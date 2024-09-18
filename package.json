@@ -3,13 +3,18 @@
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
+    "@biomejs/biome": "1.0.0",
+    "@tscircuit/soup": "^0.0.71",
     "@types/bun": "latest",
-    "@biomejs/biome": "1.0.0"
+    "@types/uuid": "^10.0.0",
+    "bun-match-svg": "^0.0.3",
+    "circuit-to-svg": "^0.0.32"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "s-expression": "^3.1.1"
+    "uuid": "^10.0.0",
+    "zod": "^3.23.8"
   }
 }
