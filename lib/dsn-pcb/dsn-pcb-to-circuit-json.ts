@@ -7,72 +7,74 @@ import type {
   PCBTrace,
 } from "@tscircuit/soup";
 
-import type {
-  Boundary,
-  Image,
-  Library,
-  Network,
-  PCB,
-  Pin,
-  Placement,
-  Wiring,
-} from "./types";
+import type { Boundary, Image, Network, PCB, Wiring } from "./types";
 
-// Function to convert DSN components to SMT pads and SourceComponents
-function convertComponentsToSmtPadsAndSourceComponents(
-  placement: Placement,
-  library: Library,
-): AnyCircuitElement[] {
+// Function to convert padstacks to SMT pads
+function convertPadstacksToSmtPads(pcb: PCB): AnyCircuitElement[] {
   const elements: AnyCircuitElement[] = [];
+  const { padstacks, images } = pcb.library;
   const imageMap = new Map<string, Image>();
 
-  // Create a map of component names to images in the library
-  library.images.forEach((image) => {
+  // Create a map of image names to images
+  images.forEach((image) => {
     imageMap.set(image.name, image);
   });
 
-  placement.components.forEach((dsnComponent) => {
-    const image = imageMap.get(dsnComponent.name);
-    const componentId = uuidv4(); // Generate unique ID for each component
+  // Loop through each padstack
+  padstacks.forEach((padstack) => {
+    const padstackName = padstack.name;
 
-    // Convert pins to SMT pads
-    if (image?.pins) {
-      image.pins.forEach((pin: Pin) => {
-        const padId = uuidv4(); // Unique ID for each pad
+    // Find all pins in images that use this padstack
+    images.forEach((image) => {
+      const componentName = image.name; // Use image name as component ID
+      const componentId = componentName; // For consistency
 
-        // Parse width and height from padstack_name
-        let width = 0.9; // Default width in mm
-        let height = 0.95; // Default height in mm
+      const placementComponent = pcb.placement.components.find(
+        (comp) => comp.name === componentName,
+      );
 
-        if (pin.padstack_name) {
-          const dimensions = parsePadstackDimensions(pin.padstack_name);
+      if (!placementComponent) return; // If component not placed, skip
+
+      const { x: compX, y: compY, side } = placementComponent.place;
+
+      // Find pins in this image that use the current padstack
+      image.pins.forEach((pin) => {
+        if (pin.padstack_name === padstackName) {
+          // Parse width and height from padstack name
+          const dimensions = parsePadstackDimensions(padstackName);
+          let width = 0.9; // Default width in mm
+          let height = 0.95; // Default height in mm
+
           if (dimensions) {
             width = dimensions.width;
             height = dimensions.height;
           }
-        }
 
-        const pcbPad: AnyCircuitElement = {
-          type: "pcb_smtpad",
-          pcb_smtpad_id: padId,
-          pcb_component_id: componentId,
-          pcb_port_id: padId, // Use the same ID for the port
-          shape: "rect", // Assuming rectangle pads, adjust based on actual shape
-          x: (dsnComponent.place.x + pin.x) / 1000,
-          y: Math.abs((dsnComponent.place.y + pin.y) / 1000), // Adjust the y coordinate to be positive
-          width,
-          height,
-          layer: dsnComponent.place.side === "front" ? "top" : "bottom",
-          port_hints: [pin.pin_number.toString()],
-        };
-        elements.push(pcbPad);
+          // Create pcb_smtpad
+          const pcbPad: AnyCircuitElement = {
+            type: "pcb_smtpad",
+            pcb_smtpad_id: `${padstackName}_${pin.pin_number}`, // Unique ID
+            pcb_component_id: componentId,
+            pcb_port_id: `${padstackName}_${pin.pin_number}`, // Use padstack_name and pin_number as port ID
+            shape: "rect", // Adjust based on actual shape if necessary
+            x: (compX + pin.x) / 1000,
+            y: Math.abs((compY + pin.y) / 1000), // Adjust y coordinate to positive
+            width,
+            height,
+            layer: side === "front" ? "top" : ("bottom" as LayerRef),
+            port_hints: [pin.pin_number.toString()],
+          };
+
+          elements.push(pcbPad);
+        }
       });
-    }
+    });
   });
 
   return elements;
 }
 
+// Function to parse padstack dimensions from the padstack name
 function parsePadstackDimensions(
   padstackName: string,
 ): { width: number; height: number } | null {
@@ -93,14 +95,14 @@ function parsePadstackDimensions(
 function convertWiresToPcbTraces(wiring: Wiring, network: Network): PCBTrace[] {
   const pcbTraces: PCBTrace[] = [];
 
-  wiring.wires.forEach((dsnWire, index) => {
+  wiring.wires.forEach((dsnWire) => {
     const sourceNet = network.nets.find((net) => net.name === dsnWire.net);
     if (!sourceNet) return;
 
     const pcbTrace: PCBTrace = {
       type: "pcb_trace",
       pcb_trace_id: uuidv4(), // Generate unique trace ID
-      source_trace_id: `net_${network.nets.indexOf(sourceNet) + 1}`,
+      source_trace_id: sourceNet.name,
       route_thickness_mode: "constant",
       should_round_corners: false,
       route: [],
@@ -149,17 +151,12 @@ function convertBoundaryToPcbBoard(boundary: Boundary): PCBBoard {
   };
 }
 
-// Main function to convert DSN PCB to Circuit JSON
+// Function to convert PCB JSON to Circuit JSON
 export function pcbJsonToCircuitJson(pcb: PCB): AnyCircuitElement[] {
   const elements: AnyCircuitElement[] = [];
 
-  // Convert components to SMT pads and Source Components
-  elements.push(
-    ...convertComponentsToSmtPadsAndSourceComponents(
-      pcb.placement,
-      pcb.library,
-    ),
-  );
+  // Convert padstacks to SMT pads
+  elements.push(...convertPadstacksToSmtPads(pcb));
 
   // Convert wires to PCB Traces
   elements.push(...convertWiresToPcbTraces(pcb.wiring, pcb.network));
