@@ -5,7 +5,6 @@ import type {
   LayerRef,
   PCBBoard,
   PCBTrace,
-  SourceNet,
 } from "@tscircuit/soup";
 
 import type {
@@ -69,22 +68,6 @@ function convertComponentsToSmtPadsAndSourceComponents(
         elements.push(pcbPad);
       });
     }
-
-    // Add the source component as well
-    const sourceComponent: {
-      type: "source_component";
-      ftype: "component";
-      source_component_id: string;
-      name: string;
-      manufacturer_part_number: string;
-    } = {
-      type: "source_component",
-      ftype: "component", // Could adjust based on component type (resistor, capacitor, etc.)
-      source_component_id: `source_component_${dsnComponent.place.refdes}`,
-      name: dsnComponent.place.refdes,
-      manufacturer_part_number: dsnComponent.place.PN,
-    };
-    elements.push(sourceComponent);
   });
 
   return elements;
@@ -106,21 +89,6 @@ function parsePadstackDimensions(
   }
 }
 
-// Function to convert DSN nets to SourceNets
-function convertNetsToSourceNets(network: Network): SourceNet[] {
-  return network.nets.map((dsnNet, index) => ({
-    type: "source_net",
-    source_net_id: `source_net_${index + 1}`,
-    name: dsnNet.name,
-    member_source_group_ids: [], // Add an empty array for member_source_group_ids
-    member_source_component_ids: dsnNet.pins.map((pin) => {
-      const [componentRefdes] = pin.split("-");
-      return `source_component_${componentRefdes}`;
-    }),
-  }));
-}
-
-// Function to convert DSN wires to PCB traces
 // Function to convert DSN wires to PCB traces
 function convertWiresToPcbTraces(wiring: Wiring, network: Network): PCBTrace[] {
   const pcbTraces: PCBTrace[] = [];
@@ -182,7 +150,7 @@ function convertBoundaryToPcbBoard(boundary: Boundary): PCBBoard {
 }
 
 // Main function to convert DSN PCB to Circuit JSON
-export function dsnPcbToCircuitJson(pcb: PCB): AnyCircuitElement[] {
+export function pcbJsonToCircuitJson(pcb: PCB): AnyCircuitElement[] {
   const elements: AnyCircuitElement[] = [];
 
   // Convert components to SMT pads and Source Components
@@ -192,9 +160,6 @@ export function dsnPcbToCircuitJson(pcb: PCB): AnyCircuitElement[] {
       pcb.library,
     ),
   );
-
-  // Convert nets to SourceNets
-  elements.push(...convertNetsToSourceNets(pcb.network));
 
   // Convert wires to PCB Traces
   elements.push(...convertWiresToPcbTraces(pcb.wiring, pcb.network));
