@@ -1,13 +1,8 @@
 import { v4 as uuidv4 } from "uuid"; // For generating unique IDs
 
-import type {
-  AnyCircuitElement,
-  LayerRef,
-  PCBBoard,
-  PCBTrace,
-} from "@tscircuit/soup";
+import type { AnyCircuitElement, LayerRef, PCBTrace } from "@tscircuit/soup";
 
-import type { Boundary, Image, Network, PCB, Wiring } from "./types";
+import type { Image, Network, PCB, Wiring } from "./types";
 
 // Function to convert padstacks to SMT pads
 function convertPadstacksToSmtPads(pcb: PCB): AnyCircuitElement[] {
@@ -132,27 +127,8 @@ function convertWiresToPcbTraces(wiring: Wiring, network: Network): PCBTrace[] {
   return pcbTraces;
 }
 
-// Function to convert DSN boundary to PCB board
-function convertBoundaryToPcbBoard(boundary: Boundary): PCBBoard {
-  const coordinates = boundary.path.coordinates;
-
-  return {
-    type: "pcb_board",
-    pcb_board_id: uuidv4(), // Generate unique ID for the PCB board
-    outline: coordinates.reduce((acc: { x: number; y: number }[], _, i) => {
-      if (i % 2 === 0) {
-        acc.push({
-          x: coordinates[i] / 1000,
-          y: Math.abs(coordinates[i + 1] / 1000), // Adjust y coordinate to positive
-        });
-      }
-      return acc;
-    }, []),
-  };
-}
-
 // Function to convert PCB JSON to Circuit JSON
-export function pcbJsonToCircuitJson(pcb: PCB): AnyCircuitElement[] {
+export function dsnJsonToCircuitJson(pcb: PCB): AnyCircuitElement[] {
   const elements: AnyCircuitElement[] = [];
 
   // Convert padstacks to SMT pads
@@ -160,9 +136,6 @@ export function pcbJsonToCircuitJson(pcb: PCB): AnyCircuitElement[] {
 
   // Convert wires to PCB Traces
   elements.push(...convertWiresToPcbTraces(pcb.wiring, pcb.network));
-
-  // Convert the boundary to PCB Board
-  elements.push(convertBoundaryToPcbBoard(pcb.structure.boundary));
 
   return elements;
 }
