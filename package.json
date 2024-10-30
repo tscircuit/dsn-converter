@@ -9,13 +9,14 @@
     "@biomejs/biome": "^1.9.4",
     "@types/bun": "latest",
     "@types/uuid": "^10.0.0",
-    "bun-match-svg": "^0.0.3"
+    "bun-match-svg": "^0.0.3",
+    "circuit-json": "^0.0.92"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "circuit-json": "*"
   },
   "dependencies": {
-    "circuit-json": "^0.0.92",
     "circuit-to-svg": "^0.0.56",
     "uuid": "^10.0.0",
     "zod": "^3.23.8"
