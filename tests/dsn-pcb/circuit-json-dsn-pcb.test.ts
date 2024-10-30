@@ -12,7 +12,7 @@ test("circuit json to dsn json", async () => {
   const dsnJson = parseDSN(testDsnFile);
   const circuitJson = dsnJsonToCircuitJson(dsnJson);
   const backToDsnJson = circuitJsonToDsnJson(circuitJson);
-  const checkCircuitJson = dsnJsonToCircuitJson(backToDsnJson);
+  const validationCircuitJson = dsnJsonToCircuitJson(backToDsnJson);
 
-  expect(circuitJsonToPcbSvg(checkCircuitJson)).toMatchSvgSnapshot(import.meta.path);
+  expect(circuitJsonToPcbSvg(validationCircuitJson)).toMatchSvgSnapshot(import.meta.path);
 });

@@ -2,10 +2,10 @@ import { v4 as uuidv4 } from "uuid"; // For generating unique IDs
 
 import type { AnyCircuitElement, LayerRef, PcbTrace } from "circuit-json";
 
-import type { Image, Network, PCB, Wiring } from "./types";
+import type { Image, Network, DsnPcb, Wiring } from "./types";
 
 // Function to convert padstacks to SMT pads
-function convertPadstacksToSmtPads(pcb: PCB): AnyCircuitElement[] {
+function convertPadstacksToSmtPads(pcb: DsnPcb): AnyCircuitElement[] {
   const elements: AnyCircuitElement[] = [];
   const { padstacks, images } = pcb.library;
   const imageMap = new Map<string, Image>();
@@ -128,7 +128,7 @@ function convertWiresToPcbTraces(wiring: Wiring, network: Network): PCBTrace[] {
 }
 
 // Function to convert PCB JSON to Circuit JSON
-export function dsnJsonToCircuitJson(pcb: PCB): AnyCircuitElement[] {
+export function dsnJsonToCircuitJson(pcb: DsnPcb): AnyCircuitElement[] {
   const elements: AnyCircuitElement[] = [];
 
   // Convert padstacks to SMT pads

@@ -1,6 +1,6 @@
 import type { AnyCircuitElement, PcbSmtPad } from "circuit-json";
 
-import type { Image, PCB, Padstack, Pin, Shape } from "./types";
+import type { Image, DsnPcb, Padstack, Pin, Shape } from "./types";
 
 interface ComponentGroup {
   pcb_component_id: string;
@@ -10,9 +10,9 @@ interface ComponentGroup {
 // Main function to convert circuit JSON to PCB JSON
 export function circuitJsonToDsnJson(
   circuitElements: AnyCircuitElement[],
-): PCB {
+): DsnPcb {
   // Initialize the PCB JSON structure
-  const pcb: PCB = {
+  const pcb: DsnPcb = {
     filename: "",
     parser: {
       string_quote: "",
@@ -143,7 +143,7 @@ function groupComponents(
 function processComponentsAndPads(
   componentGroups: ComponentGroup[],
   circuitElements: AnyCircuitElement[],
-  pcb: PCB,
+  pcb: DsnPcb,
 ) {
   for (const group of componentGroups) {
     const { pcb_component_id, pcb_smtpads } = group;
@@ -308,7 +308,7 @@ function padLayerToSide(layer: string): "front" | "back" {
 }
 
 // Function to process nets
-function processNets(circuitElements: AnyCircuitElement[], pcb: PCB) {
+function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
   // Build a map of pad IDs to pads
   const padMap = new Map<string, AnyCircuitElement>();
 
@@ -386,7 +386,7 @@ function processNets(circuitElements: AnyCircuitElement[], pcb: PCB) {
 }
 
 // Function to process PCB traces
-function processPcbTraces(circuitElements: AnyCircuitElement[], pcb: PCB) {
+function processPcbTraces(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
   for (const element of circuitElements) {
     if (element.type === "pcb_trace") {
       const pcbTrace = element;

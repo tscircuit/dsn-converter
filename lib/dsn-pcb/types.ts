@@ -1,4 +1,4 @@
-export interface PCB {
+export interface DsnPcb {
   filename: string;
   parser: Parser;
   resolution: Resolution;

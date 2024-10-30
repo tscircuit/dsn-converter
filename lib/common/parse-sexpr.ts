@@ -11,7 +11,7 @@ import type {
   Net,
   Network,
   Outline,
-  PCB,
+  DsnPcb,
   Padstack,
   Parser as ParserType,
   Path,
@@ -149,12 +149,12 @@ function parse(tokens: Token[]): ASTNode {
 }
 
 // **Process AST into TypeScript Interfaces**
-export function parseDSN(dsnString: string): PCB {
+export function parseDSN(dsnString: string): DsnPcb {
   const tokens = tokenize(dsnString);
   const ast = parse(tokens);
 
   // Process the AST into PCB object
-  const pcb = processNode(ast) as PCB;
+  const pcb = processNode(ast) as DsnPcb;
 
   return pcb;
 }
@@ -193,8 +193,8 @@ function processNode(node: ASTNode): any {
   return null;
 }
 
-function processPCB(nodes: ASTNode[]): PCB {
-  const pcb: Partial<PCB> = {};
+function processPCB(nodes: ASTNode[]): DsnPcb {
+  const pcb: Partial<DsnPcb> = {};
 
   // The first element is the filename
   const filenameNode = nodes[0];
@@ -245,7 +245,7 @@ function processPCB(nodes: ASTNode[]): PCB {
     }
   }
 
-  return pcb as PCB;
+  return pcb as DsnPcb;
 }
 
 function processParser(nodes: ASTNode[]): ParserType {
