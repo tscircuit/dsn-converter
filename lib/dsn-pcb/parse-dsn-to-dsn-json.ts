@@ -689,9 +689,10 @@ function processClass(nodes: ASTNode[]): Class {
   while (
     i < nodes.length &&
     nodes[i].type === "Atom" &&
-    typeof nodes[i].value === "string"
+    typeof nodes[i].value === "string" &&
+    nodes[i].value !== undefined
   ) {
-    classObj.net_names.push(nodes[i].value)
+    classObj.net_names.push(nodes[i].value as string)
     i++
   }
 
