@@ -43,7 +43,7 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
 
   // Structure section
   result += `${indent}(structure\n`
-  dsnJson.structure.layers.forEach(layer => {
+  dsnJson.structure.layers.forEach((layer) => {
     result += `${indent}${indent}(layer ${layer.name}\n`
     result += `${indent}${indent}${indent}(type ${layer.type})\n`
     result += `${indent}${indent}${indent}(property\n`
@@ -59,7 +59,7 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   result += `${indent}${indent}(via ${stringifyValue(dsnJson.structure.via)})\n`
   result += `${indent}${indent}(rule\n`
   result += `${indent}${indent}${indent}(width ${dsnJson.structure.rule.width})\n`
-  dsnJson.structure.rule.clearances.forEach(clearance => {
+  dsnJson.structure.rule.clearances.forEach((clearance) => {
     result += `${indent}${indent}${indent}(clearance ${clearance.value}${clearance.type ? ` (type ${clearance.type})` : ""})\n`
   })
   result += `${indent}${indent})\n`
@@ -67,7 +67,7 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
 
   // Placement section
   result += `${indent}(placement\n`
-  dsnJson.placement.components.forEach(component => {
+  dsnJson.placement.components.forEach((component) => {
     result += `${indent}${indent}(component ${stringifyValue(component.name)}\n`
     result += `${indent}${indent}${indent}(place ${component.place.refdes} ${component.place.x} ${component.place.y} ${component.place.side} ${component.place.rotation}${component.place.PN ? ` (PN ${stringifyValue(component.place.PN)})` : ""})\n`
     result += `${indent}${indent})\n`
@@ -76,19 +76,19 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
 
   // Library section
   result += `${indent}(library\n`
-  dsnJson.library.images.forEach(image => {
+  dsnJson.library.images.forEach((image) => {
     result += `${indent}${indent}(image ${stringifyValue(image.name)}\n`
-    image.outlines.forEach(outline => {
+    image.outlines.forEach((outline) => {
       result += `${indent}${indent}${indent}(outline ${stringifyPath(outline.path, 4)})\n`
     })
-    image.pins.forEach(pin => {
+    image.pins.forEach((pin) => {
       result += `${indent}${indent}${indent}(pin ${pin.padstack_name} ${pin.pin_number} ${pin.x} ${pin.y})\n`
     })
     result += `${indent}${indent})\n`
   })
-  dsnJson.library.padstacks.forEach(padstack => {
+  dsnJson.library.padstacks.forEach((padstack) => {
     result += `${indent}${indent}(padstack ${stringifyValue(padstack.name)}\n`
-    padstack.shapes.forEach(shape => {
+    padstack.shapes.forEach((shape) => {
       if (shape.shapeType === "polygon") {
         result += `${indent}${indent}${indent}(shape (polygon ${shape.layer} ${shape.width} ${stringifyCoordinates(shape.coordinates)}))\n`
       } else if (shape.shapeType === "circle") {
@@ -102,22 +102,22 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
 
   // Network section
   result += `${indent}(network\n`
-  dsnJson.network.nets.forEach(net => {
+  dsnJson.network.nets.forEach((net) => {
     result += `${indent}${indent}(net ${stringifyValue(net.name)}\n`
     if (net.pins.length > 0) {
       result += `${indent}${indent}${indent}(pins ${net.pins.join(" ")})\n`
     }
     result += `${indent}${indent})\n`
   })
-  dsnJson.network.classes.forEach(cls => {
-    result += `${indent}${indent}(class ${stringifyValue(cls.name)} ${stringifyValue(cls.description)}${cls.net_names.map(n => " " + stringifyValue(n)).join("")}\n`
+  dsnJson.network.classes.forEach((cls) => {
+    result += `${indent}${indent}(class ${stringifyValue(cls.name)} ${stringifyValue(cls.description)}${cls.net_names.map((n) => ` ${stringifyValue(n)}`).join("")}\n`
     result += `${indent}${indent}${indent}(circuit\n`
     result += `${indent}${indent}${indent}${indent}(use_via ${stringifyValue(cls.circuit.use_via)})\n`
     result += `${indent}${indent}${indent})\n`
     if (cls.rule) {
       result += `${indent}${indent}${indent}(rule\n`
       result += `${indent}${indent}${indent}${indent}(width ${cls.rule.width})\n`
-      cls.rule.clearances.forEach(clearance => {
+      cls.rule.clearances.forEach((clearance) => {
         result += `${indent}${indent}${indent}${indent}(clearance ${clearance.value}${clearance.type ? ` (type ${clearance.type})` : ""})\n`
       })
       result += `${indent}${indent}${indent})\n`
@@ -128,7 +128,7 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
 
   // Wiring section
   result += `${indent}(wiring\n`
-  dsnJson.wiring.wires.forEach(wire => {
+  dsnJson.wiring.wires.forEach((wire) => {
     result += `${indent}${indent}(wire ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)})(type ${wire.type}))\n`
   })
   result += `${indent})\n`
