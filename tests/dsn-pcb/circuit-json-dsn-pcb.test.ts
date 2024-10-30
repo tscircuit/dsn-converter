@@ -1,6 +1,6 @@
 import { circuitJsonToPcbSvg } from "circuit-to-svg"
 import { parseDSN } from "../../lib/common/parse-sexpr.ts"
-import { circuitJsonToDsnJson, dsnJsonToCircuitJson } from "../../lib/dsn-pcb"
+import { circuitJsonToDsnJson, dsnJsonToCircuitJson } from "../../lib/index.ts"
 // @ts-ignore
 import testDsnFile from "../assets/testkicadproject/testkicadproject.dsn" with {
   type: "text",

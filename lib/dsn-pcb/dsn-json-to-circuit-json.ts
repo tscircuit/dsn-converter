@@ -87,14 +87,14 @@ function parsePadstackDimensions(
 }
 
 // Function to convert DSN wires to PCB traces
-function convertWiresToPcbTraces(wiring: Wiring, network: Network): PCBTrace[] {
-  const pcbTraces: PCBTrace[] = []
+function convertWiresToPcbTraces(wiring: Wiring, network: Network): PcbTrace[] {
+  const pcbTraces: PcbTrace[] = []
 
   wiring.wires.forEach((dsnWire) => {
     const sourceNet = network.nets.find((net) => net.name === dsnWire.net)
     if (!sourceNet) return
 
-    const pcbTrace: PCBTrace = {
+    const pcbTrace: PcbTrace = {
       type: "pcb_trace",
       pcb_trace_id: uuidv4(), // Generate unique trace ID
       source_trace_id: sourceNet.name,
