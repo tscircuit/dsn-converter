@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid"; // For generating unique IDs
 
-import type { AnyCircuitElement, LayerRef, PCBTrace } from "@tscircuit/soup";
+import type { AnyCircuitElement, LayerRef, PcbTrace } from "circuit-json";
 
 import type { Image, Network, PCB, Wiring } from "./types";
 

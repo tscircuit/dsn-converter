@@ -1,10 +1,10 @@
-import type { AnyCircuitElement, PCBSMTPad } from "@tscircuit/soup";
+import type { AnyCircuitElement, PcbSmtPad } from "circuit-json";
 
 import type { Image, PCB, Padstack, Pin, Shape } from "./types";
 
 interface ComponentGroup {
   pcb_component_id: string;
-  pcb_smtpads: PCBSMTPad[];
+  pcb_smtpads: PcbSmtPad[];
 }
 
 // Main function to convert circuit JSON to PCB JSON
