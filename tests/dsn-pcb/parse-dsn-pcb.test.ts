@@ -1,5 +1,5 @@
 import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
-import { dsnJsonToCircuitJson } from "../../lib/dsn-pcb/dsn-json-to-circuit-json.ts"
+import { convertDsnJsonToCircuitJson } from "../../lib/dsn-pcb/convert-dsn-json-to-circuit-json.ts"
 // @ts-ignore
 import testDsnFile from "../assets/testkicadproject/testkicadproject.dsn" with {
   type: "text",
@@ -15,7 +15,7 @@ test("parse s-expr to json", async () => {
 
 test("parse json to circuit json", async () => {
   const pcb = parseDsnToDsnJson(testDsnFile)
-  const circuitJson = dsnJsonToCircuitJson(pcb)
+  const circuitJson = convertDsnJsonToCircuitJson(pcb)
 
   expect(convertCircuitJsonToPcbSvg(circuitJson)).toMatchSvgSnapshot(
     import.meta.path,

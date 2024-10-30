@@ -8,7 +8,7 @@ interface ComponentGroup {
 }
 
 // Main function to convert circuit JSON to PCB JSON
-export function circuitJsonToDsnJson(
+export function convertCircuitJsonToDsnJson(
   circuitElements: AnyCircuitElement[],
 ): DsnPcb {
   // Initialize the PCB JSON structure

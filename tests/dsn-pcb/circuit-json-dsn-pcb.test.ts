@@ -1,7 +1,7 @@
 import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
 import {
-  circuitJsonToDsnJson,
-  dsnJsonToCircuitJson,
+  convertCircuitJsonToDsnJson,
+  convertDsnJsonToCircuitJson,
   parseDsnToDsnJson,
 } from "lib"
 // @ts-ignore
@@ -12,9 +12,9 @@ import { expect, test } from "bun:test"
 
 test("circuit json to dsn json", async () => {
   const dsnJson = parseDsnToDsnJson(testDsnFile)
-  const circuitJson = dsnJsonToCircuitJson(dsnJson)
-  const backToDsnJson = circuitJsonToDsnJson(circuitJson)
-  const validationCircuitJson = dsnJsonToCircuitJson(backToDsnJson)
+  const circuitJson = convertDsnJsonToCircuitJson(dsnJson)
+  const backToDsnJson = convertCircuitJsonToDsnJson(circuitJson)
+  const validationCircuitJson = convertDsnJsonToCircuitJson(backToDsnJson)
 
   expect(convertCircuitJsonToPcbSvg(validationCircuitJson)).toMatchSvgSnapshot(
     import.meta.path,

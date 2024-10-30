@@ -127,7 +127,7 @@ function convertWiresToPcbTraces(wiring: Wiring, network: Network): PcbTrace[] {
 }
 
 // Function to convert PCB JSON to Circuit JSON
-export function dsnJsonToCircuitJson(pcb: DsnPcb): AnyCircuitElement[] {
+export function convertDsnJsonToCircuitJson(pcb: DsnPcb): AnyCircuitElement[] {
   const elements: AnyCircuitElement[] = []
 
   // Convert padstacks to SMT pads
