@@ -1,5 +1,4 @@
-import { circuitJsonToPcbSvg } from "circuit-to-svg"
-import { parseDSN } from "../../lib/common/parse-sexpr.ts"
+import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
 import { dsnJsonToCircuitJson } from "../../lib/dsn-pcb/dsn-json-to-circuit-json.ts"
 // @ts-ignore
 import testDsnFile from "../assets/testkicadproject/testkicadproject.dsn" with {
@@ -7,15 +6,18 @@ import testDsnFile from "../assets/testkicadproject/testkicadproject.dsn" with {
 }
 // @ts-ignore
 import { expect, test } from "bun:test"
+import { parseDsnToDsnJson } from "lib"
 
 test("parse s-expr to json", async () => {
-  const pcbJson = parseDSN(testDsnFile)
+  const pcbJson = parseDsnToDsnJson(testDsnFile)
   expect(pcbJson).toBeTruthy()
 })
 
 test("parse json to circuit json", async () => {
-  const pcb = parseDSN(testDsnFile)
+  const pcb = parseDsnToDsnJson(testDsnFile)
   const circuitJson = dsnJsonToCircuitJson(pcb)
 
-  expect(circuitJsonToPcbSvg(circuitJson)).toMatchSvgSnapshot(import.meta.path)
+  expect(convertCircuitJsonToPcbSvg(circuitJson)).toMatchSvgSnapshot(
+    import.meta.path,
+  )
 })

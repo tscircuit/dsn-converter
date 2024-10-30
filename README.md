@@ -25,42 +25,22 @@ npm install dsn-converter
 ### Converting DSN to Circuit JSON
 
 ```typescript
-import { parseDSN, dsnJsonToCircuitJson } from "dsn-converter"
+import { parseDsnToCircuitJson } from "dsn-converter"
 
-// Example 1: Convert DSN file to Circuit JSON
-async function convertDsnFile() {
-  // Read DSN file content
-  const dsnContent = await Bun.file("your-design.dsn").text()
+const dsnContent = await Bun.file("your-design.dsn").text()
 
-  // Parse DSN to intermediate JSON
-  const dsnJson = parseDSN(dsnContent)
+const circuitJson = parseDsnToCircuitJson(dsnContent)
 
-  // Convert to Circuit JSON
-  const circuitJson = dsnJsonToCircuitJson(dsnJson)
-  
-  // Use circuitJson with circuit-to-svg or other tools
-  console.log(JSON.stringify(circuitJson, null, 2))
-}
-
-// Example 2: Convert DSN string directly
-function convertDsnString(dsnString: string) {
-  const dsnJson = parseDSN(dsnString)
-  return dsnJsonToCircuitJson(dsnJson)
-}
+await Bun.write("output.circuit.json", JSON.stringify(circuitJson, null, 2))
 ```
 
 ### Converting Circuit JSON to DSN
 
 ```typescript
-import { circuitJsonToDsnJson, circuitJsonToDsnString } from "dsn-converter"
+import { circuitJsonToDsnString } from "dsn-converter"
 
-// Example 1: Convert Circuit JSON to DSN JSON
-const dsnJson = circuitJsonToDsnJson(circuitJson)
-
-// Example 2: Convert Circuit JSON directly to DSN string
 const dsnString = circuitJsonToDsnString(circuitJson)
 
-// Example 3: Save DSN to file
 await Bun.write("output.dsn", dsnString)
 ```
 
