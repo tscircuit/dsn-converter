@@ -135,12 +135,12 @@ export function processPCB(nodes: ASTNode[]): DsnPcb {
 export function processParser(nodes: ASTNode[]): ParserType {
   const parser: Partial<ParserType> = {}
   nodes.forEach((node) => {
-    if (node.type === "List") {
-      const [keyNode, valueNode] = node.children!
+    if (node.type === "List" && node.children && node.children.length >= 2) {
+      const [keyNode, valueNode] = node.children
       if (
-        keyNode.type === "Atom" &&
+        keyNode?.type === "Atom" &&
         typeof keyNode.value === "string" &&
-        valueNode.type === "Atom" &&
+        valueNode?.type === "Atom" &&
         (typeof valueNode.value === "string" ||
           typeof valueNode.value === "number")
       ) {
