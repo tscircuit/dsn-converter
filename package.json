@@ -1,19 +1,27 @@
 {
   "name": "dsn-converter",
-  "module": "index.ts",
+  "main": "dist/index.js",
+  "version": "0.0.1",
   "type": "module",
+  "scripts": {
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "build": "tsup-node ./lib/index.ts --format esm --dts --sourcemap"
+  },
   "devDependencies": {
-    "@biomejs/biome": "1.0.0",
-    "@tscircuit/soup": "^0.0.71",
+    "@biomejs/biome": "^1.9.4",
     "@types/bun": "latest",
     "@types/uuid": "^10.0.0",
     "bun-match-svg": "^0.0.3",
-    "circuit-to-svg": "^0.0.32"
+    "circuit-json": "^0.0.92",
+    "tsup": "^8.3.5"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "circuit-json": "*"
   },
   "dependencies": {
+    "circuit-to-svg": "^0.0.56",
     "uuid": "^10.0.0",
     "zod": "^3.23.8"
   }

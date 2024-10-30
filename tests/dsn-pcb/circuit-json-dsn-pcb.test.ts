@@ -1,18 +1,22 @@
-import { circuitJsonToPcbSvg } from "circuit-to-svg";
-import { parseDSN } from "../../lib/common/parse-sexpr.ts";
-import { circuitJsonToDsnJson, dsnJsonToCircuitJson } from "../../lib/dsn-pcb";
+import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
+import {
+  convertCircuitJsonToDsnJson,
+  convertDsnJsonToCircuitJson,
+  parseDsnToDsnJson,
+} from "lib"
 // @ts-ignore
 import testDsnFile from "../assets/testkicadproject/testkicadproject.dsn" with {
   type: "text",
-};
-// @ts-ignore
-import { expect, test } from "bun:test";
+}
+import { expect, test } from "bun:test"
 
 test("circuit json to dsn json", async () => {
-  const dsnJson = parseDSN(testDsnFile);
-  const circuitJson = dsnJsonToCircuitJson(dsnJson);
-  const backToDsnJson = circuitJsonToDsnJson(circuitJson);
-  const checkCircuitJson = dsnJsonToCircuitJson(backToDsnJson);
+  const dsnJson = parseDsnToDsnJson(testDsnFile)
+  const circuitJson = convertDsnJsonToCircuitJson(dsnJson)
+  const backToDsnJson = convertCircuitJsonToDsnJson(circuitJson)
+  const validationCircuitJson = convertDsnJsonToCircuitJson(backToDsnJson)
 
-  expect(circuitJsonToPcbSvg(checkCircuitJson)).toMatchSvgSnapshot(import.meta.path);
-});
+  expect(convertCircuitJsonToPcbSvg(validationCircuitJson)).toMatchSvgSnapshot(
+    import.meta.path,
+  )
+})
