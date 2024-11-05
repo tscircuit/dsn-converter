@@ -79,7 +79,9 @@ function processNode(node: ASTNode): any {
 }
 
 export function processPCB(nodes: ASTNode[]): DsnPcb {
-  const pcb: Partial<DsnPcb> = {}
+  const pcb: Partial<DsnPcb> = {
+    wiring: { wires: [] },
+  }
 
   // The first element is the filename
   const filenameNode = nodes[0]
