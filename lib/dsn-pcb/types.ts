@@ -79,6 +79,9 @@ export interface DsnPcb {
       path: {
         layer: string
         width: number
+        /**
+         * TODO UNIT?
+         */
         coordinates: number[]
       }
       net: string

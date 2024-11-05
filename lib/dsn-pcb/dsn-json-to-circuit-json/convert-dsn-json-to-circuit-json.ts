@@ -1,32 +1,22 @@
-import { fromTriangles } from "transformation-matrix"
+import { fromTriangles, scale, applyToPoint } from "transformation-matrix"
 
-import type { AnyCircuitElement } from "circuit-json"
+import type { AnyCircuitElement, PcbBoard } from "circuit-json"
 import type { DsnPcb } from "../types"
 import { convertPadstacksToSmtPads } from "./convert-padstacks-to-smtpads"
 import { convertWiresToPcbTraces } from "./convert-wire-to-trace"
+import { pairs } from "lib/utils/pairs"
 
-export function convertDsnJsonToCircuitJson(pcb: DsnPcb): AnyCircuitElement[] {
+export function convertDsnJsonToCircuitJson(
+  dsnPcb: DsnPcb,
+): AnyCircuitElement[] {
   const elements: AnyCircuitElement[] = []
 
-  // DSN space coordinates
-  const dsnSpaceCoordinates = [
-    { x: 148405, y: -105000 },
-    { x: 156105, y: -105000 },
-    { x: 156105, y: 100000 },
-  ]
-
-  // Circuit space coordinates
-  const circuitSpaceCoordinates = [
-    { x: -3.5, y: 0 },
-    { x: 3.5, y: 0 },
-    { x: 3.5, y: 10 },
-  ]
-
-  // Create the transformation matrix using the provided DSN and Circuit coordinates
-  const transform = fromTriangles(dsnSpaceCoordinates, circuitSpaceCoordinates)
+  // TODO use pcb.resolution.unit and pcb.resolution.value
+  const transformUmToMm = scale(1 / 1000)
 
   // Add the board
-  elements.push({
+  // You must use the dsnPcb.boundary to get the center, width and height
+  const board: PcbBoard = {
     type: "pcb_board",
     pcb_board_id: "pcb_board_0",
     center: { x: 0, y: 0 },
@@ -34,15 +24,38 @@ export function convertDsnJsonToCircuitJson(pcb: DsnPcb): AnyCircuitElement[] {
     height: 10,
     thickness: 1.4,
     num_layers: 4,
-  })
+  }
+  if (dsnPcb.structure.boundary.path) {
+    const boundaryPath = pairs(dsnPcb.structure.boundary.path.coordinates)
+    const maxX = Math.max(...boundaryPath.map(([x]) => x))
+    const minX = Math.min(...boundaryPath.map(([x]) => x))
+    const maxY = Math.max(...boundaryPath.map(([, y]) => y))
+    const minY = Math.min(...boundaryPath.map(([, y]) => y))
+    board.center = applyToPoint(transformUmToMm, {
+      x: (maxX + minX) / 2,
+      y: (maxY + minY) / 2,
+    })
+    board.width = (maxX - minX) * transformUmToMm.a
+    board.height = (maxY - minY) * transformUmToMm.a
+  } else {
+    throw new Error(
+      `Couldn't read DSN boundary, add support for dsnPcb.structure.boundary["${Object.keys(dsnPcb.structure.boundary).join(",")}"]`,
+    )
+  }
+
+  elements.push(board)
 
   // Convert padstacks to SMT pads using the transformation matrix
-  elements.push(...convertPadstacksToSmtPads(pcb, transform))
+  elements.push(...convertPadstacksToSmtPads(dsnPcb, transformUmToMm))
 
   // Convert wires to PCB traces using the transformation matrix
-  if (pcb.wiring && pcb.network) {
+  if (dsnPcb.wiring && dsnPcb.network) {
     elements.push(
-      ...convertWiresToPcbTraces(pcb.wiring, pcb.network, transform),
+      ...convertWiresToPcbTraces(
+        dsnPcb.wiring,
+        dsnPcb.network,
+        transformUmToMm,
+      ),
     )
   }
 

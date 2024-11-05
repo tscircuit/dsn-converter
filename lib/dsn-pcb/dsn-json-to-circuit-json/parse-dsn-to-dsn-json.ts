@@ -271,11 +271,7 @@ function processProperty(nodes: ASTNode[]): { index: number } {
 function processBoundary(nodes: ASTNode[]): Boundary {
   const boundary: Partial<Boundary> = {}
   nodes.forEach((node) => {
-    if (
-      node.type === "List" &&
-      node.children![0].type === "Atom" &&
-      node.children![0].value === "path"
-    ) {
+    if (node.type === "List" && node.children![0].type === "Atom") {
       boundary.path = processPath(node.children!)
     }
   })

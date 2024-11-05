@@ -7,21 +7,9 @@ import { getComponentValue } from "lib/utils/get-component-value"
 import { getFootprintName } from "lib/utils/get-footprint-name"
 import { getPadstackName } from "lib/utils/get-padstack-name"
 import type { DsnPcb, ComponentGroup, Padstack } from "../types"
-import { applyToPoint, fromTriangles } from "transformation-matrix"
+import { applyToPoint, scale } from "transformation-matrix"
 
-const dsnSpaceCoordinates = [
-  { x: 148405, y: -105000 },
-  { x: 156105, y: -105000 },
-  { x: 156105, y: 0 },
-]
-
-const circuitSpaceCoordinates = [
-  { x: -3.5, y: 0 },
-  { x: 3.5, y: 0 },
-  { x: 3.5, y: 10 },
-]
-
-const transform = fromTriangles(circuitSpaceCoordinates, dsnSpaceCoordinates)
+const transformMmToUm = scale(1000)
 
 function getComponentPins(): Array<{ x: number; y: number }> {
   return [
@@ -76,7 +64,7 @@ export function processComponentsAndPads(
 
     // Transform component coordinates
     const circuitSpaceCoordinates = applyToPoint(
-      transform,
+      transformUmToMm,
       sourceComponent.center,
     )
 

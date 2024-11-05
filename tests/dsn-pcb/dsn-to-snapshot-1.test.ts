@@ -5,22 +5,22 @@ import { expect, test } from "bun:test"
 import { parseDsnToDsnJson } from "lib"
 
 // @ts-ignore
-import convertedDsnFile from "../assets/testkicadproject/freeroutingTraceAdded.dsn" with {
+import traceAddedDsnFile from "../assets/testkicadproject/freeroutingTraceAdded.dsn" with {
   type: "text",
 }
 
 test("parse dsn to circuit json", async () => {
-  const fs = require("fs")
-  const dsnJson = parseDsnToDsnJson(convertedDsnFile)
+  // const fs = require("fs")
+  const dsnJson = parseDsnToDsnJson(traceAddedDsnFile)
 
-  fs.writeFileSync("dsnJson.json", JSON.stringify(dsnJson, null, 2))
+  // fs.writeFileSync("dsnJson.json", JSON.stringify(dsnJson, null, 2))
 
   const circuitJson = convertDsnJsonToCircuitJson(dsnJson)
 
-  fs.writeFileSync(
-    "circuitJsonConverted.json",
-    JSON.stringify(circuitJson, null, 2),
-  )
+  // fs.writeFileSync(
+  //   "circuitJsonConverted.json",
+  //   JSON.stringify(circuitJson, null, 2),
+  // )
 
   expect(convertCircuitJsonToPcbSvg(circuitJson)).toMatchSvgSnapshot(
     import.meta.path,
