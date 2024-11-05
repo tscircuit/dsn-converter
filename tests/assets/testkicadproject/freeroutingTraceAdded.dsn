@@ -1,0 +1,198 @@
+(pcb "/Users/rishabhgupta/Public/openSource/tscircuit/dsn-converter/convertedDsnFreeroutin.dsn"
+  (parser
+    (string_quote ")
+    (space_in_quoted_tokens on)
+    (host_cad "KiCad's Pcbnew")
+    (host_version )
+    (generated_by_freerouting)
+  )
+  (resolution um 10)
+  (unit um)
+  (structure
+    (layer F.Cu
+      (type signal)
+    )
+    (layer B.Cu
+      (type signal)
+    )
+    (boundary
+      (rect pcb 147400.0 -108100.0 158100.0 -101900.0)
+    )
+    (boundary
+      (polygon signal 0
+        147500.0 -108000.0
+        158000.0 -108000.0
+        158000.0 -102000.0
+        147500.0 -102000.0
+      )
+    )
+    (via "Via[0-1]_600:300_um" "Via[0-1]_600:300_um")
+    (rule
+      (width 200.0)
+      (clearance 200.0)
+      (clearance 100.0 (type smd_to_turn_gap))
+      (clearance 50.0 (type smd))
+      (clearance 200.0 (type "kicad_default"))
+    )
+    (snap_angle 
+      fortyfive_degree
+    )
+    (control
+      (via_at_smd off)
+    )
+    (autoroute_settings
+      (fanout off)
+      (autoroute on)
+      (postroute on)
+      (vias on)
+      (via_costs 50)
+      (plane_via_costs 5)
+      (start_ripup_costs 100)
+      (start_pass_no 4)
+      (layer_rule F.Cu
+        (active on)
+        (preferred_direction horizontal)
+        (preferred_direction_trace_costs 1.0)
+        (against_preferred_direction_trace_costs 2.7)
+      )
+      (layer_rule B.Cu
+        (active on)
+        (preferred_direction vertical)
+        (preferred_direction_trace_costs 1.0)
+        (against_preferred_direction_trace_costs 1.6)
+      )
+    )
+  )
+  (placement
+    (component "Resistor_SMD:R_0402_1005Metric"
+      (place 
+        R1 156105.0 -105000.0 front 0
+        (pin 1 (clearance_class "kicad_default"))
+        (pin 2 (clearance_class "kicad_default"))
+      )
+    )
+    (component "Capacitor_SMD:C_0603_1608Metric"
+      (place 
+        C1 148905.0 -105000.0 front 0
+        (pin 1 (clearance_class "kicad_default"))
+        (pin 2 (clearance_class "kicad_default"))
+      )
+    )
+  )
+  (library
+    (image "Resistor_SMD:R_0402_1005Metric"
+      (side front)
+      (pin "RoundRect[T]Pad_540x640_135.514_um_0.000000_0" 1 -500.0 0.0)
+      (pin "RoundRect[T]Pad_540x640_135.514_um_0.000000_0" 2 500.0 0.0)
+    )
+    (image "Capacitor_SMD:C_0603_1608Metric"
+      (side front)
+      (pin "RoundRect[T]Pad_900x950_225.856_um_0.000000_0" 1 -500.0 0.0)
+      (pin "RoundRect[T]Pad_900x950_225.856_um_0.000000_0" 2 500.0 0.0)
+    )
+    (padstack "Via[0-1]_600:300_um"
+      (shape
+        (circle F.Cu 600.0 0.0 0.0)
+      )
+      (shape
+        (circle B.Cu 600.0 0.0 0.0)
+      )
+      (attach off)
+    )
+    (padstack "RoundRect[T]Pad_540x640_135.514_um_0.000000_0"
+      (shape
+        (rect F.Cu -300.0 -300.0 300.0 300.0)
+      )
+      (attach off)
+    )
+    (padstack "RoundRect[T]Pad_900x950_225.856_um_0.000000_0"
+      (shape
+        (rect F.Cu -300.0 -300.0 300.0 300.0)
+      )
+      (attach off)
+    )
+  )
+  (network
+    (net "Net-(R1-Pad1)" 1
+      (pins
+        C1-1
+        R1-1
+      )
+    )
+    (net "unconnected-(C1-Pad2)" 1
+      (pins
+        C1-2
+      )
+    )
+    (net "unconnected-(R1-Pad2)" 1
+      (pins
+        R1-2
+      )
+    )
+    (via 
+      "Via[0-1]_600:300_um" "Via[0-1]_600:300_um" default
+    )
+    (via 
+      "Via[0-1]_600:300_um-kicad_default" "Via[0-1]_600:300_um" "kicad_default"
+    )
+    (via_rule
+      default "Via[0-1]_600:300_um"
+    )
+    (via_rule
+      "kicad_default" "Via[0-1]_600:300_um-kicad_default"
+    )
+    (class default
+      (clearance_class default)
+      (via_rule default)
+      (rule
+        (width 200.0)
+      )
+      (circuit 
+        (use_layer F.Cu B.Cu)
+      )
+    )
+    (class "kicad_default"
+      "Net-(R1-Pad1)" "unconnected-(C1-Pad2)" "unconnected-(R1-Pad2)"
+      (clearance_class "kicad_default")
+      (via_rule "kicad_default")
+      (rule
+        (width 200.0)
+      )
+      (circuit 
+        (use_layer F.Cu B.Cu)
+      )
+    )
+  )
+  (wiring
+    (wire
+      (polyline_path F.Cu 200.0
+        155605.0 -105000.0 155605.0 -105000.1 
+        155605.0 -105000.0 155604.9 -105000.0 
+        155003.3 0.0 155003.3 -0.1 
+      )
+      (net "Net-(R1-Pad1)" 1)
+      (clearance_class "kicad_default")
+      (type shove_fixed)
+    )
+    (wire
+      (polyline_path F.Cu 200.0
+        148405.0 -105000.0 148405.1 -105000.0 
+        148405.0 -105000.0 148405.0 -105000.1 
+        0.0 -105601.7 0.1 -105601.7 
+      )
+      (net "Net-(R1-Pad1)" 1)
+      (clearance_class "kicad_default")
+      (type shove_fixed)
+    )
+    (wire
+      (polyline_path F.Cu 200.0
+        148405.0 -105000.0 148405.0 -105000.1 
+        0.0 -105601.7 0.1 -105601.7 
+        155003.3 -105000.0 155003.4 -104999.9 
+        155604.9 -105000.0 155605.0 -105000.0 
+      )
+      (net "Net-(R1-Pad1)" 1)
+      (clearance_class "kicad_default")
+    )
+  )
+)
