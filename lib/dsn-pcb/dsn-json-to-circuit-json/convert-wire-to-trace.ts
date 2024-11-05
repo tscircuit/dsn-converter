@@ -14,45 +14,6 @@ export function convertWiresToPcbTraces(
   const traces: AnyCircuitElement[] = []
   const processedNets = new Set<string>()
 
-  const POINT_TOLERANCE = 0.001
-
-  function arePointsSimilar(
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number,
-  ): boolean {
-    return (
-      Math.abs(x1 - x2) < POINT_TOLERANCE && Math.abs(y1 - y2) < POINT_TOLERANCE
-    )
-  }
-
-  function cleanupRoutePoints(
-    points: Array<{ x: number; y: number }>,
-  ): Array<{ x: number; y: number }> {
-    if (points.length <= 1) return points
-
-    const cleanedPoints = [points[0]]
-
-    for (let i = 1; i < points.length; i++) {
-      const prevPoint = cleanedPoints[cleanedPoints.length - 1]
-      const currentPoint = points[i]
-
-      if (
-        !arePointsSimilar(
-          prevPoint.x,
-          prevPoint.y,
-          currentPoint.x,
-          currentPoint.y,
-        )
-      ) {
-        cleanedPoints.push(currentPoint)
-      }
-    }
-
-    return cleanedPoints
-  }
-
   wiring.wires?.forEach((wire) => {
     const netName = wire.net
 
@@ -79,11 +40,8 @@ export function convertWiresToPcbTraces(
       }
     }
 
-    // Clean up points to remove duplicates
-    const cleanedPoints = cleanupRoutePoints(points)
-
-    if (cleanedPoints.length >= 2) {
-      const routePoints = cleanedPoints.map((point) => ({
+    if (points.length >= 2) {
+      const routePoints = points.map((point) => ({
         route_type: "wire" as const,
         x: Number(point.x.toFixed(4)),
         y: Number(point.y.toFixed(4)),
