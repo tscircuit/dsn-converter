@@ -102,6 +102,7 @@ export function convertCircuitJsonToDsnJson(
             clearances: [
               {
                 value: 200,
+                type: "",
               },
             ],
             width: 200,

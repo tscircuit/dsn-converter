@@ -64,7 +64,7 @@ export function processComponentsAndPads(
 
     // Transform component coordinates
     const circuitSpaceCoordinates = applyToPoint(
-      transformUmToMm,
+      transformMmToUm,
       sourceComponent.center,
     )
 

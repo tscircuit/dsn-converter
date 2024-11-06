@@ -113,19 +113,19 @@ export function processPCB(nodes: ASTNode[]): DsnPcb {
             }
             break
           case "structure":
-            pcb.structure = processStructure(element.children!.slice(1))
+            pcb.structure = processStructure(element.children!.slice(1)) as any
             break
           case "placement":
-            pcb.placement = processPlacement(element.children!.slice(1))
+            pcb.placement = processPlacement(element.children!.slice(1)) as any
             break
           case "library":
             pcb.library = processLibrary(element.children!.slice(1))
             break
           case "network":
-            pcb.network = processNetwork(element.children!.slice(1))
+            pcb.network = processNetwork(element.children!.slice(1)) as any
             break
           case "wiring":
-            pcb.wiring = processWiring(element.children!.slice(1))
+            pcb.wiring = processWiring(element.children!.slice(1)) as any
             break
         }
       }
@@ -277,6 +277,10 @@ function processBoundary(nodes: ASTNode[]): Boundary {
       boundary.path = processPath(node.children!)
     }
   })
+  // Ensure boundary.path is defined
+  if (!boundary.path) {
+    boundary.path = { layer: "", width: 0, coordinates: [] }
+  }
   return boundary as Boundary
 }
 
