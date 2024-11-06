@@ -1,4 +1,4 @@
-import type { DsnPcb } from "./types"
+import type { DsnPcb } from "../types"
 
 export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   const indent = "  "
@@ -27,7 +27,7 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   }
 
   // Start with pcb
-  result += `(pcb ${dsnJson.filename}\n`
+  result += `(pcb ${dsnJson.filename ? dsnJson.filename : "./converted_dsn.dsn"}\n`
 
   // Parser section
   result += `${indent}(parser\n`
@@ -128,7 +128,7 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
 
   // Wiring section
   result += `${indent}(wiring\n`
-  dsnJson.wiring.wires.forEach((wire) => {
+  ;(dsnJson.wiring?.wires ?? []).forEach((wire) => {
     result += `${indent}${indent}(wire ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)})(type ${wire.type}))\n`
   })
   result += `${indent})\n`

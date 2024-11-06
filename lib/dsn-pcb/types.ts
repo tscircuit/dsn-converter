@@ -1,13 +1,94 @@
+import type { PcbSmtPad } from "circuit-json"
+
 export interface DsnPcb {
   filename: string
-  parser: Parser
-  resolution: Resolution
+  parser: {
+    string_quote: string
+    host_version: string
+    space_in_quoted_tokens: string
+    host_cad: string
+  }
+  resolution: {
+    unit: string
+    value: number
+  }
   unit: string
-  structure: Structure
-  placement: Placement
-  library: Library
-  network: Network
-  wiring: Wiring
+  structure: {
+    layers: Array<{
+      name: string
+      type: string
+      property: {
+        index: number
+      }
+    }>
+    boundary: {
+      path: {
+        layer: string
+        width: number
+        coordinates: number[]
+      }
+    }
+    via: string
+    rule: {
+      clearances: Array<{
+        value: number
+        type?: string
+      }>
+      width: number
+    }
+  }
+  placement: {
+    components: Array<{
+      name: string
+      place: {
+        refdes: string
+        PN?: string
+        x: number
+        y: number
+        side: "front" | "back"
+        rotation: number
+      }
+    }>
+  }
+  library: {
+    images: Image[]
+    padstacks: Padstack[]
+  }
+  network: {
+    nets: Array<{
+      name: string
+      pins: string[]
+    }>
+    classes: Array<{
+      name: string
+      description: string
+      net_names: string[]
+      circuit: {
+        use_via: string
+      }
+      rule: {
+        clearances: Array<{
+          type: any
+          value: number
+        }>
+        width: number
+      }
+    }>
+  }
+  wiring: {
+    wires: Array<{
+      path: {
+        layer: string
+        width: number
+        /**
+         * TODO UNIT?
+         */
+        coordinates: number[]
+      }
+      net: string
+      type: string
+    }>
+  }
 }
 
 export interface Parser {
@@ -38,7 +119,20 @@ export interface Layer {
 }
 
 export interface Boundary {
-  path: Path
+  rect?: {
+    type: string
+    coordinates: number[] // [x1, y1, x2, y2]
+  }
+  polygon?: {
+    type: string
+    width: number
+    coordinates: number[]
+  }
+  path?: {
+    layer: string
+    width: number
+    coordinates: number[]
+  }
 }
 
 export interface Path {
@@ -103,7 +197,13 @@ export interface Padstack {
   attach: string
 }
 
-export type Shape = PolygonShape | CircleShape
+export interface PadDimensions {
+  width: number
+  height: number
+  radius?: number
+}
+
+export type Shape = PolygonShape | CircleShape | RectShape
 
 export interface BaseShape {
   shapeType: string // Added shapeType to base export interface
@@ -119,6 +219,11 @@ export interface PolygonShape extends BaseShape {
 export interface CircleShape extends BaseShape {
   shapeType: "circle"
   diameter: number
+}
+
+export interface RectShape extends BaseShape {
+  shapeType: "rect"
+  coordinates: number[]
 }
 
 export interface Network {
@@ -148,7 +253,22 @@ export interface Wiring {
 }
 
 export interface Wire {
-  path: Path
+  polyline_path?: {
+    layer: string
+    width: number
+    coordinates: number[]
+  }
+  path?: {
+    layer: string
+    width: number
+    coordinates: number[]
+  }
   net: string
-  type: string
+  clearance_class?: string
+  type?: string
+}
+
+export interface ComponentGroup {
+  pcb_component_id: string
+  pcb_smtpads: PcbSmtPad[]
 }

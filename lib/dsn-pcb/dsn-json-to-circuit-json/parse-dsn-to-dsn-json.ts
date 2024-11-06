@@ -1,3 +1,8 @@
+import {
+  parseSexprToAst,
+  tokenizeDsn,
+  type ASTNode,
+} from "../../common/parse-sexpr"
 import type {
   Boundary,
   CircleShape,
@@ -5,13 +10,13 @@ import type {
   Class,
   Clearance,
   Component,
+  DsnPcb,
   Image,
   Layer,
   Library,
   Net,
   Network,
   Outline,
-  DsnPcb,
   Padstack,
   Parser as ParserType,
   Path,
@@ -19,18 +24,14 @@ import type {
   Place,
   Placement,
   PolygonShape,
+  RectShape,
   Resolution,
   Rule,
   Shape,
   Structure,
   Wire,
   Wiring,
-} from "./types"
-import {
-  parseSexprToAst,
-  tokenizeDsn,
-  type ASTNode,
-} from "../common/parse-sexpr"
+} from "../types"
 
 // **Process AST into TypeScript Interfaces**
 export function parseDsnToDsnJson(dsnString: string): DsnPcb {
@@ -78,7 +79,9 @@ function processNode(node: ASTNode): any {
 }
 
 export function processPCB(nodes: ASTNode[]): DsnPcb {
-  const pcb: Partial<DsnPcb> = {}
+  const pcb: Partial<DsnPcb> = {
+    wiring: { wires: [] },
+  }
 
   // The first element is the filename
   const filenameNode = nodes[0]
@@ -110,19 +113,19 @@ export function processPCB(nodes: ASTNode[]): DsnPcb {
             }
             break
           case "structure":
-            pcb.structure = processStructure(element.children!.slice(1))
+            pcb.structure = processStructure(element.children!.slice(1)) as any
             break
           case "placement":
-            pcb.placement = processPlacement(element.children!.slice(1))
+            pcb.placement = processPlacement(element.children!.slice(1)) as any
             break
           case "library":
             pcb.library = processLibrary(element.children!.slice(1))
             break
           case "network":
-            pcb.network = processNetwork(element.children!.slice(1))
+            pcb.network = processNetwork(element.children!.slice(1)) as any
             break
           case "wiring":
-            pcb.wiring = processWiring(element.children!.slice(1))
+            pcb.wiring = processWiring(element.children!.slice(1)) as any
             break
         }
       }
@@ -270,14 +273,14 @@ function processProperty(nodes: ASTNode[]): { index: number } {
 function processBoundary(nodes: ASTNode[]): Boundary {
   const boundary: Partial<Boundary> = {}
   nodes.forEach((node) => {
-    if (
-      node.type === "List" &&
-      node.children![0].type === "Atom" &&
-      node.children![0].value === "path"
-    ) {
+    if (node.type === "List" && node.children![0].type === "Atom") {
       boundary.path = processPath(node.children!)
     }
   })
+  // Ensure boundary.path is defined
+  if (!boundary.path) {
+    boundary.path = { layer: "", width: 0, coordinates: [] }
+  }
   return boundary as Boundary
 }
 
@@ -559,21 +562,62 @@ function processShape(nodes: ASTNode[]): Shape {
   const [_, shapeContentNode, ...rest] = nodes
 
   if (shapeContentNode.type === "List") {
-    const [shapeTypeNode, ...shapeRest] = shapeContentNode.children!
+    const [shapeTypeNode, layerNode, ...shapeData] = shapeContentNode.children!
+
     if (
       shapeTypeNode.type === "Atom" &&
       typeof shapeTypeNode.value === "string"
     ) {
       const shapeType = shapeTypeNode.value
-      if (shapeType === "polygon") {
-        return processPolygonShape(shapeContentNode.children!)
-      } else if (shapeType === "circle") {
-        return processCircleShape(shapeContentNode.children!)
+
+      switch (shapeType) {
+        case "polygon":
+          return processPolygonShape(shapeContentNode.children!)
+        case "circle":
+          return processCircleShape(shapeContentNode.children!)
+        case "rect":
+          return processRectShape(shapeContentNode.children!)
       }
     }
   }
 
-  throw new Error("Unknown shape type")
+  console.error("Shape processing error for nodes:", nodes)
+  throw new Error(`Unknown shape type for nodes: ${JSON.stringify(nodes)}`)
+}
+
+function processRectShape(nodes: ASTNode[]): RectShape {
+  // Shape format: (rect F.Cu x1 y1 x2 y2)
+  if (nodes.length < 6) {
+    throw new Error("Invalid rect shape format: insufficient nodes")
+  }
+
+  if (
+    nodes[0].type === "Atom" &&
+    nodes[0].value === "rect" &&
+    nodes[1].type === "Atom" &&
+    typeof nodes[1].value === "string" &&
+    nodes[2].type === "Atom" &&
+    typeof nodes[2].value === "number" &&
+    nodes[3].type === "Atom" &&
+    typeof nodes[3].value === "number" &&
+    nodes[4].type === "Atom" &&
+    typeof nodes[4].value === "number" &&
+    nodes[5].type === "Atom" &&
+    typeof nodes[5].value === "number"
+  ) {
+    return {
+      shapeType: "rect",
+      layer: nodes[1].value,
+      coordinates: [
+        nodes[2].value,
+        nodes[3].value,
+        nodes[4].value,
+        nodes[5].value,
+      ],
+    }
+  }
+
+  throw new Error("Invalid rect shape format")
 }
 
 function processPolygonShape(nodes: ASTNode[]): PolygonShape {
@@ -755,21 +799,52 @@ export function processWiring(nodes: ASTNode[]): Wiring {
 
 function processWire(nodes: ASTNode[]): Wire {
   const wire: Partial<Wire> = {}
+
   nodes.forEach((node) => {
     if (node.type === "List") {
       const [keyNode, ...rest] = node.children!
       if (keyNode.type === "Atom" && typeof keyNode.value === "string") {
         const key = keyNode.value
-        if (key === "path") {
-          wire.path = processPath(node.children!)
-        } else if (key === "net") {
-          if (rest[0].type === "Atom" && typeof rest[0].value === "string") {
-            wire.net = rest[0].value
-          }
-        } else if (key === "type") {
-          if (rest[0].type === "Atom" && typeof rest[0].value === "string") {
-            wire.type = rest[0].value
-          }
+        switch (key) {
+          case "path":
+            wire.path = processPath(node.children!)
+            break
+          case "polyline_path":
+            // Handle polyline path similar to regular path
+            if (
+              rest.length >= 2 &&
+              rest[0].type === "Atom" &&
+              typeof rest[0].value === "string" &&
+              rest[1].type === "Atom" &&
+              typeof rest[1].value === "number"
+            ) {
+              wire.polyline_path = {
+                layer: rest[0].value,
+                width: rest[1].value,
+                coordinates: rest
+                  .slice(2)
+                  .filter(
+                    (n) => n.type === "Atom" && typeof n.value === "number",
+                  )
+                  .map((n) => n.value as number),
+              }
+            }
+            break
+          case "net":
+            if (rest[0].type === "Atom" && typeof rest[0].value === "string") {
+              wire.net = rest[0].value
+            }
+            break
+          case "clearance_class":
+            if (rest[0].type === "Atom" && typeof rest[0].value === "string") {
+              wire.clearance_class = rest[0].value
+            }
+            break
+          case "type":
+            if (rest[0].type === "Atom" && typeof rest[0].value === "string") {
+              wire.type = rest[0].value
+            }
+            break
         }
       }
     }

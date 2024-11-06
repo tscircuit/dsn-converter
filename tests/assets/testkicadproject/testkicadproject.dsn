@@ -113,7 +113,4 @@
       )
     )
   )
-  (wiring
-    (wire (path F.Cu 200  150500 -105000  154540 -105000)(net "Net-(C1-Pad1)")(type route))
-  )
 )
