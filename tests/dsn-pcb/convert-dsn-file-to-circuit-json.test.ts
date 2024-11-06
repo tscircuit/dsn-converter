@@ -1,17 +1,16 @@
 import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
 import { convertDsnJsonToCircuitJson } from "../../lib/dsn-pcb/dsn-json-to-circuit-json/convert-dsn-json-to-circuit-json.ts"
-// @ts-ignore
 import { expect, test } from "bun:test"
 import { parseDsnToDsnJson } from "lib"
 
 // @ts-ignore
-import convertedDsnFile from "../assets/testkicadproject/freeroutingTraceAdded.dsn" with {
+import dsnFileWithFreeroutingTrace from "../assets/testkicadproject/freeroutingTraceAdded.dsn" with {
   type: "text",
 }
 
-test.skip("parse dsn to circuit json", async () => {
+test("parse dsn to circuit json", async () => {
   const fs = require("fs")
-  const dsnJson = parseDsnToDsnJson(convertedDsnFile)
+  const dsnJson = parseDsnToDsnJson(dsnFileWithFreeroutingTrace)
   const circuitJson = convertDsnJsonToCircuitJson(dsnJson)
 
   fs.writeFileSync(

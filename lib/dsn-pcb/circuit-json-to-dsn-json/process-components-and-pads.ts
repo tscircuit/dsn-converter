@@ -82,7 +82,7 @@ export function processComponentsAndPads(
     }
 
     // Handle padstacks
-    const padstackName = getPadstackName(srcComp?.ftype)
+    const padstackName =`${getPadstackName(srcComp?.ftype)}_${srcComp?.source_component_id}`
     if (!processedPadstacks.has(padstackName)) {
       const padstack = createExactPadstack(padstackName)
       pcb.library.padstacks.push(padstack)
