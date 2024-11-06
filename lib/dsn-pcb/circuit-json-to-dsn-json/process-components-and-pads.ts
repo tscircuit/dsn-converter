@@ -6,8 +6,8 @@ import type {
 import { getComponentValue } from "lib/utils/get-component-value"
 import { getFootprintName } from "lib/utils/get-footprint-name"
 import { getPadstackName } from "lib/utils/get-padstack-name"
-import type { DsnPcb, ComponentGroup, Padstack } from "../types"
 import { applyToPoint, scale } from "transformation-matrix"
+import type { ComponentGroup, DsnPcb, Padstack } from "../types"
 
 const transformMmToUm = scale(1000)
 
@@ -82,7 +82,7 @@ export function processComponentsAndPads(
     }
 
     // Handle padstacks
-    const padstackName =`${getPadstackName(srcComp?.ftype)}_${srcComp?.source_component_id}`
+    const padstackName = `${getPadstackName(srcComp?.ftype)}_${srcComp?.source_component_id}`
     if (!processedPadstacks.has(padstackName)) {
       const padstack = createExactPadstack(padstackName)
       pcb.library.padstacks.push(padstack)
