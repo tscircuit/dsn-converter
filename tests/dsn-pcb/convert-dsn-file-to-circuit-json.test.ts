@@ -9,14 +9,8 @@ import dsnFileWithFreeroutingTrace from "../assets/testkicadproject/freeroutingT
 }
 
 test("parse dsn to circuit json", async () => {
-  const fs = require("fs")
   const dsnJson = parseDsnToDsnJson(dsnFileWithFreeroutingTrace)
   const circuitJson = convertDsnJsonToCircuitJson(dsnJson)
-
-  fs.writeFileSync(
-    "circuitJsonConverted.json",
-    JSON.stringify(circuitJson, null, 2),
-  )
 
   expect(convertCircuitJsonToPcbSvg(circuitJson)).toMatchSvgSnapshot(
     import.meta.path,
