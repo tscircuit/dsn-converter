@@ -3,6 +3,9 @@
   "main": "dist/index.js",
   "version": "0.0.4",
   "type": "module",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "format": "biome format --write .",
     "format:check": "biome format .",
