@@ -10,12 +10,12 @@ import { parseDsnToDsnJson } from "lib"
 
 // @ts-ignore
 
-test.skip("parse s-expr to json", async () => {
+test("parse s-expr to json", async () => {
   const pcbJson = parseDsnToDsnJson(testDsnFile)
   expect(pcbJson).toBeTruthy()
 })
 
-test.skip("parse json to circuit json", async () => {
+test("parse json to circuit json", async () => {
   const pcb = parseDsnToDsnJson(testDsnFile)
   const circuitJson = convertDsnJsonToCircuitJson(pcb)
 

@@ -32,20 +32,48 @@ export function convertPadstacksToSmtPads(
         return
       }
 
-      // Get the rect shape from the padstack
+      // Find shape in padstack - try rectangle first, then polygon
       const rectShape = padstack.shapes.find(
-        (shape) => shape.shapeType === "rect",
+        (shape) => shape.shapeType === "rect"
+      )
+      
+      const polygonShape = padstack.shapes.find(
+        (shape) => shape.shapeType === "polygon"
       )
 
-      if (!rectShape) {
-        console.warn(`No rect shape found for padstack: ${padstack.name}`)
+      let width: number
+      let height: number
+
+      if (rectShape) {
+        // Handle rectangle shape
+        const [x1, y1, x2, y2] = rectShape.coordinates
+        width = Math.abs(x2 - x1) / 1000 // Convert μm to mm
+        height = Math.abs(y2 - y1) / 1000 // Convert μm to mm
+      } else if (polygonShape) {
+        // Handle polygon shape
+        const coordinates = polygonShape.coordinates
+        let minX = Infinity
+        let maxX = -Infinity
+        let minY = Infinity
+        let maxY = -Infinity
+
+        // Coordinates are in pairs (x,y), so iterate by 2
+        for (let i = 0; i < coordinates.length; i += 2) {
+          const x = coordinates[i]
+          const y = coordinates[i + 1]
+          
+          minX = Math.min(minX, x)
+          maxX = Math.max(maxX, x)
+          minY = Math.min(minY, y)
+          maxY = Math.max(maxY, y)
+        }
+
+        width = Math.abs(maxX - minX) / 1000
+        height = Math.abs(maxY - minY) / 1000
+      } else {
+        console.warn(`No valid shape found for padstack: ${padstack.name}`)
         return
       }
-
-      // Extract the width and height from the rect shape coordinates
-      const [x1, y1, x2, y2] = rectShape.coordinates
-      const width = Math.abs(x2 - x1) / 1000 // Convert μm to mm
-      const height = Math.abs(y2 - y1) / 1000 // Convert μm to mm
 
       // Calculate position in circuit space using the transformation matrix
       const { x: circuitX, y: circuitY } = applyToPoint(transform, {
