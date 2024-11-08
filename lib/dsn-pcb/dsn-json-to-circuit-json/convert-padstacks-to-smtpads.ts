@@ -34,11 +34,11 @@ export function convertPadstacksToSmtPads(
 
       // Find shape in padstack - try rectangle first, then polygon
       const rectShape = padstack.shapes.find(
-        (shape) => shape.shapeType === "rect"
+        (shape) => shape.shapeType === "rect",
       )
-      
+
       const polygonShape = padstack.shapes.find(
-        (shape) => shape.shapeType === "polygon"
+        (shape) => shape.shapeType === "polygon",
       )
 
       let width: number
@@ -61,7 +61,7 @@ export function convertPadstacksToSmtPads(
         for (let i = 0; i < coordinates.length; i += 2) {
           const x = coordinates[i]
           const y = coordinates[i + 1]
-          
+
           minX = Math.min(minX, x)
           maxX = Math.max(maxX, x)
           minY = Math.min(minY, y)
