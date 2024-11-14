@@ -9,8 +9,12 @@ export function convertCircuitJsonToDsnJson(
 ): DsnPcb {
   // Find the PCB board element
   const pcbBoard = circuitElements.find(
-    (element) => element.type === "pcb_board"
-  ) as AnyCircuitElement & { width: number; height: number; center: { x: number; y: number } }
+    (element) => element.type === "pcb_board",
+  ) as AnyCircuitElement & {
+    width: number
+    height: number
+    center: { x: number; y: number }
+  }
 
   const pcb: DsnPcb = {
     filename: "",
@@ -126,7 +130,11 @@ export function convertCircuitJsonToDsnJson(
   return pcb
 }
 
-function calculateBoardBoundary(pcbBoard: { width: number; height: number; center: { x: number; y: number } }): number[] {
+function calculateBoardBoundary(pcbBoard: {
+  width: number
+  height: number
+  center: { x: number; y: number }
+}): number[] {
   // Convert dimensions from mm to μm and calculate corners
   const halfWidth = (pcbBoard.width * 1000) / 2
   const halfHeight = (pcbBoard.height * 1000) / 2
@@ -136,11 +144,16 @@ function calculateBoardBoundary(pcbBoard: { width: number; height: number; cente
   // Return coordinates for a rectangular boundary path
   // Format: [x1, y1, x2, y2, x3, y3, x4, y4, x1, y1] to close the path
   return [
-    centerX - halfWidth, centerY - halfHeight,  // Top left
-    centerX + halfWidth, centerY - halfHeight,  // Top right
-    centerX + halfWidth, centerY + halfHeight,  // Bottom right
-    centerX - halfWidth, centerY + halfHeight,  // Bottom left
-    centerX - halfWidth, centerY - halfHeight,  // Back to top left to close the path
+    centerX - halfWidth,
+    centerY - halfHeight, // Top left
+    centerX + halfWidth,
+    centerY - halfHeight, // Top right
+    centerX + halfWidth,
+    centerY + halfHeight, // Bottom right
+    centerX - halfWidth,
+    centerY + halfHeight, // Bottom left
+    centerX - halfWidth,
+    centerY - halfHeight, // Back to top left to close the path
   ]
 }
 
