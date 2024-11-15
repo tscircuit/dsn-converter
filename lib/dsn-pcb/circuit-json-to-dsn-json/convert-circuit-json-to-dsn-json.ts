@@ -125,7 +125,8 @@ export function convertCircuitJsonToDsnJson(
   const componentGroups = groupComponents(circuitElements)
   processComponentsAndPads(componentGroups, circuitElements, pcb)
   processNets(circuitElements, pcb)
-  processPcbTraces(circuitElements, pcb)
+  // No need to prcess traces, cause we will be using the freerouting's autorouter
+  // processPcbTraces(circuitElements, pcb)
 
   return pcb
 }
