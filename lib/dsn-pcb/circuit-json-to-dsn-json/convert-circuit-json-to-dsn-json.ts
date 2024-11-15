@@ -3,6 +3,7 @@ import type { DsnPcb, Padstack, ComponentGroup } from "../types"
 import { processComponentsAndPads } from "./process-components-and-pads"
 import { processNets } from "./process-nets"
 import { processPcbTraces } from "./process-pcb-traces"
+import { processPlatedHoles } from "./process-plated-holes"
 
 export function convertCircuitJsonToDsnJson(
   circuitElements: AnyCircuitElement[],
@@ -124,8 +125,9 @@ export function convertCircuitJsonToDsnJson(
 
   const componentGroups = groupComponents(circuitElements)
   processComponentsAndPads(componentGroups, circuitElements, pcb)
+  processPlatedHoles(circuitElements, pcb)
   processNets(circuitElements, pcb)
-  // No need to prcess traces, cause we will be using the freerouting's autorouter
+  // No need to process traces, cause we will be using the freerouting's autorouter
   // processPcbTraces(circuitElements, pcb)
 
   return pcb

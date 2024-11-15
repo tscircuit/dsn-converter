@@ -69,6 +69,13 @@ export function processComponentsAndPads(
     )
 
     // Fixed placement coordinates
+    // Get rotation from pcb_component
+    const pcbComponent = circuitElements.find(
+      (e) =>
+        e.type === "pcb_component" &&
+        e.pcb_component_id === sourceComponent.pcb_component_id,
+    ) as PcbComponent
+
     const componentPlacement = {
       name: footprintName,
       place: {
@@ -76,7 +83,7 @@ export function processComponentsAndPads(
         x: circuitSpaceCoordinates.x,
         y: circuitSpaceCoordinates.y,
         side: "front" as const,
-        rotation: 0,
+        rotation: pcbComponent?.rotation || 0,
         PN: getComponentValue(srcComp),
       },
     }
