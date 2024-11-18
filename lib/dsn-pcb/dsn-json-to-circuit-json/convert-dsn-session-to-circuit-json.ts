@@ -1,67 +1,46 @@
 import { scale, applyToPoint } from "transformation-matrix"
 import type { AnyCircuitElement, PcbBoard } from "circuit-json"
-import type { DsnSession } from "../types"
+import type { DsnJson, DsnPcb, DsnSession } from "../types"
 import { convertWiresToPcbTraces } from "./convert-wire-to-trace"
+import Debug from "debug"
+import { convertDsnPcbToCircuitJson } from "./convert-dsn-pcb-to-circuit-json"
+import { convertWiringPathToPcbTraces } from "./convert-wiring-path-to-pcb-traces"
+
+const debug = Debug("dsn-converter")
 
 export function convertDsnSessionToCircuitJson(
+  dsnInput: DsnPcb,
   dsnSession: DsnSession,
 ): AnyCircuitElement[] {
-  const elements: AnyCircuitElement[] = []
-  const transformUmToMm = scale(1 / 1000)
-  const transformMmToUm = scale(1000)
+  const transformUmToMm = scale(1 / 10000)
 
-  // Add a default board
-  const board: PcbBoard = {
-    type: "pcb_board",
-    pcb_board_id: "pcb_board_0",
-    center: { x: 0, y: 0 },
-    width: 100,
-    height: 100,
-    thickness: 1.4,
-    num_layers: 4,
+  if (debug.enabled) {
+    Bun.write("dsn-session.json", JSON.stringify(dsnSession, null, 2))
   }
-  elements.push(board)
 
-  // Process components to create SMT pads
-  for (const component of dsnSession.placement.components) {
-    const { place } = component
-    const padId = `${place.refdes}_pad1`
+  const inputPcbElms = convertDsnPcbToCircuitJson(dsnInput as DsnPcb)
 
-    // Convert coordinates using transformation matrix
-    const { x: circuitX, y: circuitY } = applyToPoint(transformUmToMm, {
-      x: place.x,
-      y: place.y,
-    })
-
-    // Create an SMT pad for each component
-    const pcbPad: AnyCircuitElement = {
-      type: "pcb_smtpad",
-      pcb_smtpad_id: padId,
-      pcb_component_id: place.refdes,
-      pcb_port_id: padId,
-      shape: "rect",
-      x: circuitX,
-      y: circuitY,
-      width: 0.6, // Default width in mm
-      height: 0.6, // Default height in mm
-      layer: place.side === "front" ? "top" : "bottom",
-      port_hints: ["1"],
+  // Add the wires from the session
+  const wireElements: AnyCircuitElement[] = []
+  for (const net of dsnSession.routes.network_out.nets) {
+    for (const wire of net.wires) {
+      if ("path" in wire) {
+        wireElements.push(
+          ...convertWiringPathToPcbTraces({
+            wire,
+            transformUmToMm,
+            netName: net.name,
+          }),
+        )
+      }
     }
-    elements.push(pcbPad)
+    // console.log(net)
+    // wireElements.push(
+    //   ...convertWiresToPcbTraces(net, dsnInput.network, transformUmToMm),
+    // )
   }
 
-  // Convert wires to PCB traces
-  if (dsnSession.routes.network_out.nets) {
-    for (const net of dsnSession.routes.network_out.nets) {
-      elements.push(
-        ...convertWiresToPcbTraces(
-          { wires: net.wires },
-          { nets: [{ name: net.name, pins: [] }], classes: [] },
-          transformUmToMm,
-        ),
-      )
-    }
-  }
+  // console.log(wireElements)
 
-  return elements
+  return [...inputPcbElms, ...wireElements]
 }

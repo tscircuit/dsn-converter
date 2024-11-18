@@ -9,12 +9,7 @@ import { convertDsnPcbToCircuitJson } from "./convert-dsn-pcb-to-circuit-json"
 import { convertDsnSessionToCircuitJson } from "./convert-dsn-session-to-circuit-json"
 
 export function convertDsnJsonToCircuitJson(
-  dsnPcb: DsnPcb | DsnSession,
+  dsnPcb: DsnPcb,
 ): AnyCircuitElement[] {
-  if (dsnPcb.is_dsn_pcb) {
-    return convertDsnPcbToCircuitJson(dsnPcb)
-  } else if (dsnPcb.is_dsn_session) {
-    return convertDsnSessionToCircuitJson(dsnPcb)
-  }
-  throw new Error("Invalid DSN JSON type")
+  return convertDsnPcbToCircuitJson(dsnPcb)
 }
