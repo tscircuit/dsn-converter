@@ -301,33 +301,44 @@ function processBoundary(nodes: ASTNode[]): Boundary {
 
 function processPath(nodes: ASTNode[]): Path {
   // Find the path node which contains layer, width and coordinates
-  const pathNode = nodes.find(node => 
-    node.type === "List" && 
-    node.children?.[0]?.type === "Atom" && 
-    node.children[0].value === "path"
-  );
+  const pathNode = nodes.find(
+    (node) =>
+      node.type === "List" &&
+      node.children?.[0]?.type === "Atom" &&
+      node.children[0].value === "path",
+  )
 
   if (!pathNode) {
     // If no path node found, use the nodes directly
     // This handles the case where nodes is already the path content
     return {
-      layer: nodes[1]?.type === "Atom" ? nodes[1].value as string : "F.Cu",
-      width: nodes[2]?.type === "Atom" ? nodes[2].value as number : 200,
-      coordinates: nodes.slice(3)
-        .filter(node => node.type === "Atom" && typeof node.value === "number")
-        .map(node => node.value as number)
-    };
+      layer: nodes[1]?.type === "Atom" ? (nodes[1].value as string) : "F.Cu",
+      width: nodes[2]?.type === "Atom" ? (nodes[2].value as number) : 200,
+      coordinates: nodes
+        .slice(3)
+        .filter(
+          (node) => node.type === "Atom" && typeof node.value === "number",
+        )
+        .map((node) => node.value as number),
+    }
   }
 
   // Process the path node children
-  const pathChildren = pathNode.children!;
+  const pathChildren = pathNode.children!
   return {
-    layer: pathChildren[1]?.type === "Atom" ? pathChildren[1].value as string : "F.Cu",
-    width: pathChildren[2]?.type === "Atom" ? pathChildren[2].value as number : 200,
-    coordinates: pathChildren.slice(3)
-      .filter(node => node.type === "Atom" && typeof node.value === "number")
-      .map(node => node.value as number)
-  };
+    layer:
+      pathChildren[1]?.type === "Atom"
+        ? (pathChildren[1].value as string)
+        : "F.Cu",
+    width:
+      pathChildren[2]?.type === "Atom"
+        ? (pathChildren[2].value as number)
+        : 200,
+    coordinates: pathChildren
+      .slice(3)
+      .filter((node) => node.type === "Atom" && typeof node.value === "number")
+      .map((node) => node.value as number),
+  }
 }
 
 function processRule(nodes: ASTNode[]): Rule {
@@ -972,8 +983,6 @@ function processSessionNode(ast: ASTNode): DsnSession {
             child.children?.[0].type === "Atom" &&
             child.children[0].value === "wire",
         )
-
-        console.dir(wireNodes, { depth: 1000 })
 
         return {
           name: netName,
