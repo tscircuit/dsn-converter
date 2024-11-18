@@ -284,6 +284,9 @@ export interface DsnSession {
   routes: {
     resolution: Resolution
     parser: Parser
+    library_out?: {
+      padstacks: Padstack[]
+    }
     network_out: {
       nets: Array<{
         name: string

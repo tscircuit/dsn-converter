@@ -944,6 +944,27 @@ function processSessionNode(ast: ASTNode): DsnSession {
       child.children[0].value === "routes",
   )
   if (routesNode) {
+    // Extract library_out section
+    const libraryNode = routesNode.children!.find(
+      (child) =>
+        child.type === "List" &&
+        child.children?.[0].type === "Atom" &&
+        child.children[0].value === "library_out",
+    )
+    if (libraryNode) {
+      session.routes.library_out = {
+        padstacks: libraryNode.children!
+          .filter(
+            (child) =>
+              child.type === "List" &&
+              child.children?.[0].type === "Atom" &&
+              child.children[0].value === "padstack",
+          )
+          .map((padstackNode) => processPadstack(padstackNode.children!)),
+      }
+    }
+
+    // Extract network_out section
     const networkNode = routesNode.children!.find(
       (child) =>
         child.type === "List" &&

@@ -22,4 +22,16 @@ test("parse session file", () => {
   // Check routes section exists
   expect(sessionJson.routes).toBeTruthy()
   expect(sessionJson.routes.network_out.nets[0].wires).toHaveLength(3)
+
+  // Check library_out section
+  expect(sessionJson.routes.library_out).toBeTruthy()
+  expect(sessionJson.routes.library_out?.padstacks).toHaveLength(2)
+  
+  // Check first padstack
+  const firstPadstack = sessionJson.routes.library_out?.padstacks[0]
+  expect(firstPadstack?.name).toBe("Via[0-1]_600:300_um")
+  expect(firstPadstack?.shapes).toHaveLength(2)
+  expect(firstPadstack?.shapes[0].shapeType).toBe("circle")
+  expect(firstPadstack?.shapes[0].layer).toBe("F.Cu")
+  expect((firstPadstack?.shapes[0] as any).diameter).toBe(6000)
 })

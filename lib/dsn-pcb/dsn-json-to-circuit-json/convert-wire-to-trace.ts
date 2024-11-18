@@ -32,6 +32,7 @@ export function convertWiresToPcbTraces(
     }
 
     if ("path" in wire) {
+      console.log("adding wiring path")
       traces.push(
         ...convertWiringPathToPcbTraces({ wire, transformUmToMm, netName }),
       )

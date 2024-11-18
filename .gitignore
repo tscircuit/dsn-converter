@@ -180,3 +180,4 @@ dist
 #ignore the diff images
 *.diff.png
 *.diff.svg
+dsn-session.json
