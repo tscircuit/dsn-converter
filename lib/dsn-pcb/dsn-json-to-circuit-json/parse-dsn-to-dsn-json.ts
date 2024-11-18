@@ -42,93 +42,7 @@ export function parseDsnToDsnJson(dsnString: string): DsnPcb {
   if (ast.type === "List" && ast.children && ast.children[0].type === "Atom") {
     const rootNode = ast.children[0].value
     if (rootNode === "session") {
-      // For session files, create a PCB structure from session data
-      const pcb: DsnPcb = {
-        filename:
-          ast.children[1].type === "Atom"
-            ? (ast.children[1].value as string)
-            : "session",
-        parser: {
-          string_quote: "",
-          host_version: "",
-          space_in_quoted_tokens: "",
-          host_cad: "",
-        },
-        resolution: { unit: "um", value: 10 },
-        unit: "um",
-        structure: {
-          layers: [],
-          boundary: { path: { layer: "", width: 0, coordinates: [] } },
-          via: "",
-          rule: { width: 0, clearances: [] },
-        },
-        placement: { components: [] },
-        library: { images: [], padstacks: [] },
-        network: { nets: [], classes: [] },
-        wiring: { wires: [] },
-      }
-
-      // Extract placement section
-      const placementNode = ast.children.find(
-        (child) =>
-          child.type === "List" &&
-          child.children?.[0].type === "Atom" &&
-          child.children[0].value === "placement",
-      )
-      if (placementNode) {
-        pcb.placement = processPlacement(placementNode.children!.slice(1))
-      }
-
-      // Extract routes section
-      const routesNode = ast.children.find(
-        (child) =>
-          child.type === "List" &&
-          child.children?.[0].type === "Atom" &&
-          child.children[0].value === "routes",
-      )
-      if (routesNode) {
-        // Process network and wiring from routes
-        const networkNode = routesNode.children!.find(
-          (child) =>
-            child.type === "List" &&
-            child.children?.[0].type === "Atom" &&
-            child.children[0].value === "network_out",
-        )
-        if (networkNode) {
-          // Find all net nodes in the network_out section
-          const netNodes = networkNode.children!.filter(
-            (child) =>
-              child.type === "List" &&
-              child.children?.[0].type === "Atom" &&
-              child.children[0].value === "net",
-          )
-
-          pcb.wiring = { wires: [] }
-
-          // Process each net node
-          netNodes.forEach((netNode) => {
-            const netName = netNode.children![1].value
-            // Find wire nodes within this net
-            const wireNodes = netNode.children!.filter(
-              (child) =>
-                child.type === "List" &&
-                child.children?.[0].type === "Atom" &&
-                child.children[0].value === "wire",
-            )
-
-            // Process each wire node
-            wireNodes.forEach((wireNode) => {
-              pcb.wiring.wires.push({
-                path: processPath(wireNode.children!.slice(1)),
-                net: netName as string,
-                type: "route",
-              })
-            })
-          })
-        }
-      }
-
-      return pcb
+      return processSessionNode(ast)
     } else if (rootNode === "pcb") {
       // Regular PCB file processing
       const pcb = processPcbNode(ast) as DsnPcb
@@ -967,4 +881,93 @@ function processWire(nodes: ASTNode[]): Wire {
   })
 
   return wire as Wire
+}
+
+function processSessionNode(ast: ASTNode): DsnPcb {
+  const pcb: DsnPcb = {
+    filename:
+      ast.children![1].type === "Atom"
+        ? (ast.children![1].value as string)
+        : "session",
+    parser: {
+      string_quote: "",
+      host_version: "",
+      space_in_quoted_tokens: "",
+      host_cad: "",
+    },
+    resolution: { unit: "um", value: 10 },
+    unit: "um",
+    structure: {
+      layers: [],
+      boundary: { path: { layer: "", width: 0, coordinates: [] } },
+      via: "",
+      rule: { width: 0, clearances: [] },
+    },
+    placement: { components: [] },
+    library: { images: [], padstacks: [] },
+    network: { nets: [], classes: [] },
+    wiring: { wires: [] },
+  }
+
+  // Extract placement section
+  const placementNode = ast.children!.find(
+    (child) =>
+      child.type === "List" &&
+      child.children?.[0].type === "Atom" &&
+      child.children[0].value === "placement",
+  )
+  if (placementNode) {
+    pcb.placement = processPlacement(placementNode.children!.slice(1))
+  }
+
+  // Extract routes section
+  const routesNode = ast.children!.find(
+    (child) =>
+      child.type === "List" &&
+      child.children?.[0].type === "Atom" &&
+      child.children[0].value === "routes",
+  )
+  if (routesNode) {
+    // Process network and wiring from routes
+    const networkNode = routesNode.children!.find(
+      (child) =>
+        child.type === "List" &&
+        child.children?.[0].type === "Atom" &&
+        child.children[0].value === "network_out",
+    )
+    if (networkNode) {
+      // Find all net nodes in the network_out section
+      const netNodes = networkNode.children!.filter(
+        (child) =>
+          child.type === "List" &&
+          child.children?.[0].type === "Atom" &&
+          child.children[0].value === "net",
+      )
+
+      pcb.wiring = { wires: [] }
+
+      // Process each net node
+      netNodes.forEach((netNode) => {
+        const netName = netNode.children![1].value
+        // Find wire nodes within this net
+        const wireNodes = netNode.children!.filter(
+          (child) =>
+            child.type === "List" &&
+            child.children?.[0].type === "Atom" &&
+            child.children[0].value === "wire",
+        )
+
+        // Process each wire node
+        wireNodes.forEach((wireNode) => {
+          pcb.wiring.wires.push({
+            path: processPath(wireNode.children!.slice(1)),
+            net: netName as string,
+            type: "route",
+          })
+        })
+      })
+    }
+  }
+
+  return pcb
 }
