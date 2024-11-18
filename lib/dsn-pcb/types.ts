@@ -1,6 +1,8 @@
 import type { PcbSmtPad } from "circuit-json"
 
 export interface DsnPcb {
+  is_dsn_pcb: true
+  is_dsn_session?: false
   filename: string
   parser: {
     string_quote: string
@@ -268,7 +270,32 @@ export interface Wire {
   type?: string
 }
 
+export interface DsnSession {
+  is_dsn_session: true
+  is_dsn_pcb?: false
+  filename: string
+  placement: {
+    resolution: Resolution
+    components: Array<{
+      name: string
+      place: Place
+    }>
+  }
+  routes: {
+    resolution: Resolution
+    parser: Parser
+    network_out: {
+      nets: Array<{
+        name: string
+        wires: Wire[]
+      }>
+    }
+  }
+}
+
 export interface ComponentGroup {
   pcb_component_id: string
   pcb_smtpads: PcbSmtPad[]
 }
+
+export type DsnJson = DsnPcb | DsnSession

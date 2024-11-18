@@ -6,12 +6,12 @@ import testDsnFile from "../assets/testkicadproject/testkicadproject.dsn" with {
 import { expect, test } from "bun:test"
 
 test("stringify dsn json", () => {
-  const dsnJson = parseDsnToDsnJson(testDsnFile)
+  const dsnJson = parseDsnToDsnJson(testDsnFile) as DsnPcb
   const dsnString = stringifyDsnJson(dsnJson)
-  const reparsedJson = parseDsnToDsnJson(dsnString)
+  const reparsedJson = parseDsnToDsnJson(dsnString) as DsnPcb
 
   for (const key of Object.keys(reparsedJson) as Array<keyof DsnPcb>) {
-    expect(reparsedJson[key]).toEqual(dsnJson[key])
+    expect(reparsedJson[key]).toEqual(dsnJson[key] as any)
   }
 
   // Test that we can parse the generated string back to the same structure

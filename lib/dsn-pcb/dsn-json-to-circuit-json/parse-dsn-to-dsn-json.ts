@@ -10,7 +10,9 @@ import type {
   Class,
   Clearance,
   Component,
+  DsnJson,
   DsnPcb,
+  DsnSession,
   Image,
   Layer,
   Library,
@@ -34,24 +36,36 @@ import type {
 } from "../types"
 
 // **Process AST into TypeScript Interfaces**
-export function parseDsnToDsnJson(dsnString: string): DsnPcb {
+export function parseDsnToDsnJson(dsnString: string): DsnJson {
   const tokens = tokenizeDsn(dsnString)
   const ast = parseSexprToAst(tokens)
 
-  // Process the AST into PCB object
-  const pcb = processNode(ast) as DsnPcb
+  // Check if this is a session file or PCB file
+  if (ast.type === "List" && ast.children && ast.children[0].type === "Atom") {
+    const rootNode = ast.children[0].value
+    if (rootNode === "session") {
+      const session = processSessionNode(ast)
+      return session
+    } else if (rootNode === "pcb") {
+      // Regular PCB file processing
+      const pcb = processPcbNode(ast) as DsnPcb
+      return pcb
+    }
+  }
 
-  return pcb
+  throw new Error("Invalid DSN file format")
 }
 
 // **Helper Functions to Process AST Nodes**
 // The following functions map the AST nodes to the defined TypeScript interfaces.
 
-function processNode(node: ASTNode): any {
+function processPcbNode(node: ASTNode): any {
   if (node.type === "List") {
     const [head, ...tail] = node.children!
     if (head.type === "Atom" && typeof head.value === "string") {
       switch (head.value) {
+        case "session":
+          return processSessionNode(node)
         case "pcb":
           return processPCB(tail)
         case "parser":
@@ -80,6 +94,7 @@ function processNode(node: ASTNode): any {
 
 export function processPCB(nodes: ASTNode[]): DsnPcb {
   const pcb: Partial<DsnPcb> = {
+    is_dsn_pcb: true,
     wiring: { wires: [] },
   }
 
@@ -285,28 +300,49 @@ function processBoundary(nodes: ASTNode[]): Boundary {
 }
 
 function processPath(nodes: ASTNode[]): Path {
-  const path: Partial<Path> = {}
+  const path: Partial<Path> = {
+    coordinates: [],
+    layer: "F.Cu", // Default layer
+    width: 200, // Default width
+  }
+
+  // Skip the first node which is usually the keyword (e.g., "path", "wire")
+  const startIndex = nodes[0]?.type === "Atom" ? 1 : 0
+
+  // Check if we have explicit layer and width
   if (
-    nodes[1].type === "Atom" &&
-    typeof nodes[1].value === "string" &&
-    nodes[2].type === "Atom" &&
-    typeof nodes[2].value === "number"
+    nodes.length >= startIndex + 2 &&
+    nodes[startIndex]?.type === "Atom" &&
+    typeof nodes[startIndex].value === "string" &&
+    nodes[startIndex + 1]?.type === "Atom" &&
+    typeof nodes[startIndex + 1].value === "number"
   ) {
-    path.layer = nodes[1].value
-    path.width = nodes[2].value
-    path.coordinates = []
-    for (let i = 3; i < nodes.length; i++) {
+    path.layer = nodes[startIndex].value
+    path.width = nodes[startIndex + 1].value as number
+
+    // Process coordinates after layer and width
+    for (let i = startIndex + 2; i < nodes.length; i++) {
       const coordNode = nodes[i]
-      if (coordNode.type === "Atom" && typeof coordNode.value === "number") {
-        path.coordinates.push(coordNode.value)
-      } else {
-        throw new Error("Invalid coordinate in path")
+      if (coordNode?.type === "Atom" && typeof coordNode.value === "number") {
+        path.coordinates!.push(coordNode.value)
       }
     }
-    return path as Path
   } else {
-    throw new Error("Invalid path format")
+    // Process all valid number nodes as coordinates
+    for (let i = startIndex; i < nodes.length; i++) {
+      const node = nodes[i]
+      if (node?.type === "Atom" && typeof node.value === "number") {
+        path.coordinates!.push(node.value)
+      }
+    }
   }
+
+  // Ensure we have valid coordinates even if empty
+  if (!Array.isArray(path.coordinates)) {
+    path.coordinates = []
+  }
+
+  return path as Path
 }
 
 function processRule(nodes: ASTNode[]): Rule {
@@ -851,4 +887,97 @@ function processWire(nodes: ASTNode[]): Wire {
   })
 
   return wire as Wire
+}
+
+function processSessionNode(ast: ASTNode): DsnSession {
+  const session: DsnSession = {
+    is_dsn_session: true,
+    filename:
+      ast.children![1].type === "Atom"
+        ? (ast.children![1].value as string)
+        : "session",
+    placement: {
+      resolution: { unit: "um", value: 10 },
+      components: [],
+    },
+    routes: {
+      resolution: { unit: "um", value: 10 },
+      parser: {
+        string_quote: "",
+        host_version: "",
+        space_in_quoted_tokens: "",
+        host_cad: "",
+      },
+      network_out: {
+        nets: [],
+      },
+    },
+  }
+
+  // Extract placement section
+  const placementNode = ast.children!.find(
+    (child) =>
+      child.type === "List" &&
+      child.children?.[0].type === "Atom" &&
+      child.children[0].value === "placement",
+  )
+  if (placementNode) {
+    const resolutionNode = placementNode.children!.find(
+      (child) =>
+        child.type === "List" &&
+        child.children?.[0].type === "Atom" &&
+        child.children[0].value === "resolution",
+    )
+    if (resolutionNode) {
+      session.placement.resolution = processResolution(resolutionNode.children!)
+    }
+    session.placement.components = processPlacement(
+      placementNode.children!.slice(1),
+    ).components
+  }
+
+  // Extract routes section
+  const routesNode = ast.children!.find(
+    (child) =>
+      child.type === "List" &&
+      child.children?.[0].type === "Atom" &&
+      child.children[0].value === "routes",
+  )
+  if (routesNode) {
+    const networkNode = routesNode.children!.find(
+      (child) =>
+        child.type === "List" &&
+        child.children?.[0].type === "Atom" &&
+        child.children[0].value === "network_out",
+    )
+    if (networkNode) {
+      const netNodes = networkNode.children!.filter(
+        (child) =>
+          child.type === "List" &&
+          child.children?.[0].type === "Atom" &&
+          child.children[0].value === "net",
+      )
+
+      session.routes.network_out.nets = netNodes.map((netNode) => {
+        const netName = netNode.children![1].value as string
+        const wireNodes = netNode.children!.filter(
+          (child) =>
+            child.type === "List" &&
+            child.children?.[0].type === "Atom" &&
+            child.children[0].value === "wire",
+        )
+
+        return {
+          name: netName,
+          wires: wireNodes.map((wireNode) => ({
+            path: processPath(wireNode.children!.slice(1)),
+            net: netName,
+            type: "route",
+          })),
+        }
+      })
+    }
+  }
+
+  return session
 }
