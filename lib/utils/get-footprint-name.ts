@@ -1,3 +1,6 @@
+/**
+ * @deprecated THIS DOES NOT WORK AT ALL!!!!!!!
+ */
 export function getFootprintName(componentType: string | undefined): string {
   switch (componentType) {
     case "simple_resistor":

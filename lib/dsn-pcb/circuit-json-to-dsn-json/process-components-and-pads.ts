@@ -47,34 +47,26 @@ export function processComponentsAndPads(
     const { pcb_component_id, pcb_smtpads } = group
     if (pcb_smtpads.length === 0) continue
 
-    const sourceComponent = circuitElements.find(
+    const pcbComponent = circuitElements.find(
       (e) =>
         e.type === "pcb_component" && e.pcb_component_id === pcb_component_id,
     ) as PcbComponent
-    const srcComp =
-      sourceComponent &&
+    const sourceComponent =
+      pcbComponent &&
       (circuitElements.find(
         (e) =>
           e.type === "source_component" &&
-          e.source_component_id === sourceComponent.source_component_id,
+          e.source_component_id === pcbComponent.source_component_id,
       ) as SourceComponentBase)
 
-    const footprintName = getFootprintName(srcComp?.ftype)
-    const componentName = srcComp?.name || "Unknown"
+    const footprintName = getFootprintName(sourceComponent?.ftype)
+    const componentName = sourceComponent?.name || "Unknown"
 
     // Transform component coordinates
     const circuitSpaceCoordinates = applyToPoint(
       transformMmToUm,
-      sourceComponent.center,
+      pcbComponent.center,
     )
-
-    // Fixed placement coordinates
-    // Get rotation from pcb_component
-    const pcbComponent = circuitElements.find(
-      (e) =>
-        e.type === "pcb_component" &&
-        e.pcb_component_id === sourceComponent.pcb_component_id,
-    ) as PcbComponent
 
     const componentPlacement = {
       name: footprintName,
@@ -84,12 +76,12 @@ export function processComponentsAndPads(
         y: circuitSpaceCoordinates.y,
         side: "front" as const,
         rotation: pcbComponent?.rotation || 0,
-        PN: getComponentValue(srcComp),
+        PN: getComponentValue(sourceComponent),
       },
     }
 
     // Handle padstacks
-    const padstackName = `${getPadstackName(srcComp?.ftype)}_${srcComp?.source_component_id}`
+    const padstackName = `${getPadstackName(sourceComponent?.ftype)}_${sourceComponent?.source_component_id}`
     if (!processedPadstacks.has(padstackName)) {
       const padstack = createExactPadstack(padstackName)
       pcb.library.padstacks.push(padstack)
