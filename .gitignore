@@ -181,3 +181,5 @@ dist
 *.diff.png
 *.diff.svg
 dsn-session.json
+.yalc
+yalc.lock

@@ -12,7 +12,7 @@ export function convertDsnSessionToCircuitJson(
   dsnInput: DsnPcb,
   dsnSession: DsnSession,
 ): AnyCircuitElement[] {
-  const transformUmToMm = scale(1 / 10000)
+  const transformUmToMm = scale(1 / 1000)
 
   if (debug.enabled) {
     Bun.write("dsn-session.json", JSON.stringify(dsnSession, null, 2))
