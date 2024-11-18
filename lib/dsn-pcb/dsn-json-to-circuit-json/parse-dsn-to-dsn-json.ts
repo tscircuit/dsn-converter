@@ -44,7 +44,10 @@ export function parseDsnToDsnJson(dsnString: string): DsnPcb {
     if (rootNode === "session") {
       // For session files, create a PCB structure from session data
       const pcb: DsnPcb = {
-        filename: ast.children[1].type === "Atom" ? ast.children[1].value as string : "session",
+        filename:
+          ast.children[1].type === "Atom"
+            ? (ast.children[1].value as string)
+            : "session",
         parser: {
           string_quote: "",
           host_version: "",
@@ -57,19 +60,20 @@ export function parseDsnToDsnJson(dsnString: string): DsnPcb {
           layers: [],
           boundary: { path: { layer: "", width: 0, coordinates: [] } },
           via: "",
-          rule: { width: 0, clearances: [] }
+          rule: { width: 0, clearances: [] },
         },
         placement: { components: [] },
         library: { images: [], padstacks: [] },
         network: { nets: [], classes: [] },
-        wiring: { wires: [] }
+        wiring: { wires: [] },
       }
 
       // Extract placement section
       const placementNode = ast.children.find(
-        child => child.type === "List" && 
-                child.children?.[0].type === "Atom" && 
-                child.children[0].value === "placement"
+        (child) =>
+          child.type === "List" &&
+          child.children?.[0].type === "Atom" &&
+          child.children[0].value === "placement",
       )
       if (placementNode) {
         pcb.placement = processPlacement(placementNode.children!.slice(1))
@@ -77,43 +81,47 @@ export function parseDsnToDsnJson(dsnString: string): DsnPcb {
 
       // Extract routes section
       const routesNode = ast.children.find(
-        child => child.type === "List" && 
-                child.children?.[0].type === "Atom" && 
-                child.children[0].value === "routes"
+        (child) =>
+          child.type === "List" &&
+          child.children?.[0].type === "Atom" &&
+          child.children[0].value === "routes",
       )
       if (routesNode) {
         // Process network and wiring from routes
         const networkNode = routesNode.children!.find(
-          child => child.type === "List" && 
-                  child.children?.[0].type === "Atom" && 
-                  child.children[0].value === "network_out"
+          (child) =>
+            child.type === "List" &&
+            child.children?.[0].type === "Atom" &&
+            child.children[0].value === "network_out",
         )
         if (networkNode) {
           // Find all net nodes in the network_out section
           const netNodes = networkNode.children!.filter(
-            child => child.type === "List" && 
-                    child.children?.[0].type === "Atom" && 
-                    child.children[0].value === "net"
+            (child) =>
+              child.type === "List" &&
+              child.children?.[0].type === "Atom" &&
+              child.children[0].value === "net",
           )
-          
+
           pcb.wiring = { wires: [] }
-          
+
           // Process each net node
-          netNodes.forEach(netNode => {
+          netNodes.forEach((netNode) => {
             const netName = netNode.children![1].value
             // Find wire nodes within this net
             const wireNodes = netNode.children!.filter(
-              child => child.type === "List" && 
-                      child.children?.[0].type === "Atom" && 
-                      child.children[0].value === "wire"
+              (child) =>
+                child.type === "List" &&
+                child.children?.[0].type === "Atom" &&
+                child.children[0].value === "wire",
             )
-            
+
             // Process each wire node
-            wireNodes.forEach(wireNode => {
+            wireNodes.forEach((wireNode) => {
               pcb.wiring.wires.push({
                 path: processPath(wireNode.children!.slice(1)),
                 net: netName as string,
-                type: "route"
+                type: "route",
               })
             })
           })
@@ -123,7 +131,7 @@ export function parseDsnToDsnJson(dsnString: string): DsnPcb {
       return pcb
     } else if (rootNode === "pcb") {
       // Regular PCB file processing
-      const pcb = processNode(ast) as DsnPcb
+      const pcb = processPcbNode(ast) as DsnPcb
       return pcb
     }
   }
@@ -134,7 +142,7 @@ export function parseDsnToDsnJson(dsnString: string): DsnPcb {
 // **Helper Functions to Process AST Nodes**
 // The following functions map the AST nodes to the defined TypeScript interfaces.
 
-function processNode(node: ASTNode): any {
+function processPcbNode(node: ASTNode): any {
   if (node.type === "List") {
     const [head, ...tail] = node.children!
     if (head.type === "Atom" && typeof head.value === "string") {
@@ -374,23 +382,24 @@ function processBoundary(nodes: ASTNode[]): Boundary {
 function processPath(nodes: ASTNode[]): Path {
   const path: Partial<Path> = {
     coordinates: [],
-    layer: "F.Cu",  // Default layer
-    width: 200      // Default width
+    layer: "F.Cu", // Default layer
+    width: 200, // Default width
   }
-  
+
   // Skip the first node which is usually the keyword (e.g., "path", "wire")
   const startIndex = nodes[0]?.type === "Atom" ? 1 : 0
 
   // Check if we have explicit layer and width
-  if (nodes.length >= startIndex + 2 && 
-      nodes[startIndex]?.type === "Atom" &&
-      typeof nodes[startIndex].value === "string" &&
-      nodes[startIndex + 1]?.type === "Atom" &&
-      typeof nodes[startIndex + 1].value === "number") {
-    
+  if (
+    nodes.length >= startIndex + 2 &&
+    nodes[startIndex]?.type === "Atom" &&
+    typeof nodes[startIndex].value === "string" &&
+    nodes[startIndex + 1]?.type === "Atom" &&
+    typeof nodes[startIndex + 1].value === "number"
+  ) {
     path.layer = nodes[startIndex].value
     path.width = nodes[startIndex + 1].value
-    
+
     // Process coordinates after layer and width
     for (let i = startIndex + 2; i < nodes.length; i++) {
       const coordNode = nodes[i]
