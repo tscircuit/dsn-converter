@@ -6,6 +6,7 @@ import { convertPadstacksToSmtPads } from "./convert-padstacks-to-smtpads"
 import { convertWiresToPcbTraces } from "./convert-wire-to-trace"
 import { pairs } from "lib/utils/pairs"
 import { convertDsnPcbToCircuitJson } from "./convert-dsn-pcb-to-circuit-json"
+import { convertDsnSessionToCircuitJson } from "./convert-dsn-session-to-circuit-json"
 
 export function convertDsnJsonToCircuitJson(
   dsnPcb: DsnPcb | DsnSession,
@@ -15,4 +16,5 @@ export function convertDsnJsonToCircuitJson(
   } else if (dsnPcb.is_dsn_session) {
     return convertDsnSessionToCircuitJson(dsnPcb)
   }
+  throw new Error("Invalid DSN JSON type")
 }

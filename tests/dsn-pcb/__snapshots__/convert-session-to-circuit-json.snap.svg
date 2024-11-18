@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><style>
+              .boundary { fill: #000; }
+              .pcb-board { fill: none; }
+              .pcb-trace { fill: none; }
+              .pcb-hole-outer { fill: rgb(200, 52, 52); }
+              .pcb-hole-inner { fill: rgb(255, 38, 226); }
+              .pcb-pad { }
+              .pcb-boundary { fill: none; stroke: #fff; stroke-width: 0.3; }
+              .pcb-silkscreen { fill: none; }
+              .pcb-silkscreen-top { stroke: #f2eda1; }
+              .pcb-silkscreen-bottom { stroke: #f2eda1; }
+              .pcb-silkscreen-text { fill: #f2eda1; }
+            </style><rect class="boundary" x="0" y="0" width="800" height="600"/><rect class="pcb-boundary" x="105.88235294117646" y="5.882352941176464" width="588.2352941176471" height="588.2352941176471"/><path class="pcb-board" d="M 105.88235294117646 594.1176470588235 L 694.1176470588235 594.1176470588235 L 694.1176470588235 5.882352941176464 L 105.88235294117646 5.882352941176464 Z" stroke="rgba(255, 255, 255, 0.5)" stroke-width="0.5882352941176471"/></svg>

@@ -2,6 +2,7 @@ import type { PcbSmtPad } from "circuit-json"
 
 export interface DsnPcb {
   is_dsn_pcb: true
+  is_dsn_session?: false
   filename: string
   parser: {
     string_quote: string
@@ -271,6 +272,7 @@ export interface Wire {
 
 export interface DsnSession {
   is_dsn_session: true
+  is_dsn_pcb?: false
   filename: string
   placement: {
     resolution: Resolution
