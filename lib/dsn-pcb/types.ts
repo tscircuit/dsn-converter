@@ -156,7 +156,7 @@ export interface Clearance {
 }
 
 export interface Placement {
-  components: Component[]
+  components: ComponentPlacement[]
 }
 
 export interface Component {

@@ -4,7 +4,7 @@ import type {
   PcbTraceRoutePointWire,
 } from "circuit-json"
 import { type Matrix, applyToPoint } from "transformation-matrix"
-import type { Network, Wiring } from "../types"
+import type { Wiring } from "../../types"
 
 export const convertWiringPathToPcbTraces = ({
   wire,

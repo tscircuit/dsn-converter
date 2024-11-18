@@ -18,6 +18,7 @@ export function convertWiresToPcbTraces(
 
   wiring.wires?.forEach((wire) => {
     const netName = wire.net
+    if (!netName) return
 
     if (processedNets.has(netName) || wire.type === "shove_fixed") {
       return

@@ -1,5 +1,5 @@
 import type { PcbTrace } from "circuit-json"
-import type { Wiring } from "../types"
+import type { Wiring } from "../../types"
 import { type Matrix, applyToPoint } from "transformation-matrix"
 import { chunks } from "lib/utils/chunks"
 import { computeSegIntersection } from "lib/utils/compute-seg-intersection"
