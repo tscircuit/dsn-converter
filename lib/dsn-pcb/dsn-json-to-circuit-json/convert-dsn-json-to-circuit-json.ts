@@ -8,6 +8,9 @@ import { pairs } from "lib/utils/pairs"
 import { convertDsnPcbToCircuitJson } from "./convert-dsn-pcb-to-circuit-json"
 import { convertDsnSessionToCircuitJson } from "./convert-dsn-session-to-circuit-json"
 
+/**
+ * @deprecated use convertDsnPcbToCircuitJson instead
+ */
 export function convertDsnJsonToCircuitJson(
   dsnPcb: DsnPcb,
 ): AnyCircuitElement[] {
