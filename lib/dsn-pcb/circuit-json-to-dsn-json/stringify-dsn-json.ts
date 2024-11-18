@@ -138,30 +138,3 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
 
   return result
 }
-
-function convertSessionToPcb(session: DsnSession): DsnPcb {
-  const pcb: DsnPcb = {
-    filename: session.filename,
-    parser: session.routes.parser,
-    resolution: session.routes.resolution,
-    unit: "um",
-    structure: {
-      layers: [],
-      boundary: { path: { layer: "", width: 0, coordinates: [] } },
-      via: "",
-      rule: { width: 0, clearances: [] }
-    },
-    placement: { components: session.placement.components },
-    library: { images: [], padstacks: [] },
-    network: { nets: [], classes: [] },
-    wiring: { 
-      wires: session.routes.network_out.nets.flatMap(net => 
-        net.wires.map(wire => ({
-          ...wire,
-          net: net.name
-        }))
-      )
-    }
-  }
-  return pcb
-}

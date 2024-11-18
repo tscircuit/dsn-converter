@@ -318,13 +318,13 @@ function processPath(nodes: ASTNode[]): Path {
     typeof nodes[startIndex + 1].value === "number"
   ) {
     path.layer = nodes[startIndex].value
-    path.width = nodes[startIndex + 1].value
+    path.width = nodes[startIndex + 1].value as number
 
     // Process coordinates after layer and width
     for (let i = startIndex + 2; i < nodes.length; i++) {
       const coordNode = nodes[i]
       if (coordNode?.type === "Atom" && typeof coordNode.value === "number") {
-        path.coordinates.push(coordNode.value)
+        path.coordinates!.push(coordNode.value)
       }
     }
   } else {
@@ -332,7 +332,7 @@ function processPath(nodes: ASTNode[]): Path {
     for (let i = startIndex; i < nodes.length; i++) {
       const node = nodes[i]
       if (node?.type === "Atom" && typeof node.value === "number") {
-        path.coordinates.push(node.value)
+        path.coordinates!.push(node.value)
       }
     }
   }
