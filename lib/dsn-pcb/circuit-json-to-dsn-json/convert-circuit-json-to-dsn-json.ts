@@ -18,6 +18,7 @@ export function convertCircuitJsonToDsnJson(
   }
 
   const pcb: DsnPcb = {
+    is_dsn_pcb: true,
     filename: "",
     parser: {
       string_quote: "",
