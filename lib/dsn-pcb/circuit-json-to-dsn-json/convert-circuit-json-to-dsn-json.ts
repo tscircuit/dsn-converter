@@ -128,8 +128,7 @@ export function convertCircuitJsonToDsnJson(
   processComponentsAndPads(componentGroups, circuitElements, pcb)
   processPlatedHoles(circuitElements, pcb)
   processNets(circuitElements, pcb)
-  // No need to process traces, cause we will be using the freerouting's autorouter
-  // processPcbTraces(circuitElements, pcb)
+  processPcbTraces(circuitElements, pcb)
 
   return pcb
 }
