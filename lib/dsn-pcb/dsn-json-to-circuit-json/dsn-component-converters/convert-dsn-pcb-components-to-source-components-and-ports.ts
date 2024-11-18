@@ -1,9 +1,14 @@
 import type { AnySourceComponent, PcbPort, SourcePort } from "circuit-json"
+import { applyToPoint, type Matrix } from "transformation-matrix"
 import type { DsnPcb, Image, Pin } from "lib/dsn-pcb/types"
 
-export const convertDsnPcbComponentsToSourceComponentsAndPorts = (
-  dsnPcb: DsnPcb,
-): Array<AnySourceComponent | SourcePort | PcbPort> => {
+export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
+  dsnPcb,
+  transformDsnUnitToMm,
+}: {
+  dsnPcb: DsnPcb
+  transformDsnUnitToMm: Matrix
+}): Array<AnySourceComponent | SourcePort | PcbPort> => {
   const result: Array<AnySourceComponent | SourcePort | PcbPort> = []
 
   // Map to store image definitions for component lookup
@@ -35,14 +40,17 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = (
           pin_number: pin.pin_number,
           port_hints: [],
         }
+        const pcb_port_center = applyToPoint(transformDsnUnitToMm, {
+          x: component.place.x + pin.x,
+          y: component.place.y + pin.y,
+        })
         const pcb_port: PcbPort = {
           pcb_port_id: `pcb_port_${component.name}-Pad${pin.pin_number}`,
           type: "pcb_port",
           source_port_id: port.source_port_id,
           pcb_component_id: component.name,
-          // TODO get X/Y position of pad from dsnPcb
-          x: 0,
-          y: 0,
+          x: pcb_port_center.x,
+          y: pcb_port_center.y,
           layers: [],
         }
         result.push(port, pcb_port)

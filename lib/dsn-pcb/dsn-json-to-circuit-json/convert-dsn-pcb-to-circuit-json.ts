@@ -15,7 +15,7 @@ export function convertDsnPcbToCircuitJson(
   const elements: AnyCircuitElement[] = []
 
   // TODO use pcb.resolution.unit and pcb.resolution.value
-  const transformUmToMm = scale(1 / 1000)
+  const transformDsnUnitToMm = scale(1 / 1000)
 
   // Add the board
   // You must use the dsnPcb.boundary to get the center, width and height
@@ -34,12 +34,12 @@ export function convertDsnPcbToCircuitJson(
     const minX = Math.min(...boundaryPath.map(([x]) => x))
     const maxY = Math.max(...boundaryPath.map(([, y]) => y))
     const minY = Math.min(...boundaryPath.map(([, y]) => y))
-    board.center = applyToPoint(transformUmToMm, {
+    board.center = applyToPoint(transformDsnUnitToMm, {
       x: (maxX + minX) / 2,
       y: (maxY + minY) / 2,
     })
-    board.width = (maxX - minX) * transformUmToMm.a
-    board.height = (maxY - minY) * transformUmToMm.a
+    board.width = (maxX - minX) * transformDsnUnitToMm.a
+    board.height = (maxY - minY) * transformDsnUnitToMm.a
   } else {
     throw new Error(
       `Couldn't read DSN boundary, add support for dsnPcb.structure.boundary["${Object.keys(dsnPcb.structure.boundary).join(",")}"]`,
@@ -49,7 +49,7 @@ export function convertDsnPcbToCircuitJson(
   elements.push(board)
 
   // Convert padstacks to SMT pads using the transformation matrix
-  elements.push(...convertPadstacksToSmtPads(dsnPcb, transformUmToMm))
+  elements.push(...convertPadstacksToSmtPads(dsnPcb, transformDsnUnitToMm))
 
   // Convert wires to PCB traces using the transformation matrix
   if (dsnPcb.wiring && dsnPcb.network) {
@@ -57,12 +57,17 @@ export function convertDsnPcbToCircuitJson(
       ...convertWiresToPcbTraces(
         dsnPcb.wiring,
         dsnPcb.network,
-        transformUmToMm,
+        transformDsnUnitToMm,
       ),
     )
   }
 
-  elements.push(...convertDsnPcbComponentsToSourceComponentsAndPorts(dsnPcb))
+  elements.push(
+    ...convertDsnPcbComponentsToSourceComponentsAndPorts({
+      dsnPcb,
+      transformDsnUnitToMm,
+    }),
+  )
   elements.push(
     ...convertNetsToSourceNetsAndTraces({
       dsnPcb,
