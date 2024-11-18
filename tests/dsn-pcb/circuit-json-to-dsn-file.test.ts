@@ -5,6 +5,7 @@ import { convertCircuitJsonToDsnString, parseDsnToDsnJson } from "lib"
 
 import circuitJson from "../assets/testkicadproject/circuitJson.json"
 import type { AnyCircuitElement } from "circuit-json"
+import type { DsnPcb } from "lib"
 
 test("circuit json to dsn file", async () => {
   // Getting the dsn file from the circuit json
@@ -12,7 +13,7 @@ test("circuit json to dsn file", async () => {
     circuitJson as AnyCircuitElement[],
   )
 
-  const dsnJson = parseDsnToDsnJson(dsnFile)
+  const dsnJson = parseDsnToDsnJson(dsnFile) as DsnPcb
   const circuitJson2 = convertDsnJsonToCircuitJson(dsnJson)
 
   expect(convertCircuitJsonToPcbSvg(circuitJson2)).toMatchSvgSnapshot(

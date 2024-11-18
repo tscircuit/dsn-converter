@@ -6,7 +6,7 @@ import testDsnFile from "../assets/testkicadproject/testkicadproject.dsn" with {
 }
 // @ts-ignore
 import { expect, test } from "bun:test"
-import { parseDsnToDsnJson } from "lib"
+import { parseDsnToDsnJson, type DsnPcb } from "lib"
 
 // @ts-ignore
 
@@ -16,7 +16,7 @@ test("parse s-expr to json", async () => {
 })
 
 test("parse json to circuit json", async () => {
-  const pcb = parseDsnToDsnJson(testDsnFile)
+  const pcb = parseDsnToDsnJson(testDsnFile) as DsnPcb
   const circuitJson = convertDsnJsonToCircuitJson(pcb)
 
   expect(convertCircuitJsonToPcbSvg(circuitJson)).toMatchSvgSnapshot(
