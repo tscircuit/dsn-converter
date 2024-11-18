@@ -4,7 +4,7 @@ import type {
   PcbTraceRoutePointWire,
 } from "circuit-json"
 import { type Matrix, applyToPoint } from "transformation-matrix"
-import type { Network, Wiring } from "../types"
+import type { Network, Wiring } from "../../types"
 import { convertPolylinePathToPcbTraces } from "./convert-polyline-path-to-pcb-traces"
 import { convertWiringPathToPcbTraces } from "./convert-wiring-path-to-pcb-traces"
 

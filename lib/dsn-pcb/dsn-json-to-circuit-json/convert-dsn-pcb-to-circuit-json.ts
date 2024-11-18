@@ -2,9 +2,10 @@ import { fromTriangles, scale, applyToPoint } from "transformation-matrix"
 
 import type { AnyCircuitElement, PcbBoard } from "circuit-json"
 import type { DsnPcb } from "../types"
-import { convertPadstacksToSmtPads } from "./convert-padstacks-to-smtpads"
-import { convertWiresToPcbTraces } from "./convert-wire-to-trace"
+import { convertPadstacksToSmtPads } from "./dsn-component-converters/convert-padstacks-to-smtpads"
+import { convertWiresToPcbTraces } from "./dsn-component-converters/convert-wire-to-trace"
 import { pairs } from "lib/utils/pairs"
+import { convertNetsToSourceNetsAndTraces } from "./dsn-component-converters/convert-nets-to-source-nets-and-traces"
 
 export function convertDsnPcbToCircuitJson(
   dsnPcb: DsnPcb,
@@ -58,6 +59,8 @@ export function convertDsnPcbToCircuitJson(
       ),
     )
   }
+
+  elements.push(...convertNetsToSourceNetsAndTraces(dsnPcb))
 
   return elements
 }

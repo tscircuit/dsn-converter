@@ -20,6 +20,10 @@ test("convert circuit json to dsn session", () => {
   const source_traces = su(circuitJson as any).source_trace.list()
   const pcb_traces = su(circuitJson as any).pcb_trace.list()
   const nets = su(circuitJson as any).source_net.list()
+  const source_ports = su(circuitJson as any).source_port.list()
+  const source_components = su(circuitJson as any).source_component.list()
+
+  console.log(source_components)
 
   expect(nets[0].name).toBe("Net-(C1-Pad1)")
   expect(source_traces[0].connected_source_net_ids).toContain(
