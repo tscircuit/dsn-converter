@@ -51,7 +51,7 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
           pcb_component_id: component.name,
           x: pcb_port_center.x,
           y: pcb_port_center.y,
-          layers: [],
+          layers: [component.place.side === "back" ? "bottom" : "top"],
         }
         result.push(port, pcb_port)
       }
