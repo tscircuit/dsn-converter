@@ -26,7 +26,7 @@ export const stringifyDsnSession = (session: DsnSession): string => {
   // Routes section
   result += `${indent}(routes \n`
   result += `${indent}${indent}(resolution ${session.routes.resolution.unit} ${session.routes.resolution.value})\n`
-  
+
   // Parser subsection
   result += `${indent}${indent}(parser\n`
   result += `${indent}${indent}${indent}(host_cad ${JSON.stringify(session.routes.parser.host_cad)})\n`
