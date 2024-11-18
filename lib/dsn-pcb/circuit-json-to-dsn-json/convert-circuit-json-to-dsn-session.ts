@@ -22,6 +22,7 @@ export function convertCircuitJsonToDsnSession(
     source_traces,
     source_ports,
     nets,
+    wiring: dsnPcb.wiring,
   })
 
   const session: DsnSession = {

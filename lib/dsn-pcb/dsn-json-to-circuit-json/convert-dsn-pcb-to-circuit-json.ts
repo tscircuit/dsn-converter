@@ -6,6 +6,8 @@ import { convertPadstacksToSmtPads } from "./dsn-component-converters/convert-pa
 import { convertWiresToPcbTraces } from "./dsn-component-converters/convert-wire-to-trace"
 import { pairs } from "lib/utils/pairs"
 import { convertNetsToSourceNetsAndTraces } from "./dsn-component-converters/convert-nets-to-source-nets-and-traces"
+import { convertDsnPcbComponentsToSourceComponentsAndPorts } from "./dsn-component-converters/convert-dsn-pcb-components-to-source-components-and-ports"
+import { su } from "@tscircuit/soup-util"
 
 export function convertDsnPcbToCircuitJson(
   dsnPcb: DsnPcb,
@@ -60,7 +62,13 @@ export function convertDsnPcbToCircuitJson(
     )
   }
 
-  elements.push(...convertNetsToSourceNetsAndTraces(dsnPcb))
+  elements.push(...convertDsnPcbComponentsToSourceComponentsAndPorts(dsnPcb))
+  elements.push(
+    ...convertNetsToSourceNetsAndTraces({
+      dsnPcb,
+      source_ports: su(elements as any).source_port.list(),
+    }),
+  )
 
   return elements
 }

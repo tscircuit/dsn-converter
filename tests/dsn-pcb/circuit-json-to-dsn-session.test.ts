@@ -11,7 +11,7 @@ import {
 import dsnPcbContent from "../assets/testkicadproject/testkicadproject.dsn" with {
   type: "text",
 }
-import type { AnyCircuitElement } from "circuit-json"
+import type { AnyCircuitElement, PcbTrace } from "circuit-json"
 
 test("convert circuit json to dsn session", () => {
   const dsnPcb = parseDsnToDsnJson(dsnPcbContent) as DsnPcb
@@ -21,9 +21,8 @@ test("convert circuit json to dsn session", () => {
   const pcb_traces = su(circuitJson as any).pcb_trace.list()
   const nets = su(circuitJson as any).source_net.list()
   const source_ports = su(circuitJson as any).source_port.list()
+  const pcb_ports = su(circuitJson as any).pcb_port.list()
   const source_components = su(circuitJson as any).source_component.list()
-
-  console.log(source_components)
 
   expect(nets[0].name).toBe("Net-(C1-Pad1)")
   expect(source_traces[0].connected_source_net_ids).toContain(
@@ -31,11 +30,24 @@ test("convert circuit json to dsn session", () => {
   )
   expect(pcb_traces).toHaveLength(0)
 
-  return
-  // Add pcb_traces to it to simulate it being routed
+  console.log(source_traces)
+  console.log(pcb_ports)
 
+  const pcbTracesFromAutorouting: PcbTrace[] = [
+    {
+      pcb_trace_id: "pcb_trace_1",
+      type: "pcb_trace",
+      source_trace_id: source_traces[0].source_trace_id,
+      route: [],
+    },
+  ]
+
+  return
   // @ts-ignore
-  const session = convertCircuitJsonToDsnSession(dsnPcb, circuitJson)
+  const session = convertCircuitJsonToDsnSession(
+    dsnPcb,
+    circuitJson.concat(pcbTracesFromAutorouting),
+  )
 
   // console.dir(session, { depth: null })
 
