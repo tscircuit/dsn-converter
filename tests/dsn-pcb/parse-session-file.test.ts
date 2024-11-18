@@ -21,7 +21,32 @@ test("parse session file", () => {
 
   // Check routes section exists
   expect(sessionJson.routes).toBeTruthy()
-  expect(sessionJson.routes.network_out.nets[0].wires).toHaveLength(3)
+  
+  // Check network_out wire paths
+  const net = sessionJson.routes.network_out.nets[0]
+  expect(net.name).toBe("Net-(R1-Pad1)")
+  expect(net.wires).toHaveLength(3)
+  
+  // Check first wire path
+  expect(net.wires[0].path).toEqual({
+    layer: "F.Cu",
+    width: 2000,
+    coordinates: [25000, 0, 18983, 0]
+  })
+  
+  // Check second wire path
+  expect(net.wires[1].path).toEqual({
+    layer: "F.Cu",
+    width: 2000,
+    coordinates: [-35000, 0, -35000, -6017]
+  })
+  
+  // Check third wire path
+  expect(net.wires[2].path).toEqual({
+    layer: "F.Cu",
+    width: 2000,
+    coordinates: [-35000, -6017, 12966, -6017, 18983, 0]
+  })
 
   // Check library_out section
   expect(sessionJson.routes.library_out).toBeTruthy()
