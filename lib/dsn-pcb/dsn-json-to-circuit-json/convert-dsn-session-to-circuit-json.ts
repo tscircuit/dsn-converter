@@ -40,7 +40,7 @@ export function convertDsnSessionToCircuitJson(
     // )
   }
 
-  console.log(wireElements)
+  // console.log(wireElements)
 
   return [...inputPcbElms, ...wireElements]
 }

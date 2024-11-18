@@ -15,7 +15,6 @@ export const convertWiringPathToPcbTraces = ({
   transformUmToMm: Matrix
   netName: string
 }): PcbTrace[] => {
-  console.log({ wire, netName })
   const coordinates = wire.path!.coordinates
   // Convert coordinates to circuit space using the transformation matrix
   const points: Array<{ x: number; y: number }> = []

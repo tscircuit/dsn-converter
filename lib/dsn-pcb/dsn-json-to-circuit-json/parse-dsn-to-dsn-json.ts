@@ -953,8 +953,8 @@ function processSessionNode(ast: ASTNode): DsnSession {
     )
     if (libraryNode) {
       session.routes.library_out = {
-        padstacks: libraryNode.children!
-          .filter(
+        padstacks: libraryNode
+          .children!.filter(
             (child) =>
               child.type === "List" &&
               child.children?.[0].type === "Atom" &&
@@ -987,6 +987,8 @@ function processSessionNode(ast: ASTNode): DsnSession {
             child.children?.[0].type === "Atom" &&
             child.children[0].value === "wire",
         )
+
+        console.dir(wireNodes, { depth: 1000 })
 
         return {
           name: netName,
