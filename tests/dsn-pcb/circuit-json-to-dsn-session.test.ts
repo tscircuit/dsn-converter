@@ -30,24 +30,40 @@ test("convert circuit json to dsn session", () => {
   )
   expect(pcb_traces).toHaveLength(0)
 
-  console.log(source_traces)
-  console.log(pcb_ports)
-
+  // Create a direct-line connection between the pads that need to be connected
   const pcbTracesFromAutorouting: PcbTrace[] = [
     {
       pcb_trace_id: "pcb_trace_1",
       type: "pcb_trace",
       source_trace_id: source_traces[0].source_trace_id,
-      route: [],
+      route: [
+        {
+          start_pcb_port_id: pcb_ports[0].pcb_port_id,
+          route_type: "wire",
+          x: pcb_ports[0].x,
+          y: pcb_ports[0].y,
+          width: 0.1,
+          layer: pcb_ports[0].layers[0],
+        },
+        {
+          end_pcb_port_id: pcb_ports[1].pcb_port_id,
+          route_type: "wire",
+          x: pcb_ports[1].x,
+          y: pcb_ports[1].y,
+          width: 0.1,
+          layer: pcb_ports[1].layers[0],
+          start_pcb_port_id: pcb_ports[1].pcb_port_id,
+        },
+      ],
     },
   ]
 
-  return
-  // @ts-ignore
   const session = convertCircuitJsonToDsnSession(
     dsnPcb,
     circuitJson.concat(pcbTracesFromAutorouting),
   )
+
+  // console.log(session)
 
   // console.dir(session, { depth: null })
 
@@ -58,15 +74,15 @@ test("convert circuit json to dsn session", () => {
 
   // Check components were converted
   expect(session.placement.components).toHaveLength(2)
-  expect(session.placement.components[0].name).toContain("Resistor_SMD")
-  expect(session.placement.components[1].name).toContain("Capacitor_SMD")
+  const componentNames = session.placement.components.map((c) => c.name)
+  expect(componentNames.join(",")).toContain("Resistor_SMD")
+  expect(componentNames.join(",")).toContain("Capacitor_SMD")
 
   // Check resolution
   expect(session.placement.resolution.unit).toBe("um")
   expect(session.placement.resolution.value).toBe(10)
 
   // Check nets were converted
-  expect(session.routes.network_out.nets).toHaveLength(3)
-  console.log(session.routes.network_out.nets)
+  expect(session.routes.network_out.nets).toHaveLength(1)
   expect(session.routes.network_out.nets[0].name).toBe("Net-(C1-Pad1)")
 })

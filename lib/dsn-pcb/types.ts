@@ -40,17 +40,7 @@ export interface DsnPcb {
     }
   }
   placement: {
-    components: Array<{
-      name: string
-      place: {
-        refdes: string
-        PN?: string
-        x: number
-        y: number
-        side: "front" | "back"
-        rotation: number
-      }
-    }>
+    components: Array<ComponentPlacement>
   }
   library: {
     images: Image[]
@@ -90,6 +80,18 @@ export interface DsnPcb {
       net: string
       type: string
     }>
+  }
+}
+
+export interface ComponentPlacement {
+  name: string
+  place: {
+    refdes: string
+    PN?: string
+    x: number
+    y: number
+    side: "front" | "back"
+    rotation: number
   }
 }
 
@@ -265,7 +267,7 @@ export interface Wire {
     width: number
     coordinates: number[]
   }
-  net: string
+  net?: string
   clearance_class?: string
   type?: string
 }
@@ -276,10 +278,7 @@ export interface DsnSession {
   filename: string
   placement: {
     resolution: Resolution
-    components: Array<{
-      name: string
-      place: Place
-    }>
+    components: Array<ComponentPlacement>
   }
   routes: {
     resolution: Resolution
