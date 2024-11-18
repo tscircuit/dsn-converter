@@ -1,10 +1,10 @@
 import { scale, applyToPoint } from "transformation-matrix"
 import type { AnyCircuitElement, PcbBoard } from "circuit-json"
 import type { DsnJson, DsnPcb, DsnSession } from "../types"
-import { convertWiresToPcbTraces } from "./convert-wire-to-trace"
+import { convertWiresToPcbTraces } from "./dsn-component-converters/convert-wire-to-trace"
 import Debug from "debug"
 import { convertDsnPcbToCircuitJson } from "./convert-dsn-pcb-to-circuit-json"
-import { convertWiringPathToPcbTraces } from "./convert-wiring-path-to-pcb-traces"
+import { convertWiringPathToPcbTraces } from "./dsn-component-converters/convert-wiring-path-to-pcb-traces"
 
 const debug = Debug("dsn-converter")
 

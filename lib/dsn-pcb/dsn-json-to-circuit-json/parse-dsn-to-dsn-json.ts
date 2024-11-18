@@ -10,6 +10,7 @@ import type {
   Class,
   Clearance,
   Component,
+  ComponentPlacement,
   DsnJson,
   DsnPcb,
   DsnSession,
@@ -409,7 +410,7 @@ export function processPlacement(nodes: ASTNode[]): Placement {
   return placement as Placement
 }
 
-function processComponent(nodes: ASTNode[]): Component {
+function processComponent(nodes: ASTNode[]): ComponentPlacement {
   const component: Partial<Component> = {}
   if (nodes[1].type === "Atom" && typeof nodes[1].value === "string") {
     component.name = nodes[1].value
@@ -425,7 +426,7 @@ function processComponent(nodes: ASTNode[]): Component {
     }
   })
 
-  return component as Component
+  return component as ComponentPlacement
 }
 
 function processPlace(nodes: ASTNode[]): Place {

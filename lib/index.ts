@@ -1,5 +1,7 @@
 export * from "./dsn-pcb/circuit-json-to-dsn-json/convert-circuit-json-to-dsn-json.ts"
 export * from "./dsn-pcb/circuit-json-to-dsn-json/convert-circuit-json-to-dsn-string.ts"
+export * from "./dsn-pcb/circuit-json-to-dsn-json/convert-circuit-json-to-dsn-session.ts"
+export * from "./dsn-pcb/dsn-json-to-circuit-json/convert-dsn-pcb-to-circuit-json.ts"
 export * from "./dsn-pcb/circuit-json-to-dsn-json/stringify-dsn-json.ts"
 export * from "./dsn-pcb/circuit-json-to-dsn-json/stringify-dsn-session.ts"
 export * from "./dsn-pcb/dsn-json-to-circuit-json/convert-dsn-json-to-circuit-json.ts"

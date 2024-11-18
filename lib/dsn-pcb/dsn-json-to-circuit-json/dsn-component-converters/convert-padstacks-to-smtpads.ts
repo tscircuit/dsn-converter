@@ -1,5 +1,5 @@
 import type { AnyCircuitElement } from "circuit-json"
-import type { DsnPcb } from "../types"
+import type { DsnPcb } from "lib/dsn-pcb/types"
 import { applyToPoint } from "transformation-matrix"
 
 export function convertPadstacksToSmtPads(
