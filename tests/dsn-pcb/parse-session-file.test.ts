@@ -1,12 +1,12 @@
 import { expect, test } from "bun:test"
-import { parseDsnToDsnJson } from "lib"
+import { parseDsnToDsnJson, type DsnSession } from "lib"
 // @ts-ignore
 import sessionFile from "../assets/freerouting-sessions/session1.ses" with {
   type: "text",
 }
 
 test("parse session file", () => {
-  const sessionJson = parseDsnToDsnJson(sessionFile)
+  const sessionJson = parseDsnToDsnJson(sessionFile) as DsnSession
   expect(sessionJson).toBeTruthy()
   expect(sessionJson.filename).toBe("test2")
 
@@ -20,6 +20,6 @@ test("parse session file", () => {
   )
 
   // Check routes section exists
-  expect(sessionJson.wiring).toBeTruthy()
-  expect(sessionJson.wiring.wires).toHaveLength(3)
+  expect(sessionJson.routes).toBeTruthy()
+  expect(sessionJson.routes.network_out.nets[0].wires).toHaveLength(3)
 })
