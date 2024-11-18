@@ -300,49 +300,34 @@ function processBoundary(nodes: ASTNode[]): Boundary {
 }
 
 function processPath(nodes: ASTNode[]): Path {
-  const path: Partial<Path> = {
-    coordinates: [],
-    layer: "F.Cu", // Default layer
-    width: 200, // Default width
+  // Find the path node which contains layer, width and coordinates
+  const pathNode = nodes.find(node => 
+    node.type === "List" && 
+    node.children?.[0]?.type === "Atom" && 
+    node.children[0].value === "path"
+  );
+
+  if (!pathNode) {
+    // If no path node found, use the nodes directly
+    // This handles the case where nodes is already the path content
+    return {
+      layer: nodes[1]?.type === "Atom" ? nodes[1].value as string : "F.Cu",
+      width: nodes[2]?.type === "Atom" ? nodes[2].value as number : 200,
+      coordinates: nodes.slice(3)
+        .filter(node => node.type === "Atom" && typeof node.value === "number")
+        .map(node => node.value as number)
+    };
   }
 
-  // Skip the first node which is usually the keyword (e.g., "path", "wire")
-  const startIndex = nodes[0]?.type === "Atom" ? 1 : 0
-
-  // Check if we have explicit layer and width
-  if (
-    nodes.length >= startIndex + 2 &&
-    nodes[startIndex]?.type === "Atom" &&
-    typeof nodes[startIndex].value === "string" &&
-    nodes[startIndex + 1]?.type === "Atom" &&
-    typeof nodes[startIndex + 1].value === "number"
-  ) {
-    path.layer = nodes[startIndex].value
-    path.width = nodes[startIndex + 1].value as number
-
-    // Process coordinates after layer and width
-    for (let i = startIndex + 2; i < nodes.length; i++) {
-      const coordNode = nodes[i]
-      if (coordNode?.type === "Atom" && typeof coordNode.value === "number") {
-        path.coordinates!.push(coordNode.value)
-      }
-    }
-  } else {
-    // Process all valid number nodes as coordinates
-    for (let i = startIndex; i < nodes.length; i++) {
-      const node = nodes[i]
-      if (node?.type === "Atom" && typeof node.value === "number") {
-        path.coordinates!.push(node.value)
-      }
-    }
-  }
-
-  // Ensure we have valid coordinates even if empty
-  if (!Array.isArray(path.coordinates)) {
-    path.coordinates = []
-  }
-
-  return path as Path
+  // Process the path node children
+  const pathChildren = pathNode.children!;
+  return {
+    layer: pathChildren[1]?.type === "Atom" ? pathChildren[1].value as string : "F.Cu",
+    width: pathChildren[2]?.type === "Atom" ? pathChildren[2].value as number : 200,
+    coordinates: pathChildren.slice(3)
+      .filter(node => node.type === "Atom" && typeof node.value === "number")
+      .map(node => node.value as number)
+  };
 }
 
 function processRule(nodes: ASTNode[]): Rule {
