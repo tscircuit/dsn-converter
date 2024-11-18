@@ -8,6 +8,7 @@ export function convertDsnSessionToCircuitJson(
 ): AnyCircuitElement[] {
   const elements: AnyCircuitElement[] = []
   const transformUmToMm = scale(1 / 1000)
+  const transformMmToUm = scale(1000)
 
   // Add a default board
   const board: PcbBoard = {
@@ -20,6 +21,34 @@ export function convertDsnSessionToCircuitJson(
     num_layers: 4,
   }
   elements.push(board)
+
+  // Process components to create SMT pads
+  for (const component of dsnSession.placement.components) {
+    const { place } = component
+    const padId = `${place.refdes}_pad1`
+
+    // Convert coordinates using transformation matrix
+    const { x: circuitX, y: circuitY } = applyToPoint(transformUmToMm, {
+      x: place.x,
+      y: place.y,
+    })
+
+    // Create an SMT pad for each component
+    const pcbPad: AnyCircuitElement = {
+      type: "pcb_smtpad",
+      pcb_smtpad_id: padId,
+      pcb_component_id: place.refdes,
+      pcb_port_id: padId,
+      shape: "rect",
+      x: circuitX,
+      y: circuitY,
+      width: 0.6, // Default width in mm
+      height: 0.6, // Default height in mm
+      layer: place.side === "front" ? "top" : "bottom",
+      port_hints: ["1"],
+    }
+    elements.push(pcbPad)
+  }
 
   // Convert wires to PCB traces
   if (dsnSession.routes.network_out.nets) {
