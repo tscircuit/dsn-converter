@@ -18,7 +18,8 @@ export function convertCircuitJsonToDsnSession(
   const source_ports = su(circuitJson as any).source_port.list()
   const nets = su(circuitJson as any).source_net.list()
 
-  const transformMmToDsnUnit = scale(1000)
+  // Only applies to the traces (components are not getting affected)
+  const transformMmToSesUnit = scale(10000)
   const session: DsnSession = {
     is_dsn_session: true,
     filename: dsnPcb.filename || "session",
@@ -63,7 +64,8 @@ export function convertCircuitJsonToDsnSession(
                           rp.route_type === "wire",
                       )
                       .map((rp) =>
-                        applyToPoint(transformMmToDsnUnit, {
+                        // Circuit JSON space to the SES space
+                        applyToPoint(transformMmToSesUnit, {
                           x: rp.x,
                           y: rp.y,
                         }),
