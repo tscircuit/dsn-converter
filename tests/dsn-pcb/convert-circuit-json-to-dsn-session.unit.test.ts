@@ -125,7 +125,9 @@ test("converts component placement", () => {
   const session = convertCircuitJsonToDsnSession(dsnPcb, circuitJson)
 
   expect(session.placement.components).toHaveLength(1)
-  expect(session.placement.components[0]).toEqual(dsnPcb.placement.components[0])
+  expect(session.placement.components[0]).toEqual(
+    dsnPcb.placement.components[0],
+  )
 })
 
 // Test net and wire conversion
@@ -196,17 +198,17 @@ test("converts nets and wires", () => {
       type: "source_net",
       source_net_id: "net1",
       name: "Net-(R1-Pad1)",
-      member_source_group_ids: []
+      member_source_group_ids: [],
     },
     {
       type: "source_trace",
       source_trace_id: "trace1",
       connected_source_net_ids: ["net1"],
-      connected_source_port_ids: []
+      connected_source_port_ids: [],
     },
     {
       type: "pcb_trace",
-      pcb_trace_id: "pcb_trace1", 
+      pcb_trace_id: "pcb_trace1",
       source_trace_id: "trace1",
       route: [
         {
@@ -214,17 +216,17 @@ test("converts nets and wires", () => {
           x: 1,
           y: 2,
           width: 0.2,
-          layer: "top"
+          layer: "top",
         },
         {
-          route_type: "wire", 
+          route_type: "wire",
           x: 3,
           y: 4,
           width: 0.2,
-          layer: "top"
-        }
-      ]
-    }
+          layer: "top",
+        },
+      ],
+    },
   ]
 
   const session = convertCircuitJsonToDsnSession(dsnPcb, circuitJson)
@@ -235,6 +237,6 @@ test("converts nets and wires", () => {
   expect(session.routes.network_out.nets[0].wires[0].path).toEqual({
     layer: "F.Cu",
     width: 0.1,
-    coordinates: [10000, 20000, 30000, 40000]
+    coordinates: [10000, 20000, 30000, 40000],
   })
 })
