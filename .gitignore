@@ -183,3 +183,6 @@ dist
 dsn-session.json
 .yalc
 yalc.lock
+
+#ignore the md files inside the dsn-files-stages folder
+dsn-files-stages/*.md

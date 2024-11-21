@@ -4,7 +4,9 @@ import {
   convertCircuitJsonToDsnSession,
   convertDsnJsonToCircuitJson,
   convertDsnPcbToCircuitJson,
+  convertDsnSessionToCircuitJson,
   parseDsnToDsnJson,
+  stringifyDsnSession,
   type DsnPcb,
 } from "lib"
 // @ts-ignore
@@ -12,11 +14,14 @@ import dsnPcbContent from "../assets/testkicadproject/testkicadproject.dsn" with
   type: "text",
 }
 import type { AnyCircuitElement, PcbTrace } from "circuit-json"
+import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
+import { circuitJsonToTable, sessionFileToTable} from "../debug-utils"
 
 test("convert circuit json to dsn session", () => {
   const dsnPcb = parseDsnToDsnJson(dsnPcbContent) as DsnPcb
 
   const circuitJson = convertDsnPcbToCircuitJson(dsnPcb)
+  circuitJsonToTable(circuitJson, "../dsn-pcb/dsn-files-stages/stage-1-circuit-json-to-dsn-session.md", "Stage 1: circuit json")
   const source_traces = su(circuitJson as any).source_trace.list()
   const pcb_traces = su(circuitJson as any).pcb_trace.list()
   const nets = su(circuitJson as any).source_net.list()
@@ -58,10 +63,19 @@ test("convert circuit json to dsn session", () => {
     },
   ]
 
+  const routedCircuitJson = circuitJson.concat(pcbTracesFromAutorouting)
+  const pcbTraceFirstPoint = su(routedCircuitJson as any).pcb_trace.list()[0].route[0]
+  const smtPadFromRouteStarts = su(circuitJson as any).pcb_smtpad.list()[0]
+  // Checking the same scale
+  expect(pcbTraceFirstPoint.x).toEqual(smtPadFromRouteStarts.x)
+  expect(pcbTraceFirstPoint.y).toEqual(smtPadFromRouteStarts.y)
+
   const session = convertCircuitJsonToDsnSession(
     dsnPcb,
-    circuitJson.concat(pcbTracesFromAutorouting),
+    routedCircuitJson,
   )
+
+  sessionFileToTable(stringifyDsnSession(session), "../dsn-pcb/dsn-files-stages/stage-2-dsn-session.md", "Stage 2: dsn session after trace added")
 
   // console.log(session)
 
@@ -85,4 +99,14 @@ test("convert circuit json to dsn session", () => {
   // Check nets were converted
   expect(session.routes.network_out.nets).toHaveLength(1)
   expect(session.routes.network_out.nets[0].name).toBe("Net-(C1-Pad1)")
+
+  const circuitJsonFromSession = convertDsnSessionToCircuitJson(dsnPcb, session)
+  const pcbTraceFirstPointFromSession = su(circuitJsonFromSession as any).pcb_trace.list()[0].route[0]
+  const smtPadFromRouteStartsFromSession = su(circuitJsonFromSession as any).pcb_smtpad.list()[0]
+  // Checking the same scale
+  expect(pcbTraceFirstPointFromSession.x).toEqual(smtPadFromRouteStartsFromSession.x)
+  expect(pcbTraceFirstPointFromSession.y).toEqual(smtPadFromRouteStartsFromSession.y)
+
+  circuitJsonToTable(circuitJsonFromSession, "../dsn-pcb/dsn-files-stages/stage-3-circuit-json-from-dsn-session.md", "Stage 3 (Last): circuit json from dsn session")
+  expect(convertCircuitJsonToPcbSvg(circuitJsonFromSession)).toMatchSvgSnapshot(import.meta.path)
 })

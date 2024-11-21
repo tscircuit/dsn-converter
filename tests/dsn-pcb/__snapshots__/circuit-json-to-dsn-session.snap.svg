@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><style>
+              .boundary { fill: #000; }
+              .pcb-board { fill: none; }
+              .pcb-trace { fill: none; }
+              .pcb-hole-outer { fill: rgb(200, 52, 52); }
+              .pcb-hole-inner { fill: rgb(255, 38, 226); }
+              .pcb-pad { }
+              .pcb-boundary { fill: none; stroke: #fff; stroke-width: 0.3; }
+              .pcb-silkscreen { fill: none; }
+              .pcb-silkscreen-top { stroke: #f2eda1; }
+              .pcb-silkscreen-bottom { stroke: #f2eda1; }
+              .pcb-silkscreen-text { fill: #f2eda1; }
+            </style><rect class="boundary" x="0" y="0" width="800" height="600"/><rect class="pcb-boundary" x="64" y="108" width="672" height="384"/><path class="pcb-board" d="M 64 492 L 736 492 L 736 108 L 64 108 Z" stroke="rgba(255, 255, 255, 0.5)" stroke-width="6.4"/><rect class="pcb-pad" fill="rgb(200, 52, 52)" x="466.8252160000003" y="269.545216" width="57.709568" height="60.909568"/><rect class="pcb-pad" fill="rgb(200, 52, 52)" x="566.025216000001" y="269.545216" width="57.709568" height="60.909568"/><rect class="pcb-pad" fill="rgb(200, 52, 52)" x="173.40710399999935" y="279.487104" width="34.625792000000004" height="41.025792"/><rect class="pcb-pad" fill="rgb(200, 52, 52)" x="238.687104" y="279.487104" width="34.625792000000004" height="41.025792"/><path class="pcb-trace" stroke="rgb(200, 52, 52)" d="M 495.6800000000003 300 L 594.8799999999992 300" stroke-width="12.8" stroke-linecap="round" stroke-linejoin="round" shape-rendering="crispEdges"/></svg>

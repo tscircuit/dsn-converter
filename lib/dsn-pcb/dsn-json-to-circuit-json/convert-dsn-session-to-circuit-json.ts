@@ -12,6 +12,7 @@ export function convertDsnSessionToCircuitJson(
   dsnInput: DsnPcb,
   dsnSession: DsnSession,
 ): AnyCircuitElement[] {
+  // 1mm is 10000um in Ses file
   const transformUmToMm = scale(1 / 10000)
 
   if (debug.enabled) {
