@@ -10,7 +10,7 @@ import {
   type DsnPcb,
 } from "lib"
 // @ts-ignore
-import dsnPcbContent from "../assets/testkicadproject/freeroutingTraceAdded.dsn" with {
+import dsnPcbContent from "../assets/testkicadproject/testkicadproject.dsn" with {
   type: "text",
 }
 import type { AnyCircuitElement, PcbTrace } from "circuit-json"
