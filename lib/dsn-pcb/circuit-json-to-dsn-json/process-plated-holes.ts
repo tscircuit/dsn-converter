@@ -1,4 +1,9 @@
-import type { AnyCircuitElement, PcbComponent, PcbPlatedHole, SourceComponentBase } from "circuit-json"
+import type {
+  AnyCircuitElement,
+  PcbComponent,
+  PcbPlatedHole,
+  SourceComponentBase,
+} from "circuit-json"
 import type { DsnPcb } from "../types"
 import { applyToPoint, scale } from "transformation-matrix"
 
@@ -10,10 +15,12 @@ export function processPlatedHoles(
 ) {
   // Group plated holes by component
   const platedHolesByComponent = new Map<string, PcbPlatedHole[]>()
-  
+
   circuitElements
-    .filter((element): element is PcbPlatedHole => element.type === "pcb_plated_hole")
-    .forEach(hole => {
+    .filter(
+      (element): element is PcbPlatedHole => element.type === "pcb_plated_hole",
+    )
+    .forEach((hole) => {
       const componentId = hole.pcb_component_id || ""
       if (!platedHolesByComponent.has(componentId)) {
         platedHolesByComponent.set(componentId, [])
@@ -24,22 +31,26 @@ export function processPlatedHoles(
   // Process each component's plated holes
   for (const [componentId, holes] of platedHolesByComponent) {
     const pcbComponent = circuitElements.find(
-      (e) => e.type === "pcb_component" && e.pcb_component_id === componentId
+      (e) => e.type === "pcb_component" && e.pcb_component_id === componentId,
     ) as PcbComponent | undefined
-    
-    const sourceComponent = pcbComponent ? circuitElements.find(
-      (e) => e.type === "source_component" && e.source_component_id === pcbComponent.source_component_id
-    ) as SourceComponentBase | undefined : undefined
+
+    const sourceComponent = pcbComponent
+      ? (circuitElements.find(
+          (e) =>
+            e.type === "source_component" &&
+            e.source_component_id === pcbComponent.source_component_id,
+        ) as SourceComponentBase | undefined)
+      : undefined
 
     const componentName = sourceComponent?.name || `H${componentId}`
     const imageName = "MountingHole:MountingHole_3.2mm_Pad"
     const padstackName = "Round[A]Pad_6000_um"
 
-    // Add component placement once per component 
+    // Add component placement once per component
     if (pcbComponent) {
       const circuitSpaceCoordinates = applyToPoint(
         transformMmToUm,
-        pcbComponent.center
+        pcbComponent.center,
       )
 
       pcb.placement.components.push({

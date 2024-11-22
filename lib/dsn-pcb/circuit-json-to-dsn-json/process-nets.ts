@@ -13,7 +13,10 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
   const padsBySourcePortId = new Map()
 
   for (const element of circuitElements) {
-    if ((element.type === "pcb_smtpad" || element.type === "pcb_plated_hole") && element.pcb_port_id) {
+    if (
+      (element.type === "pcb_smtpad" || element.type === "pcb_plated_hole") &&
+      element.pcb_port_id
+    ) {
       const pcbPort = circuitElements.find(
         (e) => e.type === "pcb_port" && e.pcb_port_id === element.pcb_port_id,
       )
