@@ -1,53 +1,86 @@
-import type { AnyCircuitElement, PcbPlatedHole } from "circuit-json"
+import type {
+  AnyCircuitElement,
+  PcbComponent,
+  PcbPlatedHole,
+  SourceComponentBase,
+} from "circuit-json"
 import type { DsnPcb } from "../types"
+import { applyToPoint, scale } from "transformation-matrix"
+
+const transformMmToUm = scale(1000)
 
 export function processPlatedHoles(
   circuitElements: AnyCircuitElement[],
   pcb: DsnPcb,
 ) {
-  // Find all plated holes
-  const platedHoles = circuitElements.filter(
-    (element) => element.type === "pcb_plated_hole",
-  ) as PcbPlatedHole[]
+  // Group plated holes by component
+  const platedHolesByComponent = new Map<string, PcbPlatedHole[]>()
 
-  // Process each plated hole
-  for (let i = 0; i < platedHoles.length; i++) {
-    const hole = platedHoles[i]
-    const holeNumber = i + 1
-    const holeName = `H${holeNumber}`
-
-    // Add component to placement
-    pcb.placement.components.push({
-      name: "MountingHole:MountingHole_3.2mm_Pad",
-      place: {
-        refdes: holeName,
-        x: hole.x * 1000, // Convert mm to μm
-        y: -hole.y * 1000, // Convert mm to μm and flip Y coordinate
-        side: "front",
-        rotation: 0,
-        PN: "",
-      },
+  circuitElements
+    .filter(
+      (element): element is PcbPlatedHole => element.type === "pcb_plated_hole",
+    )
+    .forEach((hole) => {
+      const componentId = hole.pcb_component_id || ""
+      if (!platedHolesByComponent.has(componentId)) {
+        platedHolesByComponent.set(componentId, [])
+      }
+      platedHolesByComponent.get(componentId)?.push(hole)
     })
 
-    // Add image to library if not already present
+  // Process each component's plated holes
+  for (const [componentId, holes] of platedHolesByComponent) {
+    const pcbComponent = circuitElements.find(
+      (e) => e.type === "pcb_component" && e.pcb_component_id === componentId,
+    ) as PcbComponent | undefined
+
+    const sourceComponent = pcbComponent
+      ? (circuitElements.find(
+          (e) =>
+            e.type === "source_component" &&
+            e.source_component_id === pcbComponent.source_component_id,
+        ) as SourceComponentBase | undefined)
+      : undefined
+
+    const componentName = sourceComponent?.name || `H${componentId}`
     const imageName = "MountingHole:MountingHole_3.2mm_Pad"
+    const padstackName = "Round[A]Pad_6000_um"
+
+    // Add component placement once per component
+    if (pcbComponent) {
+      const circuitSpaceCoordinates = applyToPoint(
+        transformMmToUm,
+        pcbComponent.center,
+      )
+
+      pcb.placement.components.push({
+        name: imageName,
+        place: {
+          refdes: componentName,
+          x: circuitSpaceCoordinates.x,
+          y: -circuitSpaceCoordinates.y, // Flip Y coordinate
+          side: "front",
+          rotation: pcbComponent.rotation || 0,
+          PN: "",
+        },
+      })
+    }
+
+    // Add image to library if not already present
     if (!pcb.library.images.find((img) => img.name === imageName)) {
       pcb.library.images.push({
         name: imageName,
         outlines: [],
-        pins: [
-          {
-            padstack_name: "Round[A]Pad_6000_um",
-            pin_number: 1,
-            x: 0,
-            y: 0,
-          },
-        ],
+        pins: holes.map((hole, index) => ({
+          padstack_name: padstackName,
+          pin_number: index + 1,
+          x: (hole.x - (pcbComponent?.center.x || 0)) * 1000,
+          y: -(hole.y - (pcbComponent?.center.y || 0)) * 1000,
+        })),
       })
     }
 
     // Add padstack if not already present
-    const padstackName = "Round[A]Pad_6000_um"
     if (!pcb.library.padstacks.find((p) => p.name === padstackName)) {
       pcb.library.padstacks.push({
         name: padstackName,
@@ -65,21 +98,6 @@ export function processPlatedHoles(
         ],
         attach: "off",
       })
-    }
-
-    // Add to mounting holes net
-    const mountingHolesNet = pcb.network.nets.find(
-      (net) => net.name === "MountingHoles",
-    )
-    if (mountingHolesNet) {
-      mountingHolesNet.pins.push(`${holeName}-1`)
-    } else {
-      pcb.network.nets.push({
-        name: "MountingHoles",
-        pins: [`${holeName}-1`],
-      })
-      // Add to default class net names
-      pcb.network.classes[0].net_names.push("MountingHoles")
     }
   }
 }
