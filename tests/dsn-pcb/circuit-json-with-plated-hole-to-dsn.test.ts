@@ -13,7 +13,7 @@ test("circuit json (with plated hole) -> dsn file", async () => {
     circuitJson as AnyCircuitElement[],
   )
   const dsnJson = parseDsnToDsnJson(dsnFile) as DsnPcb
-  
+
   // expect the json placemet to have length 2
   expect(dsnJson.placement.components.length).toBe(2)
 
