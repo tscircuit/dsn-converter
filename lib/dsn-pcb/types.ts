@@ -85,14 +85,14 @@ export interface DsnPcb {
 
 export interface ComponentPlacement {
   name: string
-  place: {
+  places: Array<{
     refdes: string
     PN?: string
     x: number
     y: number
     side: "front" | "back"
     rotation: number
-  }
+  }>
 }
 
 export interface Parser {
@@ -161,10 +161,10 @@ export interface Placement {
 
 export interface Component {
   name: string
-  place: Place
+  places: Places[]
 }
 
-export interface Place {
+export interface Places {
   refdes: string
   x: number
   y: number

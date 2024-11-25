@@ -55,14 +55,14 @@ export function processPlatedHoles(
 
       pcb.placement.components.push({
         name: imageName,
-        place: {
+        places: holes.map((hole, index) => ({
           refdes: componentName,
           x: circuitSpaceCoordinates.x,
           y: -circuitSpaceCoordinates.y, // Flip Y coordinate
           side: "front",
           rotation: pcbComponent.rotation || 0,
           PN: "",
-        },
+        })),
       })
     }
 

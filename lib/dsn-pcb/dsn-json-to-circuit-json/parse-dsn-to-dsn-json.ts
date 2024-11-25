@@ -1,7 +1,7 @@
 import {
+  type ASTNode,
   parseSexprToAst,
   tokenizeDsn,
-  type ASTNode,
 } from "../../common/parse-sexpr"
 import type {
   Boundary,
@@ -24,8 +24,8 @@ import type {
   Parser as ParserType,
   Path,
   Pin,
-  Place,
   Placement,
+  Places,
   PolygonShape,
   RectShape,
   Resolution,
@@ -411,9 +411,12 @@ export function processPlacement(nodes: ASTNode[]): Placement {
 }
 
 function processComponent(nodes: ASTNode[]): ComponentPlacement {
-  const component: Partial<Component> = {}
-  if (nodes[1].type === "Atom" && typeof nodes[1].value === "string") {
-    component.name = nodes[1].value
+  const component: Partial<Component> = {
+    name:
+      nodes[1].type === "Atom" && typeof nodes[1].value === "string"
+        ? nodes[1].value
+        : "",
+    places: [],
   }
 
   nodes.slice(2).forEach((node) => {
@@ -422,15 +425,15 @@ function processComponent(nodes: ASTNode[]): ComponentPlacement {
       node.children![0].type === "Atom" &&
       node.children![0].value === "place"
     ) {
-      component.place = processPlace(node.children!)
+      component.places!.push(processPlace(node.children!))
     }
   })
 
   return component as ComponentPlacement
 }
 
-function processPlace(nodes: ASTNode[]): Place {
-  const place: Partial<Place> = {}
+function processPlace(nodes: ASTNode[]): Places {
+  const places: Partial<Places> = {}
   if (
     nodes[1].type === "Atom" &&
     typeof nodes[1].value === "string" &&
@@ -443,11 +446,11 @@ function processPlace(nodes: ASTNode[]): Place {
     nodes[5].type === "Atom" &&
     typeof nodes[5].value === "number"
   ) {
-    place.refdes = nodes[1].value
-    place.x = nodes[2].value
-    place.y = nodes[3].value
-    place.side = nodes[4].value
-    place.rotation = nodes[5].value
+    places.refdes = nodes[1].value
+    places.x = nodes[2].value
+    places.y = nodes[3].value
+    places.side = nodes[4].value
+    places.rotation = nodes[5].value
 
     // The rest may contain (PN value)
     for (let i = 6; i < nodes.length; i++) {
@@ -461,7 +464,7 @@ function processPlace(nodes: ASTNode[]): Place {
           node.children![1].type === "Atom" &&
           typeof node.children![1].value === "string"
         ) {
-          place.PN = node.children![1].value
+          places.PN = node.children![1].value
         }
       }
     }
@@ -469,7 +472,7 @@ function processPlace(nodes: ASTNode[]): Place {
     throw new Error("Invalid place format")
   }
 
-  return place as Place
+  return places as Places
 }
 
 export function processLibrary(nodes: ASTNode[]): Library {
