@@ -96,14 +96,16 @@ test("converts component placement", () => {
       components: [
         {
           name: "R_0402",
-          place: {
-            refdes: "R1",
-            x: 1000,
-            y: 2000,
-            side: "front",
-            rotation: 0,
-            PN: "10k",
-          },
+          places: [
+            {
+              refdes: "R1",
+              x: 1000,
+              y: 2000,
+              side: "front",
+              rotation: 0,
+              PN: "10k",
+            },
+          ],
         },
       ],
     },

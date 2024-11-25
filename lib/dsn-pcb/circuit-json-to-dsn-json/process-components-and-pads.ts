@@ -5,7 +5,6 @@ import type {
 } from "circuit-json"
 import { getComponentValue } from "lib/utils/get-component-value"
 import { getFootprintName } from "lib/utils/get-footprint-name"
-import { getPadstackName } from "lib/utils/get-padstack-name"
 import { applyToPoint, scale } from "transformation-matrix"
 import type { ComponentGroup, DsnPcb, Padstack } from "../types"
 
@@ -42,7 +41,18 @@ export function processComponentsAndPads(
   pcb: DsnPcb,
 ) {
   const processedPadstacks = new Set<string>()
+  const componentsByFootprint = new Map<
+    string,
+    Array<{
+      componentName: string
+      coordinates: { x: number; y: number }
+      rotation: number
+      value: string
+      sourceComponent: SourceComponentBase | undefined
+    }>
+  >()
 
+  // First pass: Group components by footprint
   for (const group of componentGroups) {
     const { pcb_component_id, pcb_smtpads } = group
     if (pcb_smtpads.length === 0) continue
@@ -61,46 +71,58 @@ export function processComponentsAndPads(
 
     const footprintName = getFootprintName(sourceComponent?.ftype)
     const componentName = sourceComponent?.name || "Unknown"
-
-    // Transform component coordinates
     const circuitSpaceCoordinates = applyToPoint(
       transformMmToUm,
       pcbComponent.center,
     )
 
-    const componentPlacement = {
-      name: footprintName,
-      place: {
-        refdes: componentName,
-        x: circuitSpaceCoordinates.x,
-        y: circuitSpaceCoordinates.y,
-        side: "front" as const,
-        rotation: pcbComponent?.rotation || 0,
-        PN: getComponentValue(sourceComponent),
-      },
+    if (!componentsByFootprint.has(footprintName)) {
+      componentsByFootprint.set(footprintName, [])
     }
 
-    // Handle padstacks
-    const padstackName = `${getPadstackName(sourceComponent?.ftype)}_${sourceComponent?.source_component_id}`
-    if (!processedPadstacks.has(padstackName)) {
-      const padstack = createExactPadstack(padstackName)
-      pcb.library.padstacks.push(padstack)
-      processedPadstacks.add(padstackName)
-    }
+    componentsByFootprint.get(footprintName)?.push({
+      componentName,
+      coordinates: circuitSpaceCoordinates,
+      rotation: pcbComponent?.rotation || 0,
+      value: getComponentValue(sourceComponent),
+      sourceComponent,
+    })
+  }
 
-    // Create image with exact pin positions
+  // Second pass: Process each footprint group
+  for (const [footprintName, components] of componentsByFootprint) {
+    // Add image once per footprint
     const image = {
       name: footprintName,
       outlines: [],
       pins: getComponentPins().map((pos, index) => ({
-        padstack_name: padstackName,
+        padstack_name: `default_pad_${footprintName}`,
         pin_number: index + 1,
         x: pos.x,
         y: pos.y,
       })),
     }
-
     pcb.library.images.push(image)
-    pcb.placement.components.push(componentPlacement)
+
+    // Add padstack once per footprint
+    if (!processedPadstacks.has(footprintName)) {
+      const padstack = createExactPadstack(`default_pad_${footprintName}`)
+      pcb.library.padstacks.push(padstack)
+      processedPadstacks.add(footprintName)
+    }
+
+    // Add one component entry per footprint with all placements
+    const componentEntry = {
+      name: footprintName,
+      places: components.map((component) => ({
+        refdes: component.componentName,
+        x: component.coordinates.x,
+        y: component.coordinates.y,
+        side: "front" as const,
+        rotation: component.rotation,
+        PN: component.value,
+      })),
+    }
+    pcb.placement.components.push(componentEntry)
   }
 }
