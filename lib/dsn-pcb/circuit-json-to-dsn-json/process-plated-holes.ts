@@ -46,28 +46,75 @@ export function processPlatedHoles(
     const imageName = "MountingHole:MountingHole_3.2mm_Pad"
     const padstackName = "Round[A]Pad_6000_um"
 
-    // Add component placement once per component
+    // Group all holes by image name
+    const placesByImage = new Map<
+      string,
+      Array<{
+        refdes: string
+        x: number
+        y: number
+        rotation: number
+      }>
+    >()
+
     if (pcbComponent) {
       const circuitSpaceCoordinates = applyToPoint(
         transformMmToUm,
         pcbComponent.center,
       )
 
-      pcb.placement.components.push({
-        name: imageName,
-        places: holes.map((hole, index) => ({
-          refdes: componentName,
-          x: circuitSpaceCoordinates.x,
-          y: -circuitSpaceCoordinates.y, // Flip Y coordinate
-          side: "front",
-          rotation: pcbComponent.rotation || 0,
-          PN: "",
-        })),
+      // Add to places collection
+      if (!placesByImage.has(imageName)) {
+        placesByImage.set(imageName, [])
+      }
+      placesByImage.get(imageName)?.push({
+        refdes: componentName,
+        x: circuitSpaceCoordinates.x,
+        y: -circuitSpaceCoordinates.y, // Flip Y coordinate
+        rotation: 0,
       })
     }
 
-    // Add image to library if not already present
-    if (!pcb.library.images.find((img) => img.name === imageName)) {
+    // Add single component with all places
+    if (placesByImage.size > 0) {
+      // Check if component with this image name already exists
+      const existingComponent = pcb.placement.components.find(
+        (comp) => comp.name === imageName,
+      )
+
+      if (existingComponent) {
+        // Add new places to existing component
+        existingComponent.places.push(
+          ...placesByImage.get(imageName)!.map((place) => ({
+            refdes: place.refdes,
+            x: place.x,
+            y: place.y,
+            side: "front" as const,
+            rotation: place.rotation,
+            PN: "",
+          })),
+        )
+      } else {
+        // Create new component
+        pcb.placement.components.push({
+          name: imageName,
+          places: placesByImage.get(imageName)!.map((place) => ({
+            refdes: place.refdes,
+            x: place.x,
+            y: place.y,
+            side: "front",
+            rotation: place.rotation,
+            PN: "",
+          })),
+        })
+      }
+    }
+
+    // Add or update image in library
+    const existingImage = pcb.library.images.find(
+      (img) => img.name === imageName,
+    )
+    if (!existingImage) {
       pcb.library.images.push({
         name: imageName,
         outlines: [],

@@ -166,17 +166,22 @@ function groupComponents(
   const componentMap = new Map<string, ComponentGroup>()
 
   for (const element of circuitElements) {
-    if (element.type === "pcb_smtpad") {
-      const pcbPad = element
-      const componentId = pcbPad.pcb_component_id ?? ""
+    if (element.type === "pcb_smtpad" || element.type === "pcb_plated_hole") {
+      const componentId = element.pcb_component_id ?? ""
 
       if (!componentMap.has(componentId)) {
         componentMap.set(componentId, {
           pcb_component_id: componentId,
           pcb_smtpads: [],
+          pcb_plated_holes: [],
         })
       }
-      componentMap.get(componentId)?.pcb_smtpads.push(pcbPad)
+
+      if (element.type === "pcb_smtpad") {
+        componentMap.get(componentId)?.pcb_smtpads.push(element)
+      } else if (element.type === "pcb_plated_hole") {
+        componentMap.get(componentId)?.pcb_plated_holes.push(element)
+      }
     }
   }
 
