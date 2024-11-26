@@ -84,9 +84,9 @@ export function convertPadstacksToSmtPads(
 
         const pcbPad: AnyCircuitElement = {
           type: "pcb_smtpad",
-          pcb_smtpad_id: `${pin.padstack_name}_${pin.pin_number}`,
+          pcb_smtpad_id: `pcb_smtpad_${pin.pin_number - 1}`,
           pcb_component_id: componentId,
-          pcb_port_id: `${pin.padstack_name}_${pin.pin_number}`,
+          pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}`,
           shape: "rect",
           x: circuitX,
           y: circuitY,

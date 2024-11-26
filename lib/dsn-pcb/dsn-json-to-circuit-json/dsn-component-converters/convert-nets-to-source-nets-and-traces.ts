@@ -8,6 +8,7 @@ export const convertNetsToSourceNetsAndTraces = ({
   const result: Array<SourceNet | SourceTrace> = []
   const { nets } = dsnPcb.network
 
+  let source_trace_id = 0
   for (const { name, pins } of nets) {
     if (name.startsWith("unconnected-")) continue
     const source_net: SourceNet = {
@@ -28,9 +29,10 @@ export const convertNetsToSourceNetsAndTraces = ({
       type: "source_trace",
       connected_source_net_ids: [source_net.source_net_id],
       connected_source_port_ids,
-      source_trace_id: `source_trace_${name}`,
+      source_trace_id: `source_trace_${source_trace_id}`,
     }
     result.push(source_net, source_trace)
+    source_trace_id++
   }
 
   return result
