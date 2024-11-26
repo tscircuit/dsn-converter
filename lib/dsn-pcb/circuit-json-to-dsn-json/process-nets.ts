@@ -75,14 +75,14 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
   for (const [sourcePortId, padInfo] of padsBySourcePortId) {
     let isConnected = false
     for (const connectedPads of netMap.values()) {
-      if (connectedPads.has(`${padInfo.componentName}-${padInfo.pinNumber}`)) {
+      if (connectedPads.has(`${padInfo.componentName}-${padInfo.pinNumber.replace("pin", "")}`)) {
         isConnected = true
         break
       }
     }
 
     if (!isConnected) {
-      const unconnectedNetName = `unconnected-(${padInfo.componentName}-Pad${padInfo.pinNumber})`
+      const unconnectedNetName = `unconnected-(${padInfo.componentName}-Pad${padInfo.pinNumber.replace("pin", "")})`
       netMap.set(
         unconnectedNetName,
         new Set([`${padInfo.componentName}-${padInfo.pinNumber}`]),
@@ -101,7 +101,7 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
   for (const netName of allNets) {
     pcb.network.nets.push({
       name: netName,
-      pins: Array.from(netMap.get(netName) || []),
+      pins: Array.from(netMap.get(netName) || []).map((pin) => (pin as string).replace("pin", "")),
     })
   }
 
