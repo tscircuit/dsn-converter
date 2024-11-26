@@ -77,27 +77,31 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
     let isConnected = false
     const padIdentifier = `${padInfo.componentName}-${padInfo.pinNumber.replace("pin", "")}`
     for (const [_, connectedPads] of netMap.entries()) {
-      if (Array.from(connectedPads).some((pad: unknown) => 
-        pad?.toString() === padIdentifier || 
-        pad?.toString() === `${padInfo.componentName}-${padInfo.pinNumber}`
-      )) {
+      if (
+        Array.from(connectedPads).some(
+          (pad: unknown) =>
+            pad?.toString() === padIdentifier ||
+            pad?.toString() === `${padInfo.componentName}-${padInfo.pinNumber}`,
+        )
+      ) {
         isConnected = true
         break
       }
     }
 
     // Check if the pad is connected to any source net (GND, VCC)
-    let isInSourceNet = false;
+    let isInSourceNet = false
     for (const element of circuitElements) {
       if (element.type === "source_net") {
         const connectedTraces = circuitElements.filter(
-          (e) => e.type === "source_trace" && 
-                 e.connected_source_net_ids?.includes(element.source_net_id) &&
-                 e.connected_source_port_ids?.includes(sourcePortId)
+          (e) =>
+            e.type === "source_trace" &&
+            e.connected_source_net_ids?.includes(element.source_net_id) &&
+            e.connected_source_port_ids?.includes(sourcePortId),
         )
         if (connectedTraces.length > 0) {
-          isInSourceNet = true;
-          break;
+          isInSourceNet = true
+          break
         }
       }
     }
@@ -120,14 +124,18 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
       }
       // Find all traces connected to this net
       const connectedTraces = circuitElements.filter(
-        (e) => e.type === "source_trace" && e.connected_source_net_ids?.includes(element.source_net_id)
+        (e) =>
+          e.type === "source_trace" &&
+          e.connected_source_net_ids?.includes(element.source_net_id),
       ) as SourceTrace[]
       // Add connected ports to the net
       for (const trace of connectedTraces) {
         for (const portId of trace.connected_source_port_ids || []) {
           const padInfo = padsBySourcePortId.get(portId)
           if (padInfo) {
-            netMap.get(netName)?.add(`${padInfo.componentName}-${padInfo.pinNumber}`)
+            netMap
+              .get(netName)
+              ?.add(`${padInfo.componentName}-${padInfo.pinNumber}`)
           }
         }
       }
@@ -138,7 +146,7 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
   const allNets = Array.from(netMap.keys()).sort((a, b) => {
     if (a === "GND") return -1
     if (b === "GND") return 1
-    if (a === "VCC") return -1 
+    if (a === "VCC") return -1
     if (b === "VCC") return 1
     if (a.startsWith("Net-") && !b.startsWith("Net-")) return -1
     if (!a.startsWith("Net-") && b.startsWith("Net-")) return 1
@@ -149,7 +157,9 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
   for (const netName of allNets) {
     pcb.network.nets.push({
       name: netName,
-      pins: Array.from(netMap.get(netName) || []).map((pin) => (pin as string).replace("pin", "")),
+      pins: Array.from(netMap.get(netName) || []).map((pin) =>
+        (pin as string).replace("pin", ""),
+      ),
     })
   }
 
