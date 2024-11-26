@@ -434,9 +434,13 @@ function processComponent(nodes: ASTNode[]): ComponentPlacement {
 
 function processPlace(nodes: ASTNode[]): Places {
   const places: Partial<Places> = {}
-  
+
   // Ensure we have at least the basic required nodes
-  if (nodes.length < 2 || nodes[0].type !== "Atom" || nodes[0].value !== "place") {
+  if (
+    nodes.length < 2 ||
+    nodes[0].type !== "Atom" ||
+    nodes[0].value !== "place"
+  ) {
     throw new Error("Invalid place format: missing basic structure")
   }
 
