@@ -434,43 +434,63 @@ function processComponent(nodes: ASTNode[]): ComponentPlacement {
 
 function processPlace(nodes: ASTNode[]): Places {
   const places: Partial<Places> = {}
-  if (
-    nodes[1].type === "Atom" &&
-    typeof nodes[1].value === "string" &&
-    nodes[2].type === "Atom" &&
-    typeof nodes[2].value === "number" &&
-    nodes[3].type === "Atom" &&
-    typeof nodes[3].value === "number" &&
-    nodes[4].type === "Atom" &&
-    typeof nodes[4].value === "string" &&
-    nodes[5].type === "Atom" &&
-    typeof nodes[5].value === "number"
-  ) {
-    places.refdes = nodes[1].value
-    places.x = nodes[2].value
-    places.y = nodes[3].value
-    places.side = nodes[4].value
-    places.rotation = nodes[5].value
 
-    // The rest may contain (PN value)
-    for (let i = 6; i < nodes.length; i++) {
-      const node = nodes[i]
-      if (
-        node.type === "List" &&
-        node.children![0].type === "Atom" &&
-        node.children![0].value === "PN"
-      ) {
-        if (
-          node.children![1].type === "Atom" &&
-          typeof node.children![1].value === "string"
-        ) {
-          places.PN = node.children![1].value
-        }
-      }
-    }
-  } else {
-    throw new Error("Invalid place format")
+  // Ensure we have at least the basic required nodes
+  if (
+    nodes.length < 2 ||
+    nodes[0].type !== "Atom" ||
+    nodes[0].value !== "place"
+  ) {
+    throw new Error("Invalid place format: missing basic structure")
   }
+
+  // Process refdes (component reference designator)
+  if (nodes[1].type === "Atom" && typeof nodes[1].value === "string") {
+    places.refdes = nodes[1].value
+  } else {
+    throw new Error("Invalid place format: invalid refdes")
+  }
+
+  // Process coordinates and rotation
+  const coordIndex = 2
+  if (coordIndex + 3 < nodes.length) {
+    if (
+      nodes[coordIndex].type === "Atom" &&
+      typeof nodes[coordIndex].value === "number" &&
+      nodes[coordIndex + 1].type === "Atom" &&
+      typeof nodes[coordIndex + 1].value === "number" &&
+      nodes[coordIndex + 2].type === "Atom" &&
+      typeof nodes[coordIndex + 2].value === "string" &&
+      nodes[coordIndex + 3].type === "Atom" &&
+      typeof nodes[coordIndex + 3].value === "number"
+    ) {
+      places.x = nodes[coordIndex].value as number
+      places.y = nodes[coordIndex + 1].value as number
+      places.side = nodes[coordIndex + 2].value as string
+      places.rotation = nodes[coordIndex + 3].value as number
+    }
+  }
+
+  // Process optional PN (part number) if present
+  for (let i = coordIndex + 4; i < nodes.length; i++) {
+    const node = nodes[i]
+    if (
+      node.type === "List" &&
+      node.children &&
+      node.children[0].type === "Atom" &&
+      node.children[0].value === "PN" &&
+      node.children[1] &&
+      node.children[1].type === "Atom"
+    ) {
+      places.PN = String(node.children[1].value)
+      break
+    }
+  }
+
+  // Set default values if not present
+  places.PN = places.PN || ""
+  places.side = places.side || "front"
+  places.rotation = places.rotation || 0
 
   return places as Places
 }
