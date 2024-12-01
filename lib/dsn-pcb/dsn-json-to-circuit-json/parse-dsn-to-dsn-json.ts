@@ -709,16 +709,31 @@ function processCircleShape(nodes: ASTNode[]): CircleShape {
     shapeType: "circle",
   }
 
+  // Handle both direct circle nodes and nested shape nodes
+  const shapeNodes = nodes[0].value === "shape" ? nodes[1].children! : nodes
+
   if (
-    nodes[1].type === "Atom" &&
-    typeof nodes[1].value === "string" &&
-    nodes[2].type === "Atom" &&
-    typeof nodes[2].value === "number"
+    shapeNodes[1]?.type === "Atom" &&
+    typeof shapeNodes[1].value === "string" &&
+    shapeNodes[2]?.type === "Atom" &&
+    typeof shapeNodes[2].value === "number"
   ) {
-    circle.layer = nodes[1].value
-    circle.diameter = nodes[2].value
+    circle.layer = shapeNodes[1].value
+    circle.diameter = shapeNodes[2].value
     return circle as CircleShape
   } else {
+    // Try to extract coordinates if they exist
+    const coords = shapeNodes
+      .slice(2)
+      .filter((n) => n.type === "Atom" && typeof n.value === "number")
+    if (coords.length >= 3) {
+      if (shapeNodes[1]?.type === "Atom") {
+        circle.layer = String(shapeNodes[1].value)
+        circle.diameter = Number(coords[2].value)
+        return circle as CircleShape
+      }
+      throw new Error("Invalid circle shape format: missing layer")
+    }
     throw new Error("Invalid circle shape format")
   }
 }

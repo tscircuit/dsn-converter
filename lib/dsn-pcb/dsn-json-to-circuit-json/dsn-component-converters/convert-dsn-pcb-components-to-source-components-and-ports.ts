@@ -42,9 +42,12 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
             pin_number: pin.pin_number,
             port_hints: [],
           }
+          // Handle case where place coordinates might be null/undefined
+          const placeX = place.x || 0
+          const placeY = place.y || 0
           const pcb_port_center = applyToPoint(transformDsnUnitToMm, {
-            x: place.x + pin.x,
-            y: place.y + pin.y,
+            x: placeX + pin.x,
+            y: placeY + pin.y,
           })
           const pcb_port: PcbPort = {
             pcb_port_id: `pcb_port_${component.name}-Pad${pin.pin_number}`,
