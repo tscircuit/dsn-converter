@@ -1,9 +1,14 @@
 import { expect, test } from "bun:test"
-import { convertCircuitJsonToDsnString, parseDsnToDsnJson } from "lib"
+import { convertCircuitJsonToDsnString, convertDsnSessionToCircuitJson, parseDsnToDsnJson } from "lib"
 
 import circuitJson from "../assets/repro/motor-driver-breakout-circuit.json"
 import type { AnyCircuitElement } from "circuit-json"
-import type { DsnPcb } from "lib"
+import type { DsnPcb, DsnSession } from "lib"
+
+// @ts-ignore
+import sessionFile from "../assets/repro/motor-driver-breakout-dsn.ses" with {
+  type: "text",
+}
 
 test("circuit json (motor driver breakout) -> dsn file", async () => {
   // Getting the dsn file from the circuit json
@@ -29,4 +34,29 @@ test("circuit json (motor driver breakout) -> dsn file", async () => {
   //expect the second net to have length name "VCC" and pins length 3
   expect(dsnJson.network.nets[1].name).toBe("VCC")
   expect(dsnJson.network.nets[1].pins.length).toBe(3)
+})
+
+test("session file (motor driver breakout) -> circuit json", async () => {
+  const dsnSession = parseDsnToDsnJson(sessionFile) as DsnSession
+  const dsnFile = convertCircuitJsonToDsnString(
+    circuitJson as AnyCircuitElement[],
+  )
+  const dsnPcb = parseDsnToDsnJson(dsnFile) as DsnPcb
+  const circuitJsonWithOutputTraces = convertDsnSessionToCircuitJson(dsnPcb, dsnSession)
+
+  //find the circuitJson element type pcb_smtpad
+  const pcbSmtpads = circuitJsonWithOutputTraces.filter((element) => element.type === "pcb_smtpad")
+
+  expect(pcbSmtpads).toBeDefined()
+  expect(pcbSmtpads?.length).toBe(46)
+
+  //expect the pcbsmtpad to not have x and y values as null
+  pcbSmtpads.forEach((pcbSmtpad) => {
+    expect(pcbSmtpad.x).not.toBeNull()
+    expect(pcbSmtpad.y).not.toBeNull()
+  })
+
+  // expect the pcb_trace to not be null
+  const pcbTraces = circuitJsonWithOutputTraces.filter((element) => element.type === "pcb_trace")
+  expect(pcbTraces).toBeDefined()
 })
