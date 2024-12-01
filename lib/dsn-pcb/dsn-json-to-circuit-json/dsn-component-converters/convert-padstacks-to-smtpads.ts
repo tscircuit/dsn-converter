@@ -93,9 +93,9 @@ export function convertPadstacksToSmtPads(
         })
 
         let pcbPad: PcbSmtPad
-        if(rectShape || polygonShape) {
+        if (rectShape || polygonShape) {
           pcbPad = {
-            type: "pcb_smtpad", 
+            type: "pcb_smtpad",
             pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pin.pin_number - 1}`,
             pcb_component_id: `${componentId}_${place.refdes}`,
             pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}`,

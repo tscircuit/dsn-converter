@@ -723,7 +723,9 @@ function processCircleShape(nodes: ASTNode[]): CircleShape {
     return circle as CircleShape
   } else {
     // Try to extract coordinates if they exist
-    const coords = shapeNodes.slice(2).filter(n => n.type === "Atom" && typeof n.value === "number")
+    const coords = shapeNodes
+      .slice(2)
+      .filter((n) => n.type === "Atom" && typeof n.value === "number")
     if (coords.length >= 3) {
       if (shapeNodes[1]?.type === "Atom") {
         circle.layer = String(shapeNodes[1].value)
