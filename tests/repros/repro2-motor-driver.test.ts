@@ -71,11 +71,6 @@ test("session file (motor driver breakout) -> circuit json", async () => {
   )
   expect(pcbTraces).toBeDefined()
 
-  Bun.write(
-    "circuit-json-with-output-traces.json",
-    JSON.stringify(circuitJsonWithOutputTraces, null, 2),
-  )
-
   //expect the pcb_via to not be null
   const pcbVias = circuitJsonWithOutputTraces.filter(
     (element) => element.type === "pcb_via",
