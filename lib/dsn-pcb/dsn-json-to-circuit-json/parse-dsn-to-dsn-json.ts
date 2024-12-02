@@ -1023,14 +1023,27 @@ function processSessionNode(ast: ASTNode): DsnSession {
             child.children[0].value === "wire",
         )
 
-        return {
+        const viaNodes = netNode.children!.filter(
+          (child) =>
+            child.type === "List" &&
+            child.children?.[0].type === "Atom" &&
+            child.children[0].value === "via",
+        )
+
+        const net = {
           name: netName,
           wires: wireNodes.map((wireNode) => ({
             path: processPath(wireNode.children!.slice(1)),
             net: netName,
             type: "route",
           })),
+          vias: viaNodes.map((viaNode) => ({
+            x: viaNode.children![2].value as number,
+            y: viaNode.children![3].value as number,
+          })),
         }
+        
+        return net
       })
     }
   }

@@ -43,8 +43,6 @@ export const convertWiringPathToPcbTraces = ({
       type: "pcb_trace",
       pcb_trace_id: `pcb_trace_${netName}`,
       source_trace_id: netName,
-      route_thickness_mode: "constant",
-      should_round_corners: false,
       route: routePoints as PcbTraceRoutePointWire[],
     }
     return [pcbTrace]

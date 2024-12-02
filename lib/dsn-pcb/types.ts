@@ -272,6 +272,11 @@ export interface Wire {
   type?: string
 }
 
+export interface Via {
+  x: number
+  y: number
+}
+
 export interface DsnSession {
   is_dsn_session: true
   is_dsn_pcb?: false
@@ -290,6 +295,7 @@ export interface DsnSession {
       nets: Array<{
         name: string
         wires: Wire[]
+        vias?: Via[]
       }>
     }
   }
