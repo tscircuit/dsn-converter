@@ -23,5 +23,7 @@ export const convertViaToPcbVia = ({
     hole_diameter: 0.3, // From session file "Via[0-1]_600:300_um"
     layers: [fromLayer, toLayer],
     pcb_trace_id: `pcb_trace_${netName}`,
+    from_layer: fromLayer,
+    to_layer: toLayer,
   }
 }
