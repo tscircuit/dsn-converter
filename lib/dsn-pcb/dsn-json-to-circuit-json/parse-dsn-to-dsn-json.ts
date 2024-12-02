@@ -1042,7 +1042,7 @@ function processSessionNode(ast: ASTNode): DsnSession {
             y: viaNode.children![3].value as number,
           })),
         }
-        
+
         return net
       })
     }
