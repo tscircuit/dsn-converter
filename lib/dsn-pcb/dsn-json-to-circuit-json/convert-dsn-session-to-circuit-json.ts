@@ -1,4 +1,8 @@
-import type { AnyCircuitElement, PcbTrace } from "circuit-json"
+import type {
+  AnyCircuitElement,
+  PcbTrace,
+  PcbTraceRoutePointWire,
+} from "circuit-json"
 import Debug from "debug"
 import { scale } from "transformation-matrix"
 import type { DsnPcb, DsnSession } from "../types"
@@ -28,16 +32,14 @@ export function convertDsnSessionToCircuitJson(
   // Process nets for vias and wires
   for (const net of dsnSession.routes.network_out.nets) {
     // Get via padstack info if available
-    const viaPadstack = dsnSession.routes.library_out?.padstacks?.find(
+    const viaPadstackExists = dsnSession.routes.library_out?.padstacks?.find(
       (p) => p.name === "Via[0-1]_600:300_um",
     )
-
+    // Create route segments array
+    const routeSegments: PcbTrace[] = []
     // Process wires and vias together in routes
     net.wires?.forEach((wire) => {
       if ("path" in wire) {
-        // Create route segments array
-        const routeSegments: PcbTrace[] = []
-
         // Add wire segments
         routeSegments.push(
           ...convertWiringPathToPcbTraces({
@@ -46,34 +48,59 @@ export function convertDsnSessionToCircuitJson(
             netName: net.name,
           }),
         )
-
-        // Add associated vias if they exist at wire endpoints
-        if (viaPadstack && net.vias && net.vias.length > 0) {
-          net.vias.forEach((via) => {
-            const viaPoint = applyToPoint(transformUmToMm, {
-              x: via.x,
-              y: via.y,
-            })
-            sessionElements.push({
-              ...convertViaToPcbVia({
-                x: Number(viaPoint.x.toFixed(4)),
-                y: Number(viaPoint.y.toFixed(4)),
-                netName: net.name,
-              })
-            })
-            routeSegments[0].route.push({
-              route_type: "via" as const,
-              x: Number(viaPoint.x.toFixed(4)),
-              y: Number(viaPoint.y.toFixed(4)),
-              from_layer: "top",
-              to_layer: "bottom",
-            })
-          })
-        }
-
-        sessionElements.push(...routeSegments)
       }
     })
+
+    // Add associated vias if they exist at wire endpoints
+    if (viaPadstackExists && net.vias && net.vias.length > 0) {
+      net.vias.forEach((via) => {
+        const viaPoint = applyToPoint(transformUmToMm, {
+          x: via.x,
+          y: via.y,
+        })
+        const viaX = Number(viaPoint.x.toFixed(4))
+        const viaY = Number(viaPoint.y.toFixed(4))
+
+        // Find the wire points that connect to this via across all route segments
+        const connectingWires = routeSegments
+          .flatMap((segment) =>
+            segment.route.map((point) => ({
+              ...point,
+              x: Number(point.x.toFixed(4)),
+              y: Number(point.y.toFixed(4)),
+            })),
+          )
+          .filter(
+            (point) =>
+              point.route_type === "wire" &&
+              point.x === viaX &&
+              point.y === viaY,
+          ) as PcbTraceRoutePointWire[]
+
+        // Get the layers from the connecting wires
+        const fromLayer = connectingWires[0]?.layer || "top"
+        const toLayer = connectingWires[1]?.layer || "bottom"
+
+        routeSegments[0].route.push({
+          route_type: "via" as const,
+          x: viaX,
+          y: viaY,
+          from_layer: fromLayer,
+          to_layer: toLayer,
+        })
+
+        sessionElements.push({
+          ...convertViaToPcbVia({
+            x: viaX,
+            y: viaY,
+            netName: net.name,
+            fromLayer,
+            toLayer,
+          }),
+        })
+      })
+    }
+    sessionElements.push(...routeSegments)
   }
 
   return [...inputPcbElms, ...sessionElements]
