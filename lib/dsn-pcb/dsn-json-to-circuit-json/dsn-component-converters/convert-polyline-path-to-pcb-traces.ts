@@ -30,8 +30,6 @@ export const convertPolylinePathToPcbTraces = ({
     type: "pcb_trace",
     pcb_trace_id: `pcb_trace_${netName}`,
     source_trace_id: netName,
-    route_thickness_mode: "constant",
-    should_round_corners: false,
     route: pointsOnTraceMm.map((point) => ({
       route_type: "wire" as const,
       x: Number(point.x.toFixed(4)),

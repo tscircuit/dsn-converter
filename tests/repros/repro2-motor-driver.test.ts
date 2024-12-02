@@ -70,4 +70,16 @@ test("session file (motor driver breakout) -> circuit json", async () => {
     (element) => element.type === "pcb_trace",
   )
   expect(pcbTraces).toBeDefined()
+
+  //expect the pcb_via to not be null
+  const pcbVias = circuitJsonWithOutputTraces.filter(
+    (element) => element.type === "pcb_via",
+  )
+  expect(pcbVias.length).toBeGreaterThan(0)
+
+  //expect some of the pcb_trace routes to have type 'via'
+  const pcbTraceWithVia = pcbTraces.filter((pcbTrace) =>
+    pcbTrace.route.some((route) => route.route_type === "via"),
+  )
+  expect(pcbTraceWithVia.length).toBeGreaterThan(0)
 })
