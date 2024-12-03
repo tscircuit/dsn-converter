@@ -6,18 +6,18 @@ import type {
 import { getComponentValue } from "lib/utils/get-component-value"
 import { getFootprintName } from "lib/utils/get-footprint-name"
 import { applyToPoint, scale } from "transformation-matrix"
-import type { ComponentGroup, DsnPcb, Padstack } from "../types"
+import type { ComponentGroup, DsnPcb, Image, Padstack, Pin } from "../types"
 
 const transformMmToUm = scale(1000)
 
-function getComponentPins(): Array<{ x: number; y: number }> {
-  return [
-    { x: -500, y: 0 },
-    { x: 500, y: 0 },
-  ]
-}
+function createExactPadstack(
+  padstackName: string,
+  width: number,
+  height: number,
+): Padstack {
+  const halfWidth = width / 2
+  const halfHeight = height / 2
 
-function createExactPadstack(padstackName: string): Padstack {
   return {
     name: padstackName,
     shapes: [
@@ -26,8 +26,16 @@ function createExactPadstack(padstackName: string): Padstack {
         layer: "F.Cu",
         width: 0,
         coordinates: [
-          -300.0, 300.0, 300.0, 300.0, 300.0, -300.0, -300.0, -300.0, -300.0,
-          300.0,
+          -halfWidth,
+          halfHeight, // Top left
+          halfWidth,
+          halfHeight, // Top right
+          halfWidth,
+          -halfHeight, // Bottom right
+          -halfWidth,
+          -halfHeight, // Bottom left
+          -halfWidth,
+          halfHeight, // Back to top left to close the polygon
         ],
       },
     ],
@@ -94,27 +102,68 @@ export function processComponentsAndPads(
 
   // Second pass: Process each footprint group
   for (const [footprintName, components] of componentsByFootprint) {
+    // All are having the same footprint so getting the first one
+    const firstComponent = components[0]
+    const componentGroup = componentGroups.find((group) => {
+      const pcbComponent = circuitElements.find(
+        (e) =>
+          e.type === "pcb_component" &&
+          e.source_component_id ===
+            firstComponent.sourceComponent?.source_component_id,
+      ) as PcbComponent
+      return (
+        pcbComponent && group.pcb_component_id === pcbComponent.pcb_component_id
+      )
+    })
+
+    if (!componentGroup) continue
+
+    // Add padstacks for all pads
+    for (const pad of componentGroup.pcb_smtpads) {
+      if (pad.shape === "rect") {
+        const padstackName = `pad_${pad.width}_${pad.height}`
+        if (!processedPadstacks.has(padstackName)) {
+          const padWidthInUm = Math.round(pad.width * 1000)
+          const padHeightInUm = Math.round(pad.height * 1000)
+          const padstack = createExactPadstack(
+            padstackName,
+            padWidthInUm,
+            padHeightInUm,
+          )
+          pcb.library.padstacks.push(padstack)
+          processedPadstacks.add(padstackName)
+        }
+      }
+    }
+
     // Add image once per footprint
-    const image = {
+    const image: Image = {
       name: footprintName,
       outlines: [],
-      pins: getComponentPins().map((pos, index) => ({
-        padstack_name: `default_pad_${footprintName}`,
-        pin_number: index + 1,
-        x: pos.x,
-        y: pos.y,
-      })),
+      pins: componentGroup.pcb_smtpads
+        .map((pad) => {
+          const pcbComponent = circuitElements.find(
+            (e) =>
+              e.type === "pcb_component" &&
+              e.source_component_id ===
+                firstComponent.sourceComponent?.source_component_id,
+          ) as PcbComponent
+          if (pad.shape === "rect") {
+            return {
+              padstack_name: `pad_${pad.width}_${pad.height}`,
+              pin_number:
+                pad.port_hints?.find((hint) => !Number.isNaN(Number(hint))) ||
+                1,
+              x: (pcbComponent.center.x - pad.x) * 1000,
+              y: (pcbComponent.center.y - pad.y) * 1000,
+            }
+          }
+        })
+        .filter((pin): pin is Pin => pin !== undefined),
     }
     pcb.library.images.push(image)
 
-    // Add padstack once per footprint
-    if (!processedPadstacks.has(footprintName)) {
-      const padstack = createExactPadstack(`default_pad_${footprintName}`)
-      pcb.library.padstacks.push(padstack)
-      processedPadstacks.add(footprintName)
-    }
-
-    // Add one component entry per footprint with all placements
+    // Add component entry
     const componentEntry = {
       name: footprintName,
       places: components.map((component) => ({
