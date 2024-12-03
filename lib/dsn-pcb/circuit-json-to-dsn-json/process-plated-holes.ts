@@ -5,8 +5,8 @@ import type {
   PcbPlatedHoleCircle,
   SourceComponentBase,
 } from "circuit-json"
-import type { DsnPcb } from "../types"
 import { applyToPoint, scale } from "transformation-matrix"
+import type { DsnPcb } from "../types"
 
 const transformMmToUm = scale(1000)
 
@@ -29,6 +29,16 @@ export function processPlatedHoles(
       platedHolesByComponent.get(componentId)?.push(hole)
     })
 
+  const placesByDimensions = new Map<
+    string,
+    Array<{
+      refdes: string
+      x: number
+      y: number
+      rotation: number
+    }>
+  >()
+
   // Process each component's plated holes
   for (const [componentId, holes] of platedHolesByComponent) {
     const pcbComponent = circuitElements.find(
@@ -45,30 +55,20 @@ export function processPlatedHoles(
 
     const componentName = sourceComponent?.name || `H${componentId}`
 
-    // TODO each hole can have it's own imageName and padstackName, we can't
-    // just use the first hole's values for all holes
-    const platedHole = holes[0]
+    // Check if all holes have the same dimensions
+    const firstHole = holes[0] as PcbPlatedHoleCircle
+    const allHolesSameDimensions = holes.every(hole => {
+      const currentHole = hole as PcbPlatedHoleCircle
+      return currentHole.outer_diameter === firstHole.outer_diameter &&
+             currentHole.hole_diameter === firstHole.hole_diameter
+    })
 
-    if (platedHole.shape === "oval" || platedHole.shape === "pill") {
-      throw new Error("Oval or pill plated holes are not supported")
-    }
-
-    const platedHoleCircle = platedHole as PcbPlatedHoleCircle
-
-    const outerDiameterUm = Math.round(platedHoleCircle.outer_diameter * 1000)
-    const holeDiameterUm = Math.round(platedHoleCircle.hole_diameter * 1000)
-    const imageName = `MountingHole:MountingHole_${holeDiameterUm}um_${outerDiameterUm}um_Pad`
-    const padstackName = `Round[A]Pad_${holeDiameterUm}_${outerDiameterUm}_um` // Group all holes by image name
-
-    const placesByImage = new Map<
-      string,
-      Array<{
-        refdes: string
-        x: number
-        y: number
-        rotation: number
-      }>
-    >()
+    const outerDiameterUm = Math.round(firstHole.outer_diameter * 1000)
+    const holeDiameterUm = Math.round(firstHole.hole_diameter * 1000)
+    
+    const imageName = allHolesSameDimensions
+      ? `MountingHole:MountingHole_${holeDiameterUm}um_${outerDiameterUm}um_Pad`
+      : `MountingHole:MountingHole_Component_${componentId}`
 
     if (pcbComponent) {
       const circuitSpaceCoordinates = applyToPoint(
@@ -76,51 +76,16 @@ export function processPlatedHoles(
         pcbComponent.center,
       )
 
-      // Add to places collection
-      if (!placesByImage.has(imageName)) {
-        placesByImage.set(imageName, [])
+      // Group places by dimensions
+      if (!placesByDimensions.has(imageName)) {
+        placesByDimensions.set(imageName, [])
       }
-      placesByImage.get(imageName)?.push({
+      placesByDimensions.get(imageName)?.push({
         refdes: componentName,
         x: circuitSpaceCoordinates.x,
-        y: -circuitSpaceCoordinates.y, // Flip Y coordinate
+        y: -circuitSpaceCoordinates.y,
         rotation: 0,
       })
-    }
-
-    // Add single component with all places
-    if (placesByImage.size > 0) {
-      // Check if component with this image name already exists
-      const existingComponent = pcb.placement.components.find(
-        (comp) => comp.name === imageName,
-      )
-
-      if (existingComponent) {
-        // Add new places to existing component
-        existingComponent.places.push(
-          ...placesByImage.get(imageName)!.map((place) => ({
-            refdes: place.refdes,
-            x: place.x,
-            y: place.y,
-            side: "front" as const,
-            rotation: place.rotation,
-            PN: "",
-          })),
-        )
-      } else {
-        // Create new component
-        pcb.placement.components.push({
-          name: imageName,
-          places: placesByImage.get(imageName)!.map((place) => ({
-            refdes: place.refdes,
-            x: place.x,
-            y: place.y,
-            side: "front",
-            rotation: place.rotation,
-            PN: "",
-          })),
-        })
-      }
     }
 
     // Add or update image in library
@@ -131,38 +96,59 @@ export function processPlatedHoles(
       pcb.library.images.push({
         name: imageName,
         outlines: [],
-        pins: holes.map((hole, index) => ({
-          padstack_name: padstackName,
-          pin_number: index + 1,
-          x: (hole.x - (pcbComponent?.center.x || 0)) * 1000,
-          y: -(hole.y - (pcbComponent?.center.y || 0)) * 1000,
-        })),
-      })
-    }
+        pins: holes.map((hole, index) => {
+          const platedHoleCircle = hole as PcbPlatedHoleCircle
+          const currentOuterDiameterUm = Math.round(platedHoleCircle.outer_diameter * 1000)
+          const currentHoleDiameterUm = Math.round(platedHoleCircle.hole_diameter * 1000)
+          const padstackName = `Round[A]Pad_${currentHoleDiameterUm}_${currentOuterDiameterUm}_um`
 
-    // Add padstack if not already present
-    if (!pcb.library.padstacks.find((p) => p.name === padstackName)) {
-      pcb.library.padstacks.push({
-        name: padstackName,
-        shapes: [
-          {
-            shapeType: "circle",
-            layer: "F.Cu",
-            diameter: outerDiameterUm,
-          },
-          {
-            shapeType: "circle",
-            layer: "B.Cu",
-            diameter: outerDiameterUm,
-          },
-        ],
-        // Add drill hole
-        hole: {
-          shape: "circle",
-          diameter: holeDiameterUm,
-        },
-        attach: "off",
+          // Add padstack if not already present
+          if (!pcb.library.padstacks.find((p) => p.name === padstackName)) {
+            pcb.library.padstacks.push({
+              name: padstackName,
+              shapes: [
+                {
+                  shapeType: "circle",
+                  layer: "F.Cu",
+                  diameter: currentOuterDiameterUm,
+                },
+                {
+                  shapeType: "circle",
+                  layer: "B.Cu",
+                  diameter: currentOuterDiameterUm,
+                },
+              ],
+              hole: {
+                shape: "circle",
+                diameter: currentHoleDiameterUm,
+              },
+              attach: "off",
+            })
+          }
+
+          return {
+            padstack_name: padstackName,
+            pin_number: index + 1,
+            x: (hole.x - (pcbComponent?.center.x || 0)) * 1000,
+            y: -(hole.y - (pcbComponent?.center.y || 0)) * 1000,
+          }
+        }),
       })
     }
+  }
+
+  // Add components to placement after processing all holes
+  for (const [imageName, places] of placesByDimensions) {
+    pcb.placement.components.push({
+      name: imageName,
+      places: places.map(place => ({
+        refdes: place.refdes,
+        x: place.x,
+        y: place.y,
+        side: "front",
+        rotation: place.rotation,
+        PN: "",
+      })),
+    })
   }
 }
