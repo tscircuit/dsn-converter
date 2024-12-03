@@ -56,6 +56,11 @@ export function processPlatedHoles(
     const componentName = sourceComponent?.name || `H${componentId}`
 
     holes.forEach((platedHole) => {
+      // Skip oval plated holes
+      if (platedHole.shape === "oval") {
+        throw new Error("Oval plated holes are not supported")
+      }
+
       let padstackName: string
       let imageName: string
       let outerDiameterUm = 0

@@ -1067,8 +1067,10 @@ function processPathShape(nodes: ASTNode[]): PathShape {
       width: nodes[2].value,
       coordinates: nodes
         .slice(3)
-        .filter((node) => node.type === "Atom" && typeof node.value === "number")
-        .map((node) => node.value as number)
+        .filter(
+          (node) => node.type === "Atom" && typeof node.value === "number",
+        )
+        .map((node) => node.value as number),
     }
   }
   throw new Error("Invalid path shape format")
