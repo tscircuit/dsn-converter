@@ -18,14 +18,13 @@ test("check smtpad dimension", async () => {
   // check if the smtpad has the correct dimensions
   const pcbSmtpads = circuitJson2.filter((e) => e.type === "pcb_smtpad")
   expect(pcbSmtpads.length).toBe(2)
-  
+
   // expect the pads to have the correct dimensions and not the same
   expect(
     pcbSmtpads.some(
       (p) => p.shape === "rect" && p.width === 0.308 && p.height === 1.324,
     ),
   ).toBe(true)
-
 
   expect(convertCircuitJsonToPcbSvg(circuitJson2)).toMatchSvgSnapshot(
     import.meta.path,
