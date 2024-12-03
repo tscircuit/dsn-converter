@@ -12,7 +12,7 @@ test("check chip smtpad dimension", async () => {
   const dsnFile = convertCircuitJsonToDsnString(
     circuitJson as AnyCircuitElement[],
   )
-  
+
   const dsnJson = parseDsnToDsnJson(dsnFile) as DsnPcb
   const circuitJson2 = convertDsnJsonToCircuitJson(dsnJson)
 
