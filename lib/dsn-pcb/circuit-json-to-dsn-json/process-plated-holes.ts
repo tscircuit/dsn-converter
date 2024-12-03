@@ -2,6 +2,7 @@ import type {
   AnyCircuitElement,
   PcbComponent,
   PcbPlatedHole,
+  PcbPlatedHoleCircle,
   SourceComponentBase,
 } from "circuit-json"
 import type { DsnPcb } from "../types"
@@ -43,10 +44,22 @@ export function processPlatedHoles(
       : undefined
 
     const componentName = sourceComponent?.name || `H${componentId}`
-    const imageName = "MountingHole:MountingHole_3.2mm_Pad"
-    const padstackName = "Round[A]Pad_6000_um"
 
-    // Group all holes by image name
+    // TODO each hole can have it's own imageName and padstackName, we can't
+    // just use the first hole's values for all holes
+    const platedHole = holes[0]
+
+    if (platedHole.shape === "oval" || platedHole.shape === "pill") {
+      throw new Error("Oval or pill plated holes are not supported")
+    }
+
+    const platedHoleCircle = platedHole as PcbPlatedHoleCircle
+
+    const outerDiameterUm = Math.round(platedHoleCircle.outer_diameter * 1000)
+    const holeDiameterUm = Math.round(platedHoleCircle.hole_diameter * 1000)
+    const imageName = `MountingHole:MountingHole_${holeDiameterUm}um_${outerDiameterUm}um_Pad`
+    const padstackName = `Round[A]Pad_${holeDiameterUm}_${outerDiameterUm}_um` // Group all holes by image name
+
     const placesByImage = new Map<
       string,
       Array<{
@@ -135,14 +148,19 @@ export function processPlatedHoles(
           {
             shapeType: "circle",
             layer: "F.Cu",
-            diameter: 600,
+            diameter: outerDiameterUm,
           },
           {
             shapeType: "circle",
             layer: "B.Cu",
-            diameter: 600,
+            diameter: outerDiameterUm,
           },
         ],
+        // Add drill hole
+        hole: {
+          shape: "circle",
+          diameter: holeDiameterUm,
+        },
         attach: "off",
       })
     }

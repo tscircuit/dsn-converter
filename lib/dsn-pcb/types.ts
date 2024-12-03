@@ -199,6 +199,10 @@ export interface Padstack {
   name: string
   shapes: Shape[]
   attach: string
+  hole?: {
+    shape: "circle" | "square"
+    diameter: number
+  }
 }
 
 export interface PadDimensions {

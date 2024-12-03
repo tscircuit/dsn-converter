@@ -20,6 +20,17 @@ test("circuit json (with plated hole) -> dsn file", async () => {
   // expect the image to have length 2
   expect(dsnJson.library.images.length).toBe(2)
 
+  // Test plated hole image
   const image = dsnJson.library.images[1]
-  expect(image.name).toBe("MountingHole:MountingHole_3.2mm_Pad")
+  expect(image.name).toBe("MountingHole:MountingHole_700um_1000um_Pad")
+
+  // Test padstack for plated hole
+  const padstack = dsnJson.library.padstacks.find(
+    (p) => p.name === "Round[A]Pad_700_1000_um",
+  )
+  expect(padstack).toBeDefined()
+  expect(padstack?.shapes).toHaveLength(2) // Top and bottom copper
+  expect(padstack?.shapes[0].shapeType).toBe("circle")
+  expect(padstack?.shapes[0].layer).toBe("F.Cu")
+  expect((padstack?.shapes[0] as any).diameter).toBe(1000) // Outer diameter in μm
 })
