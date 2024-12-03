@@ -4,7 +4,7 @@ import { processComponentsAndPads } from "./process-components-and-pads"
 import { processNets } from "./process-nets"
 import { processPcbTraces } from "./process-pcb-traces"
 import { processPlatedHoles } from "./process-plated-holes"
-import { processChips } from "./process-chips"
+
 export function convertCircuitJsonToDsnJson(
   circuitElements: AnyCircuitElement[],
 ): DsnPcb {
