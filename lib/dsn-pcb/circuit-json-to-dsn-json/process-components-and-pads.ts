@@ -77,9 +77,6 @@ export function processComponentsAndPads(
           e.source_component_id === pcbComponent.source_component_id,
       ) as SourceComponentBase)
 
-    // Skip components with ftype "simple_chip"
-    if (sourceComponent?.ftype === "simple_chip") continue
-
     const footprintName = getFootprintName(sourceComponent?.ftype)
     const componentName = sourceComponent?.name || "Unknown"
     const circuitSpaceCoordinates = applyToPoint(

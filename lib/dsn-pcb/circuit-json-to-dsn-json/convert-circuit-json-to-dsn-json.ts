@@ -129,7 +129,6 @@ export function convertCircuitJsonToDsnJson(
   processPlatedHoles(circuitElements, pcb)
   processNets(circuitElements, pcb)
   processPcbTraces(circuitElements, pcb)
-  processChips(circuitElements, pcb)
   return pcb
 }
 
