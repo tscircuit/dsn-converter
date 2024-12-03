@@ -23,6 +23,7 @@ import type {
   Padstack,
   Parser as ParserType,
   Path,
+  PathShape,
   Pin,
   Placement,
   Places,
@@ -633,6 +634,8 @@ function processShape(nodes: ASTNode[]): Shape {
           return processCircleShape(shapeContentNode.children!)
         case "rect":
           return processRectShape(shapeContentNode.children!)
+        case "path":
+          return processPathShape(shapeContentNode.children!)
       }
     }
   }
@@ -1049,4 +1052,24 @@ function processSessionNode(ast: ASTNode): DsnSession {
   }
 
   return session
+}
+
+function processPathShape(nodes: ASTNode[]): PathShape {
+  if (
+    nodes[1]?.type === "Atom" &&
+    typeof nodes[1].value === "string" &&
+    nodes[2]?.type === "Atom" &&
+    typeof nodes[2].value === "number"
+  ) {
+    return {
+      shapeType: "path",
+      layer: nodes[1].value,
+      width: nodes[2].value,
+      coordinates: nodes
+        .slice(3)
+        .filter((node) => node.type === "Atom" && typeof node.value === "number")
+        .map((node) => node.value as number)
+    }
+  }
+  throw new Error("Invalid path shape format")
 }

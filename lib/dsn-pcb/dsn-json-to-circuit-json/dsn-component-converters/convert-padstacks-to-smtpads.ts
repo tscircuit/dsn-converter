@@ -46,6 +46,10 @@ export function convertPadstacksToSmtPads(
           (shape) => shape.shapeType === "circle",
         )
 
+        const pathShape = padstack.shapes.find(
+          (shape) => shape.shapeType === "path",
+        )
+
         let width: number
         let height: number
 
@@ -75,6 +79,12 @@ export function convertPadstacksToSmtPads(
 
           width = Math.abs(maxX - minX) / 1000
           height = Math.abs(maxY - minY) / 1000
+        } else if (pathShape) {
+          // For path shapes (oval/pill pads), width is the path width
+          // and height is the distance between path endpoints
+          const [x1, y1, x2, y2] = pathShape.coordinates
+          width = pathShape.width / 1000 // Convert μm to mm
+          height = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) / 1000
         } else if (circleShape) {
           // Handle circle shape
           const radius = circleShape.diameter / 2 / 1000
@@ -93,7 +103,7 @@ export function convertPadstacksToSmtPads(
         })
 
         let pcbPad: PcbSmtPad
-        if (rectShape || polygonShape) {
+        if (rectShape || polygonShape || pathShape) {
           pcbPad = {
             type: "pcb_smtpad",
             pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pin.pin_number - 1}`,

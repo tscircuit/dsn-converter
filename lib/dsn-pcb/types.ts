@@ -200,8 +200,10 @@ export interface Padstack {
   shapes: Shape[]
   attach: string
   hole?: {
-    shape: "circle" | "square"
-    diameter: number
+    shape: "circle" | "square" | "oval"
+    width?: number
+    height?: number
+    diameter?: number
   }
 }
 
@@ -211,7 +213,7 @@ export interface PadDimensions {
   radius?: number
 }
 
-export type Shape = PolygonShape | CircleShape | RectShape
+export type Shape = PolygonShape | CircleShape | RectShape | PathShape
 
 export interface BaseShape {
   shapeType: string // Added shapeType to base export interface
@@ -231,6 +233,12 @@ export interface CircleShape extends BaseShape {
 
 export interface RectShape extends BaseShape {
   shapeType: "rect"
+  coordinates: number[]
+}
+
+export interface PathShape extends BaseShape {
+  shapeType: "path"
+  width: number
   coordinates: number[]
 }
 
