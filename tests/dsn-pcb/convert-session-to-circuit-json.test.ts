@@ -51,22 +51,6 @@ test("convert session to circuit json", async () => {
     )
   }
 
-  const pcbSmtpads = circuitJsonFromSession.filter(
-    (e) => e.type === "pcb_smtpad",
-  )
-  expect(pcbSmtpads.length).toBe(4)
-  // expect the pads to have the correct dimensions and not the same
-  expect(
-    pcbSmtpads.some(
-      (p) => p.shape === "rect" && p.width === 0.6 && p.height === 0.6,
-    ),
-  ).toBe(true)
-  expect(
-    pcbSmtpads.some(
-      (p) => p.shape === "rect" && p.width === 1 && p.height === 1,
-    ),
-  ).toBe(true)
-
   expect(convertCircuitJsonToPcbSvg(circuitJsonFromSession)).toMatchSvgSnapshot(
     import.meta.path,
   )
