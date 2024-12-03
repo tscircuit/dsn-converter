@@ -34,7 +34,7 @@ export const convertPolylinePathToPcbTraces = ({
       route_type: "wire" as const,
       x: Number(point.x.toFixed(4)),
       y: Number(point.y.toFixed(4)),
-      width: 0.2, // Standard trace width in circuit space
+      width: 0.16, // Standard trace width in circuit space
       layer: wire.polyline_path?.layer.includes("B.") ? "bottom" : "top",
     })),
   })
