@@ -48,9 +48,7 @@ test("different sized plated holes", async () => {
   expect(dsnJson.library.images.length).toBe(1)
 
   const image = dsnJson.library.images[0]
-  expect(image.name).toBe(
-    "MountingHole:MountingHole_Component_pcb_component_0",
-  )
+  expect(image.name).toBe("MountingHole:MountingHole_Component_pcb_component_0")
 
   expect(image.pins).toHaveLength(2)
 

@@ -57,15 +57,17 @@ export function processPlatedHoles(
 
     // Check if all holes have the same dimensions
     const firstHole = holes[0] as PcbPlatedHoleCircle
-    const allHolesSameDimensions = holes.every(hole => {
+    const allHolesSameDimensions = holes.every((hole) => {
       const currentHole = hole as PcbPlatedHoleCircle
-      return currentHole.outer_diameter === firstHole.outer_diameter &&
-             currentHole.hole_diameter === firstHole.hole_diameter
+      return (
+        currentHole.outer_diameter === firstHole.outer_diameter &&
+        currentHole.hole_diameter === firstHole.hole_diameter
+      )
     })
 
     const outerDiameterUm = Math.round(firstHole.outer_diameter * 1000)
     const holeDiameterUm = Math.round(firstHole.hole_diameter * 1000)
-    
+
     const imageName = allHolesSameDimensions
       ? `MountingHole:MountingHole_${holeDiameterUm}um_${outerDiameterUm}um_Pad`
       : `MountingHole:MountingHole_Component_${componentId}`
@@ -98,8 +100,12 @@ export function processPlatedHoles(
         outlines: [],
         pins: holes.map((hole, index) => {
           const platedHoleCircle = hole as PcbPlatedHoleCircle
-          const currentOuterDiameterUm = Math.round(platedHoleCircle.outer_diameter * 1000)
-          const currentHoleDiameterUm = Math.round(platedHoleCircle.hole_diameter * 1000)
+          const currentOuterDiameterUm = Math.round(
+            platedHoleCircle.outer_diameter * 1000,
+          )
+          const currentHoleDiameterUm = Math.round(
+            platedHoleCircle.hole_diameter * 1000,
+          )
           const padstackName = `Round[A]Pad_${currentHoleDiameterUm}_${currentOuterDiameterUm}_um`
 
           // Add padstack if not already present
@@ -141,7 +147,7 @@ export function processPlatedHoles(
   for (const [imageName, places] of placesByDimensions) {
     pcb.placement.components.push({
       name: imageName,
-      places: places.map(place => ({
+      places: places.map((place) => ({
         refdes: place.refdes,
         x: place.x,
         y: place.y,
