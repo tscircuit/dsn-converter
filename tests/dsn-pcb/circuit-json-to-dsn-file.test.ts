@@ -20,7 +20,7 @@ test("circuit json to dsn file", async () => {
   expect(dsnJson.library.images[0].pins[0].y).toBe(0)
 
   expect(dsnJson.library.images[0].pins[1].x).toBe(500)
-  expect(dsnJson.library.images[0].pins[1].y).toBe(0) 
+  expect(dsnJson.library.images[0].pins[1].y).toBe(0)
 
   const circuitJson2 = convertDsnJsonToCircuitJson(dsnJson)
 
