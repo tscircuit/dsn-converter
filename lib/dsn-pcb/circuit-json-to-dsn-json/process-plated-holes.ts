@@ -4,7 +4,7 @@ import type {
   PcbPlatedHole,
   PcbPlatedHoleCircle,
   SourceComponentBase,
-  PcbPlatedHoleOval
+  PcbPlatedHoleOval,
 } from "circuit-json"
 import { applyToPoint, scale } from "transformation-matrix"
 import type { DsnPcb } from "../types"
