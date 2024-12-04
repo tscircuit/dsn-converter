@@ -151,8 +151,8 @@ export function processComponentsAndPads(
               pin_number:
                 pad.port_hints?.find((hint) => !Number.isNaN(Number(hint))) ||
                 1,
-              x: (pcbComponent.center.x - pad.x) * 1000,
-              y: (pcbComponent.center.y - pad.y) * 1000,
+              x: (pad.x - pcbComponent.center.x) * 1000,
+              y: (pad.y - pcbComponent.center.y) * 1000,
             }
           }
         })

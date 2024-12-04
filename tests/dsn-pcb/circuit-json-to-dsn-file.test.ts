@@ -14,6 +14,14 @@ test("circuit json to dsn file", async () => {
   )
 
   const dsnJson = parseDsnToDsnJson(dsnFile) as DsnPcb
+
+  // expect the images pin to be in increasing order of position
+  expect(dsnJson.library.images[0].pins[0].x).toBe(-500)
+  expect(dsnJson.library.images[0].pins[0].y).toBe(0)
+
+  expect(dsnJson.library.images[0].pins[1].x).toBe(500)
+  expect(dsnJson.library.images[0].pins[1].y).toBe(0)
+
   const circuitJson2 = convertDsnJsonToCircuitJson(dsnJson)
 
   expect(convertCircuitJsonToPcbSvg(circuitJson2)).toMatchSvgSnapshot(
