@@ -77,7 +77,7 @@ export function processComponentsAndPads(
           e.source_component_id === pcbComponent.source_component_id,
       ) as SourceComponentBase)
 
-    const footprintName = getFootprintName(sourceComponent?.ftype)
+    const footprintName = getFootprintName(sourceComponent, pcbComponent)
     const componentName = sourceComponent?.name || "Unknown"
     const circuitSpaceCoordinates = applyToPoint(
       transformMmToUm,
