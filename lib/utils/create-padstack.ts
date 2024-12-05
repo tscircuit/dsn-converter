@@ -34,21 +34,29 @@ export function createOvalPadstack(
   holeWidth: number,
   holeHeight: number,
 ): Padstack {
-  const pathOffset = (outerWidth - outerHeight) / 2
+  const pathOffset = Math.abs(outerWidth - outerHeight) / 2
+
+  // Determine orientation based on dimensions
+  const isHorizontal = outerWidth > outerHeight
+
   return {
     name,
     shapes: [
       {
         shapeType: "path",
         layer: "F.Cu",
-        width: outerHeight,
-        coordinates: [-pathOffset, 0, pathOffset, 0],
+        width: isHorizontal ? outerHeight : outerWidth,
+        coordinates: isHorizontal
+          ? [-pathOffset, 0, pathOffset, 0]  // Horizontal oval
+          : [0, -pathOffset, 0, pathOffset],  // Vertical oval
       },
       {
         shapeType: "path",
         layer: "B.Cu",
-        width: outerHeight,
-        coordinates: [-pathOffset, 0, pathOffset, 0],
+        width: isHorizontal ? outerHeight : outerWidth,
+        coordinates: isHorizontal
+          ? [-pathOffset, 0, pathOffset, 0]  // Horizontal oval
+          : [0, -pathOffset, 0, pathOffset],  // Vertical oval
       },
     ],
     hole: {

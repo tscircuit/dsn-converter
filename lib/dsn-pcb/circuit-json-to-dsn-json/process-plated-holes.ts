@@ -118,7 +118,7 @@ export function processPlatedHoles(
       placesByDimensions.get(imageName)?.push({
         refdes: componentName,
         x: circuitSpaceCoordinates.x,
-        y: -circuitSpaceCoordinates.y,
+        y: circuitSpaceCoordinates.y,
         rotation: 0,
       })
     }
