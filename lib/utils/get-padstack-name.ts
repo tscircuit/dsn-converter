@@ -1,11 +1,16 @@
-interface PadstackNameArgs {  
+interface PadstackNameArgs {
   shape: string
   width?: number
   height?: number
   diameter?: number
 }
 
-export function getPadstackName({ shape, width, height, diameter }: PadstackNameArgs): string {
+export function getPadstackName({
+  shape,
+  width,
+  height,
+  diameter,
+}: PadstackNameArgs): string {
   switch (shape) {
     case "circle":
       return `Round[A]Pad_${diameter}_um`
