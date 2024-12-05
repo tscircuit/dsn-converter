@@ -168,7 +168,7 @@ export function processComponentsAndPads(
         x: component.coordinates.x,
         y: component.coordinates.y,
         side: "front" as const,
-        rotation: component.rotation,
+        rotation: component.rotation % 90,
         PN: component.value,
       })),
     }
