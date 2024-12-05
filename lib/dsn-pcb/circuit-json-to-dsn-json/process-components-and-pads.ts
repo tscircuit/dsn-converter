@@ -77,7 +77,7 @@ export function processComponentsAndPads(
           e.source_component_id === pcbComponent.source_component_id,
       ) as SourceComponentBase)
 
-    const footprintName = getFootprintName(sourceComponent?.ftype)
+    const footprintName = getFootprintName(sourceComponent, pcbComponent)
     const componentName = sourceComponent?.name || "Unknown"
     const circuitSpaceCoordinates = applyToPoint(
       transformMmToUm,
@@ -168,7 +168,7 @@ export function processComponentsAndPads(
         x: component.coordinates.x,
         y: component.coordinates.y,
         side: "front" as const,
-        rotation: component.rotation,
+        rotation: component.rotation % 90,
         PN: component.value,
       })),
     }
