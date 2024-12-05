@@ -210,16 +210,26 @@ export function processPlatedHoles(
 
   // Add components to placement after processing all holes
   for (const [imageName, places] of placesByDimensions) {
-    pcb.placement.components.push({
-      name: imageName,
-      places: places.map((place) => ({
-        refdes: place.refdes,
-        x: place.x,
-        y: place.y,
-        side: "front",
-        rotation: place.rotation,
-        PN: "",
-      })),
-    })
+    // Filter out places whose refdes already exists in any component
+    const newPlaces = places.filter((place) => 
+      !pcb.placement.components.some((comp) =>
+        comp.places.some((existingPlace) => existingPlace.refdes === place.refdes)
+      )
+    );
+
+    // Only add component if there are any new places to add
+    if (newPlaces.length > 0) {
+      pcb.placement.components.push({
+        name: imageName,
+        places: newPlaces.map((place) => ({
+          refdes: place.refdes,
+          x: place.x,
+          y: place.y,
+          side: "front",
+          rotation: place.rotation,
+          PN: "",
+        })),
+      });
+    }
   }
 }
