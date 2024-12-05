@@ -8,6 +8,7 @@ import type {
 } from "circuit-json"
 import { applyToPoint, scale } from "transformation-matrix"
 import type { DsnPcb } from "../types"
+import { createOvalPadstack } from "lib/utils/create-padstack"
 
 const transformMmToUm = scale(1000)
 
@@ -93,12 +94,12 @@ export function processPlatedHoles(
         const holeHeightUm = Math.round(pillHole.hole_height * 1000)
         const outerWidthUm = Math.round(pillHole.outer_width * 1000)
         const outerHeightUm = Math.round(pillHole.outer_height * 1000)
-        imageName = `MountingHole:MountingHole_${holeWidthUm}x${holeHeightUm}um_${outerWidthUm}x${outerHeightUm}um_Pad`
+        imageName = `MountingHole:MountingHole_${holeWidthUm}x${holeHeightUm}um_${outerWidthUm}x${outerHeightUm}um_${holes.length}_Pad`
       } else {
         const circleHole = firstHole as PcbPlatedHoleCircle
         const holeDiameterUm = Math.round(circleHole.hole_diameter * 1000)
         const outerDiameterUm = Math.round(circleHole.outer_diameter * 1000)
-        imageName = `MountingHole:MountingHole_${holeDiameterUm}um_${outerDiameterUm}um_Pad`
+        imageName = `MountingHole:MountingHole_${holeDiameterUm}um_${outerDiameterUm}um_${holes.length}_Pad`
       }
     } else {
       imageName = `MountingHole:MountingHole_Component_${componentId}`
@@ -137,34 +138,21 @@ export function processPlatedHoles(
             const pillHole = hole
             const outerWidthUm = Math.round(pillHole.outer_width * 1000)
             const outerHeightUm = Math.round(pillHole.outer_height * 1000)
+            const holeWidthUm = Math.round(pillHole.hole_width * 1000)
+            const holeHeightUm = Math.round(pillHole.hole_height * 1000)
             padstackName = `Oval[A]Pad_${outerWidthUm}x${outerHeightUm}_um`
 
             // Add padstack if not already present
             if (!pcb.library.padstacks.find((p) => p.name === padstackName)) {
-              const pathOffset = (outerWidthUm - outerHeightUm) / 2
-              pcb.library.padstacks.push({
-                name: padstackName,
-                shapes: [
-                  {
-                    shapeType: "path",
-                    layer: "F.Cu",
-                    width: outerHeightUm,
-                    coordinates: [-pathOffset, 0, pathOffset, 0],
-                  },
-                  {
-                    shapeType: "path",
-                    layer: "B.Cu",
-                    width: outerHeightUm,
-                    coordinates: [-pathOffset, 0, pathOffset, 0],
-                  },
-                ],
-                hole: {
-                  shape: "oval",
-                  width: Math.round(pillHole.hole_width * 1000),
-                  height: Math.round(pillHole.hole_height * 1000),
-                },
-                attach: "off",
-              })
+              pcb.library.padstacks.push(
+                createOvalPadstack(
+                  padstackName,
+                  outerWidthUm,
+                  outerHeightUm,
+                  holeWidthUm,
+                  holeHeightUm,
+                ),
+              )
             }
           } else {
             const circleHole = hole as PcbPlatedHoleCircle

@@ -24,7 +24,7 @@ test("circuit json (with plated hole) -> dsn file", async () => {
 
   // Test plated hole image
   const image = dsnJson.library.images[1]
-  expect(image.name).toBe("MountingHole:MountingHole_700um_1000um_Pad")
+  expect(image.name).toBe("MountingHole:MountingHole_700um_1000um_2_Pad")
 
   // Test padstack for plated hole
   const padstack = dsnJson.library.padstacks.find(

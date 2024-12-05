@@ -8,41 +8,13 @@ import { getFootprintName } from "lib/utils/get-footprint-name"
 import { applyToPoint, scale } from "transformation-matrix"
 import type { ComponentGroup, DsnPcb, Image, Padstack, Pin } from "../types"
 import { getPadstackName } from "lib/utils/get-padstack-name"
+import {
+  createCircularPadstack,
+  createOvalPadstack,
+  createRectangularPadstack,
+} from "lib/utils/create-padstack"
 
 const transformMmToUm = scale(1000)
-
-function createExactPadstack(
-  padstackName: string,
-  width: number,
-  height: number,
-): Padstack {
-  const halfWidth = width / 2
-  const halfHeight = height / 2
-
-  return {
-    name: padstackName,
-    shapes: [
-      {
-        shapeType: "polygon",
-        layer: "F.Cu",
-        width: 0,
-        coordinates: [
-          -halfWidth,
-          halfHeight, // Top left
-          halfWidth,
-          halfHeight, // Top right
-          halfWidth,
-          -halfHeight, // Bottom right
-          -halfWidth,
-          -halfHeight, // Bottom left
-          -halfWidth,
-          halfHeight, // Back to top left to close the polygon
-        ],
-      },
-    ],
-    attach: "off",
-  }
-}
 
 export function processComponentsAndPads(
   componentGroups: ComponentGroup[],
@@ -124,7 +96,7 @@ export function processComponentsAndPads(
         if (!processedPadstacks.has(padstackName)) {
           const padWidthInUm = Math.round(pad.width * 1000)
           const padHeightInUm = Math.round(pad.height * 1000)
-          const padstack = createExactPadstack(
+          const padstack = createRectangularPadstack(
             padstackName,
             padWidthInUm,
             padHeightInUm,
@@ -143,7 +115,7 @@ export function processComponentsAndPads(
         })
         if (!processedPlatedHoles.has(platedHoleName)) {
           const padDiameterInUm = Math.round(pad.hole_diameter * 1000)
-          const padstack = createExactPadstack(
+          const padstack = createCircularPadstack(
             platedHoleName,
             padDiameterInUm,
             padDiameterInUm,
@@ -158,12 +130,16 @@ export function processComponentsAndPads(
           height: pad.hole_height * 1000,
         })
         if (!processedPlatedHoles.has(platedHoleName)) {
-          const padWidthInUm = Math.round(pad.hole_width * 1000)
-          const padHeightInUm = Math.round(pad.hole_height * 1000)
-          const padstack = createExactPadstack(
+          const padInnerWidthInUm = Math.round(pad.hole_width * 1000)
+          const padInnerHeightInUm = Math.round(pad.hole_height * 1000)
+          const padOuterWidthInUm = Math.round(pad.outer_width * 1000)
+          const padOuterHeightInUm = Math.round(pad.outer_height * 1000)
+          const padstack = createOvalPadstack(
             platedHoleName,
-            padWidthInUm,
-            padHeightInUm,
+            padOuterWidthInUm,
+            padOuterHeightInUm,
+            padInnerWidthInUm,
+            padInnerHeightInUm,
           )
           pcb.library.padstacks.push(padstack)
           processedPlatedHoles.add(platedHoleName)
@@ -214,7 +190,10 @@ export function processComponentsAndPads(
               x: (platedHole.x - pcbComponent.center.x) * 1000,
               y: (platedHole.y - pcbComponent.center.y) * 1000,
             }
-          } else if (platedHole.shape === "oval" || platedHole.shape === "pill") {
+          } else if (
+            platedHole.shape === "oval" ||
+            platedHole.shape === "pill"
+          ) {
             return {
               padstack_name: getPadstackName({
                 shape: platedHole.shape,
