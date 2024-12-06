@@ -8,11 +8,7 @@ import { getFootprintName } from "lib/utils/get-footprint-name"
 import { applyToPoint, scale } from "transformation-matrix"
 import type { ComponentGroup, DsnPcb, Image, Padstack, Pin } from "../types"
 import { getPadstackName } from "lib/utils/get-padstack-name"
-import {
-  createCircularPadstack,
-  createOvalPadstack,
-  createRectangularPadstack,
-} from "lib/utils/create-padstack"
+import { createRectangularPadstack } from "lib/utils/create-padstack"
 
 const transformMmToUm = scale(1000)
 
@@ -22,7 +18,6 @@ export function processComponentsAndPads(
   pcb: DsnPcb,
 ) {
   const processedPadstacks = new Set<string>()
-  const processedPlatedHoles = new Set<string>()
   const componentsByFootprint = new Map<
     string,
     Array<{
@@ -89,10 +84,14 @@ export function processComponentsAndPads(
 
     if (!componentGroup) continue
 
-    // Add padstacks for all pads
+    // Add padstacks for SMT pads
     for (const pad of componentGroup.pcb_smtpads) {
       if (pad.shape === "rect") {
-        const padstackName = `pad_${pad.width}_${pad.height}`
+        const padstackName = getPadstackName({
+          shape: "rect",
+          width: pad.width * 1000,
+          height: pad.height * 1000,
+        })
         if (!processedPadstacks.has(padstackName)) {
           const padWidthInUm = Math.round(pad.width * 1000)
           const padHeightInUm = Math.round(pad.height * 1000)
@@ -106,53 +105,13 @@ export function processComponentsAndPads(
         }
       }
     }
-    // Add padstacks for all plated holes
-    for (const pad of componentGroup.pcb_plated_holes) {
-      if (pad.shape === "circle") {
-        const platedHoleName = getPadstackName({
-          shape: "circle",
-          diameter: pad.hole_diameter,
-        })
-        if (!processedPlatedHoles.has(platedHoleName)) {
-          const padDiameterInUm = Math.round(pad.hole_diameter * 1000)
-          const padstack = createCircularPadstack(
-            platedHoleName,
-            padDiameterInUm,
-            padDiameterInUm,
-          )
-          pcb.library.padstacks.push(padstack)
-          processedPlatedHoles.add(platedHoleName)
-        }
-      } else if (pad.shape === "oval" || pad.shape === "pill") {
-        const platedHoleName = getPadstackName({
-          shape: pad.shape,
-          width: pad.hole_width * 1000,
-          height: pad.hole_height * 1000,
-        })
-        if (!processedPlatedHoles.has(platedHoleName)) {
-          const padInnerWidthInUm = Math.round(pad.hole_width * 1000)
-          const padInnerHeightInUm = Math.round(pad.hole_height * 1000)
-          const padOuterWidthInUm = Math.round(pad.outer_width * 1000)
-          const padOuterHeightInUm = Math.round(pad.outer_height * 1000)
-          const padstack = createOvalPadstack(
-            platedHoleName,
-            padOuterWidthInUm,
-            padOuterHeightInUm,
-            padInnerWidthInUm,
-            padInnerHeightInUm,
-          )
-          pcb.library.padstacks.push(padstack)
-          processedPlatedHoles.add(platedHoleName)
-        }
-      }
-    }
 
     // Add image once per footprint
     const image: Image = {
       name: footprintName,
       outlines: [],
-      pins: [
-        ...componentGroup.pcb_smtpads.map((pad) => {
+      pins: componentGroup.pcb_smtpads
+        .map((pad) => {
           const pcbComponent = circuitElements.find(
             (e) =>
               e.type === "pcb_component" &&
@@ -161,7 +120,11 @@ export function processComponentsAndPads(
           ) as PcbComponent
           if (pad.shape === "rect") {
             return {
-              padstack_name: `pad_${pad.width}_${pad.height}`,
+              padstack_name: getPadstackName({
+                shape: "rect",
+                width: pad.width * 1000,
+                height: pad.height * 1000,
+              }),
               pin_number:
                 pad.port_hints?.find((hint) => !Number.isNaN(Number(hint))) ||
                 1,
@@ -169,47 +132,8 @@ export function processComponentsAndPads(
               y: (pad.y - pcbComponent.center.y) * 1000,
             }
           }
-        }),
-        ...componentGroup.pcb_plated_holes.map((platedHole) => {
-          const pcbComponent = circuitElements.find(
-            (e) =>
-              e.type === "pcb_component" &&
-              e.source_component_id ===
-                firstComponent.sourceComponent?.source_component_id,
-          ) as PcbComponent
-          if (platedHole.shape === "circle") {
-            return {
-              padstack_name: getPadstackName({
-                shape: "circle",
-                diameter: platedHole.hole_diameter * 1000,
-              }),
-              pin_number:
-                platedHole.port_hints?.find(
-                  (hint) => !Number.isNaN(Number(hint)),
-                ) || 1,
-              x: (platedHole.x - pcbComponent.center.x) * 1000,
-              y: (platedHole.y - pcbComponent.center.y) * 1000,
-            }
-          } else if (
-            platedHole.shape === "oval" ||
-            platedHole.shape === "pill"
-          ) {
-            return {
-              padstack_name: getPadstackName({
-                shape: platedHole.shape,
-                width: platedHole.hole_width * 1000,
-                height: platedHole.hole_height * 1000,
-              }),
-              pin_number:
-                platedHole.port_hints?.find(
-                  (hint) => !Number.isNaN(Number(hint)),
-                ) || 1,
-              x: (platedHole.x - pcbComponent.center.x) * 1000,
-              y: (platedHole.y - pcbComponent.center.y) * 1000,
-            }
-          }
-        }),
-      ].filter((pin): pin is Pin => pin !== undefined),
+        })
+        .filter((pin): pin is Pin => pin !== undefined),
     }
     pcb.library.images.push(image)
 

@@ -126,7 +126,7 @@ export function convertCircuitJsonToDsnJson(
 
   const componentGroups = groupComponents(circuitElements)
   processComponentsAndPads(componentGroups, circuitElements, pcb)
-  processPlatedHoles(circuitElements, pcb)
+  processPlatedHoles(componentGroups, circuitElements, pcb)
   processNets(circuitElements, pcb)
   processPcbTraces(circuitElements, pcb)
   return pcb
