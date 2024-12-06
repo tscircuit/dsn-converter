@@ -47,16 +47,16 @@ export function createOvalPadstack(
         layer: "F.Cu",
         width: isHorizontal ? outerHeight : outerWidth,
         coordinates: isHorizontal
-          ? [-pathOffset, 0, pathOffset, 0]  // Horizontal oval
-          : [0, -pathOffset, 0, pathOffset],  // Vertical oval
+          ? [-pathOffset, 0, pathOffset, 0] // Horizontal oval
+          : [0, -pathOffset, 0, pathOffset], // Vertical oval
       },
       {
         shapeType: "path",
         layer: "B.Cu",
         width: isHorizontal ? outerHeight : outerWidth,
         coordinates: isHorizontal
-          ? [-pathOffset, 0, pathOffset, 0]  // Horizontal oval
-          : [0, -pathOffset, 0, pathOffset],  // Vertical oval
+          ? [-pathOffset, 0, pathOffset, 0] // Horizontal oval
+          : [0, -pathOffset, 0, pathOffset], // Vertical oval
       },
     ],
     hole: {

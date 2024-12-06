@@ -24,7 +24,7 @@ test("circuit json (with plated hole) -> dsn file", async () => {
 
   // Test plated hole image
   const image = dsnJson.library.images[1]
-  expect(image.name).toBe("MountingHole:MountingHole_700um_1000um_2_Pad")
+  expect(image.name).toBe("simple_resistor:3.5400x1.0000_mm")
 
   // Test padstack for plated hole
   const padstack = dsnJson.library.padstacks.find(
@@ -48,7 +48,7 @@ test("different sized plated holes", async () => {
   expect(dsnJson.library.images.length).toBe(1)
 
   const image = dsnJson.library.images[0]
-  expect(image.name).toBe("MountingHole:MountingHole_Component_pcb_component_0")
+  expect(image.name).toBe("simple_resistor:4.7000x2.2000_mm")
 
   expect(image.pins).toHaveLength(2)
 
