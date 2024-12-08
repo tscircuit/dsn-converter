@@ -159,9 +159,13 @@ export function processPlatedHoles(
           const pcbPort = circuitElements.find(
             (e) => e.type === "pcb_port" && e.pcb_port_id === hole.pcb_port_id,
           ) as PcbPort
-          const sourcePort = pcbPort && circuitElements.find(
-            (e) => e.type === "source_port" && e.source_port_id === pcbPort.source_port_id,
-          ) as SourcePort
+          const sourcePort =
+            pcbPort &&
+            (circuitElements.find(
+              (e) =>
+                e.type === "source_port" &&
+                e.source_port_id === pcbPort.source_port_id,
+            ) as SourcePort)
 
           const pin = {
             padstack_name: getPadstackName({
@@ -169,7 +173,10 @@ export function processPlatedHoles(
               width: hole.hole_width * 1000,
               height: hole.hole_height * 1000,
             }),
-            pin_number: sourcePort?.port_hints?.find(hint => !Number.isNaN(Number(hint))) || 1,
+            pin_number:
+              sourcePort?.port_hints?.find(
+                (hint) => !Number.isNaN(Number(hint)),
+              ) || 1,
             x: (Number(hole.x.toFixed(3)) - pcbComponent.center.x) * 1000,
             y: (Number(hole.y.toFixed(3)) - pcbComponent.center.y) * 1000,
           }
