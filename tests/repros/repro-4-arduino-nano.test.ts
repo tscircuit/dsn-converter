@@ -20,6 +20,11 @@ test("circuit json (arduino nano) -> dsn file", async () => {
   // image of usbc
   const usbcImage = dsnJson.library.images[0]
   expect(usbcImage.name).toBe("simple_chip:9.8502x6.7732_mm")
+  // pin number in the range of 1 to 20
+  usbcImage.pins.forEach((pin) => {
+    expect(pin.pin_number).toBeGreaterThanOrEqual(1)
+    expect(pin.pin_number).toBeLessThanOrEqual(20)
+  })
   expect(usbcImage.pins).toHaveLength(20)
   expect(usbcImage.pins[0].padstack_name).toBe(
     "RoundRect[T]Pad_299.9994x1299.9974_um",
@@ -35,5 +40,5 @@ test("circuit json (arduino nano) -> dsn file", async () => {
   // padstack length
   expect(dsnJson.library.padstacks.length).toBe(10)
   // net length
-  expect(dsnJson.network.nets.length).toBe(60)
+  expect(dsnJson.network.nets.length).toBe(63)
 })

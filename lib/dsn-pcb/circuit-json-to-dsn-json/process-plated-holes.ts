@@ -1,7 +1,9 @@
 import type {
   AnyCircuitElement,
   PcbComponent,
+  PcbPort,
   SourceComponentBase,
+  SourcePort,
 } from "circuit-json"
 import {
   createCircularPadstack,
@@ -153,6 +155,18 @@ export function processPlatedHoles(
             ? pin
             : undefined
         } else if (hole.shape === "oval" || hole.shape === "pill") {
+          // Find the corresponding pcb_port and its source_port
+          const pcbPort = circuitElements.find(
+            (e) => e.type === "pcb_port" && e.pcb_port_id === hole.pcb_port_id,
+          ) as PcbPort
+          const sourcePort =
+            pcbPort &&
+            (circuitElements.find(
+              (e) =>
+                e.type === "source_port" &&
+                e.source_port_id === pcbPort.source_port_id,
+            ) as SourcePort)
+
           const pin = {
             padstack_name: getPadstackName({
               shape: hole.shape,
@@ -160,11 +174,12 @@ export function processPlatedHoles(
               height: hole.hole_height * 1000,
             }),
             pin_number:
-              hole.port_hints?.find((hint) => !Number.isNaN(Number(hint))) || 1,
+              sourcePort?.port_hints?.find(
+                (hint) => !Number.isNaN(Number(hint)),
+              ) || 1,
             x: (Number(hole.x.toFixed(3)) - pcbComponent.center.x) * 1000,
             y: (Number(hole.y.toFixed(3)) - pcbComponent.center.y) * 1000,
           }
-
           // Only return pin if it doesn't already exist in the image
           return !existingImage.pins.some(
             (existingPin) =>

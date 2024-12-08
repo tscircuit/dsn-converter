@@ -28,6 +28,16 @@ test("circuit json (motor driver breakout) -> dsn file", async () => {
   // expect the image to have length 3
   expect(dsnJson.library.images.length).toBe(3)
 
+  // image chip
+  const chipImage = dsnJson.library.images[0]
+  expect(chipImage.name).toBe("simple_chip:7.4322x8.4741_mm")
+  expect(chipImage.pins).toHaveLength(24)
+  //pin number in the range of 1 to 24
+  chipImage.pins.forEach((pin) => {
+    expect(pin.pin_number).toBeGreaterThanOrEqual(1)
+    expect(pin.pin_number).toBeLessThanOrEqual(24)
+  })
+
   // expect the network to have length 1
   expect(dsnJson.network.nets.length).toBe(16)
 

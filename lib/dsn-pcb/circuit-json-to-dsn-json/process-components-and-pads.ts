@@ -1,7 +1,9 @@
 import type {
   AnyCircuitElement,
   PcbComponent,
+  PcbPort,
   SourceComponentBase,
+  SourcePort,
 } from "circuit-json"
 import { getComponentValue } from "lib/utils/get-component-value"
 import { getFootprintName } from "lib/utils/get-footprint-name"
@@ -119,6 +121,18 @@ export function processComponentsAndPads(
                 firstComponent.sourceComponent?.source_component_id,
           ) as PcbComponent
           if (pad.shape === "rect") {
+            // Find the corresponding pcb_port and its source_port
+            const pcbPort = circuitElements.find(
+              (e) => e.type === "pcb_port" && e.pcb_port_id === pad.pcb_port_id,
+            ) as PcbPort
+            const sourcePort =
+              pcbPort &&
+              (circuitElements.find(
+                (e) =>
+                  e.type === "source_port" &&
+                  e.source_port_id === pcbPort.source_port_id,
+              ) as SourcePort)
+
             return {
               padstack_name: getPadstackName({
                 shape: "rect",
@@ -126,8 +140,9 @@ export function processComponentsAndPads(
                 height: pad.height * 1000,
               }),
               pin_number:
-                pad.port_hints?.find((hint) => !Number.isNaN(Number(hint))) ||
-                1,
+                sourcePort?.port_hints?.find(
+                  (hint) => !Number.isNaN(Number(hint)),
+                ) || 1,
               x: (pad.x - pcbComponent.center.x) * 1000,
               y: (pad.y - pcbComponent.center.y) * 1000,
             }
