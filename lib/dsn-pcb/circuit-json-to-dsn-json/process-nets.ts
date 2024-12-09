@@ -1,3 +1,4 @@
+import { su } from "@tscircuit/soup-util"
 import type { DsnPcb } from "../types"
 import type { AnyCircuitElement, SourcePort, SourceTrace } from "circuit-json"
 
@@ -17,16 +18,14 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
       (element.type === "pcb_smtpad" || element.type === "pcb_plated_hole") &&
       element.pcb_port_id
     ) {
-      const pcbPort = circuitElements.find(
-        (e) => e.type === "pcb_port" && e.pcb_port_id === element.pcb_port_id,
-      )
+      const pcbPort = su(circuitElements)
+        .pcb_port.list()
+        .find((e) => e.pcb_port_id === element.pcb_port_id)
 
       if (pcbPort && "source_port_id" in pcbPort) {
-        const sourcePort = circuitElements.find(
-          (e) =>
-            e.type === "source_port" &&
-            e.source_port_id === pcbPort.source_port_id,
-        ) as SourcePort
+        const sourcePort = su(circuitElements)
+          .source_port.list()
+          .find((e) => e.source_port_id === pcbPort.source_port_id)
 
         if (sourcePort && "source_component_id" in sourcePort) {
           const componentName =

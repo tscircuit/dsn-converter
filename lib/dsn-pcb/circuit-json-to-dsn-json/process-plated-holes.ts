@@ -14,6 +14,7 @@ import { getPadstackName } from "lib/utils/get-padstack-name"
 import type { ComponentGroup, DsnPcb, Pin } from "../types"
 import { getComponentValue } from "lib/utils/get-component-value"
 import { applyToPoint, scale } from "transformation-matrix"
+import { su } from "@tscircuit/soup-util"
 
 const transformMmToUm = scale(1000)
 
@@ -38,25 +39,22 @@ export function processPlatedHoles(
     const { pcb_component_id, pcb_plated_holes, pcb_smtpads } = group
     if (pcb_plated_holes.length === 0) continue
 
-    const pcbComponent = circuitElements.find(
-      (e) =>
-        e.type === "pcb_component" && e.pcb_component_id === pcb_component_id,
-    ) as PcbComponent
+    const pcbComponent = su(circuitElements)
+      .pcb_component.list()
+      .find((e) => e.pcb_component_id === pcb_component_id)
     const sourceComponent =
       pcbComponent &&
-      (circuitElements.find(
-        (e) =>
-          e.type === "source_component" &&
-          e.source_component_id === pcbComponent.source_component_id,
-      ) as SourceComponentBase)
+      su(circuitElements)
+        .source_component.list()
+        .find((e) => e.source_component_id === pcbComponent.source_component_id)
 
     if (!pcbComponent) continue
 
-    const footprintName = getFootprintName(sourceComponent, pcbComponent)
-    const componentName = sourceComponent?.name || "Unknown"
+    const footprintName = getFootprintName(sourceComponent!, pcbComponent!)
+    const componentName = sourceComponent!.name || "Unknown"
     const circuitSpaceCoordinates = applyToPoint(
       transformMmToUm,
-      pcbComponent.center,
+      pcbComponent!.center,
     )
 
     // Add to componentsByFootprint map
@@ -156,16 +154,14 @@ export function processPlatedHoles(
             : undefined
         } else if (hole.shape === "oval" || hole.shape === "pill") {
           // Find the corresponding pcb_port and its source_port
-          const pcbPort = circuitElements.find(
-            (e) => e.type === "pcb_port" && e.pcb_port_id === hole.pcb_port_id,
-          ) as PcbPort
+          const pcbPort = su(circuitElements)
+            .pcb_port.list()
+            .find((e) => e.pcb_port_id === hole.pcb_port_id)
           const sourcePort =
             pcbPort &&
-            (circuitElements.find(
-              (e) =>
-                e.type === "source_port" &&
-                e.source_port_id === pcbPort.source_port_id,
-            ) as SourcePort)
+            su(circuitElements)
+              .source_port.list()
+              .find((e) => e.source_port_id === pcbPort.source_port_id)
 
           const pin = {
             padstack_name: getPadstackName({
