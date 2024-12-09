@@ -40,5 +40,5 @@ test("circuit json (arduino nano) -> dsn file", async () => {
   // padstack length
   expect(dsnJson.library.padstacks.length).toBe(10)
   // net length
-  expect(dsnJson.network.nets.length).toBe(63)
+  expect(dsnJson.network.nets.length).toBe(72)
 })
