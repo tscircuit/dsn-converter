@@ -31,8 +31,9 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
           const componentName =
             componentNameMap.get(sourcePort.source_component_id) || ""
           // "A12" -> "12", "B1" -> "1 (When pinNumber a)
-          const pinNumber =
-            element.port_hints?.[0]?.match(/(?:A|B)?(\d+)/)?.[1] || "1"
+          const pinNumber = sourcePort.port_hints?.find(
+            (hint) => !Number.isNaN(Number(hint)),
+          )
 
           padsBySourcePortId.set(sourcePort.source_port_id, {
             componentName,
