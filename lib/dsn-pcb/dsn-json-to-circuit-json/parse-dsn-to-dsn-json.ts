@@ -563,29 +563,84 @@ function processOutline(nodes: ASTNode[]): Outline {
 
 function processPin(nodes: ASTNode[]): Pin {
   const pin: Partial<Pin> = {}
-  if (
-    nodes[1].type === "Atom" &&
-    typeof nodes[1].value === "string" &&
-    nodes[2].type === "Atom" &&
-    (typeof nodes[2].value === "string" ||
-      typeof nodes[2].value === "number") &&
-    nodes[3].type === "Atom" &&
-    typeof nodes[3].value === "number" &&
-    nodes[4].type === "Atom" &&
-    typeof nodes[4].value === "number"
-  ) {
-    pin.padstack_name = nodes[1].value
-    if (typeof nodes[2].value === "number") {
-      pin.pin_number = nodes[2].value
+
+  try {
+    // Get padstack name
+    if (nodes[1]?.type === "Atom") {
+      pin.padstack_name = String(nodes[1].value)
     } else {
-      pin.pin_number = parseInt(nodes[2].value, 10)
+      throw new Error("Missing padstack name")
     }
-    pin.x = nodes[3].value
-    pin.y = nodes[4].value
-  } else {
-    throw new Error("Invalid pin format")
+
+    // Get pin number
+    if (nodes[2]?.type === "Atom") {
+      if (typeof nodes[2].value === "number") {
+        pin.pin_number = nodes[2].value
+      } else {
+        const parsed = parseInt(String(nodes[2].value), 10)
+        pin.pin_number = Number.isNaN(parsed) ? String(nodes[2].value) : parsed
+      }
+    } else {
+      throw new Error("Missing pin number")
+    }
+
+    // Handle coordinates, accounting for scientific notation
+    let xValue: number | undefined
+    let yValue: number | undefined
+
+    for (let i = 3; i < nodes.length; i++) {
+      const node = nodes[i]
+      const nextNode = nodes[i + 1]
+
+      if (node.type === "Atom") {
+        if (xValue === undefined) {
+          // Try to parse X coordinate
+          if (typeof node.value === "number") {
+            if (
+              nextNode?.type === "Atom" &&
+              String(nextNode.value).toLowerCase().startsWith("e")
+            ) {
+              // Handle scientific notation
+              xValue = Number(`${node.value}${nextNode.value}`)
+              i++ // Skip the exponent part
+            } else {
+              xValue = node.value
+            }
+          }
+        } else if (yValue === undefined) {
+          // Try to parse Y coordinate
+          if (typeof node.value === "number") {
+            if (
+              nextNode?.type === "Atom" &&
+              String(nextNode.value).toLowerCase().startsWith("e")
+            ) {
+              // Handle scientific notation
+              yValue = Number(`${node.value}${nextNode.value}`)
+              i++ // Skip the exponent part
+            } else {
+              yValue = node.value
+            }
+          }
+        }
+      }
+    }
+
+    if (typeof xValue !== "number") {
+      throw new Error(`Invalid x coordinate: ${xValue}`)
+    }
+    if (typeof yValue !== "number") {
+      throw new Error(`Invalid y coordinate: ${yValue}`)
+    }
+
+    pin.x = xValue
+    pin.y = yValue
+
+    return pin as Pin
+  } catch (error) {
+    console.error("Pin processing error:", error)
+    console.error("Problematic nodes:", JSON.stringify(nodes, null, 2))
+    throw error
   }
-  return pin as Pin
 }
 
 function processPadstack(nodes: ASTNode[]): Padstack {
