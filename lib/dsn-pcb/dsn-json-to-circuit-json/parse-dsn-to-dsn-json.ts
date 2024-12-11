@@ -563,7 +563,7 @@ function processOutline(nodes: ASTNode[]): Outline {
 
 function processPin(nodes: ASTNode[]): Pin {
   const pin: Partial<Pin> = {}
-  
+
   try {
     // Get padstack name
     if (nodes[1]?.type === "Atom") {
@@ -587,16 +587,19 @@ function processPin(nodes: ASTNode[]): Pin {
     // Handle coordinates, accounting for scientific notation
     let xValue: number | undefined
     let yValue: number | undefined
-    
+
     for (let i = 3; i < nodes.length; i++) {
       const node = nodes[i]
       const nextNode = nodes[i + 1]
-      
+
       if (node.type === "Atom") {
         if (xValue === undefined) {
           // Try to parse X coordinate
           if (typeof node.value === "number") {
-            if (nextNode?.type === "Atom" && String(nextNode.value).toLowerCase().startsWith('e')) {
+            if (
+              nextNode?.type === "Atom" &&
+              String(nextNode.value).toLowerCase().startsWith("e")
+            ) {
               // Handle scientific notation
               xValue = Number(`${node.value}${nextNode.value}`)
               i++ // Skip the exponent part
@@ -607,7 +610,10 @@ function processPin(nodes: ASTNode[]): Pin {
         } else if (yValue === undefined) {
           // Try to parse Y coordinate
           if (typeof node.value === "number") {
-            if (nextNode?.type === "Atom" && String(nextNode.value).toLowerCase().startsWith('e')) {
+            if (
+              nextNode?.type === "Atom" &&
+              String(nextNode.value).toLowerCase().startsWith("e")
+            ) {
               // Handle scientific notation
               yValue = Number(`${node.value}${nextNode.value}`)
               i++ // Skip the exponent part
@@ -619,10 +625,10 @@ function processPin(nodes: ASTNode[]): Pin {
       }
     }
 
-    if (typeof xValue !== 'number') {
+    if (typeof xValue !== "number") {
       throw new Error(`Invalid x coordinate: ${xValue}`)
     }
-    if (typeof yValue !== 'number') {
+    if (typeof yValue !== "number") {
       throw new Error(`Invalid y coordinate: ${yValue}`)
     }
 
