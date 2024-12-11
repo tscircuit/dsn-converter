@@ -190,7 +190,7 @@ export interface Outline {
 
 export interface Pin {
   padstack_name: string
-  pin_number: number
+  pin_number: number | string
   x: number
   y: number
 }
