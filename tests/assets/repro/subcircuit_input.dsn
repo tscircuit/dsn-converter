@@ -1,0 +1,77 @@
+(pcb ./converted_dsn.dsn
+  (parser
+    (string_quote ")
+    (space_in_quoted_tokens on)
+    (host_cad "KiCad's Pcbnew")
+    (host_version "")
+  )
+  (resolution um 10)
+  (unit um)
+  (structure
+    (layer F.Cu
+      (type signal)
+      (property
+        (index 0)
+      )
+    )
+    (layer B.Cu
+      (type signal)
+      (property
+        (index 1)
+      )
+    )
+    (boundary
+      (path pcb 0  -50000 -50000 50000 -50000 50000 50000 -50000 50000 -50000 -50000)
+    )
+    (via "Via[0-1]_600:300_um")
+    (rule
+      (width 200)
+      (clearance 200)
+      (clearance 200 (type default_smd))
+      (clearance 50 (type smd_smd))
+    )
+  )
+  (placement
+    (component "simple_resistor:1.6000x0.6000_mm"
+      (place R1 0 0 front 0 (PN "100"))
+      (place R2 2000 0 front 0 (PN "100"))
+    )
+  )
+  (library
+    (image "simple_resistor:1.6000x0.6000_mm"
+      (pin RoundRect[T]Pad_600.0000000000001x600.0000000000001_um 1 -500 0)
+      (pin RoundRect[T]Pad_600.0000000000001x600.0000000000001_um 2 500 0)
+    )
+    (padstack "Via[0-1]_600:300_um"
+      (shape (circle F.Cu 600))
+      (shape (circle B.Cu 600))
+      (attach off)
+    )
+    (padstack "RoundRect[T]Pad_600.0000000000001x600.0000000000001_um"
+      (shape (polygon F.Cu 0 -300 300 300 300 300 -300 -300 -300 -300 300))
+      (attach off)
+    )
+  )
+  (network
+    (net "Net-(R1-Pad1)"
+      (pins R1-1 R2-1)
+    )
+    (net "unconnected-(R1-Pad2)"
+      (pins R1-2)
+    )
+    (net "unconnected-(R2-Pad2)"
+      (pins R2-2)
+    )
+    (class "kicad_default" "" "Net-(R1-Pad1)" "unconnected-(R1-Pad2)" "unconnected-(R2-Pad2)"
+      (circuit
+        (use_via "Via[0-1]_600:300_um")
+      )
+      (rule
+        (width 200)
+        (clearance 200)
+      )
+    )
+  )
+  (wiring
+  )
+)
