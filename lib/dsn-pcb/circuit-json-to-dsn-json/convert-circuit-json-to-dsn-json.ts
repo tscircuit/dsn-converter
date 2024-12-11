@@ -137,11 +137,17 @@ function calculateBoardBoundary(pcbBoard: {
   height: number
   center: { x: number; y: number }
 }): number[] {
+  // default to 100mm x 100mm if not provided
+  const width = pcbBoard?.width ?? 100
+  const height = pcbBoard?.height ?? 100
+  const x = pcbBoard?.center?.x ?? 0
+  const y = pcbBoard?.center?.y ?? 0
+
   // Convert dimensions from mm to μm and calculate corners
-  const halfWidth = (pcbBoard.width * 1000) / 2
-  const halfHeight = (pcbBoard.height * 1000) / 2
-  const centerX = pcbBoard.center.x * 1000
-  const centerY = pcbBoard.center.y * 1000
+  const halfWidth = (width * 1000) / 2
+  const halfHeight = (height * 1000) / 2
+  const centerX = x * 1000
+  const centerY = y * 1000
 
   // Return coordinates for a rectangular boundary path
   // Format: [x1, y1, x2, y2, x3, y3, x4, y4, x1, y1] to close the path
