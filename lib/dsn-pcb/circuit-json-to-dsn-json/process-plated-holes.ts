@@ -130,6 +130,7 @@ export function processPlatedHoles(
     }
     const platedHolePins = pcb_plated_holes
       .map((hole) => {
+        // Find the corresponding pcb_port and its source_port
         const pcbPort = su(circuitElements)
           .pcb_port.list()
           .find((e) => e.pcb_port_id === hole.pcb_port_id)
@@ -164,16 +165,6 @@ export function processPlatedHoles(
             ? pin
             : undefined
         } else if (hole.shape === "oval" || hole.shape === "pill") {
-          // Find the corresponding pcb_port and its source_port
-          const pcbPort = su(circuitElements)
-            .pcb_port.list()
-            .find((e) => e.pcb_port_id === hole.pcb_port_id)
-          const sourcePort =
-            pcbPort &&
-            su(circuitElements)
-              .source_port.list()
-              .find((e) => e.source_port_id === pcbPort.source_port_id)
-
           const pin = {
             padstack_name: getPadstackName({
               shape: hole.shape,
