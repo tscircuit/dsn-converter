@@ -121,7 +121,7 @@ export function convertDsnSessionToCircuitJson(
             fromLayer,
             toLayer,
           }),
-        })       
+        })
         sessionElements.push(...routeSegments)
       })
     }
