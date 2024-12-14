@@ -18,7 +18,6 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
     const image = imageMap.get(component.name)
     if (!image) continue
 
-    // Create source component
     // Create source component for each place
     component.places.forEach((place) => {
       const sourceComponent: AnySourceComponent = {
@@ -36,9 +35,9 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
         for (const pin of image.pins) {
           const port: SourcePort = {
             type: "source_port",
-            source_port_id: `source_port_${component.name}-Pad${pin.pin_number}`,
+            source_port_id: `source_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,
             source_component_id: sourceComponent.source_component_id,
-            name: `${component.places[0].refdes}-${pin.pin_number}`,
+            name: `${place.refdes}-${pin.pin_number}`,
             pin_number: Number(pin.pin_number),
             port_hints: [],
           }
@@ -50,7 +49,7 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
             y: placeY + pin.y,
           })
           const pcb_port: PcbPort = {
-            pcb_port_id: `pcb_port_${component.name}-Pad${pin.pin_number}`,
+            pcb_port_id: `pcb_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,
             type: "pcb_port",
             source_port_id: port.source_port_id,
             pcb_component_id: component.name,
