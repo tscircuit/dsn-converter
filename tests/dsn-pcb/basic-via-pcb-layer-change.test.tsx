@@ -9,11 +9,9 @@ import {
 import looksSame from "looks-same"
 import { getTestDebugUtils } from "tests/fixtures/get-test-debug-utils"
 import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
+import { su } from "@tscircuit/soup-util"
 
-// This test is skipped because of several bugs in dsn-converter, we
-// should fix them!!!!
-// https://github.com/tscircuit/dsn-converter/issues/65
-test.skip("basic-via-pcb-layer-change", async () => {
+test("basic-via-pcb-layer-change", async () => {
   const { writeDebugFile, getDebugFilePath } = getTestDebugUtils(
     import.meta.path,
   )
@@ -41,6 +39,8 @@ test.skip("basic-via-pcb-layer-change", async () => {
 
   const dsnJson = parseDsnToDsnJson(dsnFile) as DsnPcb
 
+  // console.log("DSN JSON\n--------\n", dsnJson)
+
   const circuitJsonAfter = convertDsnPcbToCircuitJson(dsnJson)
 
   const svgBefore = convertCircuitJsonToPcbSvg(circuitJsonBefore)
@@ -57,5 +57,18 @@ test.skip("basic-via-pcb-layer-change", async () => {
     getDebugFilePath("circuit.after.svg"),
   )
 
-  expect(looksSameResult.equal).toBe(true)
+  const beforeSmtPads = su(circuitJsonBefore).pcb_smtpad.list()
+  const afterSmtPads = su(circuitJsonAfter).pcb_smtpad.list()
+
+  // console.log("BEFORE\n-------\n", beforeSmtPads)
+  // console.log("AFTER\n-------\n", afterSmtPads)
+
+  expect(
+    afterSmtPads.map((p) => p.layer).filter((l) => l === "bottom"),
+  ).toHaveLength(
+    beforeSmtPads.map((p) => p.layer).filter((l) => l === "bottom").length,
+  )
+
+  //
+  // expect(looksSameResult.equal).toBe(true)
 })

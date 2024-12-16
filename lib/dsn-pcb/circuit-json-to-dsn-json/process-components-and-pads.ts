@@ -89,6 +89,7 @@ export function processComponentsAndPads(
           shape: "rect",
           width: pad.width * 1000,
           height: pad.height * 1000,
+          layer: pad.layer,
         })
         if (!processedPadstacks.has(padstackName)) {
           const padWidthInUm = Math.round(pad.width * 1000)
@@ -97,6 +98,7 @@ export function processComponentsAndPads(
             padstackName,
             padWidthInUm,
             padHeightInUm,
+            pad.layer,
           )
           pcb.library.padstacks.push(padstack)
           processedPadstacks.add(padstackName)
@@ -129,6 +131,7 @@ export function processComponentsAndPads(
                 shape: "rect",
                 width: pad.width * 1000,
                 height: pad.height * 1000,
+                layer: pad.layer,
               }),
               pin_number:
                 sourcePort?.port_hints?.find(
