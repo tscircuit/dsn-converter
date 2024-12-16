@@ -186,3 +186,5 @@ yalc.lock
 
 #ignore the md files inside the dsn-files-stages folder
 dsn-files-stages/*.md
+
+debug-files
