@@ -18,15 +18,17 @@ export function mergeDsnSessionIntoDsnPcb(
     mergedPcb.wiring.wires = []
 
     dsnSession.routes.network_out.nets.forEach((sessionNet) => {
-      sessionNet.wires.forEach((wire) => {
-        if (wire.path) {
-          mergedPcb.wiring.wires.push({
-            path: wire.path,
-            net: sessionNet.name,
-            type: "route",
-          })
-        }
-      })
+      if (sessionNet.wires) {
+        sessionNet.wires.forEach((wire) => {
+          if (wire.path) {
+            mergedPcb.wiring.wires.push({
+              path: wire.path,
+              net: sessionNet.name,
+              type: "route",
+            })
+          }
+        })
+      }
     })
   }
 
