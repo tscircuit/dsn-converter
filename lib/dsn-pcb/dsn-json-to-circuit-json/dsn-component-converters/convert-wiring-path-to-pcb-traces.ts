@@ -5,6 +5,9 @@ import type {
 } from "circuit-json"
 import { type Matrix, applyToPoint } from "transformation-matrix"
 import type { Wiring } from "../../types"
+import Debug from "debug"
+
+const debug = Debug("dsn-converter:convertWiringPathToPcbTraces")
 
 export const convertWiringPathToPcbTraces = ({
   wire,

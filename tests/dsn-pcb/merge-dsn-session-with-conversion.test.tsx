@@ -107,27 +107,6 @@ test("merge-dsn-session-with-conversion", async () => {
 
     debug("ORIGINAL TRACE\n--------------\n", originalTrace)
     debug("MERGED TRACE\n--------------\n", mergedTrace)
-
-    // Compare each route point
-    // expect(mergedTrace.route.length).toBe(originalTrace.route.length)
-
-    for (let j = 0; j < originalTrace.route.length; j++) {
-      const originalPoint = originalTrace.route[j]
-      const mergedPoint = mergedTrace.route[j]
-
-      // Compare x,y coordinates with small tolerance for floating point differences
-      // expect(Math.abs(mergedPoint.x - originalPoint.x)).toBeLessThan(0.0001)
-      // expect(Math.abs(mergedPoint.y - originalPoint.y)).toBeLessThan(0.0001)
-
-      // For wire points, also check width and layer
-      // if (
-      //   originalPoint.route_type === "wire" &&
-      //   mergedPoint.route_type === "wire"
-      // ) {
-      // expect(mergedPoint.width).toBe(originalPoint.width)
-      // expect(mergedPoint.layer).toBe(originalPoint.layer)
-      // }
-    }
   }
 
   // Compare SVGs
