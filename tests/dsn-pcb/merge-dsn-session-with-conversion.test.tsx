@@ -8,6 +8,7 @@ import {
   convertDsnSessionToCircuitJson,
   type DsnPcb,
   type DsnSession,
+  convertCircuitJsonToDsnSession,
 } from "lib"
 import looksSame from "looks-same"
 import { getTestDebugUtils } from "tests/fixtures/get-test-debug-utils"
@@ -37,8 +38,11 @@ test("merge-dsn-session-with-conversion", async () => {
   )
 
   const circuitJsonBefore = await circuit.getCircuitJson()
+  console.log("CIRCUIT JSON BEFORE\n------------------\n", circuitJsonBefore)
   const dsnFile = convertCircuitJsonToDsnString(circuitJsonBefore)
+  console.log("DSN FILE\n--------\n", dsnFile)
   const originalDsnPcb = parseDsnToDsnJson(dsnFile) as DsnPcb
+  console.log("ORIGINAL DSN PCB\n----------------\n", originalDsnPcb)
 
   // Create a PCB without traces by removing wiring section
   const dsnPcbWithoutTraces: DsnPcb = {
@@ -47,28 +51,18 @@ test("merge-dsn-session-with-conversion", async () => {
   }
 
   // Create a session from the original PCB's wiring
-  const session: DsnSession = {
-    is_dsn_session: true,
-    filename: "test_session",
-    placement: {
-      resolution: originalDsnPcb.resolution,
-      components: originalDsnPcb.placement.components,
-    },
-    routes: {
-      resolution: originalDsnPcb.resolution,
-      parser: originalDsnPcb.parser,
-      network_out: {
-        nets: originalDsnPcb.network.nets.map((net) => ({
-          name: net.name,
-          wires: originalDsnPcb.wiring.wires.filter((w) => w.net === net.name),
-        })),
-      },
-    },
-  }
+  const session: DsnSession = convertCircuitJsonToDsnSession(
+    dsnPcbWithoutTraces,
+    circuitJsonBefore,
+  )
+
+  console.log("SESSION\n-------\n", session)
 
   // Merge session back into PCB without traces
   const mergedPcb = mergeDsnSessionIntoDsnPcb(dsnPcbWithoutTraces, session)
-  
+
+  console.log("MERGED PCB\n------------\n", mergedPcb)
+
   // Convert both to circuit JSON for comparison
   const circuitJsonFromOriginal = convertDsnPcbToCircuitJson(originalDsnPcb)
   const circuitJsonFromMerged = convertDsnPcbToCircuitJson(mergedPcb)
@@ -79,7 +73,10 @@ test("merge-dsn-session-with-conversion", async () => {
 
   writeDebugFile("circuit.original.svg", svgOriginal)
   writeDebugFile("circuit.merged.svg", svgMerged)
-  writeDebugFile("circuit.original.json", JSON.stringify(circuitJsonFromOriginal))
+  writeDebugFile(
+    "circuit.original.json",
+    JSON.stringify(circuitJsonFromOriginal),
+  )
   writeDebugFile("circuit.merged.json", JSON.stringify(circuitJsonFromMerged))
 
   // Verify wiring was restored
