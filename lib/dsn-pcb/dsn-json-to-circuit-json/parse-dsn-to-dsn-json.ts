@@ -921,9 +921,20 @@ export function processWiring(nodes: ASTNode[]): Wiring {
     ) {
       wiring.wires!.push(processWire(node.children!))
     }
+    if (
+      node.type === "List" &&
+      node.children![0].type === "Atom" &&
+      node.children![0].value === "via"
+    ) {
+      wiring.wires!.push(processVia(node.children!))
+    }
   })
 
   return wiring as Wiring
+}
+
+function processVia(nodes: ASTNode[]): Wire {
+  // TODO
 }
 
 function processWire(nodes: ASTNode[]): Wire {

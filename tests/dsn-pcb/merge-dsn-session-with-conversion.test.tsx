@@ -9,6 +9,7 @@ import {
   type DsnPcb,
   type DsnSession,
   convertCircuitJsonToDsnSession,
+  stringifyDsnJson,
 } from "lib"
 import looksSame from "looks-same"
 import { getTestDebugUtils } from "tests/fixtures/get-test-debug-utils"
@@ -39,11 +40,12 @@ test("merge-dsn-session-with-conversion", async () => {
   )
 
   const baseCircuitJson = await circuit.getCircuitJson()
-  debug("CIRCUIT JSON BEFORE\n------------------\n", baseCircuitJson)
+  writeDebugFile("base.circuit.json", JSON.stringify(baseCircuitJson, null, 2))
   const dsnFile = convertCircuitJsonToDsnString(baseCircuitJson)
   debug("DSN FILE\n--------\n", dsnFile)
   writeDebugFile("original.dsn", dsnFile)
   const originalDsnPcb = parseDsnToDsnJson(dsnFile) as DsnPcb
+  writeDebugFile("original.dsn.json", JSON.stringify(originalDsnPcb, null, 2))
   debug("ORIGINAL DSN PCB\n----------------\n", originalDsnPcb)
 
   // Create a PCB without traces by removing wiring section
@@ -62,6 +64,7 @@ test("merge-dsn-session-with-conversion", async () => {
 
   // Merge session back into PCB without traces
   const mergedPcb = mergeDsnSessionIntoDsnPcb(dsnPcbWithoutTraces, session)
+  writeDebugFile("merged.dsn", stringifyDsnJson(mergedPcb))
 
   debug("MERGED PCB\n------------\n", mergedPcb)
 
@@ -79,9 +82,12 @@ test("merge-dsn-session-with-conversion", async () => {
   writeDebugFile("circuit.merged.svg", svgMerged)
   writeDebugFile(
     "circuit.original.json",
-    JSON.stringify(circuitJsonFromOriginal),
+    JSON.stringify(circuitJsonFromOriginal, null, 2),
   )
-  writeDebugFile("circuit.merged.json", JSON.stringify(circuitJsonFromMerged))
+  writeDebugFile(
+    "circuit.merged.json",
+    JSON.stringify(circuitJsonFromMerged, null, 2),
+  )
 
   // Verify wiring was restored
   // TODO must fix dsn session conversion before this works
