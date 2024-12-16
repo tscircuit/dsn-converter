@@ -17,7 +17,12 @@ export function getPadstackName({
   outerDiameter,
   layer = "top",
 }: PadstackNameArgs): string {
-  const layerCode = layer === "bottom" ? "B" : "T"
+  const layerCode =
+    {
+      top: "T",
+      bottom: "B",
+      all: "A",
+    }[layer as string] ?? "T"
   switch (shape) {
     case "circle":
       return `Round[${layerCode}]Pad_${holeDiameter}_${outerDiameter}_um`

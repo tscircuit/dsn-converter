@@ -96,6 +96,7 @@ export function processPlatedHoles(
           shape: hole.shape,
           width: hole.hole_width * 1000,
           height: hole.hole_height * 1000,
+          layer: "all",
         })
         if (!processedPadstacks.has(padstackName)) {
           const padInnerWidthInUm = Math.round(hole.hole_width * 1000)
@@ -147,6 +148,7 @@ export function processPlatedHoles(
               shape: "circle",
               holeDiameter: hole.hole_diameter * 1000,
               outerDiameter: hole.outer_diameter * 1000,
+              layer: "all",
             }),
             pin_number:
               sourcePort?.port_hints?.find(
@@ -171,6 +173,7 @@ export function processPlatedHoles(
               shape: hole.shape,
               width: hole.hole_width * 1000,
               height: hole.hole_height * 1000,
+              layer: "all",
             }),
             pin_number:
               sourcePort?.port_hints?.find(
