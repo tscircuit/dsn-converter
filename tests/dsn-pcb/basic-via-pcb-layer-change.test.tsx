@@ -39,7 +39,7 @@ test("basic-via-pcb-layer-change", async () => {
 
   const dsnJson = parseDsnToDsnJson(dsnFile) as DsnPcb
 
-  console.log("DSN JSON\n--------\n", dsnJson)
+  // console.log("DSN JSON\n--------\n", dsnJson)
 
   const circuitJsonAfter = convertDsnPcbToCircuitJson(dsnJson)
 
@@ -60,8 +60,8 @@ test("basic-via-pcb-layer-change", async () => {
   const beforeSmtPads = su(circuitJsonBefore).pcb_smtpad.list()
   const afterSmtPads = su(circuitJsonAfter).pcb_smtpad.list()
 
-  console.log("BEFORE\n-------\n", beforeSmtPads)
-  console.log("AFTER\n-------\n", afterSmtPads)
+  // console.log("BEFORE\n-------\n", beforeSmtPads)
+  // console.log("AFTER\n-------\n", afterSmtPads)
 
   expect(
     afterSmtPads.map((p) => p.layer).filter((l) => l === "bottom"),
@@ -69,5 +69,6 @@ test("basic-via-pcb-layer-change", async () => {
     beforeSmtPads.map((p) => p.layer).filter((l) => l === "bottom").length,
   )
 
+  //
   // expect(looksSameResult.equal).toBe(true)
 })
