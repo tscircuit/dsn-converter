@@ -4,7 +4,7 @@ import type {
   PcbTrace,
   PcbTraceRoutePoint,
 } from "circuit-json"
-import type { DsnPcb } from "../../types"
+import type { DsnPcb, DsnSession } from "../../types"
 import Debug from "debug"
 import { findOrCreateViaPadstack } from "./findOrCreateViaPadstack"
 

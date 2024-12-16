@@ -1,4 +1,7 @@
 import type { DsnPcb, DsnSession } from "../types"
+import Debug from "debug"
+
+const debug = Debug("dsn-converter:mergeDsnSessionIntoDsnPcb")
 
 export function mergeDsnSessionIntoDsnPcb(
   dsnPcb: DsnPcb,
@@ -20,12 +23,11 @@ export function mergeDsnSessionIntoDsnPcb(
     dsnSession.routes.network_out.nets.forEach((sessionNet) => {
       if (sessionNet.wires) {
         sessionNet.wires.forEach((wire) => {
+          debug("WIRE\n----\n", wire)
           if (wire.path) {
             mergedPcb.wiring.wires.push({
               path: {
                 ...wire.path,
-                // The coordinates must be flipped over the y axis and scaled
-                // to 1/10 the original value
                 // DsnSession represents the coordinates in ses units, which are
                 // 10x larger than the um units used in the DsnPcb files
                 coordinates: wire.path.coordinates.map((c) => c / 10),
