@@ -38,9 +38,9 @@ test("merge-dsn-session-with-conversion", async () => {
     </board>,
   )
 
-  const circuitJsonBefore = await circuit.getCircuitJson()
-  debug("CIRCUIT JSON BEFORE\n------------------\n", circuitJsonBefore)
-  const dsnFile = convertCircuitJsonToDsnString(circuitJsonBefore)
+  const baseCircuitJson = await circuit.getCircuitJson()
+  debug("CIRCUIT JSON BEFORE\n------------------\n", baseCircuitJson)
+  const dsnFile = convertCircuitJsonToDsnString(baseCircuitJson)
   debug("DSN FILE\n--------\n", dsnFile)
   writeDebugFile("original.dsn", dsnFile)
   const originalDsnPcb = parseDsnToDsnJson(dsnFile) as DsnPcb
@@ -55,7 +55,7 @@ test("merge-dsn-session-with-conversion", async () => {
   // Create a session from the original PCB's wiring
   const session: DsnSession = convertCircuitJsonToDsnSession(
     dsnPcbWithoutTraces,
-    circuitJsonBefore,
+    baseCircuitJson,
   )
 
   debug("SESSION\n-------\n", session)
@@ -70,9 +70,11 @@ test("merge-dsn-session-with-conversion", async () => {
   const circuitJsonFromMerged = convertDsnPcbToCircuitJson(mergedPcb)
 
   // Generate SVGs for visual comparison
+  const baseCircuitSvg = convertCircuitJsonToPcbSvg(baseCircuitJson)
   const svgOriginal = convertCircuitJsonToPcbSvg(circuitJsonFromOriginal)
   const svgMerged = convertCircuitJsonToPcbSvg(circuitJsonFromMerged)
 
+  writeDebugFile("circuit.base.svg", baseCircuitSvg)
   writeDebugFile("circuit.original.svg", svgOriginal)
   writeDebugFile("circuit.merged.svg", svgMerged)
   writeDebugFile(
