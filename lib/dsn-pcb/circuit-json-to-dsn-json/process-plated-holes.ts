@@ -78,6 +78,7 @@ export function processPlatedHoles(
           shape: "circle",
           holeDiameter: hole.hole_diameter * 1000,
           outerDiameter: hole.outer_diameter * 1000,
+          layer: "all",
         })
         if (!processedPadstacks.has(padstackName)) {
           const padDiameterInUm = Math.round(hole.outer_diameter * 1000)

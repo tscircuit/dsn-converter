@@ -1,9 +1,12 @@
+import type { PcbSmtPad } from "circuit-json"
+
 interface PadstackNameArgs {
   shape: "circle" | "oval" | "pill" | "rect"
   width?: number
   height?: number
   holeDiameter?: number
   outerDiameter?: number
+  layer?: PcbSmtPad["layer"] | "all"
 }
 
 export function getPadstackName({
@@ -12,16 +15,18 @@ export function getPadstackName({
   height,
   holeDiameter,
   outerDiameter,
+  layer = "top",
 }: PadstackNameArgs): string {
+  const layerCode = layer === "bottom" ? "B" : "T"
   switch (shape) {
     case "circle":
-      return `Round[A]Pad_${holeDiameter}_${outerDiameter}_um`
+      return `Round[${layerCode}]Pad_${holeDiameter}_${outerDiameter}_um`
     case "oval":
-      return `Oval[A]Pad_${width}x${height}_um`
+      return `Oval[${layerCode}]Pad_${width}x${height}_um`
     case "pill":
-      return `Oval[A]Pad_${width}x${height}_um`
+      return `Oval[${layerCode}]Pad_${width}x${height}_um`
     case "rect":
-      return `RoundRect[T]Pad_${width}x${height}_um`
+      return `RoundRect[${layerCode}]Pad_${width}x${height}_um`
     default:
       return "default_pad"
   }

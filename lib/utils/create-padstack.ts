@@ -1,3 +1,4 @@
+import type { PcbSmtPad } from "circuit-json"
 import type { Padstack } from "../dsn-pcb/types"
 
 export function createCircularPadstack(
@@ -72,6 +73,7 @@ export function createRectangularPadstack(
   name: string,
   width: number,
   height: number,
+  layer: PcbSmtPad["layer"],
 ): Padstack {
   const halfWidth = width / 2
   const halfHeight = height / 2
@@ -81,7 +83,7 @@ export function createRectangularPadstack(
     shapes: [
       {
         shapeType: "polygon",
-        layer: "F.Cu",
+        layer: layer === "bottom" ? "B.Cu" : "F.Cu",
         width: 0,
         coordinates: [
           -halfWidth,

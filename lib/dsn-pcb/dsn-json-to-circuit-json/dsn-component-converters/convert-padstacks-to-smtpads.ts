@@ -1,6 +1,9 @@
 import type { AnyCircuitElement, PcbSmtPad } from "circuit-json"
 import type { DsnPcb } from "lib/dsn-pcb/types"
 import { applyToPoint } from "transformation-matrix"
+import Debug from "debug"
+
+const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
 
 export function convertPadstacksToSmtPads(
   pcb: DsnPcb,
@@ -9,6 +12,7 @@ export function convertPadstacksToSmtPads(
   const elements: AnyCircuitElement[] = []
   const { padstacks, images } = pcb.library
 
+  debug("processing padstacks...")
   images.forEach((image) => {
     const componentId = image.name
     const placementComponent = pcb.placement.components.find(
@@ -22,11 +26,13 @@ export function convertPadstacksToSmtPads(
 
     // Handle each placement for this component
     placementComponent.places.forEach((place) => {
+      debug("processing place...", { place })
       const { x: compX, y: compY, side } = place
 
       image.pins.forEach((pin) => {
         // Find the corresponding padstack
         const padstack = padstacks.find((p) => p.name === pin.padstack_name)
+        debug("found padstack", { padstack })
 
         if (!padstack) {
           console.warn(`No padstack found for pin: ${pin.padstack_name}`)
@@ -49,6 +55,13 @@ export function convertPadstacksToSmtPads(
         const pathShape = padstack.shapes.find(
           (shape) => shape.shapeType === "path",
         )
+
+        debug("found shapes", {
+          rectShape,
+          polygonShape,
+          circleShape,
+          pathShape,
+        })
 
         let width: number
         let height: number
@@ -104,6 +117,13 @@ export function convertPadstacksToSmtPads(
 
         let pcbPad: PcbSmtPad
         if (rectShape || polygonShape || pathShape) {
+          const layer = padstack.shapes[0].layer.includes("B.")
+            ? "bottom"
+            : "top"
+          debug("determining layer with padstack shapes", {
+            shapes: padstack.shapes,
+            layer,
+          })
           pcbPad = {
             type: "pcb_smtpad",
             pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
@@ -114,7 +134,7 @@ export function convertPadstacksToSmtPads(
             y: circuitY,
             width,
             height,
-            layer: side === "front" ? "top" : "bottom",
+            layer,
             port_hints: [pin.pin_number.toString()],
           }
         } else {

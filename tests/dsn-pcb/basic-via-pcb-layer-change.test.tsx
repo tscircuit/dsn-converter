@@ -39,6 +39,8 @@ test("basic-via-pcb-layer-change", async () => {
 
   const dsnJson = parseDsnToDsnJson(dsnFile) as DsnPcb
 
+  console.log("DSN JSON\n--------\n", dsnJson)
+
   const circuitJsonAfter = convertDsnPcbToCircuitJson(dsnJson)
 
   const svgBefore = convertCircuitJsonToPcbSvg(circuitJsonBefore)
