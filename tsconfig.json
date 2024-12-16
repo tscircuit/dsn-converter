@@ -10,7 +10,8 @@
 
     "paths": {
       "lib": ["./lib"],
-      "lib/*": ["./lib/*"]
+      "lib/*": ["./lib/*"],
+      "tests/*": ["./tests/*"]
     },
 
     // Bundler mode
