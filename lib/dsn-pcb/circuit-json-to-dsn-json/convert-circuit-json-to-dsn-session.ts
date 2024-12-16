@@ -8,11 +8,6 @@ export function convertCircuitJsonToDsnSession(
   dsnPcb: DsnPcb,
   circuitJson: AnyCircuitElement[],
 ): DsnSession {
-  // First convert to DSN PCB to reuse component/pad processing
-  // const dsnPcb = convertCircuitJsonToDsnJson(circuitJson)
-
-  // console.dir(dsnPcb, { depth: null })
-
   const pcb_traces = su(circuitJson as any).pcb_trace.list()
   const source_traces = su(circuitJson as any).source_trace.list()
   const source_ports = su(circuitJson as any).source_port.list()
@@ -44,13 +39,22 @@ export function convertCircuitJsonToDsnSession(
             )
           const net_name = source_net?.name || trace.source_trace_id
 
+          // TODO only supports single layer traces
+          const traceLayer =
+            "layer" in trace.route[0] && trace.route[0].layer === "bottom"
+              ? "bottom"
+              : "top"
+
+          const traceWidth =
+            "width" in trace.route[0] ? trace.route[0].width : 0.16
+
           return {
-            name: net_name,
+            name: net_name!,
             wires: [
               {
                 path: {
-                  layer: trace.route[0]?.layer === "bottom" ? "B.Cu" : "F.Cu",
-                  width: (trace.route[0]?.width || 0.16) * 1000,
+                  layer: traceLayer === "bottom" ? "B.Cu" : "F.Cu",
+                  width: traceWidth * 1000,
                   coordinates: trace.route
                     .filter(
                       (rp): rp is PcbTraceRoutePointWire =>

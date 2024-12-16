@@ -32,7 +32,7 @@ export function processPcbTraces(
 
       for (const point of pcbTrace.route) {
         wire.path.coordinates.push(point.x * 1000) // Convert mm to um
-        wire.path.coordinates.push(-point.y * 1000) // Negate Y to match DSN coordinate system
+        wire.path.coordinates.push(point.y * 1000) // Negate Y to match DSN coordinate system
       }
 
       pcb.wiring.wires.push(wire)

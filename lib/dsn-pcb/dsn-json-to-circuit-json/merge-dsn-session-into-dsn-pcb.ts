@@ -22,7 +22,14 @@ export function mergeDsnSessionIntoDsnPcb(
         sessionNet.wires.forEach((wire) => {
           if (wire.path) {
             mergedPcb.wiring.wires.push({
-              path: wire.path,
+              path: {
+                ...wire.path,
+                // The coordinates must be flipped over the y axis and scaled
+                // to 1/10 the original value
+                // DsnSession represents the coordinates in ses units, which are
+                // 10x larger than the um units used in the DsnPcb files
+                coordinates: wire.path.coordinates.map((c) => c / 10),
+              },
               net: sessionNet.name,
               type: "route",
             })
