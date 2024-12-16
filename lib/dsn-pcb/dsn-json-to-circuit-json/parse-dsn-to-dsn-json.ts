@@ -36,6 +36,9 @@ import type {
   Wire,
   Wiring,
 } from "../types"
+import Debug from "debug"
+
+const debug = Debug("dsn-converter:parse-dsn-to-dsn-json")
 
 // **Process AST into TypeScript Interfaces**
 export function parseDsnToDsnJson(dsnString: string): DsnJson {
@@ -921,9 +924,58 @@ export function processWiring(nodes: ASTNode[]): Wiring {
     ) {
       wiring.wires!.push(processWire(node.children!))
     }
+    if (
+      node.type === "List" &&
+      node.children![0].type === "Atom" &&
+      node.children![0].value === "via"
+    ) {
+      wiring.wires!.push(processVia(node.children!))
+    }
   })
 
   return wiring as Wiring
+}
+
+function processVia(nodes: ASTNode[]): Wire {
+  const wire: Partial<Wire> = {}
+
+  // Find the path node which contains coordinates
+  const pathNode = nodes.find(
+    (node) =>
+      node.type === "List" &&
+      node.children?.[0]?.type === "Atom" &&
+      node.children[0].value === "path",
+  )
+
+  if (pathNode?.children) {
+    const coords = pathNode.children
+      .filter((node) => node.type === "Atom" && typeof node.value === "number")
+      .slice(-2) // Take last two numbers as x,y coordinates
+
+    if (coords.length === 2) {
+      wire.path = {
+        layer: "all", // vias connect all layers
+        width: 0, // width is defined by the padstack
+        coordinates: coords.map((node) => node.value as number),
+      }
+      wire.type = "via"
+
+      // Find net name if present
+      const netNode = nodes.find(
+        (node) =>
+          node.type === "List" &&
+          node.children?.[0]?.type === "Atom" &&
+          node.children[0].value === "net",
+      )
+      if (netNode?.children?.[1]?.type === "Atom") {
+        wire.net = String(netNode.children[1].value)
+      }
+
+      return wire as Wire
+    }
+  }
+
+  throw new Error("Invalid via format")
 }
 
 function processWire(nodes: ASTNode[]): Wire {

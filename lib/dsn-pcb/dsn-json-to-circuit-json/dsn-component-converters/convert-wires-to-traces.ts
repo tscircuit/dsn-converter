@@ -7,38 +7,56 @@ import { type Matrix, applyToPoint } from "transformation-matrix"
 import type { Network, Wiring } from "../../types"
 import { convertPolylinePathToPcbTraces } from "./convert-polyline-path-to-pcb-traces"
 import { convertWiringPathToPcbTraces } from "./convert-wiring-path-to-pcb-traces"
+import Debug from "debug"
+import { convertWiringViaToPcbVias } from "./convert-wiring-via-to-pcb-vias"
+
+const debug = Debug("dsn-converter:convertWiresToPcbTraces")
 
 export function convertWiresToPcbTraces(
   wiring: Wiring,
   network: Network,
   transformUmToMm: Matrix,
 ): AnyCircuitElement[] {
-  const traces: AnyCircuitElement[] = []
+  const tracesAndVias: AnyCircuitElement[] = []
   const processedNets = new Set<string>()
 
   wiring.wires?.forEach((wire) => {
+    debug("WIRE\n----\n", wire)
     const netName = wire.net
     if (!netName) return
 
-    if (processedNets.has(netName) || wire.type === "shove_fixed") {
+    if (wire.type === "shove_fixed") {
       return
+    }
+    if (processedNets.has(netName)) {
+      debug(
+        `Already processed wire for net "${netName}" but got another (hopefully not a duplicate wire!)`,
+      )
     }
     processedNets.add(netName)
 
+    if (wire.type === "via") {
+      debug("wire is actually a via!")
+      tracesAndVias.push(
+        ...convertWiringViaToPcbVias({ wire, transformUmToMm, netName }),
+      )
+      return
+    }
+
     if ("polyline_path" in wire) {
-      traces.push(
+      tracesAndVias.push(
         ...convertPolylinePathToPcbTraces({ wire, transformUmToMm, netName }),
       )
       return
     }
 
     if ("path" in wire) {
-      traces.push(
+      tracesAndVias.push(
         ...convertWiringPathToPcbTraces({ wire, transformUmToMm, netName }),
       )
       return
     }
   })
 
-  return traces
+  return tracesAndVias
 }

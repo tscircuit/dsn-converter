@@ -105,12 +105,21 @@ export function convertDsnSessionToCircuitJson(
         const fromLayer = connectingWires[0]?.layer || "top"
         const toLayer = connectingWires[1]?.layer || "bottom"
 
-        routeSegments[0].route.push({
-          x: viaX,
-          y: viaY,
-          route_type: "via",
-          from_layer: fromLayer,
-          to_layer: toLayer,
+        // Add via point to each trace that connects to it
+        sessionElements.forEach((element) => {
+          if (element.type === "pcb_trace") {
+            const trace = element as PcbTrace
+            const lastPoint = trace.route[trace.route.length - 1]
+            if (lastPoint && lastPoint.x === viaX && lastPoint.y === viaY) {
+              trace.route.push({
+                x: viaX,
+                y: viaY,
+                route_type: "via",
+                from_layer: fromLayer,
+                to_layer: toLayer,
+              })
+            }
+          }
         })
 
         sessionElements.push({
@@ -122,7 +131,6 @@ export function convertDsnSessionToCircuitJson(
             toLayer,
           }),
         })
-        sessionElements.push(...routeSegments)
       })
     }
   }
