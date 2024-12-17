@@ -1098,6 +1098,7 @@ function processSessionNode(ast: ASTNode): DsnSession {
     )
     if (libraryNode) {
       session.routes.library_out = {
+        images: [],
         padstacks: libraryNode
           .children!.filter(
             (child) =>
