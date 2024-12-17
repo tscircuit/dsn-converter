@@ -301,6 +301,7 @@ export interface DsnSession {
     resolution: Resolution
     parser: Parser
     library_out?: {
+      images: Image[]
       padstacks: Padstack[]
     }
     network_out: {
