@@ -1,14 +1,17 @@
 import type { DsnPcb, Padstack } from "lib/dsn-pcb/types"
+import type { DsnTraceOperationsWrapper } from "./DsnTraceOperationsWrapper"
 
 export function findOrCreateViaPadstack(
-  pcb: DsnPcb,
+  pcb: DsnTraceOperationsWrapper,
   outerDiameter: number,
   holeDiameter: number,
 ): string {
   const viaName = `Via[0-1]_${outerDiameter}:${holeDiameter}_um`
 
+  const library = pcb.getLibrary()
+
   // Check if padstack already exists
-  const existingPadstack = pcb.library.padstacks.find((p) => p.name === viaName)
+  const existingPadstack = library.padstacks.find((p) => p.name === viaName)
 
   if (existingPadstack) {
     return viaName
@@ -36,6 +39,6 @@ export function findOrCreateViaPadstack(
     },
   }
 
-  pcb.library.padstacks.push(viaPadstack)
+  library.padstacks.push(viaPadstack)
   return viaName
 }

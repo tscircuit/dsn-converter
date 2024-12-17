@@ -116,5 +116,5 @@ test("merge-dsn-session-with-conversion", async () => {
   )
   // TODO requires fix inside convertCircuitJsonToDsnSession, currently the vias
   // aren't converted properly- reference or adapt the code in processPcbTraces
-  // expect(looksSameResult.equal).toBe(true) // Should be identical after merge
+  expect(looksSameResult.equal).toBe(true) // Should be identical after merge
 })

@@ -33,7 +33,7 @@ export function mergeDsnSessionIntoDsnPcb(
                 coordinates: wire.path.coordinates.map((c) => c / 10),
               },
               net: sessionNet.name,
-              type: "route",
+              type: wire.type ?? "route",
             })
           }
         })
