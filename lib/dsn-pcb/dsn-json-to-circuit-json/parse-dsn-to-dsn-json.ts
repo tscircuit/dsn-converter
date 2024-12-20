@@ -598,56 +598,6 @@ function processPin(nodes: ASTNode[]): Pin {
       console.error("Missing pin number")
     }
 
-    //   if (nodes[1]?.type === "Atom") {
-    //     pin.padstack_name = String(nodes[1].value)
-    //   } else {
-    //     throw new Error("Missing padstack name")
-    //   }
-
-    //   // Get pin number
-    //   if (nodes[2]?.type === "Atom") {
-    //     if (typeof nodes[2].value === "number") {
-    //       pin.pin_number = nodes[2].value
-    //     } else {
-    //       const parsed = parseInt(String(nodes[2].value), 10)
-    //       pin.pin_number = Number.isNaN(parsed) ? String(nodes[2].value) : parsed
-    //     }
-    //   } else if (nodes[2]?.type === "List") {
-    //   nodes[2].children?.forEach((node) => {
-    //     if (typeof node.value === "number") {
-    //       pin.pin_number =node.value
-    //     } else {
-    //       const parsed = parseInt(String(node.value), 10)
-    //       pin.pin_number = Number.isNaN(parsed) ? String(node.value) : parsed
-    //     }
-    // })
-
-    // }else{
-    //     throw new Error("Missing pin number")
-    //   }
-
-    // Check for rotate property
-
-    // if (nodes[1]?.type === "Atom") {
-    //   pin.padstack_name = String(nodes[1].value)
-    // } else {
-    //   throw new Error("Missing padstack name")
-    // }
-
-    // // Get pin number
-    // if (nodes[2]?.type === "Atom") {
-    //   console.log("nodes[2].value", nodes[2].value)
-    //   if (typeof nodes[2].value === "number") {
-    //     pin.pin_number = nodes[2].value
-    //   } else {
-    //     const parsed = parseInt(String(nodes[2].value), 10)
-    //     pin.pin_number = Number.isNaN(parsed) ? String(nodes[2].value) : parsed
-    //   }
-    // } else {
-    //   console.log("nodes[1]",nodes[1],"nodes[2]", nodes[2])
-    //   throw new Error("Missing pin number")
-    // }
-
     // Handle coordinates, accounting for scientific notation
     let xValue: number | undefined
     let yValue: number | undefined
@@ -1045,49 +995,6 @@ function processVia(nodes: ASTNode[]): Wire {
 
   return wire as Wire
 }
-
-// function processVia(nodes: ASTNode[]): Wire {
-//   const wire: Partial<Wire> = {}
-
-//   // Find the path node which contains coordinates
-//   const pathNode = nodes.find(
-//     (node) =>
-//       node.type === "List" &&
-//       node.children?.[0]?.type === "Atom" &&
-//       node.children[0].value === "path",
-//   )
-
-//   if (pathNode?.children) {
-//     const coords = pathNode.children
-//       .filter((node) => node.type === "Atom" && typeof node.value === "number")
-//       .slice(-2) // Take last two numbers as x,y coordinates
-
-//     if (coords.length === 2) {
-//       wire.path = {
-//         layer: "all", // vias connect all layers
-//         width: 0, // width is defined by the padstack
-//         coordinates: coords.map((node) => node.value as number),
-//       }
-//       wire.type = "via"
-
-//       // Find net name if present
-//       const netNode = nodes.find(
-//         (node) =>
-//           node.type === "List" &&
-//           node.children?.[0]?.type === "Atom" &&
-//           node.children[0].value === "net",
-//       )
-//       if (netNode?.children?.[1]?.type === "Atom") {
-//         wire.net = String(netNode.children[1].value)
-//       }
-
-//       return wire as Wire
-//     }
-//   }
-
-//   console.log("nodes", nodes)
-//   throw new Error("Invalid via format")
-// }
 
 function processWire(nodes: ASTNode[]): Wire {
   const wire: Partial<Wire> = {}
