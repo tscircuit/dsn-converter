@@ -567,11 +567,6 @@ function processOutline(nodes: ASTNode[]): Outline {
 
 function processPin(nodes: ASTNode[]): Pin | null {
   const pin: Partial<Pin> = {}
-  // default pin
-  pin.padstack_name = "default"
-  pin.pin_number = 1
-  pin.x = 0
-  pin.y = 0
 
   try {
     // Get padstack name
