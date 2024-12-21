@@ -541,7 +541,8 @@ function processImage(nodes: ASTNode[]): Image {
         if (key === "outline") {
           image.outlines!.push(processOutline(node.children!))
         } else if (key === "pin") {
-          image.pins!.push(processPin(node.children!))
+          const pin = processPin(node.children!)
+          if (pin) image.pins!.push(pin)
         }
       }
     }
@@ -564,7 +565,7 @@ function processOutline(nodes: ASTNode[]): Outline {
   return outline as Outline
 }
 
-function processPin(nodes: ASTNode[]): Pin {
+function processPin(nodes: ASTNode[]): Pin | null {
   const pin: Partial<Pin> = {}
   // default pin
   pin.padstack_name = "default"
@@ -578,7 +579,8 @@ function processPin(nodes: ASTNode[]): Pin {
     if (nodes[1]?.type === "Atom") {
       pin.padstack_name = String(nodes[1].value)
     } else {
-      throw new Error("Missing padstack name")
+      debug("Unsupported pin padstack_name format:", nodes)
+      return null
     }
 
     // Helper function to parse pin number
@@ -594,8 +596,8 @@ function processPin(nodes: ASTNode[]): Pin {
     if (nodes[2]?.type === "Atom") {
       pin.pin_number = parsePinNumber(nodes[2].value)
     } else {
-      console.warn("Warning: Missing pin number")
-      console.error("Missing pin number")
+      debug("Unsupported pin number format:", nodes)
+      return null
     }
 
     // Handle coordinates, accounting for scientific notation
@@ -834,8 +836,10 @@ export function processNetwork(nodes: ASTNode[]): Network {
 
 function processNet(nodes: ASTNode[]): Net {
   const net: Partial<Net> = {}
+  // in the smoothie board some of the nets names are numbers like 3.3 so I need to convert them to strings
   if (nodes[1].type === "Atom") {
     net.name = nodes[1].value?.toString()
+    debug("net name was not string before parsing", net.name)
   }
 
   nodes.slice(2).forEach((node) => {
@@ -938,22 +942,16 @@ export function processWiring(nodes: ASTNode[]): Wiring {
       node.children![0].type === "Atom" &&
       node.children![0].value === "via"
     ) {
-      wiring.wires!.push(processVia(node.children!))
+      const via = processVia(node.children!)
+      if (via) wiring.wires!.push(via)
     }
   })
 
   return wiring as Wiring
 }
 
-function processVia(nodes: ASTNode[]): Wire {
-  const wire: Partial<Wire> = {
-    type: "via",
-    path: {
-      layer: "all", // Default: vias connect all layers
-      width: 0, // Default width
-      coordinates: [], // Fallback to empty if coordinates are missing
-    },
-  }
+function processVia(nodes: ASTNode[]): Wire | null {
+  const wire: Partial<Wire> = {}
 
   // Find the path node which contains coordinates
   const pathNode = nodes.find(
@@ -971,29 +969,16 @@ function processVia(nodes: ASTNode[]): Wire {
     if (coords.length === 2) {
       wire.path!.coordinates = coords.map((node) => node.value as number)
     } else {
-      console.warn("Warning: Missing or incomplete coordinates for via")
-      console.error("problematic node", nodes)
+      debug("Warning: Missing or incomplete coordinates for via", nodes)
+      return null
     }
   } else {
-    console.warn("Warning: Missing path node for via")
-    console.error("problematic node", nodes)
+    debug("Warning: Missing path node for via", nodes)
+    return null
   }
 
-  // Find net name if present
-  const netNode = nodes.find(
-    (node) =>
-      node.type === "List" &&
-      node.children?.[0]?.type === "Atom" &&
-      node.children[0].value === "net",
-  )
-  if (netNode?.children?.[1]?.type === "Atom") {
-    wire.net = String(netNode.children[1].value)
-  } else {
-    console.warn("Warning: Missing net information for via")
-    console.error("problematic node", nodes)
-  }
-
-  return wire as Wire
+  debug("Unsupported via format", nodes)
+  return null
 }
 
 function processWire(nodes: ASTNode[]): Wire {
