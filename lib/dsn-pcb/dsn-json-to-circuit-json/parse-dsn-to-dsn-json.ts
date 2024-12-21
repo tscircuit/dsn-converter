@@ -578,18 +578,13 @@ function processPin(nodes: ASTNode[]): Pin | null {
       return null
     }
 
-    // Helper function to parse pin number
-    const parsePinNumber = (value: any): number | string => {
-      if (typeof value === "number") {
-        return value
-      }
-      const parsed = parseInt(String(value), 10)
-      return Number.isNaN(parsed) ? String(value) : parsed
-    }
-
-    // Get pin number
     if (nodes[2]?.type === "Atom") {
-      pin.pin_number = parsePinNumber(nodes[2].value)
+      if (typeof nodes[2].value === "number") {
+        pin.pin_number = nodes[2].value
+      } else {
+        const parsed = parseInt(String(nodes[2].value), 10)
+        pin.pin_number = Number.isNaN(parsed) ? String(nodes[2].value) : parsed
+      }
     } else {
       debug("Unsupported pin number format:", nodes)
       return null
@@ -831,10 +826,11 @@ export function processNetwork(nodes: ASTNode[]): Network {
 
 function processNet(nodes: ASTNode[]): Net {
   const net: Partial<Net> = {}
-  // in the smoothie board some of the nets names are numbers like 3.3 so I need to convert them to strings
-  if (nodes[1].type === "Atom") {
+  if (nodes[1].type === "Atom" && typeof nodes[1].value === "string") {
+    net.name = nodes[1].value
+  } else {
     net.name = nodes[1].value?.toString()
-    debug("net name was not string before parsing", net.name)
+    debug("net name was not a string", net.name)
   }
 
   nodes.slice(2).forEach((node) => {
@@ -956,24 +952,40 @@ function processVia(nodes: ASTNode[]): Wire | null {
       node.children[0].value === "path",
   )
 
-  if (pathNode?.children) {
-    const coords = pathNode.children
-      .filter((node) => node.type === "Atom" && typeof node.value === "number")
-      .slice(-2) // Take last two numbers as x, y coordinates
-
-    if (coords.length === 2) {
-      wire.path!.coordinates = coords.map((node) => node.value as number)
-    } else {
-      debug("Warning: Missing or incomplete coordinates for via", nodes)
-      return null
-    }
-  } else {
+  if (!pathNode?.children) {
     debug("Warning: Missing path node for via", nodes)
     return null
   }
 
-  debug("Unsupported via format", nodes)
-  return null
+  const coords = pathNode.children
+    .filter((node) => node.type === "Atom" && typeof node.value === "number")
+    .slice(-2) // Take last two numbers as x, y coordinates
+
+  if (coords.length !== 2) {
+    debug("Warning: Missing or incomplete coordinates for via", nodes)
+    return null
+  }
+
+  wire.path = {
+    layer: "all", // vias connect all layers
+    width: 0, // width is defined by the padstack
+    coordinates: coords.map((node) => node.value as number),
+  }
+  wire.type = "via"
+
+  // Find net name if present
+  const netNode = nodes.find(
+    (node) =>
+      node.type === "List" &&
+      node.children?.[0]?.type === "Atom" &&
+      node.children[0].value === "net",
+  )
+
+  if (netNode?.children?.[1]?.type === "Atom") {
+    wire.net = String(netNode.children[1].value)
+  }
+
+  return wire as Wire
 }
 
 function processWire(nodes: ASTNode[]): Wire {
