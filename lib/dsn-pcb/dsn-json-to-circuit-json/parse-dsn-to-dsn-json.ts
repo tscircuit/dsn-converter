@@ -571,23 +571,22 @@ function processPin(nodes: ASTNode[]): Pin | null {
   try {
     // Get padstack name
     // Get padstack name
-    if (nodes[1]?.type === "Atom") {
-      pin.padstack_name = String(nodes[1].value)
-    } else {
+    if (nodes[1]?.type !== "Atom") {
       debug("Unsupported pin padstack_name format:", nodes)
       return null
     }
+    pin.padstack_name = String(nodes[1].value)
 
-    if (nodes[2]?.type === "Atom") {
-      if (typeof nodes[2].value === "number") {
-        pin.pin_number = nodes[2].value
-      } else {
-        const parsed = parseInt(String(nodes[2].value), 10)
-        pin.pin_number = Number.isNaN(parsed) ? String(nodes[2].value) : parsed
-      }
-    } else {
+    if (nodes[2]?.type !== "Atom") {
       debug("Unsupported pin number format:", nodes)
       return null
+    }
+
+    if (typeof nodes[2].value === "number") {
+      pin.pin_number = nodes[2].value
+    } else {
+      const parsed = parseInt(String(nodes[2].value), 10)
+      pin.pin_number = Number.isNaN(parsed) ? String(nodes[2].value) : parsed
     }
 
     // Handle coordinates, accounting for scientific notation
