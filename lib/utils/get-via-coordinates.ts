@@ -1,7 +1,7 @@
 import type { ASTNode } from "../common/parse-sexpr"
 import Debug from "debug"
 
-const debug = Debug("dsn-converter:extractViaCoordinates")
+const debug = Debug("dsn-converter:getViaCoords")
 
 /**
  * Extract coordinates from via nodes, handling both path and direct coordinate formats

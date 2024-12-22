@@ -1,7 +1,7 @@
 import type { ASTNode } from "../common/parse-sexpr"
 import Debug from "debug"
 
-const debug = Debug("dsn-converter:processPinIdentifier")
+const debug = Debug("dsn-converter:getPinNum")
 
 /**
  * Process pin identifier from AST nodes and convert to appropriate type
