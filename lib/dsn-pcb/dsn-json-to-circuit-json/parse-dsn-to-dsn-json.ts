@@ -37,6 +37,8 @@ import type {
   Wiring,
 } from "../types"
 import Debug from "debug"
+import { getPinNum } from "lib/utils/get-pin-number"
+import { getViaCoords } from "lib/utils/get-via-coordinates"
 
 const debug = Debug("dsn-converter:parse-dsn-to-dsn-json")
 
@@ -570,26 +572,19 @@ function processPin(nodes: ASTNode[]): Pin | null {
 
   try {
     // Get padstack name
-    // Get padstack name
     if (nodes[1]?.type !== "Atom") {
       debug("Unsupported pin padstack_name format:", nodes)
       return null
     }
     pin.padstack_name = String(nodes[1].value)
+    // check if pin number is in a List structure
+    const pinNumber = getPinNum(nodes)
 
-    if (nodes[2]?.type !== "Atom") {
-      debug("Unsupported pin number format:", nodes)
-      return null
-    }
+    if (pinNumber === null) return null
 
-    if (typeof nodes[2].value === "number") {
-      pin.pin_number = nodes[2].value
-    } else {
-      const parsed = parseInt(String(nodes[2].value), 10)
-      pin.pin_number = Number.isNaN(parsed) ? String(nodes[2].value) : parsed
-    }
+    pin.pin_number = pinNumber
 
-    // Handle coordinates, accounting for scientific notation
+    // Parse coordinates
     let xValue: number | undefined
     let yValue: number | undefined
 
@@ -630,11 +625,8 @@ function processPin(nodes: ASTNode[]): Pin | null {
       }
     }
 
-    if (typeof xValue !== "number") {
-      throw new Error(`Invalid x coordinate: ${xValue}`)
-    }
-    if (typeof yValue !== "number") {
-      throw new Error(`Invalid y coordinate: ${yValue}`)
+    if (typeof xValue !== "number" || typeof yValue !== "number") {
+      throw new Error(`Invalid coordinates: x=${xValue}, y=${yValue}`)
     }
 
     pin.x = xValue
@@ -941,36 +933,19 @@ export function processWiring(nodes: ASTNode[]): Wiring {
 }
 
 function processVia(nodes: ASTNode[]): Wire | null {
-  const wire: Partial<Wire> = {}
-
-  // Find the path node which contains coordinates
-  const pathNode = nodes.find(
-    (node) =>
-      node.type === "List" &&
-      node.children?.[0]?.type === "Atom" &&
-      node.children[0].value === "path",
-  )
-
-  if (!pathNode?.children) {
-    debug("Warning: Missing path node for via", nodes)
+  const coords = getViaCoords(nodes)
+  if (!coords) {
     return null
   }
 
-  const coords = pathNode.children
-    .filter((node) => node.type === "Atom" && typeof node.value === "number")
-    .slice(-2) // Take last two numbers as x, y coordinates
-
-  if (coords.length !== 2) {
-    debug("Warning: Missing or incomplete coordinates for via", nodes)
-    return null
+  const wire: Partial<Wire> = {
+    path: {
+      layer: "all", // vias connect all layers
+      width: 0, // width is defined by the padstack
+      coordinates: [coords.x, coords.y],
+    },
+    type: "via",
   }
-
-  wire.path = {
-    layer: "all", // vias connect all layers
-    width: 0, // width is defined by the padstack
-    coordinates: coords.map((node) => node.value as number),
-  }
-  wire.type = "via"
 
   // Find net name if present
   const netNode = nodes.find(
