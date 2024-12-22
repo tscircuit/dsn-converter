@@ -3,7 +3,7 @@ import { expect, test } from "bun:test"
 import { convertDsnPcbToCircuitJson, parseDsnToDsnJson, type DsnPcb } from "lib"
 
 // @ts-ignore
-import dsnFileWithFreeroutingTrace from "../assets/testkicadproject/smoothieboard-repro.dsn" with {
+import dsnFileWithFreeroutingTrace from "../assets/repro/smoothieboard-repro.dsn" with {
   type: "text",
 }
 
