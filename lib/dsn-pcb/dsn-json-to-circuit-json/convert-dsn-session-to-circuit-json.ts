@@ -9,12 +9,14 @@ import type { DsnPcb, DsnSession } from "../types"
 import { convertDsnPcbToCircuitJson } from "./convert-dsn-pcb-to-circuit-json"
 import { convertViaToPcbVia } from "./dsn-component-converters/convert-via-to-pcb-via"
 import { convertWiringPathToPcbTraces } from "./dsn-component-converters/convert-wiring-path-to-pcb-traces"
+import { su } from "@tscircuit/soup-util"
 
 const debug = Debug("dsn-converter")
 
 export function convertDsnSessionToCircuitJson(
   dsnInput: DsnPcb,
   dsnSession: DsnSession,
+  circuitJson?: AnyCircuitElement[],
 ): AnyCircuitElement[] {
   const transformUmToMm = scale(1 / 10000)
   const inputPcbElms = convertDsnPcbToCircuitJson(dsnInput as DsnPcb)
@@ -23,6 +25,46 @@ export function convertDsnSessionToCircuitJson(
   const existingSourceTraces = inputPcbElms.filter(
     (elm) => elm.type === "source_trace",
   )
+
+  // The source_trace_id is not correctly set in the existing source_trace elements
+  if (circuitJson) {
+    existingSourceTraces.forEach((st) => {
+      // Process all connected source port IDs
+      for (const portId of st.connected_source_port_ids) {
+        const [pad_number, source_port_component_name] =
+          portId.split("-").pop()?.split("_") ?? []
+        const pin_number = parseInt(pad_number.replace("Pad", ""))
+
+        const source_port_component = su(circuitJson)
+          .source_component.list()
+          .find((elm) => elm.name === source_port_component_name)
+        const source_ports = su(circuitJson)
+          .source_port.list()
+          .filter(
+            (elm) =>
+              elm.source_component_id ===
+                source_port_component?.source_component_id &&
+              elm.pin_number === pin_number,
+          )
+        // Find the source_trace connecting the source_port
+        const source_trace = su(circuitJson)
+          .source_trace.list()
+          .find((elm) =>
+            elm.connected_source_port_ids.some((id) =>
+              source_ports.some((sp) => sp.source_port_id === id),
+            ),
+          )
+        if (source_trace) {
+          st.source_trace_id = source_trace.source_trace_id
+          break
+        }
+      }
+      // If no source_trace was found, use the first port ID as fallback
+      if (!st.source_trace_id) {
+        st.source_trace_id = `source_trace_${st.connected_source_port_ids[0]}`
+      }
+    })
+  }
 
   const sessionElements: AnyCircuitElement[] = []
   const routeSegments: PcbTrace[] = []
