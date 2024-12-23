@@ -32,7 +32,9 @@ test("motor driver circuit with hover", async () => {
   const newCircuitJson = [...circuitJson, ...outputPcbTraces]
 
   const pcbTraces = su(newCircuitJson as AnyCircuitElement[]).pcb_trace.list()
-  const sourceTraceIds = pcbTraces.map((trace) => parseInt(trace.source_trace_id?.replace("source_trace_", "") ?? "0"))
+  const sourceTraceIds = pcbTraces.map((trace) =>
+    parseInt(trace.source_trace_id?.replace("source_trace_", "") ?? "0"),
+  )
 
   expect(pcbTraces.length).toBe(67)
   expect(sourceTraceIds.every((id) => id >= 0 && id <= 22)).toBe(true)

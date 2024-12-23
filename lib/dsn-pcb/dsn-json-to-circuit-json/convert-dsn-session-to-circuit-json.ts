@@ -31,19 +31,29 @@ export function convertDsnSessionToCircuitJson(
     existingSourceTraces.forEach((st) => {
       // Process all connected source port IDs
       for (const portId of st.connected_source_port_ids) {
-        const [pad_number, source_port_component_name] = portId.split("-").pop()?.split("_") ?? []
+        const [pad_number, source_port_component_name] =
+          portId.split("-").pop()?.split("_") ?? []
         const pin_number = parseInt(pad_number.replace("Pad", ""))
-        
-        const source_port_component = su(circuitJson).source_component.list().find(
-          (elm) => elm.name === source_port_component_name,
-        )
-        const source_ports = su(circuitJson).source_port.list().filter(
-          (elm) => elm.source_component_id === source_port_component?.source_component_id && elm.pin_number === pin_number,
-        )
+
+        const source_port_component = su(circuitJson)
+          .source_component.list()
+          .find((elm) => elm.name === source_port_component_name)
+        const source_ports = su(circuitJson)
+          .source_port.list()
+          .filter(
+            (elm) =>
+              elm.source_component_id ===
+                source_port_component?.source_component_id &&
+              elm.pin_number === pin_number,
+          )
         // Find the source_trace connecting the source_port
-        const source_trace = su(circuitJson).source_trace.list().find(
-          (elm) => elm.connected_source_port_ids.some(id => source_ports.some(sp => sp.source_port_id === id)),
-        )
+        const source_trace = su(circuitJson)
+          .source_trace.list()
+          .find((elm) =>
+            elm.connected_source_port_ids.some((id) =>
+              source_ports.some((sp) => sp.source_port_id === id),
+            ),
+          )
         if (source_trace) {
           st.source_trace_id = source_trace.source_trace_id
           break
