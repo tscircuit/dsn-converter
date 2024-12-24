@@ -159,12 +159,14 @@ export function processPlatedHoles(
           }
 
           // Only return pin if it doesn't already exist in the image
-          return !existingImage.pins.some(
-            (existingPin) =>
+          return !existingImage.pins.some((existingPin) => {
+            const samePinNumber = existingPin.pin_number === pin.pin_number
+            const samePositionAndPadstack =
               existingPin.x === pin.x &&
               existingPin.y === pin.y &&
-              existingPin.padstack_name === pin.padstack_name,
-          )
+              existingPin.padstack_name === pin.padstack_name
+            return samePinNumber || samePositionAndPadstack
+          })
             ? pin
             : undefined
         } else if (hole.shape === "oval" || hole.shape === "pill") {
@@ -196,7 +198,6 @@ export function processPlatedHoles(
       .filter((pin): pin is Pin => pin !== undefined)
 
     existingImage.pins.push(...platedHolePins)
-    // }
   }
 
   // Add component placements for plated-hole-only components
