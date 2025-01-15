@@ -37,12 +37,12 @@ test("motor driver circuit with hover", async () => {
   )
 
   expect(pcbTraces.length).toBe(67)
-  expect(sourceTraceIds.every((id) => id >= 0 && id <= 22)).toBe(true)
+  expect(sourceTraceIds.every((id) => id >= 0 && id <= 31)).toBe(true)
 
   // Checking the proper linkage of source traces to source ports
   expect(sourceTraceIds.filter((id) => id === 17).length).toBe(2)
-  expect(sourceTraceIds.filter((id) => id === 5).length).toBe(21)
-  expect(sourceTraceIds.filter((id) => id === 4).length).toBe(5)
+  expect(sourceTraceIds.filter((id) => id === 23).length).toBe(21)
+  expect(sourceTraceIds.filter((id) => id === 31).length).toBe(5)
   expect(sourceTraceIds.filter((id) => id === 10).length).toBe(6)
   expect(sourceTraceIds.filter((id) => id === 0).length).toBe(11)
 })

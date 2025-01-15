@@ -74,12 +74,27 @@ export function convertDsnSessionToCircuitJson(
     // Find corresponding source trace for this net
     const sourceTrace = existingSourceTraces.find((st) => {
       const sourceNetIds = (st as any).connected_source_net_ids || []
-      const sourceNet = inputPcbElms.find(
-        (elm) =>
-          elm.type === "source_net" &&
-          elm.name === net.name &&
-          sourceNetIds.includes(elm.source_net_id),
-      )
+      const sourceNet = inputPcbElms.find((elm) => {
+        if (elm.type === "source_net") {
+          if (elm.name.startsWith("Net")) {
+            // For connected nets (Net-1, Net-2, etc.)
+            const modifiedName = elm.name.replace(/_source_component_.+?-/, "-")
+            return (
+              elm.type === "source_net" &&
+              modifiedName === net.name &&
+              sourceNetIds.includes(elm.source_net_id)
+            )
+          } else {
+            // For GND,VCC etc
+            const modifiedName = elm.name.split("_")[0]
+            return (
+              elm.type === "source_net" &&
+              modifiedName === net.name &&
+              sourceNetIds.includes(elm.source_net_id)
+            )
+          }
+        }
+      })
       return sourceNet !== undefined
     })
 
