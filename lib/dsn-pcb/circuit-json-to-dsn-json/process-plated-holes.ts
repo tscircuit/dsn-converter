@@ -205,7 +205,7 @@ export function processPlatedHoles(
     const componentEntry = {
       name: footprintName,
       places: components.map((component) => ({
-        refdes: component.componentName,
+        refdes: `${component.componentName}_${component.sourceComponent?.source_component_id}`,
         x: component.coordinates.x,
         y: component.coordinates.y,
         side: "front" as const,
