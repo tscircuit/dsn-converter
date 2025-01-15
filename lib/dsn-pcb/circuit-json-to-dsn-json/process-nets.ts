@@ -35,7 +35,7 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
           )
 
           padsBySourcePortId.set(sourcePort.source_port_id, {
-            componentName,
+            componentName: `${componentName}_${sourcePort.source_component_id}`,
             pinNumber,
             sourcePortId: sourcePort.source_port_id,
           })
@@ -119,7 +119,7 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
   // Add source nets (GND, VCC, etc.)
   for (const element of circuitElements) {
     if (element.type === "source_net") {
-      const netName = element.name
+      const netName = `${element.name}_${element.source_net_id}`
       if (!netMap.has(netName)) {
         netMap.set(netName, new Set())
       }

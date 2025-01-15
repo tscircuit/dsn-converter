@@ -42,12 +42,24 @@ test("circuit json (motor driver breakout) -> dsn file", async () => {
   expect(dsnJson.network.nets.length).toBe(16)
 
   //expect the first net to have length name "GND" and pins length 11
-  expect(dsnJson.network.nets[0].name).toBe("GND")
-  expect(dsnJson.network.nets[0].pins.length).toBe(11)
+  let foundGndNet = false
+  dsnJson.network.nets.forEach((net) => {
+    if (net.name === "GND_source_net_1") {
+      expect(net.pins.length).toBe(11)
+      foundGndNet = true
+    }
+  })
+  expect(foundGndNet).toBe(true)
 
   //expect the second net to have length name "VCC" and pins length 3
-  expect(dsnJson.network.nets[1].name).toBe("VCC")
-  expect(dsnJson.network.nets[1].pins.length).toBe(3)
+  let foundVccNet = false
+  dsnJson.network.nets.forEach((net) => {
+    if (net.name === "VCC_source_net_0") {
+      expect(net.pins.length).toBe(3)
+      foundVccNet = true
+    }
+  })
+  expect(foundVccNet).toBe(true)
 })
 
 test("session file (motor driver breakout) -> circuit json", async () => {
