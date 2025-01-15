@@ -1,8 +1,5 @@
 import { expect, test } from "bun:test"
-import {
-  convertCircuitJsonToDsnString,
-  type DsnPcb
-} from "lib"
+import { convertCircuitJsonToDsnString, type DsnPcb } from "lib"
 import inputCircuitFile from "../assets/repro/subcircuits-same-components.json"
 import type { AnyCircuitElement } from "circuit-json"
 

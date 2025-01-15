@@ -4,13 +4,7 @@
     "source_port_id": "source_port_0",
     "name": "pin1",
     "pin_number": 1,
-    "port_hints": [
-      "anode",
-      "pos",
-      "left",
-      "pin1",
-      "1"
-    ],
+    "port_hints": ["anode", "pos", "left", "pin1", "1"],
     "source_component_id": "source_component_0"
   },
   {
@@ -18,13 +12,7 @@
     "source_port_id": "source_port_1",
     "name": "pin2",
     "pin_number": 2,
-    "port_hints": [
-      "cathode",
-      "neg",
-      "right",
-      "pin2",
-      "2"
-    ],
+    "port_hints": ["cathode", "neg", "right", "pin2", "2"],
     "source_component_id": "source_component_0"
   },
   {
@@ -40,13 +28,7 @@
     "source_port_id": "source_port_2",
     "name": "pin1",
     "pin_number": 1,
-    "port_hints": [
-      "anode",
-      "pos",
-      "left",
-      "pin1",
-      "1"
-    ],
+    "port_hints": ["anode", "pos", "left", "pin1", "1"],
     "source_component_id": "source_component_1"
   },
   {
@@ -54,13 +36,7 @@
     "source_port_id": "source_port_3",
     "name": "pin2",
     "pin_number": 2,
-    "port_hints": [
-      "cathode",
-      "neg",
-      "right",
-      "pin2",
-      "2"
-    ],
+    "port_hints": ["cathode", "neg", "right", "pin2", "2"],
     "source_component_id": "source_component_1"
   },
   {
@@ -82,13 +58,7 @@
     "source_port_id": "source_port_4",
     "name": "pin1",
     "pin_number": 1,
-    "port_hints": [
-      "anode",
-      "pos",
-      "left",
-      "pin1",
-      "1"
-    ],
+    "port_hints": ["anode", "pos", "left", "pin1", "1"],
     "source_component_id": "source_component_2"
   },
   {
@@ -96,13 +66,7 @@
     "source_port_id": "source_port_5",
     "name": "pin2",
     "pin_number": 2,
-    "port_hints": [
-      "cathode",
-      "neg",
-      "right",
-      "pin2",
-      "2"
-    ],
+    "port_hints": ["cathode", "neg", "right", "pin2", "2"],
     "source_component_id": "source_component_2"
   },
   {
@@ -118,13 +82,7 @@
     "source_port_id": "source_port_6",
     "name": "pin1",
     "pin_number": 1,
-    "port_hints": [
-      "anode",
-      "pos",
-      "left",
-      "pin1",
-      "1"
-    ],
+    "port_hints": ["anode", "pos", "left", "pin1", "1"],
     "source_component_id": "source_component_3"
   },
   {
@@ -132,13 +90,7 @@
     "source_port_id": "source_port_7",
     "name": "pin2",
     "pin_number": 2,
-    "port_hints": [
-      "cathode",
-      "neg",
-      "right",
-      "pin2",
-      "2"
-    ],
+    "port_hints": ["cathode", "neg", "right", "pin2", "2"],
     "source_component_id": "source_component_3"
   },
   {
@@ -158,24 +110,16 @@
   {
     "type": "source_trace",
     "source_trace_id": "source_trace_0",
-    "connected_source_port_ids": [
-      "source_port_0"
-    ],
-    "connected_source_net_ids": [
-      "source_net_0"
-    ],
+    "connected_source_port_ids": ["source_port_0"],
+    "connected_source_net_ids": ["source_net_0"],
     "display_name": ".R1 > .pin1 to net.NET1",
     "subcircuit_connectivity_map_key": "unnamedsubcircuit327_connectivity_net0"
   },
   {
     "type": "source_trace",
     "source_trace_id": "source_trace_1",
-    "connected_source_port_ids": [
-      "source_port_2"
-    ],
-    "connected_source_net_ids": [
-      "source_net_0"
-    ],
+    "connected_source_port_ids": ["source_port_2"],
+    "connected_source_net_ids": ["source_net_0"],
     "max_length": null,
     "display_name": ".C1 > .pin1 to net.NET1",
     "subcircuit_connectivity_map_key": "unnamedsubcircuit327_connectivity_net0"
@@ -183,24 +127,16 @@
   {
     "type": "source_trace",
     "source_trace_id": "source_trace_2",
-    "connected_source_port_ids": [
-      "source_port_4"
-    ],
-    "connected_source_net_ids": [
-      "source_net_1"
-    ],
+    "connected_source_port_ids": ["source_port_4"],
+    "connected_source_net_ids": ["source_net_1"],
     "display_name": ".R1 > .pin1 to net.NET1",
     "subcircuit_connectivity_map_key": "unnamedsubcircuit340_connectivity_net0"
   },
   {
     "type": "source_trace",
     "source_trace_id": "source_trace_3",
-    "connected_source_port_ids": [
-      "source_port_6"
-    ],
-    "connected_source_net_ids": [
-      "source_net_1"
-    ],
+    "connected_source_port_ids": ["source_port_6"],
+    "connected_source_net_ids": ["source_net_1"],
     "max_length": null,
     "display_name": ".C1 > .pin1 to net.NET1",
     "subcircuit_connectivity_map_key": "unnamedsubcircuit340_connectivity_net0"
@@ -540,10 +476,7 @@
     "shape": "rect",
     "width": 0.6000000000000001,
     "height": 0.6000000000000001,
-    "port_hints": [
-      "1",
-      "left"
-    ],
+    "port_hints": ["1", "left"],
     "x": 2.5,
     "y": 3
   },
@@ -568,10 +501,7 @@
     "shape": "rect",
     "width": 0.6000000000000001,
     "height": 0.6000000000000001,
-    "port_hints": [
-      "2",
-      "right"
-    ],
+    "port_hints": ["2", "right"],
     "x": 3.5,
     "y": 3
   },
@@ -596,10 +526,7 @@
     "shape": "rect",
     "width": 0.6000000000000001,
     "height": 0.6000000000000001,
-    "port_hints": [
-      "1",
-      "left"
-    ],
+    "port_hints": ["1", "left"],
     "x": -3.5,
     "y": 3
   },
@@ -624,10 +551,7 @@
     "shape": "rect",
     "width": 0.6000000000000001,
     "height": 0.6000000000000001,
-    "port_hints": [
-      "2",
-      "right"
-    ],
+    "port_hints": ["2", "right"],
     "x": -2.5,
     "y": 3
   },
@@ -652,10 +576,7 @@
     "shape": "rect",
     "width": 0.6000000000000001,
     "height": 0.6000000000000001,
-    "port_hints": [
-      "1",
-      "left"
-    ],
+    "port_hints": ["1", "left"],
     "x": 2.5,
     "y": -3
   },
@@ -680,10 +601,7 @@
     "shape": "rect",
     "width": 0.6000000000000001,
     "height": 0.6000000000000001,
-    "port_hints": [
-      "2",
-      "right"
-    ],
+    "port_hints": ["2", "right"],
     "x": 3.5,
     "y": -3
   },
@@ -708,10 +626,7 @@
     "shape": "rect",
     "width": 0.6000000000000001,
     "height": 0.6000000000000001,
-    "port_hints": [
-      "1",
-      "left"
-    ],
+    "port_hints": ["1", "left"],
     "x": -3.5,
     "y": -3
   },
@@ -736,10 +651,7 @@
     "shape": "rect",
     "width": 0.6000000000000001,
     "height": 0.6000000000000001,
-    "port_hints": [
-      "2",
-      "right"
-    ],
+    "port_hints": ["2", "right"],
     "x": -2.5,
     "y": -3
   },
@@ -759,9 +671,7 @@
     "type": "pcb_port",
     "pcb_port_id": "pcb_port_0",
     "pcb_component_id": "pcb_component_0",
-    "layers": [
-      "top"
-    ],
+    "layers": ["top"],
     "x": 2.5,
     "y": 3,
     "source_port_id": "source_port_0"
@@ -770,9 +680,7 @@
     "type": "pcb_port",
     "pcb_port_id": "pcb_port_1",
     "pcb_component_id": "pcb_component_0",
-    "layers": [
-      "top"
-    ],
+    "layers": ["top"],
     "x": 3.5,
     "y": 3,
     "source_port_id": "source_port_1"
@@ -781,9 +689,7 @@
     "type": "pcb_port",
     "pcb_port_id": "pcb_port_2",
     "pcb_component_id": "pcb_component_1",
-    "layers": [
-      "top"
-    ],
+    "layers": ["top"],
     "x": -3.5,
     "y": 3,
     "source_port_id": "source_port_2"
@@ -792,9 +698,7 @@
     "type": "pcb_port",
     "pcb_port_id": "pcb_port_3",
     "pcb_component_id": "pcb_component_1",
-    "layers": [
-      "top"
-    ],
+    "layers": ["top"],
     "x": -2.5,
     "y": 3,
     "source_port_id": "source_port_3"
@@ -803,9 +707,7 @@
     "type": "pcb_port",
     "pcb_port_id": "pcb_port_4",
     "pcb_component_id": "pcb_component_3",
-    "layers": [
-      "top"
-    ],
+    "layers": ["top"],
     "x": 2.5,
     "y": -3,
     "source_port_id": "source_port_4"
@@ -814,9 +716,7 @@
     "type": "pcb_port",
     "pcb_port_id": "pcb_port_5",
     "pcb_component_id": "pcb_component_3",
-    "layers": [
-      "top"
-    ],
+    "layers": ["top"],
     "x": 3.5,
     "y": -3,
     "source_port_id": "source_port_5"
@@ -825,9 +725,7 @@
     "type": "pcb_port",
     "pcb_port_id": "pcb_port_6",
     "pcb_component_id": "pcb_component_4",
-    "layers": [
-      "top"
-    ],
+    "layers": ["top"],
     "x": -3.5,
     "y": -3,
     "source_port_id": "source_port_6"
@@ -836,9 +734,7 @@
     "type": "pcb_port",
     "pcb_port_id": "pcb_port_7",
     "pcb_component_id": "pcb_component_4",
-    "layers": [
-      "top"
-    ],
+    "layers": ["top"],
     "x": -2.5,
     "y": -3,
     "source_port_id": "source_port_7"
