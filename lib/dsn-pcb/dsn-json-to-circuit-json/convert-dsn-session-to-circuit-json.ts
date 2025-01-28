@@ -2,6 +2,7 @@ import type {
   AnyCircuitElement,
   PcbTrace,
   PcbTraceRoutePointWire,
+  SourceTrace,
 } from "circuit-json"
 import Debug from "debug"
 import { applyToPoint, scale } from "transformation-matrix"
@@ -67,7 +68,7 @@ export function convertDsnSessionToCircuitJson(
   }
 
   const sessionElements: AnyCircuitElement[] = []
-  const routeSegments: PcbTrace[] = []
+  const routeSegments: Array<PcbTrace | SourceTrace> = []
 
   // Process nets for vias and wires
   for (const net of dsnSession.routes.network_out.nets) {

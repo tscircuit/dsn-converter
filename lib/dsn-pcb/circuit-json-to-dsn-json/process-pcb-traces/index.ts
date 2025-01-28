@@ -9,6 +9,7 @@ import Debug from "debug"
 import { findOrCreateViaPadstack } from "./findOrCreateViaPadstack"
 import { getDsnTraceOperationsWrapper } from "./DsnTraceOperationsWrapper"
 import { su } from "@tscircuit/soup-util"
+import { getCombinedSourcePortName } from "lib/utils/get-combined-source-port-name"
 
 const debug = Debug("dsn-converter:processPcbTraces")
 
@@ -62,9 +63,13 @@ export function processPcbTraces(
             source_trace.connected_source_net_ids.includes(n.source_net_id),
           )
       debug("PCB TRACE\n----------\n", pcbTrace)
+      const sourceTraceConnectedPortIds = getCombinedSourcePortName(
+        circuitElements,
+        source_trace?.connected_source_port_ids || [],
+      )
       const netName =
         source_net?.name ||
-        pcbTrace.source_trace_id ||
+        `${pcbTrace.source_trace_id}--${sourceTraceConnectedPortIds}` ||
         dsnWrapper.getNextNetId()
 
       let currentLayer = ""
