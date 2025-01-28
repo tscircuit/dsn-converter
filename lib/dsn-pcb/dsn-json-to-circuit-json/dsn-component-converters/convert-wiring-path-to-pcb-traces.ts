@@ -2,6 +2,7 @@ import type {
   AnyCircuitElement,
   PcbTrace,
   PcbTraceRoutePointWire,
+  SourceTrace,
 } from "circuit-json"
 import { type Matrix, applyToPoint } from "transformation-matrix"
 import type { Wiring } from "../../types"
@@ -17,7 +18,7 @@ export const convertWiringPathToPcbTraces = ({
   wire: Wiring["wires"][number]
   transformUmToMm: Matrix
   netName: string
-}): PcbTrace[] => {
+}): Array<PcbTrace | SourceTrace> => {
   const coordinates = wire.path!.coordinates
   // Convert coordinates to circuit space using the transformation matrix
   const points: Array<{ x: number; y: number }> = []
@@ -45,10 +46,17 @@ export const convertWiringPathToPcbTraces = ({
     const pcbTrace: PcbTrace = {
       type: "pcb_trace",
       pcb_trace_id: `pcb_trace_${netName}`,
-      source_trace_id: netName,
+      source_trace_id: netName.split("-")[0],
       route: routePoints as PcbTraceRoutePointWire[],
     }
-    return [pcbTrace]
+
+    const sourceTrace: SourceTrace = {
+      type: "source_trace",
+      source_trace_id: netName.split("--")[0],
+      connected_source_net_ids: [],
+      connected_source_port_ids: netName.split("--").slice(1),
+    }
+    return [pcbTrace, sourceTrace]
   }
 
   return []
