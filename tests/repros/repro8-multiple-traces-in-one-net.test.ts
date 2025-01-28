@@ -4,7 +4,9 @@ import threeSubcircuitCircuitConnectedToSamePorts from "../assets/repro/three-su
 import { su } from "@tscircuit/soup-util"
 
 test("circuit json -> dsn -> circuit json", async () => {
-  const dsnFile = convertCircuitJsonToDsnString(threeSubcircuitCircuitConnectedToSamePorts as any)
+  const dsnFile = convertCircuitJsonToDsnString(
+    threeSubcircuitCircuitConnectedToSamePorts as any,
+  )
   const circuitJson = parseDsnToCircuitJson(dsnFile)
 
   const source_trace = su(circuitJson).source_trace.list()

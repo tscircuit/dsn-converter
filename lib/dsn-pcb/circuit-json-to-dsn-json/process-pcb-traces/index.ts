@@ -63,7 +63,10 @@ export function processPcbTraces(
             source_trace.connected_source_net_ids.includes(n.source_net_id),
           )
       debug("PCB TRACE\n----------\n", pcbTrace)
-      const sourceTraceConnectedPortIds = getCombinedSourcePortName(circuitElements, source_trace?.connected_source_port_ids || [])
+      const sourceTraceConnectedPortIds = getCombinedSourcePortName(
+        circuitElements,
+        source_trace?.connected_source_port_ids || [],
+      )
       const netName =
         source_net?.name ||
         `${pcbTrace.source_trace_id}--${sourceTraceConnectedPortIds}` ||
