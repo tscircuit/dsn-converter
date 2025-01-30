@@ -48,6 +48,7 @@ export const convertWiringPathToPcbTraces = ({
       pcb_trace_id: `pcb_trace_${netName}`,
       source_trace_id: netName.split("-")[0],
       route: routePoints as PcbTraceRoutePointWire[],
+      trace_length: (wire.path?.width ?? 0) / 1000,
     }
 
     const sourceTrace: SourceTrace = {
