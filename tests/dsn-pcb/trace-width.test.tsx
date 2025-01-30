@@ -40,5 +40,5 @@ test("circuit json to dsn file", async () => {
 
   const pcb_trace = su(convertingBackToCircuitJson).pcb_trace.list()
 
-  expect(pcb_trace[0].trace_length).toBe(0.16)
+  expect(pcb_trace[0].trace_length).toBe(6.6)
 })

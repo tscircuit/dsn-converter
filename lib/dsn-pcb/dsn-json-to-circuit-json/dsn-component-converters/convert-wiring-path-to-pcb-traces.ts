@@ -7,6 +7,7 @@ import type {
 import { type Matrix, applyToPoint } from "transformation-matrix"
 import type { Wiring } from "../../types"
 import Debug from "debug"
+import { getTraceLength } from "../../../utils/get-trace-length"
 
 const debug = Debug("dsn-converter:convertWiringPathToPcbTraces")
 
@@ -48,7 +49,7 @@ export const convertWiringPathToPcbTraces = ({
       pcb_trace_id: `pcb_trace_${netName}`,
       source_trace_id: netName.split("-")[0],
       route: routePoints as PcbTraceRoutePointWire[],
-      trace_length: (wire.path?.width ?? 0) / 1000,
+      trace_length: getTraceLength(routePoints),
     }
 
     const sourceTrace: SourceTrace = {
