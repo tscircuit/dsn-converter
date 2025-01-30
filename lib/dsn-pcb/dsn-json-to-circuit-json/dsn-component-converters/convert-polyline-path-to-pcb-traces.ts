@@ -3,6 +3,7 @@ import type { Wiring } from "../../types"
 import { type Matrix, applyToPoint } from "transformation-matrix"
 import { chunks } from "lib/utils/chunks"
 import { computeSegIntersection } from "lib/utils/compute-seg-intersection"
+import { getTraceLength } from "lib/utils/get-trace-length"
 
 export const convertPolylinePathToPcbTraces = ({
   wire,
@@ -37,7 +38,7 @@ export const convertPolylinePathToPcbTraces = ({
       width: 0.16, // Standard trace width in circuit space
       layer: wire.polyline_path?.layer.includes("B.") ? "bottom" : "top",
     })),
-    trace_length: (wire.path?.width ?? 0) / 1000,
+    trace_length: getTraceLength(pointsOnTraceMm),
   })
 
   return traces
