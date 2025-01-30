@@ -1,9 +1,13 @@
 import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
 import { convertDsnJsonToCircuitJson } from "../../lib/dsn-pcb/dsn-json-to-circuit-json/convert-dsn-json-to-circuit-json.ts"
 import { expect, test } from "bun:test"
-import { convertCircuitJsonToDsnString, parseDsnToCircuitJson, parseDsnToDsnJson } from "lib"
+import {
+  convertCircuitJsonToDsnString,
+  parseDsnToCircuitJson,
+  parseDsnToDsnJson,
+} from "lib"
 import { Circuit } from "@tscircuit/core"
-import {su} from "@tscircuit/soup-util"
+import { su } from "@tscircuit/soup-util"
 
 test("circuit json to dsn file", async () => {
   const circuit = new Circuit()
