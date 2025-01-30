@@ -37,6 +37,7 @@ export const convertPolylinePathToPcbTraces = ({
       width: 0.16, // Standard trace width in circuit space
       layer: wire.polyline_path?.layer.includes("B.") ? "bottom" : "top",
     })),
+    trace_length: (wire.path?.width ?? 0) / 1000,
   })
 
   return traces
