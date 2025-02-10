@@ -1,5 +1,4 @@
 import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
-import { convertDsnJsonToCircuitJson } from "../../lib/dsn-pcb/dsn-json-to-circuit-json/convert-dsn-json-to-circuit-json.ts"
 import { expect, test } from "bun:test"
 import {
   parseDsnToDsnJson,
@@ -21,6 +20,7 @@ import pcbDsnFile from "../assets/freerouting-sessions/circuit1.dsn" with {
 import { circuitJsonToTable } from "../debug-utils/circuit-json-to-table.ts"
 import { sessionFileToTable } from "../debug-utils/index.ts"
 import Debug from "debug"
+import { su } from "@tscircuit/soup-util"
 
 test("convert session to circuit json", async () => {
   const debug = Debug("tscircuit:dsn-converter")
@@ -32,6 +32,13 @@ test("convert session to circuit json", async () => {
     pcbJson,
     sessionJson,
   )
+
+  const pcb_traces = su(circuitJsonFromSession).pcb_trace.list()
+  const pcb_traces_by_id = [
+    ...new Set(pcb_traces.map((trace) => trace.pcb_trace_id)),
+  ]
+
+  expect(pcb_traces_by_id.length).toBe(3)
 
   if (debug.enabled) {
     circuitJsonToTable(
