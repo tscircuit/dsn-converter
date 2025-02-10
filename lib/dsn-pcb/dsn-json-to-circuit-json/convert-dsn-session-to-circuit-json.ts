@@ -68,7 +68,6 @@ export function convertDsnSessionToCircuitJson(
   }
 
   const sessionElements: AnyCircuitElement[] = []
-  const routeSegments: Array<PcbTrace | SourceTrace> = []
 
   // Process nets for vias and wires
   for (const net of dsnSession.routes.network_out.nets) {
@@ -87,18 +86,10 @@ export function convertDsnSessionToCircuitJson(
     // Process wires and vias together in routes
     net.wires?.forEach((wire, wireIdx) => {
       if ("path" in wire) {
-        routeSegments.push(
-          ...convertWiringPathToPcbTraces({
-            wire,
-            transformUmToMm,
-            netName: net.name,
-          }),
-        )
-
         const traces = convertWiringPathToPcbTraces({
           wire,
           transformUmToMm,
-          netName: net.name,
+          netName: `${net.name}_${wireIdx}`,
         })
 
         // Update trace IDs to maintain proper linkage
