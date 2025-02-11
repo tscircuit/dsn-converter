@@ -1,5 +1,5 @@
-import type { SourceNet, SourcePort, SourceTrace } from "circuit-json"
-import type { DsnPcb } from "lib/dsn-pcb/types"
+import type { SourceNet, SourcePort, SourceTrace } from "circuit-json";
+import type { DsnPcb } from "lib/dsn-pcb/types";
 
 export const convertNetsToSourceNetsAndTraces = ({
   dsnPcb,
@@ -9,8 +9,11 @@ export const convertNetsToSourceNetsAndTraces = ({
   const { nets } = dsnPcb.network
 
   let source_trace_id = dsnPcb.wiring.wires.length
-  for (const { name, pins } of nets) {
-    if (name.startsWith("unconnected-")) continue
+  for (const net of nets) {
+    const { name, pins = [] } = net
+    
+    if (!name || name.startsWith("unconnected-")) continue
+
     const source_net: SourceNet = {
       type: "source_net",
       name,
@@ -19,10 +22,13 @@ export const convertNetsToSourceNetsAndTraces = ({
     }
 
     const connected_source_port_ids: string[] = []
-    for (const pin of pins) {
-      const source_port = source_ports.find((sp) => sp.name === pin)
-      if (source_port)
-        connected_source_port_ids.push(source_port.source_port_id)
+    if (pins && pins.length > 0) {
+      for (const pin of pins) {
+        const source_port = source_ports.find((sp) => sp.name === pin)
+        if (source_port) {
+          connected_source_port_ids.push(source_port.source_port_id)
+        }
+      }
     }
 
     const source_trace: SourceTrace = {
