@@ -129,13 +129,14 @@ export function convertPadstacksToSmtPads(
             pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
             pcb_component_id: `${componentId}_${place.refdes}`,
             pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
-            shape: "rect",
+            shape: pin.rotation ? "rotated_rect" : "rect",
             x: circuitX,
             y: circuitY,
             width,
             height,
             layer,
             port_hints: [pin.pin_number.toString()],
+            ccw_rotation: pin.rotation ? pin.rotation : 0,
           }
         } else {
           pcbPad = {
