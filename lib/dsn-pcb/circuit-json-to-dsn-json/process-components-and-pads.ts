@@ -111,6 +111,7 @@ export function processComponentsAndPads(
       name: footprintName,
       outlines: [],
       pins: componentGroup.pcb_smtpads
+        .filter((pad) => pad.shape === "rect" || pad.shape === "rotated_rect")
         .map((pad) => {
           const pcbComponent = circuitElements.find(
             (e) =>
@@ -118,31 +119,33 @@ export function processComponentsAndPads(
               e.source_component_id ===
                 firstComponent.sourceComponent?.source_component_id,
           ) as PcbComponent
-          if (pad.shape === "rect") {
-            // Find the corresponding pcb_port and its source_port
-            const pcbPort = su(circuitElements)
-              .pcb_port.list()
-              .find((e) => e.pcb_port_id === pad.pcb_port_id)
-            const sourcePort = su(circuitElements)
-              .source_port.list()
-              .find((e) => e.source_port_id === pcbPort?.source_port_id)
-            return {
-              padstack_name: getPadstackName({
-                shape: "rect",
-                width: pad.width * 1000,
-                height: pad.height * 1000,
-                layer: pad.layer,
-              }),
-              pin_number:
-                sourcePort?.port_hints?.find(
-                  (hint) => !Number.isNaN(Number(hint)),
-                ) || 1,
-              x: (pad.x - pcbComponent.center.x) * 1000,
-              y: (pad.y - pcbComponent.center.y) * 1000,
-            }
+          // Find the corresponding pcb_port and its source_port
+          const pcbPort = su(circuitElements)
+            .pcb_port.list()
+            .find((e) => e.pcb_port_id === pad.pcb_port_id)
+          const sourcePort = su(circuitElements)
+            .source_port.list()
+            .find((e) => e.source_port_id === pcbPort?.source_port_id)
+          return {
+            padstack_name: getPadstackName({
+              shape: "rect",
+              width: pad.width * 1000,
+              height: pad.height * 1000,
+              layer: pad.layer,
+            }),
+            pin_number:
+              sourcePort?.port_hints?.find(
+                (hint) => !Number.isNaN(Number(hint)),
+              ) || 1,
+            x: (pad.x - pcbComponent.center.x) * 1000,
+            y: (pad.y - pcbComponent.center.y) * 1000,
+            rotation:
+              pad.shape === "rotated_rect" &&
+              typeof pad.ccw_rotation === "number"
+                ? pad.ccw_rotation
+                : 0,
           }
-        })
-        .filter((pin): pin is Pin => pin !== undefined),
+        }),
     }
     pcb.library.images.push(image)
 
@@ -154,7 +157,7 @@ export function processComponentsAndPads(
         x: component.coordinates.x,
         y: component.coordinates.y,
         side: "front" as const,
-        rotation: component.rotation % 90,
+        rotation: component.rotation,
         PN: component.value,
       })),
     }
