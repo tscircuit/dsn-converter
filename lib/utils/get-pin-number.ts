@@ -12,8 +12,11 @@ export function getPinNum(nodes: ASTNode[]): number | string | null {
   let pinNumber
 
   if (nodes[2]?.type === "List" && nodes[2].children) {
-    // Pin number is in a List structure
-    pinNumber = nodes[2].children[0]?.value
+    // Handle Pin number  in different structures
+    pinNumber =
+      nodes[2].children[1]?.value === "rotate"
+        ? nodes[3].value
+        : nodes[2].children[0]?.value
   } else if (nodes[2]?.type === "Atom") {
     // Pin number is direct value
     pinNumber = nodes[2].value
