@@ -1,9 +1,10 @@
 import type { Parser as ParserType, Pin } from ".././dsn-pcb/types"
 import Debug from "debug"
+import type { ASTNode } from "lib/common/parse-sexpr"
 import { getPinNum } from "lib/utils/get-pin-number"
 
 const debug = Debug("dsn-converter:get-pin-details")
-export function getPinDetails(nodes: any[]): Pin | null {
+export function getPinDetails(nodes: ASTNode[]): Pin | null {
   try {
     const pin: any = {}
 
