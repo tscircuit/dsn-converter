@@ -1,0 +1,979 @@
+{
+  "is_dsn_pcb": true,
+  "wiring": {
+    "wires": []
+  },
+  "filename": "B:depotCADKiCadtestSmoothieboard-mastersmoothieboard-5driversmoothieboard-5driver.dsn",
+  "parser": {
+    "string_quote": ")\r\n    (space_in_quoted_tokens on)\r\n    (host_cad ",
+    "host_version": "(5.1.9)-1"
+  },
+  "resolution": {
+    "unit": "um",
+    "value": 10
+  },
+  "unit": "um",
+  "structure": {
+    "layers": [
+      {
+        "name": "Top",
+        "type": "signal",
+        "property": {
+          "index": 0
+        }
+      },
+      {
+        "name": "Route2",
+        "type": "power",
+        "property": {
+          "index": 1
+        }
+      },
+      {
+        "name": "Route15",
+        "type": "signal",
+        "property": {
+          "index": 2
+        }
+      },
+      {
+        "name": "Bottom",
+        "type": "signal",
+        "property": {
+          "index": 3
+        }
+      }
+    ],
+    "boundary": {
+      "path": {
+        "layer": "pcb",
+        "width": 0,
+        "coordinates": [
+          211000, -52300, 211200, -52350, 211350, -52420, 211480, -52500,
+          211600, -52600, 211700, -52720, 211780, -52850, 211840, -53000,
+          211860, -53150, 211860, -155500, 211865, -155650, 211840, -155800,
+          211780, -155940, 211700, -156070, 211600, -156180, 211480, -156270,
+          211350, -156330, 211200, -156360, 86000, -156360, 85800, -156330,
+          85650, -156270, 85520, -156180, 85400, -156070, 85300, -155940, 85240,
+          -155800, 85210, -155650, 85210, -53150, 85230, -53000, 85280, -52850,
+          85360, -52720, 85450, -52600, 85560, -52500, 85700, -52420, 85850,
+          -52350, 86000, -52300, 210800, -52300, 211000, -52300
+        ]
+      }
+    },
+    "rule": {
+      "clearances": [
+        {
+          "value": 200.1
+        },
+        {
+          "value": 200.1,
+          "type": "default_smd"
+        },
+        {
+          "value": 50,
+          "type": "smd_smd"
+        }
+      ],
+      "width": 250
+    }
+  },
+  "placement": {
+    "components": [
+      {
+        "name": "smoothieboard-5driver:LQFP100",
+        "places": [
+          {
+            "refdes": "IC1",
+            "x": 136436,
+            "y": -112306,
+            "side": "front",
+            "rotation": 315,
+            "PN": "LPC1769"
+          }
+        ]
+      },
+      {
+        "name": "smoothieboard-5driver:TACTILE_SWITCH_SMD",
+        "places": [
+          {
+            "refdes": "S1",
+            "x": 126530,
+            "y": -153010,
+            "side": "front",
+            "rotation": 90,
+            "PN": "TAC_SWITCHSMD"
+          },
+          {
+            "refdes": "S2",
+            "x": 123927,
+            "y": -136817,
+            "side": "front",
+            "rotation": 90,
+            "PN": "TAC_SWITCHSMD"
+          }
+        ]
+      }
+    ]
+  },
+  "library": {
+    "images": [
+      {
+        "name": "smoothieboard-5driver:LQFP100",
+        "outlines": [
+          {
+            "path": {
+              "layer": "signal",
+              "width": 152.4,
+              "coordinates": [-6873, 6873, 6873, 6873]
+            }
+          },
+          {
+            "path": {
+              "layer": "signal",
+              "width": 152.4,
+              "coordinates": [6873, 6873, 6873, -6873]
+            }
+          },
+          {
+            "path": {
+              "layer": "signal",
+              "width": 152.4,
+              "coordinates": [6873, -6873, -6123, -6873]
+            }
+          },
+          {
+            "path": {
+              "layer": "signal",
+              "width": 152.4,
+              "coordinates": [-6123, -6873, -6873, -6123]
+            }
+          },
+          {
+            "path": {
+              "layer": "signal",
+              "width": 152.4,
+              "coordinates": [-6873, -6123, -6873, 6873]
+            }
+          },
+          {
+            "path": {
+              "layer": "signal",
+              "width": 406.4,
+              "coordinates": [-9000, 9000, 9000, 9000]
+            }
+          },
+          {
+            "path": {
+              "layer": "signal",
+              "width": 406.4,
+              "coordinates": [9000, 9000, 9000, -9000]
+            }
+          },
+          {
+            "path": {
+              "layer": "signal",
+              "width": 406.4,
+              "coordinates": [9000, -9000, -9000, -9000]
+            }
+          },
+          {
+            "path": {
+              "layer": "signal",
+              "width": 406.4,
+              "coordinates": [-9000, -9000, -9000, 9000]
+            }
+          },
+          {
+            "path": {
+              "layer": "signal",
+              "width": 152.4,
+              "coordinates": [
+                -3500, -4500, -3576.12, -4882.68, -3792.89, -5207.11, -4117.32,
+                -5423.88, -4500, -5500, -4882.68, -5423.88, -5207.11, -5207.11,
+                -5423.88, -4882.68, -5500, -4500, -5423.88, -4117.32, -5207.11,
+                -3792.89, -4882.68, -3576.12, -4500, -3500, -4117.32, -3576.12,
+                -3792.89, -3792.89, -3576.12, -4117.32, -3500, -4500
+              ]
+            }
+          }
+        ],
+        "pins": [
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 100,
+            "x": -7750,
+            "y": -6000,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 99,
+            "x": -7750,
+            "y": -5500,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 98,
+            "x": -7750,
+            "y": -5000,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 97,
+            "x": -7750,
+            "y": -4500,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 96,
+            "x": -7750,
+            "y": -4000,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 95,
+            "x": -7750,
+            "y": -3500,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 94,
+            "x": -7750,
+            "y": -3000,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 93,
+            "x": -7750,
+            "y": -2500,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 92,
+            "x": -7750,
+            "y": -2000,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 91,
+            "x": -7750,
+            "y": -1500,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 90,
+            "x": -7750,
+            "y": -1000,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 89,
+            "x": -7750,
+            "y": -500,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 88,
+            "x": -7750,
+            "y": 0,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 87,
+            "x": -7750,
+            "y": 500,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 86,
+            "x": -7750,
+            "y": 1000,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 85,
+            "x": -7750,
+            "y": 1500,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 84,
+            "x": -7750,
+            "y": 2000,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 83,
+            "x": -7750,
+            "y": 2500,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 82,
+            "x": -7750,
+            "y": 3000,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 81,
+            "x": -7750,
+            "y": 3500,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 80,
+            "x": -7750,
+            "y": 4000,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 79,
+            "x": -7750,
+            "y": 4500,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 78,
+            "x": -7750,
+            "y": 5000,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 77,
+            "x": -7750,
+            "y": 5500,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 76,
+            "x": -7750,
+            "y": 6000,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 50,
+            "x": 7750,
+            "y": 6000,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 49,
+            "x": 7750,
+            "y": 5500,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 48,
+            "x": 7750,
+            "y": 5000,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 47,
+            "x": 7750,
+            "y": 4500,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 46,
+            "x": 7750,
+            "y": 4000,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 45,
+            "x": 7750,
+            "y": 3500,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 44,
+            "x": 7750,
+            "y": 3000,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 43,
+            "x": 7750,
+            "y": 2500,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 42,
+            "x": 7750,
+            "y": 2000,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 41,
+            "x": 7750,
+            "y": 1500,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 40,
+            "x": 7750,
+            "y": 1000,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 39,
+            "x": 7750,
+            "y": 500,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 38,
+            "x": 7750,
+            "y": 0,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 37,
+            "x": 7750,
+            "y": -500,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 36,
+            "x": 7750,
+            "y": -1000,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 35,
+            "x": 7750,
+            "y": -1500,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 34,
+            "x": 7750,
+            "y": -2000,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 33,
+            "x": 7750,
+            "y": -2500,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 32,
+            "x": 7750,
+            "y": -3000,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 31,
+            "x": 7750,
+            "y": -3500,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 30,
+            "x": 7750,
+            "y": -4000,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 29,
+            "x": 7750,
+            "y": -4500,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 28,
+            "x": 7750,
+            "y": -5000,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 27,
+            "x": 7750,
+            "y": -5500,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_1500x270_um",
+            "pin_number": 26,
+            "x": 7750,
+            "y": -6000,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 25,
+            "x": 6000,
+            "y": -7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 24,
+            "x": 5500,
+            "y": -7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 23,
+            "x": 5000,
+            "y": -7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 22,
+            "x": 4500,
+            "y": -7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 21,
+            "x": 4000,
+            "y": -7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 20,
+            "x": 3500,
+            "y": -7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 19,
+            "x": 3000,
+            "y": -7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 18,
+            "x": 2500,
+            "y": -7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 17,
+            "x": 2000,
+            "y": -7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 16,
+            "x": 1500,
+            "y": -7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 15,
+            "x": 1000,
+            "y": -7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 14,
+            "x": 500,
+            "y": -7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 13,
+            "x": 0,
+            "y": -7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 12,
+            "x": -500,
+            "y": -7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 11,
+            "x": -1000,
+            "y": -7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 10,
+            "x": -1500,
+            "y": -7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 9,
+            "x": -2000,
+            "y": -7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 8,
+            "x": -2500,
+            "y": -7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 7,
+            "x": -3000,
+            "y": -7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 6,
+            "x": -3500,
+            "y": -7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 5,
+            "x": -4000,
+            "y": -7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 4,
+            "x": -4500,
+            "y": -7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 3,
+            "x": -5000,
+            "y": -7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 2,
+            "x": -5500,
+            "y": -7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 1,
+            "x": -6000,
+            "y": -7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 51,
+            "x": 6000,
+            "y": 7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 52,
+            "x": 5500,
+            "y": 7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 53,
+            "x": 5000,
+            "y": 7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 54,
+            "x": 4500,
+            "y": 7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 55,
+            "x": 4000,
+            "y": 7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 56,
+            "x": 3500,
+            "y": 7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 57,
+            "x": 3000,
+            "y": 7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 58,
+            "x": 2500,
+            "y": 7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 59,
+            "x": 2000,
+            "y": 7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 60,
+            "x": 1500,
+            "y": 7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 61,
+            "x": 1000,
+            "y": 7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 62,
+            "x": 500,
+            "y": 7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 63,
+            "x": 0,
+            "y": 7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 64,
+            "x": -500,
+            "y": 7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 65,
+            "x": -1000,
+            "y": 7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 66,
+            "x": -1500,
+            "y": 7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 67,
+            "x": -2000,
+            "y": 7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 68,
+            "x": -2500,
+            "y": 7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 69,
+            "x": -3000,
+            "y": 7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 70,
+            "x": -3500,
+            "y": 7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 71,
+            "x": -4000,
+            "y": 7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 72,
+            "x": -4500,
+            "y": 7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 73,
+            "x": -5000,
+            "y": 7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 74,
+            "x": -5500,
+            "y": 7750,
+            "rotation": 0
+          },
+          {
+            "padstack_name": "Rect[T]Pad_270x1500_um",
+            "pin_number": 75,
+            "x": -6000,
+            "y": 7750,
+            "rotation": 0
+          }
+        ]
+      },
+      {
+        "name": "smoothieboard-5driver:TACTILE_SWITCH_SMD",
+        "outlines": [],
+        "pins": [
+          {
+            "padstack_name": "Rect[T]Pad_762x1524_um",
+            "rotation": 90,
+            "pin_number": 4,
+            "x": 2540,
+            "y": -1905
+          },
+          {
+            "padstack_name": "Rect[T]Pad_762x1524_um",
+            "rotation": 90,
+            "pin_number": 3,
+            "x": -2540,
+            "y": -1905
+          },
+          {
+            "padstack_name": "Rect[T]Pad_762x1524_um",
+            "rotation": 90,
+            "pin_number": 2,
+            "x": 2540,
+            "y": 1905
+          },
+          {
+            "padstack_name": "Rect[T]Pad_762x1524_um",
+            "rotation": 90,
+            "pin_number": 1,
+            "x": -2540,
+            "y": 1905
+          }
+        ]
+      }
+    ],
+    "padstacks": [
+      {
+        "name": "Rect[T]Pad_1500x270_um",
+        "shapes": [
+          {
+            "shapeType": "rect",
+            "layer": "Top",
+            "coordinates": [-750, -135, 750, 135]
+          }
+        ],
+        "attach": "off"
+      },
+      {
+        "name": "Rect[T]Pad_270x1500_um",
+        "shapes": [
+          {
+            "shapeType": "rect",
+            "layer": "Top",
+            "coordinates": [-135, -750, 135, 750]
+          }
+        ],
+        "attach": "off"
+      },
+      {
+        "name": "Rect[T]Pad_762x1524_um",
+        "shapes": [
+          {
+            "shapeType": "rect",
+            "layer": "Top",
+            "coordinates": [-381, -762, 381, 762]
+          }
+        ],
+        "attach": "off"
+      }
+    ]
+  },
+  "network": {
+    "nets": [],
+    "classes": []
+  }
+}
