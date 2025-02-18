@@ -111,7 +111,6 @@ export function convertPadstacksToSmtPads(
         // Calculate position in circuit space using the transformation matrix
         // Convert component position and pin offset to circuit coordinates
         // Convert rotation to radians (if needed)
-        console.log("transform", transform)
         const rotationAngle = (place.rotation || 0) * (Math.PI / 180)
 
         // Rotate the pin offset by the component's rotation
