@@ -243,7 +243,7 @@
     "width": 1.5848077530122087,
     "height": 0.7736481776669304,
     "layer": "top",
-    "rotation": 40,
+    "rotation": 10,
     "source_component_id": "source_component_0",
     "subcircuit_id": "subcircuit_source_group_0"
   },
