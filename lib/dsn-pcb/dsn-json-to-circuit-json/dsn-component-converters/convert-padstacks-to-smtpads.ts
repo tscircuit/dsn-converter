@@ -110,11 +110,22 @@ export function convertPadstacksToSmtPads(
 
         // Calculate position in circuit space using the transformation matrix
         // Convert component position and pin offset to circuit coordinates
-        const { x: circuitX, y: circuitY } = applyToPoint(transform, {
-          x: (compX || 0) + pin.x,
-          y: (compY || 0) + pin.y,
-        })
+        // Convert rotation to radians (if needed)
+        console.log("transform", transform)
+        const rotationAngle = (place.rotation || 0) * (Math.PI / 180)
 
+        // Rotate the pin offset by the component's rotation
+        const rotatedPin = {
+          x: pin.x * Math.cos(rotationAngle) - pin.y * Math.sin(rotationAngle),
+          y: pin.x * Math.sin(rotationAngle) + pin.y * Math.cos(rotationAngle),
+        }
+
+        // Now combine the rotated offset with the component's position,
+        // and then apply the overall transformation matrix.
+        const { x: circuitX, y: circuitY } = applyToPoint(transform, {
+          x: (compX || 0) + rotatedPin.x,
+          y: (compY || 0) + rotatedPin.y,
+        })
         let pcbPad: PcbSmtPad
         if (rectShape || polygonShape || pathShape) {
           const layer = padstack.shapes[0].layer.includes("B.")
@@ -129,14 +140,16 @@ export function convertPadstacksToSmtPads(
             pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
             pcb_component_id: `${componentId}_${place.refdes}`,
             pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
-            shape: pin.rotation ? "rotated_rect" : "rect",
+            shape: place.rotation ? "rotated_rect" : "rect",
             x: circuitX,
             y: circuitY,
-            width,
-            height,
+
+            width: place.rotation === 90 ? height : width,
+            height: place.rotation === 90 ? width : height,
+
             layer,
             port_hints: [pin.pin_number.toString()],
-            ccw_rotation: pin.rotation ? pin.rotation : 0,
+            ccw_rotation: place.rotation ? place.rotation : 0,
           }
         } else {
           pcbPad = {
