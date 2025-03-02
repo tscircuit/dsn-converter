@@ -587,7 +587,6 @@ function processPin(nodes: ASTNode[]): Pin | null {
     // Parse coordinates
     let xValue: number | undefined
     let yValue: number | undefined
-    let rotationValue: number | undefined
 
     for (let i = 3; i < nodes.length; i++) {
       const node = nodes[i]
@@ -622,11 +621,6 @@ function processPin(nodes: ASTNode[]): Pin | null {
               yValue = node.value
             }
           }
-        } else if (rotationValue === undefined) {
-          // Try to parse rotation
-          if (typeof node.value === "number") {
-            rotationValue = node.value
-          }
         }
       }
     }
@@ -637,7 +631,6 @@ function processPin(nodes: ASTNode[]): Pin | null {
 
     pin.x = xValue
     pin.y = yValue
-    pin.rotation = rotationValue ? rotationValue : 0
 
     return pin as Pin
   } catch (error) {
