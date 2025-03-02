@@ -37,7 +37,7 @@ import type {
   Wiring,
 } from "../types"
 import Debug from "debug"
-import { getPinNum } from "lib/utils/get-pin-number"
+import { getPinDetails } from "lib/utils/get-pin-details"
 import { getViaCoords } from "lib/utils/get-via-coordinates"
 
 const debug = Debug("dsn-converter:parse-dsn-to-dsn-json")
@@ -568,76 +568,7 @@ function processOutline(nodes: ASTNode[]): Outline {
 }
 
 function processPin(nodes: ASTNode[]): Pin | null {
-  const pin: Partial<Pin> = {}
-
-  try {
-    // Get padstack name
-    if (nodes[1]?.type !== "Atom") {
-      debug("Unsupported pin padstack_name format:", nodes)
-      return null
-    }
-    pin.padstack_name = String(nodes[1].value)
-    // check if pin number is in a List structure
-    const pinNumber = getPinNum(nodes)
-
-    if (pinNumber === null) return null
-
-    pin.pin_number = pinNumber
-
-    // Parse coordinates
-    let xValue: number | undefined
-    let yValue: number | undefined
-
-    for (let i = 3; i < nodes.length; i++) {
-      const node = nodes[i]
-      const nextNode = nodes[i + 1]
-
-      if (node.type === "Atom") {
-        if (xValue === undefined) {
-          // Try to parse X coordinate
-          if (typeof node.value === "number") {
-            if (
-              nextNode?.type === "Atom" &&
-              String(nextNode.value).toLowerCase().startsWith("e")
-            ) {
-              // Handle scientific notation
-              xValue = Number(`${node.value}${nextNode.value}`)
-              i++ // Skip the exponent part
-            } else {
-              xValue = node.value
-            }
-          }
-        } else if (yValue === undefined) {
-          // Try to parse Y coordinate
-          if (typeof node.value === "number") {
-            if (
-              nextNode?.type === "Atom" &&
-              String(nextNode.value).toLowerCase().startsWith("e")
-            ) {
-              // Handle scientific notation
-              yValue = Number(`${node.value}${nextNode.value}`)
-              i++ // Skip the exponent part
-            } else {
-              yValue = node.value
-            }
-          }
-        }
-      }
-    }
-
-    if (typeof xValue !== "number" || typeof yValue !== "number") {
-      throw new Error(`Invalid coordinates: x=${xValue}, y=${yValue}`)
-    }
-
-    pin.x = xValue
-    pin.y = yValue
-
-    return pin as Pin
-  } catch (error) {
-    console.error("Pin processing error:", error)
-    console.error("Problematic nodes:", JSON.stringify(nodes, null, 2))
-    throw error
-  }
+  return getPinDetails(nodes)
 }
 
 function processPadstack(nodes: ASTNode[]): Padstack {

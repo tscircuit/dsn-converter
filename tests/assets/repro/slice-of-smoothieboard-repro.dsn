@@ -1,0 +1,208 @@
+(pcb "B:\depot\CAD\KiCad\test\Smoothieboard-master\smoothieboard-5driver\smoothieboard-5driver.dsn"
+  (parser
+    (string_quote ")
+    (space_in_quoted_tokens on)
+    (host_cad "KiCad's Pcbnew")
+    (host_version "(5.1.9)-1")
+  )
+  (resolution um 10)
+  (unit um)
+  (structure
+    (layer Top
+      (type signal)
+      (property
+        (index 0)
+      )
+    )
+    (layer Route2
+      (type power)
+      (property
+        (index 1)
+      )
+    )
+    (layer Route15
+      (type signal)
+      (property
+        (index 2)
+      )
+    )
+    (layer Bottom
+      (type signal)
+      (property
+        (index 3)
+      )
+    )
+    (boundary
+(path pcb 0  211000 -52300  211200 -52350  211350 -52420  211480 -52500
+            211600 -52600  211700 -52720  211780 -52850  211840 -53000
+            211860 -53150  211860 -155500  211865 -155650  211840 -155800
+            211780 -155940  211700 -156070  211600 -156180  211480 -156270
+            211350 -156330  211200 -156360  86000 -156360  85800 -156330
+            85650 -156270  85520 -156180  85400 -156070  85300 -155940
+            85240 -155800  85210 -155650  85210 -53150
+            85230 -53000  85280 -52850  85360 -52720  85450 -52600
+            85560 -52500  85700 -52420  85850 -52350  86000 -52300
+            210800 -52300  211000 -52300)
+    )
+    (plane AGND (polygon Route2 0  214249 -158877  82677 -159512  82550 -50673  214376 -50673
+            214249 -158877))
+
+    (rule
+      (width 250)
+      (clearance 200.1)
+      (clearance 200.1 (type default_smd))
+      (clearance 50 (type smd_smd))
+    )
+  )
+  (placement
+    (component "smoothieboard-5driver:LQFP100"
+      (place IC1 136436 -112306 front 315 (PN LPC1769))
+    )
+    (component "smoothieboard-5driver:TACTILE_SWITCH_SMD"
+      (place S1 126530 -153010 front 90 (PN TAC_SWITCHSMD))
+      (place S2 123927 -136817 front 90 (PN TAC_SWITCHSMD))
+    )
+  )
+  (library
+   (image "smoothieboard-5driver:LQFP100"
+      (outline (path signal 152.4  -6873 6873  6873 6873))
+      (outline (path signal 152.4  6873 6873  6873 -6873))
+      (outline (path signal 152.4  6873 -6873  -6123 -6873))
+      (outline (path signal 152.4  -6123 -6873  -6873 -6123))
+      (outline (path signal 152.4  -6873 -6123  -6873 6873))
+      (outline (path signal 406.4  -9000 9000  9000 9000))
+      (outline (path signal 406.4  9000 9000  9000 -9000))
+      (outline (path signal 406.4  9000 -9000  -9000 -9000))
+      (outline (path signal 406.4  -9000 -9000  -9000 9000))
+      (outline (path signal 152.4  -3500 -4500  -3576.12 -4882.68  -3792.89 -5207.11  -4117.32 -5423.88
+            -4500 -5500  -4882.68 -5423.88  -5207.11 -5207.11  -5423.88 -4882.68
+            -5500 -4500  -5423.88 -4117.32  -5207.11 -3792.89  -4882.68 -3576.12
+            -4500 -3500  -4117.32 -3576.12  -3792.89 -3792.89  -3576.12 -4117.32
+            -3500 -4500))
+      (pin Rect[T]Pad_1500x270_um 100 -7750 -6000)
+      (pin Rect[T]Pad_1500x270_um 99 -7750 -5500)
+      (pin Rect[T]Pad_1500x270_um 98 -7750 -5000)
+      (pin Rect[T]Pad_1500x270_um 97 -7750 -4500)
+      (pin Rect[T]Pad_1500x270_um 96 -7750 -4000)
+      (pin Rect[T]Pad_1500x270_um 95 -7750 -3500)
+      (pin Rect[T]Pad_1500x270_um 94 -7750 -3000)
+      (pin Rect[T]Pad_1500x270_um 93 -7750 -2500)
+      (pin Rect[T]Pad_1500x270_um 92 -7750 -2000)
+      (pin Rect[T]Pad_1500x270_um 91 -7750 -1500)
+      (pin Rect[T]Pad_1500x270_um 90 -7750 -1000)
+      (pin Rect[T]Pad_1500x270_um 89 -7750 -500)
+      (pin Rect[T]Pad_1500x270_um 88 -7750 0)
+      (pin Rect[T]Pad_1500x270_um 87 -7750 500)
+      (pin Rect[T]Pad_1500x270_um 86 -7750 1000)
+      (pin Rect[T]Pad_1500x270_um 85 -7750 1500)
+      (pin Rect[T]Pad_1500x270_um 84 -7750 2000)
+      (pin Rect[T]Pad_1500x270_um 83 -7750 2500)
+      (pin Rect[T]Pad_1500x270_um 82 -7750 3000)
+      (pin Rect[T]Pad_1500x270_um 81 -7750 3500)
+      (pin Rect[T]Pad_1500x270_um 80 -7750 4000)
+      (pin Rect[T]Pad_1500x270_um 79 -7750 4500)
+      (pin Rect[T]Pad_1500x270_um 78 -7750 5000)
+      (pin Rect[T]Pad_1500x270_um 77 -7750 5500)
+      (pin Rect[T]Pad_1500x270_um 76 -7750 6000)
+      (pin Rect[T]Pad_1500x270_um 50 7750 6000)
+      (pin Rect[T]Pad_1500x270_um 49 7750 5500)
+      (pin Rect[T]Pad_1500x270_um 48 7750 5000)
+      (pin Rect[T]Pad_1500x270_um 47 7750 4500)
+      (pin Rect[T]Pad_1500x270_um 46 7750 4000)
+      (pin Rect[T]Pad_1500x270_um 45 7750 3500)
+      (pin Rect[T]Pad_1500x270_um 44 7750 3000)
+      (pin Rect[T]Pad_1500x270_um 43 7750 2500)
+      (pin Rect[T]Pad_1500x270_um 42 7750 2000)
+      (pin Rect[T]Pad_1500x270_um 41 7750 1500)
+      (pin Rect[T]Pad_1500x270_um 40 7750 1000)
+      (pin Rect[T]Pad_1500x270_um 39 7750 500)
+      (pin Rect[T]Pad_1500x270_um 38 7750 0)
+      (pin Rect[T]Pad_1500x270_um 37 7750 -500)
+      (pin Rect[T]Pad_1500x270_um 36 7750 -1000)
+      (pin Rect[T]Pad_1500x270_um 35 7750 -1500)
+      (pin Rect[T]Pad_1500x270_um 34 7750 -2000)
+      (pin Rect[T]Pad_1500x270_um 33 7750 -2500)
+      (pin Rect[T]Pad_1500x270_um 32 7750 -3000)
+      (pin Rect[T]Pad_1500x270_um 31 7750 -3500)
+      (pin Rect[T]Pad_1500x270_um 30 7750 -4000)
+      (pin Rect[T]Pad_1500x270_um 29 7750 -4500)
+      (pin Rect[T]Pad_1500x270_um 28 7750 -5000)
+      (pin Rect[T]Pad_1500x270_um 27 7750 -5500)
+      (pin Rect[T]Pad_1500x270_um 26 7750 -6000)
+      (pin Rect[T]Pad_270x1500_um 25 6000 -7750)
+      (pin Rect[T]Pad_270x1500_um 24 5500 -7750)
+      (pin Rect[T]Pad_270x1500_um 23 5000 -7750)
+      (pin Rect[T]Pad_270x1500_um 22 4500 -7750)
+      (pin Rect[T]Pad_270x1500_um 21 4000 -7750)
+      (pin Rect[T]Pad_270x1500_um 20 3500 -7750)
+      (pin Rect[T]Pad_270x1500_um 19 3000 -7750)
+      (pin Rect[T]Pad_270x1500_um 18 2500 -7750)
+      (pin Rect[T]Pad_270x1500_um 17 2000 -7750)
+      (pin Rect[T]Pad_270x1500_um 16 1500 -7750)
+      (pin Rect[T]Pad_270x1500_um 15 1000 -7750)
+      (pin Rect[T]Pad_270x1500_um 14 500 -7750)
+      (pin Rect[T]Pad_270x1500_um 13 0 -7750)
+      (pin Rect[T]Pad_270x1500_um 12 -500 -7750)
+      (pin Rect[T]Pad_270x1500_um 11 -1000 -7750)
+      (pin Rect[T]Pad_270x1500_um 10 -1500 -7750)
+      (pin Rect[T]Pad_270x1500_um 9 -2000 -7750)
+      (pin Rect[T]Pad_270x1500_um 8 -2500 -7750)
+      (pin Rect[T]Pad_270x1500_um 7 -3000 -7750)
+      (pin Rect[T]Pad_270x1500_um 6 -3500 -7750)
+      (pin Rect[T]Pad_270x1500_um 5 -4000 -7750)
+      (pin Rect[T]Pad_270x1500_um 4 -4500 -7750)
+      (pin Rect[T]Pad_270x1500_um 3 -5000 -7750)
+      (pin Rect[T]Pad_270x1500_um 2 -5500 -7750)
+      (pin Rect[T]Pad_270x1500_um 1 -6000 -7750)
+      (pin Rect[T]Pad_270x1500_um 51 6000 7750)
+      (pin Rect[T]Pad_270x1500_um 52 5500 7750)
+      (pin Rect[T]Pad_270x1500_um 53 5000 7750)
+      (pin Rect[T]Pad_270x1500_um 54 4500 7750)
+      (pin Rect[T]Pad_270x1500_um 55 4000 7750)
+      (pin Rect[T]Pad_270x1500_um 56 3500 7750)
+      (pin Rect[T]Pad_270x1500_um 57 3000 7750)
+      (pin Rect[T]Pad_270x1500_um 58 2500 7750)
+      (pin Rect[T]Pad_270x1500_um 59 2000 7750)
+      (pin Rect[T]Pad_270x1500_um 60 1500 7750)
+      (pin Rect[T]Pad_270x1500_um 61 1000 7750)
+      (pin Rect[T]Pad_270x1500_um 62 500 7750)
+      (pin Rect[T]Pad_270x1500_um 63 0 7750)
+      (pin Rect[T]Pad_270x1500_um 64 -500 7750)
+      (pin Rect[T]Pad_270x1500_um 65 -1000 7750)
+      (pin Rect[T]Pad_270x1500_um 66 -1500 7750)
+      (pin Rect[T]Pad_270x1500_um 67 -2000 7750)
+      (pin Rect[T]Pad_270x1500_um 68 -2500 7750)
+      (pin Rect[T]Pad_270x1500_um 69 -3000 7750)
+      (pin Rect[T]Pad_270x1500_um 70 -3500 7750)
+      (pin Rect[T]Pad_270x1500_um 71 -4000 7750)
+      (pin Rect[T]Pad_270x1500_um 72 -4500 7750)
+      (pin Rect[T]Pad_270x1500_um 73 -5000 7750)
+      (pin Rect[T]Pad_270x1500_um 74 -5500 7750)
+      (pin Rect[T]Pad_270x1500_um 75 -6000 7750)
+    )
+    (image "smoothieboard-5driver:TACTILE_SWITCH_SMD"
+    
+      (pin Rect[T]Pad_762x1524_um (rotate 90) 4 2540 -1905)
+      (pin Rect[T]Pad_762x1524_um (rotate 90) 3 -2540 -1905)
+      (pin Rect[T]Pad_762x1524_um (rotate 90) 2 2540 1905)
+      (pin Rect[T]Pad_762x1524_um (rotate 90) 1 -2540 1905)
+    )
+       (padstack Rect[T]Pad_1500x270_um
+      (shape (rect Top -750 -135 750 135))
+      (attach off)
+    )
+      (padstack Rect[T]Pad_270x1500_um
+      (shape (rect Top -135 -750 135 750))
+      (attach off)
+    )
+    (padstack Rect[T]Pad_762x1524_um
+      (shape (rect Top -381 -762 381 762))
+      (attach off)
+    )
+  )
+  (network
+   
+  )
+  (wiring
+  )
+)

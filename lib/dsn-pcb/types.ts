@@ -193,6 +193,7 @@ export interface Pin {
   pin_number: number | string
   x: number
   y: number
+  rotation?: number
 }
 
 export interface Padstack {

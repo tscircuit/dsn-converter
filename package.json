@@ -1,7 +1,7 @@
 {
   "name": "dsn-converter",
   "main": "dist/index.js",
-  "version": "0.0.63",
+  "version": "0.0.66",
   "type": "module",
   "files": [
     "dist"
@@ -13,14 +13,14 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
-    "@tscircuit/core": "^0.0.294",
+    "@tscircuit/core": "^0.0.315",
     "@types/bun": "latest",
     "@types/debug": "^4.1.12",
     "@types/react": "^19.0.1",
     "@types/uuid": "^10.0.0",
-    "bun-match-svg": "^0.0.3",
+    "bun-match-svg": "^0.0.9",
     "circuit-json": "^0.0.134",
-    "circuit-to-svg": "^0.0.58",
+    "circuit-to-svg": "^0.0.101",
     "react": "18",
     "tsup": "^8.3.5"
   },
