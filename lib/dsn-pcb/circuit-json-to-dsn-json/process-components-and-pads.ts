@@ -84,7 +84,7 @@ export function processComponentsAndPads(
 
     // Add padstacks for SMT pads
     for (const pad of componentGroup.pcb_smtpads) {
-      if (pad.shape === "rect") {
+      if (pad.shape === "rect" || pad.shape === "rotated_rect") {
         const padstackName = getPadstackName({
           shape: "rect",
           width: pad.width * 1000,
@@ -118,7 +118,7 @@ export function processComponentsAndPads(
               e.source_component_id ===
                 firstComponent.sourceComponent?.source_component_id,
           ) as PcbComponent
-          if (pad.shape === "rect") {
+          if (pad.shape === "rect" || pad.shape === "rotated_rect") {
             // Find the corresponding pcb_port and its source_port
             const pcbPort = su(circuitElements)
               .pcb_port.list()
