@@ -73,7 +73,7 @@ export function processComponentsAndPads(
         (e) =>
           e.type === "pcb_component" &&
           e.source_component_id ===
-            firstComponent.sourceComponent?.source_component_id,
+          firstComponent.sourceComponent?.source_component_id,
       ) as PcbComponent
       return (
         pcbComponent && group.pcb_component_id === pcbComponent.pcb_component_id
@@ -100,7 +100,6 @@ export function processComponentsAndPads(
             padHeightInUm,
             pad.layer,
           )
-          console.log("padstack", padstack)
           pcb.library.padstacks.push(padstack)
           processedPadstacks.add(padstackName)
         }
@@ -118,7 +117,7 @@ export function processComponentsAndPads(
             (e) =>
               e.type === "pcb_component" &&
               e.source_component_id ===
-                firstComponent.sourceComponent?.source_component_id,
+              firstComponent.sourceComponent?.source_component_id,
           ) as PcbComponent
           // Find the corresponding pcb_port and its source_port
           const pcbPort = su(circuitElements)
@@ -142,11 +141,11 @@ export function processComponentsAndPads(
             y: (pad.y - pcbComponent.center.y) * 1000,
             rotation:
               pad.shape === "rotated_rect" &&
-              typeof pad.ccw_rotation === "number"
+                typeof pad.ccw_rotation === "number"
                 ? pad.ccw_rotation
                 : 0,
           }
-        }),      
+        }),
     }
     // console.log(pcb.library.images)
     pcb.library.images.push(image)
