@@ -84,7 +84,7 @@ export function processComponentsAndPads(
 
     // Add padstacks for SMT pads
     for (const pad of componentGroup.pcb_smtpads) {
-      if (pad.shape === "rect") {
+      if (pad.shape === "rect" || pad.shape === "rotated_rect") {
         const padstackName = getPadstackName({
           shape: "rect",
           width: pad.width * 1000,
@@ -100,6 +100,7 @@ export function processComponentsAndPads(
             padHeightInUm,
             pad.layer,
           )
+          console.log("padstack", padstack)
           pcb.library.padstacks.push(padstack)
           processedPadstacks.add(padstackName)
         }
@@ -145,8 +146,9 @@ export function processComponentsAndPads(
                 ? pad.ccw_rotation
                 : 0,
           }
-        }),
+        }),      
     }
+    // console.log(pcb.library.images)
     pcb.library.images.push(image)
 
     // Add component entry
