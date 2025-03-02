@@ -147,7 +147,6 @@ export function processComponentsAndPads(
           }
         }),
     }
-    // console.log(pcb.library.images)
     pcb.library.images.push(image)
 
     // Add component entry
