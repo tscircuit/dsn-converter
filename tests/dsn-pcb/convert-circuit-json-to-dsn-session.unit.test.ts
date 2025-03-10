@@ -238,7 +238,7 @@ test("converts nets and wires", () => {
   expect(session.routes.network_out.nets[0].wires).toHaveLength(1)
   expect(session.routes.network_out.nets[0].wires[0].path).toEqual({
     layer: "F.Cu",
-    width: 200,
+    width: 2000,
     coordinates: [10000, 20000, 30000, 40000],
   })
 })

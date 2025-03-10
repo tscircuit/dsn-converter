@@ -34,7 +34,7 @@ function createWire(opts: {
   return {
     path: {
       layer: opts.layer === "top" ? "F.Cu" : "B.Cu",
-      width: opts.widthMm * 1000,
+      width: opts.widthMm,
       coordinates: [],
     },
     net: opts.netName,
@@ -89,7 +89,7 @@ export function processPcbTraces(
             // Start new wire on new layer
             currentWire = createWire({
               layer: point.layer,
-              widthMm: point.width,
+              widthMm: point.width * CJ_TO_DSN_SCALE,
               netName,
             })
 
