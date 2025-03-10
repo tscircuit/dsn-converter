@@ -19,8 +19,12 @@ export function convertDsnSessionToCircuitJson(
   dsnSession: DsnSession,
   circuitJson?: AnyCircuitElement[],
 ): AnyCircuitElement[] {
+  // From sesssion space to circuit space
   const transformUmToMm = scale(1 / 10000)
-  const inputPcbElms = convertDsnPcbToCircuitJson(dsnInput as DsnPcb)
+  const inputPcbElms = convertDsnPcbToCircuitJson(
+    dsnInput as DsnPcb,
+    true, // from session space to circuit space
+  )
 
   // Get existing source traces to maintain proper linkage
   const existingSourceTraces = inputPcbElms.filter(

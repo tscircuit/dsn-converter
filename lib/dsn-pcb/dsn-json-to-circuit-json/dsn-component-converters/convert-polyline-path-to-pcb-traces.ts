@@ -9,10 +9,12 @@ export const convertPolylinePathToPcbTraces = ({
   wire,
   transformUmToMm,
   netName,
+  fromSessionSpace = true,
 }: {
   wire: Wiring["wires"][number]
   transformUmToMm: Matrix
   netName: string
+  fromSessionSpace?: boolean
 }): PcbTrace[] => {
   const traces: PcbTrace[] = []
 
@@ -35,7 +37,9 @@ export const convertPolylinePathToPcbTraces = ({
       route_type: "wire" as const,
       x: Number(point.x.toFixed(4)),
       y: Number(point.y.toFixed(4)),
-      width: 0.16, // Standard trace width in circuit space
+      width: fromSessionSpace
+        ? wire.polyline_path!.width / 10000 // session space to circuit space
+        : wire.polyline_path!.width / 1000, // dsn space to circuit space
       layer: wire.polyline_path?.layer.includes("B.") ? "bottom" : "top",
     })),
     trace_length: getTraceLength(pointsOnTraceMm),
