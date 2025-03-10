@@ -71,7 +71,7 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
           }
 
           // Store trace width if specified
-          if ('min_trace_thickness' in element && element.min_trace_thickness) {
+          if ("min_trace_thickness" in element && element.min_trace_thickness) {
             // Convert from mm to μm
             const traceWidthMicrons = element.min_trace_thickness * 1000
             netTraceWidthMap.set(netName, traceWidthMicrons)
@@ -110,16 +110,19 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
         )
         if (connectedTraces.length > 0) {
           isInSourceNet = true
-          
+
           // Store trace width if specified in any of the connected traces
           for (const trace of connectedTraces) {
-            if ('min_trace_thickness' in trace && trace.min_trace_thickness) {
+            if ("min_trace_thickness" in trace && trace.min_trace_thickness) {
               const traceWidthMicrons = trace.min_trace_thickness * 1000
-              netTraceWidthMap.set(`${element.name}_${element.source_net_id}`, traceWidthMicrons)
+              netTraceWidthMap.set(
+                `${element.name}_${element.source_net_id}`,
+                traceWidthMicrons,
+              )
               break
             }
           }
-          
+
           break
         }
       }
@@ -147,7 +150,7 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
           e.type === "source_trace" &&
           e.connected_source_net_ids?.includes(element.source_net_id),
       ) as SourceTrace[]
-      
+
       // Add connected ports to the net
       for (const trace of connectedTraces) {
         for (const portId of trace.connected_source_port_ids || []) {
@@ -158,9 +161,13 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
               ?.add(`${padInfo.componentName}-${padInfo.pinNumber}`)
           }
         }
-        
+
         // Store trace width if specified
-        if ('min_trace_thickness' in trace && trace.min_trace_thickness && !netTraceWidthMap.has(netName)) {
+        if (
+          "min_trace_thickness" in trace &&
+          trace.min_trace_thickness &&
+          !netTraceWidthMap.has(netName)
+        ) {
           const traceWidthMicrons = trace.min_trace_thickness * 1000
           netTraceWidthMap.set(netName, traceWidthMicrons)
         }
@@ -182,16 +189,19 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
   // Create a map of unique trace widths to class names
   const traceWidthClassMap = new Map<number, string>()
   const defaultTraceWidth = 200 // Default width in μm
-  
+
   // Always include the default class
   traceWidthClassMap.set(defaultTraceWidth, "kicad_default")
-  
+
   // Create additional classes for each unique trace width
   for (const [netName, traceWidth] of netTraceWidthMap.entries()) {
-    if (traceWidth !== defaultTraceWidth && !traceWidthClassMap.has(traceWidth)) {
+    if (
+      traceWidth !== defaultTraceWidth &&
+      !traceWidthClassMap.has(traceWidth)
+    ) {
       const className = `trace_width_${traceWidth}um`
       traceWidthClassMap.set(traceWidth, className)
-      
+
       // Add the new class to pcb.network.classes
       pcb.network.classes.push({
         name: className,
@@ -212,20 +222,20 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
       })
     }
   }
-  
+
   // Group nets by trace width class
   const netsByClass = new Map<string, string[]>()
-  
+
   for (const netName of allNets) {
     const traceWidth = netTraceWidthMap.get(netName) || defaultTraceWidth
     const className = traceWidthClassMap.get(traceWidth) || "kicad_default"
-    
+
     if (!netsByClass.has(className)) {
       netsByClass.set(className, [])
     }
-    
+
     netsByClass.get(className)?.push(netName)
-    
+
     // Add net to pcb.network.nets
     pcb.network.nets.push({
       name: netName,
@@ -234,15 +244,17 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
       ),
     })
   }
-  
+
   // Update class net names
   for (const [className, nets] of netsByClass.entries()) {
-    const classIndex = pcb.network.classes.findIndex(c => c.name === className)
+    const classIndex = pcb.network.classes.findIndex(
+      (c) => c.name === className,
+    )
     if (classIndex !== -1) {
       pcb.network.classes[classIndex].net_names = nets
     }
   }
-  
+
   // If a class has no nets, assign it the default net names
   for (const classObj of pcb.network.classes) {
     if (classObj.net_names.length === 0) {
