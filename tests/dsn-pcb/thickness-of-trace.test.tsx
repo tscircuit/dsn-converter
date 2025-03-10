@@ -71,7 +71,6 @@ test("thickness of trace in dsn file to circuit json", async () => {
     (element) => element.type === "pcb_trace",
   )[0] as PcbTrace
 
-  // console.dir(pcbTraces, { depth: null })
   expect((pcbTraces.route[0] as PcbTraceRoutePointWire).width).toBe(0.3)
   expect(
     convertCircuitJsonToPcbSvg(circuitJsonWithOutputTraces),
