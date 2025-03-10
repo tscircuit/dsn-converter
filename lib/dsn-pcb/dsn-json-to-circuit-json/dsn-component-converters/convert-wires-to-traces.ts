@@ -16,6 +16,7 @@ export function convertWiresToPcbTraces(
   wiring: Wiring,
   network: Network,
   transformUmToMm: Matrix,
+  fromSessionSpace?: boolean,
 ): AnyCircuitElement[] {
   const tracesAndVias: AnyCircuitElement[] = []
   const processedNets = new Set<string>()
@@ -45,14 +46,24 @@ export function convertWiresToPcbTraces(
 
     if ("polyline_path" in wire) {
       tracesAndVias.push(
-        ...convertPolylinePathToPcbTraces({ wire, transformUmToMm, netName }),
+        ...convertPolylinePathToPcbTraces({
+          wire,
+          transformUmToMm,
+          netName,
+          fromSessionSpace,
+        }),
       )
       return
     }
 
     if ("path" in wire) {
       tracesAndVias.push(
-        ...convertWiringPathToPcbTraces({ wire, transformUmToMm, netName }),
+        ...convertWiringPathToPcbTraces({
+          wire,
+          transformUmToMm,
+          netName,
+          fromSessionSpace,
+        }),
       )
       return
     }

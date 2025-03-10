@@ -15,10 +15,12 @@ export const convertWiringPathToPcbTraces = ({
   wire,
   transformUmToMm,
   netName,
+  fromSessionSpace = true,
 }: {
   wire: Wiring["wires"][number]
   transformUmToMm: Matrix
   netName: string
+  fromSessionSpace?: boolean
 }): Array<PcbTrace | SourceTrace> => {
   const coordinates = wire.path!.coordinates
   // Convert coordinates to circuit space using the transformation matrix
@@ -40,7 +42,9 @@ export const convertWiringPathToPcbTraces = ({
       route_type: "wire" as const,
       x: Number(point.x.toFixed(4)),
       y: Number(point.y.toFixed(4)),
-      width: 0.16, // Standard trace width in circuit space
+      width: fromSessionSpace
+        ? wire.path!.width / 10000 // session space to circuit space
+        : wire.path!.width / 1000, // dsn space to circuit space
       layer: wire.path!.layer.includes("F.") ? "top" : "bottom",
     }))
 

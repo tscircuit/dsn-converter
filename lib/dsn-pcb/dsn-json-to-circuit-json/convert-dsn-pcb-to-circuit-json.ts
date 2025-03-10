@@ -11,6 +11,7 @@ import { su } from "@tscircuit/soup-util"
 
 export function convertDsnPcbToCircuitJson(
   dsnPcb: DsnPcb,
+  fromSessionSpace = false,
 ): AnyCircuitElement[] {
   const elements: AnyCircuitElement[] = []
 
@@ -58,6 +59,7 @@ export function convertDsnPcbToCircuitJson(
         dsnPcb.wiring,
         dsnPcb.network,
         transformDsnUnitToMm,
+        fromSessionSpace,
       ),
     )
   }
