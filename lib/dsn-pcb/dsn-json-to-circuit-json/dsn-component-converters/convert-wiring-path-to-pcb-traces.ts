@@ -40,7 +40,7 @@ export const convertWiringPathToPcbTraces = ({
       route_type: "wire" as const,
       x: Number(point.x.toFixed(4)),
       y: Number(point.y.toFixed(4)),
-      width: wire.path!.width / 10000,
+      width: wire.path!.width / 10000, // um to mm
       layer: wire.path!.layer.includes("F.") ? "top" : "bottom",
     }))
 
