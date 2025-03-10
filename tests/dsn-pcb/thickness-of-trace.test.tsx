@@ -1,7 +1,13 @@
 import { Circuit } from "@tscircuit/core"
 import { parseDsnToDsnJson, type DsnPcb, type DsnSession } from "lib"
 import { expect, test } from "bun:test"
-import { convertCircuitJsonToDsnJson, convertCircuitJsonToDsnString, convertDsnPcbToCircuitJson, convertDsnSessionToCircuitJson, mergeDsnSessionIntoDsnPcb } from "lib"
+import {
+  convertCircuitJsonToDsnJson,
+  convertCircuitJsonToDsnString,
+  convertDsnPcbToCircuitJson,
+  convertDsnSessionToCircuitJson,
+  mergeDsnSessionIntoDsnPcb,
+} from "lib"
 // @ts-ignore
 import sessionFile from "../assets/repro/thickness-of-trace.ses" with {
   type: "text",
@@ -34,9 +40,7 @@ test("circuit json thickness converted to dsn file", () => {
   const network = dsnJson.network.classes
   expect(network.length).toBe(2)
 
-  const trace_width_300um = network.find(
-    (c) => c.name === "trace_width_300um",
-  )
+  const trace_width_300um = network.find((c) => c.name === "trace_width_300um")
   expect(trace_width_300um).toBeDefined()
   expect(trace_width_300um?.rule.width).toBe(300)
 
@@ -44,7 +48,6 @@ test("circuit json thickness converted to dsn file", () => {
   expect(kicad_default).toBeDefined()
   expect(kicad_default?.rule.width).toBe(100)
 })
-
 
 test("thickness of trace in dsn file to circuit json", () => {
   const circuit = new Circuit()
@@ -61,9 +64,7 @@ test("thickness of trace in dsn file to circuit json", () => {
   circuit.render()
 
   const dsnSession = parseDsnToDsnJson(sessionFile) as DsnSession
-  const dsnFile = convertCircuitJsonToDsnString(
-    circuit.getCircuitJson()
-  )
+  const dsnFile = convertCircuitJsonToDsnString(circuit.getCircuitJson())
   const dsnPcb = parseDsnToDsnJson(dsnFile) as DsnPcb
   const circuitJsonWithOutputTraces = convertDsnSessionToCircuitJson(
     dsnPcb,
@@ -73,9 +74,9 @@ test("thickness of trace in dsn file to circuit json", () => {
   const pcbTraces = circuitJsonWithOutputTraces.filter(
     (element) => element.type === "pcb_trace",
   )[0] as PcbTrace
-  
+
   expect((pcbTraces.route[0] as PcbTraceRoutePointWire).width).toBe(0.3)
-  expect(convertCircuitJsonToPcbSvg(circuitJsonWithOutputTraces)).toMatchSvgSnapshot(
-    import.meta.path,
-  )
+  expect(
+    convertCircuitJsonToPcbSvg(circuitJsonWithOutputTraces),
+  ).toMatchSvgSnapshot(import.meta.path)
 })
