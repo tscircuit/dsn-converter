@@ -114,7 +114,7 @@ export function convertCircuitJsonToDsnJson(
                 type: "",
               },
             ],
-            width: 100, // trace width used in freerouting
+            width: 150, // trace width used in freerouting
           },
         },
       ],

@@ -27,8 +27,6 @@ test("circuit json thickness converted to dsn file", () => {
     </board>,
   )
 
-  circuit.render()
-
   const circuitJson = circuit.getCircuitJson()
   const source_trace = circuitJson.filter(
     (element) => element.type === "source_trace",
@@ -46,10 +44,10 @@ test("circuit json thickness converted to dsn file", () => {
 
   const kicad_default = network.find((c) => c.name === "kicad_default")
   expect(kicad_default).toBeDefined()
-  expect(kicad_default?.rule.width).toBe(100)
+  expect(kicad_default?.rule.width).toBe(150)
 })
 
-test("thickness of trace in dsn file to circuit json", () => {
+test("thickness of trace in dsn file to circuit json", async () => {
   const circuit = new Circuit()
 
   circuit.add(
@@ -60,8 +58,6 @@ test("thickness of trace in dsn file to circuit json", () => {
       <trace from=".R1 > .pin2" to=".R2 > .pin2" />
     </board>,
   )
-
-  circuit.render()
 
   const dsnSession = parseDsnToDsnJson(sessionFile) as DsnSession
   const dsnFile = convertCircuitJsonToDsnString(circuit.getCircuitJson())
@@ -75,6 +71,7 @@ test("thickness of trace in dsn file to circuit json", () => {
     (element) => element.type === "pcb_trace",
   )[0] as PcbTrace
 
+  // console.dir(pcbTraces, { depth: null })
   expect((pcbTraces.route[0] as PcbTraceRoutePointWire).width).toBe(0.3)
   expect(
     convertCircuitJsonToPcbSvg(circuitJsonWithOutputTraces),
