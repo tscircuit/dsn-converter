@@ -1,0 +1,87 @@
+(session "my-board"
+  (base_design "my-board")
+  (placement
+    (resolution um 10)
+    (component simple_resistor:1.6000x0.6000_mm
+      (place R1_source_component_0 -30000 0 front 0)
+      (place R2_source_component_1 30000 0 front 0)
+    )
+  )
+  (was_is
+  )
+  (routes 
+    (resolution um 10)
+    (parser
+      (host_cad "KiCad's Pcbnew")
+      (host_version )
+    )
+    (library_out 
+      (padstack "Via[0-1]_600:300_um"
+        (shape
+          (circle F.Cu 6000 0 0)
+        )
+        (shape
+          (circle B.Cu 6000 0 0)
+        )
+        (attach off)
+      )
+      (padstack "Via[0-1]_600:300_um"
+        (shape
+          (circle F.Cu 6000 0 0)
+        )
+        (shape
+          (circle B.Cu 6000 0 0)
+        )
+        (attach off)
+      )
+      (padstack "Via[0-1]_600:300_um"
+        (shape
+          (circle F.Cu 6000 0 0)
+        )
+        (shape
+          (circle B.Cu 6000 0 0)
+        )
+        (attach off)
+      )
+    )
+    (network_out 
+      (net "Net-(R1_source_component_0-Pad1)"
+        (wire
+          (path F.Cu 3000
+            -35000 0
+            -35000 -6517
+          )
+        )
+        (wire
+          (path F.Cu 3000
+            25000 0
+            18483 0
+          )
+        )
+        (wire
+          (path F.Cu 3000
+            18483 0
+            11966 -6517
+            -35000 -6517
+          )
+        )
+      )
+      (net "Net-(R1_source_component_0-Pad2)"
+        (wire
+          (path F.Cu 1000
+            -25000 0
+            -19483 0
+          )
+        )
+        (wire
+          (path F.Cu 1000
+            35000 0
+            29483 5517
+            -13966 5517
+            -19483 0
+          )
+        )
+      )
+    )
+  )
+)
