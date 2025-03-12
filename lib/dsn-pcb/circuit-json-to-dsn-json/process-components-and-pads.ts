@@ -1,17 +1,18 @@
+import { su } from "@tscircuit/soup-util"
 import type {
   AnyCircuitElement,
   PcbComponent,
-  PcbPort,
+  PcbSmtPad,
   SourceComponentBase,
   SourcePort,
 } from "circuit-json"
 import { getComponentValue } from "lib/utils/get-component-value"
 import { getFootprintName } from "lib/utils/get-footprint-name"
-import { applyToPoint, scale } from "transformation-matrix"
-import type { ComponentGroup, DsnPcb, Image, Padstack, Pin } from "../types"
 import { getPadstackName } from "lib/utils/get-padstack-name"
-import { createRectangularPadstack } from "lib/utils/create-padstack"
-import { su } from "@tscircuit/soup-util"
+import { applyToPoint, scale } from "transformation-matrix"
+import type { ComponentGroup, DsnPcb, Image, Pin } from "../types"
+import { createAndAddPadstack } from "lib/utils/create-and-add-padstack"
+import { createPinForImage } from "lib/utils/create-pin-for-image"
 
 const transformMmToUm = scale(1000)
 
@@ -84,26 +85,7 @@ export function processComponentsAndPads(
 
     // Add padstacks for SMT pads
     for (const pad of componentGroup.pcb_smtpads) {
-      if (pad.shape === "rect" || pad.shape === "rotated_rect") {
-        const padstackName = getPadstackName({
-          shape: "rect",
-          width: pad.width * 1000,
-          height: pad.height * 1000,
-          layer: pad.layer,
-        })
-        if (!processedPadstacks.has(padstackName)) {
-          const padWidthInUm = Math.round(pad.width * 1000)
-          const padHeightInUm = Math.round(pad.height * 1000)
-          const padstack = createRectangularPadstack(
-            padstackName,
-            padWidthInUm,
-            padHeightInUm,
-            pad.layer,
-          )
-          pcb.library.padstacks.push(padstack)
-          processedPadstacks.add(padstackName)
-        }
-      }
+      createAndAddPadstack(pcb, pad, processedPadstacks)
     }
 
     // Add image once per footprint
@@ -118,29 +100,16 @@ export function processComponentsAndPads(
               e.source_component_id ===
                 firstComponent.sourceComponent?.source_component_id,
           ) as PcbComponent
-          if (pad.shape === "rect" || pad.shape === "rotated_rect") {
-            // Find the corresponding pcb_port and its source_port
-            const pcbPort = su(circuitElements)
-              .pcb_port.list()
-              .find((e) => e.pcb_port_id === pad.pcb_port_id)
-            const sourcePort = su(circuitElements)
-              .source_port.list()
-              .find((e) => e.source_port_id === pcbPort?.source_port_id)
-            return {
-              padstack_name: getPadstackName({
-                shape: "rect",
-                width: pad.width * 1000,
-                height: pad.height * 1000,
-                layer: pad.layer,
-              }),
-              pin_number:
-                sourcePort?.port_hints?.find(
-                  (hint) => !Number.isNaN(Number(hint)),
-                ) || 1,
-              x: (pad.x - pcbComponent.center.x) * 1000,
-              y: (pad.y - pcbComponent.center.y) * 1000,
-            }
-          }
+
+          // Find the corresponding pcb_port and its source_port
+          const pcbPort = su(circuitElements)
+            .pcb_port.list()
+            .find((e) => e.pcb_port_id === pad.pcb_port_id)
+          const sourcePort = su(circuitElements)
+            .source_port.list()
+            .find((e) => e.source_port_id === pcbPort?.source_port_id)
+
+          return createPinForImage(pad, pcbComponent, sourcePort)
         })
         .filter((pin): pin is Pin => pin !== undefined),
     }
