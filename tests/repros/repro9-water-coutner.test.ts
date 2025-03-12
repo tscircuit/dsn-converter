@@ -5,7 +5,9 @@ import circuitJson from "../assets/repro/WaterCounter.json"
 import type { AnyCircuitElement } from "circuit-json"
 
 test("RoundRect padstack for chip with pad shape circle", async () => {
-  const dsnJson = convertCircuitJsonToDsnJson(circuitJson as AnyCircuitElement[])
+  const dsnJson = convertCircuitJsonToDsnJson(
+    circuitJson as AnyCircuitElement[],
+  )
 
   expect(dsnJson).toBeDefined()
   expect(dsnJson.library.padstacks.length).toBe(7)

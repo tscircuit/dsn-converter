@@ -4,7 +4,7 @@ import type {
   PcbComponent,
   PcbSmtPad,
   SourceComponentBase,
-  SourcePort
+  SourcePort,
 } from "circuit-json"
 import { getComponentValue } from "lib/utils/get-component-value"
 import { getFootprintName } from "lib/utils/get-footprint-name"
@@ -100,7 +100,7 @@ export function processComponentsAndPads(
               e.source_component_id ===
                 firstComponent.sourceComponent?.source_component_id,
           ) as PcbComponent
-          
+
           // Find the corresponding pcb_port and its source_port
           const pcbPort = su(circuitElements)
             .pcb_port.list()
@@ -108,7 +108,7 @@ export function processComponentsAndPads(
           const sourcePort = su(circuitElements)
             .source_port.list()
             .find((e) => e.source_port_id === pcbPort?.source_port_id)
-            
+
           return createPinForImage(pad, pcbComponent, sourcePort)
         })
         .filter((pin): pin is Pin => pin !== undefined),
