@@ -2,7 +2,7 @@ import { su } from "@tscircuit/soup-util"
 import type {
   AnyCircuitElement,
   PcbTrace,
-  PcbTraceRoutePointWire
+  PcbTraceRoutePointWire,
 } from "circuit-json"
 import Debug from "debug"
 import { applyToPoint, scale } from "transformation-matrix"
