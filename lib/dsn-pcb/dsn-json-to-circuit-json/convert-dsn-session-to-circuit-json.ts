@@ -1,8 +1,8 @@
+import { su } from "@tscircuit/soup-util"
 import type {
   AnyCircuitElement,
   PcbTrace,
-  PcbTraceRoutePointWire,
-  SourceTrace,
+  PcbTraceRoutePointWire
 } from "circuit-json"
 import Debug from "debug"
 import { applyToPoint, scale } from "transformation-matrix"
@@ -10,7 +10,6 @@ import type { DsnPcb, DsnSession } from "../types"
 import { convertDsnPcbToCircuitJson } from "./convert-dsn-pcb-to-circuit-json"
 import { convertViaToPcbVia } from "./dsn-component-converters/convert-via-to-pcb-via"
 import { convertWiringPathToPcbTraces } from "./dsn-component-converters/convert-wiring-path-to-pcb-traces"
-import { su } from "@tscircuit/soup-util"
 
 const debug = Debug("dsn-converter")
 
@@ -147,15 +146,20 @@ export function convertDsnSessionToCircuitJson(
         sessionElements.forEach((element) => {
           if (element.type === "pcb_trace") {
             const trace = element as PcbTrace
-            const lastPoint = trace.route[trace.route.length - 1]
-            if (lastPoint && lastPoint.x === viaX && lastPoint.y === viaY) {
-              trace.route.push({
-                x: viaX,
-                y: viaY,
-                route_type: "via",
-                from_layer: fromLayer,
-                to_layer: toLayer,
-              })
+            // Check all points in the route, not just the last one
+            for (let i = 0; i < trace.route.length; i++) {
+              const point = trace.route[i]
+              if (point.x === viaX && point.y === viaY) {
+                // Insert via point after the matching point
+                trace.route.splice(i + 1, 0, {
+                  x: viaX,
+                  y: viaY,
+                  route_type: "via",
+                  from_layer: fromLayer,
+                  to_layer: toLayer,
+                })
+                break // Found the matching point, no need to continue checking
+              }
             }
           }
         })
