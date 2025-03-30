@@ -29,13 +29,13 @@ export function createAndAddPadstackFromPcbSmtPad(
       ? createCircularPadstack(
           padstackName,
           padstackParams.outerDiameter!,
-          padstackParams.holeDiameter!
+          padstackParams.holeDiameter!,
         )
       : createRectangularPadstack(
           padstackName,
           padstackParams.width!,
           padstackParams.height!,
-          pad.layer
+          pad.layer,
         )
 
     pcb.library.padstacks.push(padstack)
