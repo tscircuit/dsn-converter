@@ -2,16 +2,13 @@ import { su } from "@tscircuit/soup-util"
 import type {
   AnyCircuitElement,
   PcbComponent,
-  PcbSmtPad,
   SourceComponentBase,
-  SourcePort,
 } from "circuit-json"
 import { getComponentValue } from "lib/utils/get-component-value"
 import { getFootprintName } from "lib/utils/get-footprint-name"
-import { getPadstackName } from "lib/utils/get-padstack-name"
 import { applyToPoint, scale } from "transformation-matrix"
 import type { ComponentGroup, DsnPcb, Image, Pin } from "../types"
-import { createAndAddPadstack } from "lib/utils/create-and-add-padstack"
+import { createAndAddPadstackFromPcbSmtPad } from "lib/utils/create-and-add-padstack-for-pcb-smtpad"
 import { createPinForImage } from "lib/utils/create-pin-for-image"
 
 const transformMmToUm = scale(1000)
@@ -85,7 +82,7 @@ export function processComponentsAndPads(
 
     // Add padstacks for SMT pads
     for (const pad of componentGroup.pcb_smtpads) {
-      createAndAddPadstack(pcb, pad, processedPadstacks)
+      createAndAddPadstackFromPcbSmtPad(pcb, pad, processedPadstacks)
     }
 
     // Add image once per footprint

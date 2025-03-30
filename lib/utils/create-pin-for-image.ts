@@ -2,7 +2,7 @@ import type { PcbSmtPad } from "circuit-json"
 
 import type { PcbComponent, SourcePort } from "circuit-json"
 import type { Pin } from "lib"
-import { getPadstackName } from "./get-padstack-name"
+import { getPadstackName, type PadstackNameArgs } from "./get-padstack-name"
 
 export function createPinForImage(
   pad: any,
@@ -11,10 +11,13 @@ export function createPinForImage(
 ): Pin | undefined {
   if (!sourcePort) return undefined
 
-  const padstackParams = {
-    shape: pad.shape === "circle" ? ("circle" as const) : ("rect" as const),
-    width: pad.shape === "circle" ? pad.radius * 1000 : pad.width * 1000,
-    height: pad.shape === "circle" ? pad.radius * 1000 : pad.height * 1000,
+  const isCircle = pad.shape === "circle"
+  const padstackParams: PadstackNameArgs = {
+    shape: isCircle ? "circle" : "rect",
+    outerDiameter: isCircle ? pad.radius * 1000 : undefined,
+    holeDiameter: isCircle ? pad.radius * 1000 : undefined,
+    width: isCircle ? undefined : pad.width * 1000,
+    height: isCircle ? undefined : pad.height * 1000,
     layer: pad.layer as PcbSmtPad["layer"],
   }
 

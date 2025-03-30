@@ -1,6 +1,6 @@
 import type { PcbSmtPad } from "circuit-json"
 
-interface PadstackNameArgs {
+export interface PadstackNameArgs {
   shape: "circle" | "oval" | "pill" | "rect"
   width?: number
   height?: number
