@@ -62,8 +62,16 @@ export function convertCircuitJsonToDsnJson(
             value: 200,
           },
           {
-            value: 200,
-            type: "default_smd",
+            value: 300,
+            type: "smd_to_turn_gap",
+          },
+          {
+            value: 300,
+            type: "pad_to_turn_gap",
+          },
+          {
+            value: 500,
+            type: "default_smd", // Trace smdpad gap
           },
           {
             value: 50,
