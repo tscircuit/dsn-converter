@@ -60,7 +60,7 @@ export interface DsnPcb {
       }
       rule: {
         clearances: Array<{
-          type: any
+          type?: any
           value: number
         }>
         width: number
