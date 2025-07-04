@@ -57,6 +57,7 @@ export function convertCircuitJsonToDsnJson(
       },
       via: "Via[0-1]_600:300_um",
       rule: {
+        // Default clearance having fallback value
         clearances: [
           {
             value: 300, // fallback gap between any <-> any
@@ -104,9 +105,10 @@ export function convertCircuitJsonToDsnJson(
             use_via: "Via[0-1]_600:300_um",
           },
           rule: {
+            // Actual value being used in the dsn for the specific network class
             clearances: [
               {
-                value: 500,
+                value: 300,
               },
             ],
             width: 150, // trace width used in freerouting
