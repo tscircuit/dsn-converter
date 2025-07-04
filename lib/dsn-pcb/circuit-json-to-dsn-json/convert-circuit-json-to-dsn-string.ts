@@ -4,7 +4,10 @@ import { stringifyDsnJson } from "./stringify-dsn-json"
 
 export const convertCircuitJsonToDsnString = (
   circuitJson: AnyCircuitElement[],
+  options: {
+    traceClearance?: number
+  } = {},
 ) => {
-  const dsnJson = convertCircuitJsonToDsnJson(circuitJson)
+  const dsnJson = convertCircuitJsonToDsnJson(circuitJson, options)
   return stringifyDsnJson(dsnJson)
 }

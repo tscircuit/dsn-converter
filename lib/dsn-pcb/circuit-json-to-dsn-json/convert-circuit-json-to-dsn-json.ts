@@ -7,6 +7,9 @@ import { processPlatedHoles } from "./process-plated-holes"
 
 export function convertCircuitJsonToDsnJson(
   circuitElements: AnyCircuitElement[],
+  options: {
+    traceClearance?: number
+  } = {},
 ): DsnPcb {
   // Find the PCB board element
   const pcbBoard = circuitElements.find(
@@ -60,7 +63,7 @@ export function convertCircuitJsonToDsnJson(
         // Default clearance having fallback value
         clearances: [
           {
-            value: 300, // fallback gap between any <-> any
+            value: options.traceClearance ?? 300, // fallback gap between any <-> any
           },
           {
             value: 50,
@@ -108,7 +111,7 @@ export function convertCircuitJsonToDsnJson(
             // Actual value being used in the dsn for the specific network class
             clearances: [
               {
-                value: 300,
+                value: options.traceClearance ?? 300,
               },
             ],
             width: 150, // trace width used in freerouting
