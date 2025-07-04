@@ -4,7 +4,7 @@ import { convertCircuitJsonToDsnJson } from "lib"
 import circuitJson from "../assets/repro/XIAO_S3.json"
 import type { AnyCircuitElement } from "circuit-json"
 
-test("smtpad shape circle have correct padstack name", async () => {
+test("configuration passed to converter", async () => {
   const dsnJson = convertCircuitJsonToDsnJson(
     circuitJson as AnyCircuitElement[],
     {
