@@ -59,19 +59,7 @@ export function convertCircuitJsonToDsnJson(
       rule: {
         clearances: [
           {
-            value: 200,
-          },
-          {
-            value: 300,
-            type: "smd_to_turn_gap",
-          },
-          {
-            value: 300,
-            type: "pad_to_turn_gap",
-          },
-          {
-            value: 500,
-            type: "default_smd", // Trace smdpad gap
+            value: 300, // fallback gap between any <-> any
           },
           {
             value: 50,
@@ -118,8 +106,7 @@ export function convertCircuitJsonToDsnJson(
           rule: {
             clearances: [
               {
-                value: 200,
-                type: "",
+                value: 500,
               },
             ],
             width: 150, // trace width used in freerouting
