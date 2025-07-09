@@ -108,7 +108,10 @@ test("convert dsn file -> circuit json -> dsn session -> circuit json", () => {
     circuitJsonFromSession as any,
   ).pcb_smtpad.list()[0]
   // Checking the same scale
-  if ("x" in smtPadFromRouteStartsFromSession && "y" in smtPadFromRouteStartsFromSession) {
+  if (
+    "x" in smtPadFromRouteStartsFromSession &&
+    "y" in smtPadFromRouteStartsFromSession
+  ) {
     expect(pcbTraceFirstPointFromSession.x).toEqual(
       smtPadFromRouteStartsFromSession.x,
     )
