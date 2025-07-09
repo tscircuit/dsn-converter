@@ -62,7 +62,12 @@ function convertCircuitJsonToMarkdown(circuitJson: any, title?: string) {
       if ("width" in pad && "height" in pad) {
         markdown += `| ${shortId} | ${formatPoint(pad.x, pad.y)} | ${formatNumber(pad.width)} × ${formatNumber(pad.height)} |\n`
       } else {
-        markdown += `| ${shortId} | ${formatPoint(pad.x, pad.y)} | N/A |\n`
+        // For polygons and other shapes without x,y properties, we need to handle them differently
+        if ("x" in pad && "y" in pad) {
+          markdown += `| ${shortId} | ${formatPoint(pad.x, pad.y)} | N/A |\n`
+        } else {
+          markdown += `| ${shortId} | ${pad.shape} | N/A |\n`
+        }
       }
     })
     markdown += "\n"

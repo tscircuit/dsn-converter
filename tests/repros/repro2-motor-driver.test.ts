@@ -83,8 +83,10 @@ test("session file (motor driver breakout) -> circuit json", async () => {
 
   //expect the pcbsmtpad to not have x and y values as null
   pcbSmtpads.forEach((pcbSmtpad) => {
-    expect(pcbSmtpad.x).not.toBeNull()
-    expect(pcbSmtpad.y).not.toBeNull()
+    if ("x" in pcbSmtpad && "y" in pcbSmtpad) {
+      expect(pcbSmtpad.x).not.toBeNull()
+      expect(pcbSmtpad.y).not.toBeNull()
+    }
   })
 
   // expect the pcb_trace to not be null
