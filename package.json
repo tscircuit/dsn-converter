@@ -29,7 +29,10 @@
     "circuit-json": "*"
   },
   "dependencies": {
+    "@tscircuit/math-utils": "^0.0.19",
+    "@tscircuit/props": "^0.0.258",
     "@tscircuit/soup-util": "^0.0.41",
+    "calculate-elbow": "^0.0.5",
     "debug": "^4.3.7",
     "uuid": "^10.0.0",
     "zod": "^3.23.8"
