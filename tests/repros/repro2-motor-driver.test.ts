@@ -6,7 +6,11 @@ import {
 } from "lib"
 
 import circuitJson from "../assets/repro/motor-driver-breakout-circuit.json"
-import type { AnyCircuitElement } from "circuit-json"
+import type {
+  AnyCircuitElement,
+  PcbSmtPad,
+  PcbSmtPadCircle,
+} from "circuit-json"
 import type { DsnPcb, DsnSession } from "lib"
 
 // @ts-ignore
@@ -83,8 +87,10 @@ test("session file (motor driver breakout) -> circuit json", async () => {
 
   //expect the pcbsmtpad to not have x and y values as null
   pcbSmtpads.forEach((pcbSmtpad) => {
-    expect(pcbSmtpad.x).not.toBeNull()
-    expect(pcbSmtpad.y).not.toBeNull()
+    // Cast to a pad type that has x,y properties (most shapes except polygon)
+    const padWithPosition = pcbSmtpad as PcbSmtPadCircle
+    expect(padWithPosition.x).not.toBeNull()
+    expect(padWithPosition.y).not.toBeNull()
   })
 
   // expect the pcb_trace to not be null
