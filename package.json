@@ -13,14 +13,14 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
-    "@tscircuit/core": "^0.0.349",
+    "@tscircuit/core": "^0.0.566",
     "@types/bun": "latest",
     "@types/debug": "^4.1.12",
     "@types/react": "^19.0.1",
     "@types/uuid": "^10.0.0",
-    "bun-match-svg": "^0.0.3",
-    "circuit-json": "^0.0.153",
-    "circuit-to-svg": "^0.0.58",
+    "bun-match-svg": "^0.0.12",
+    "circuit-json": "^0.0.219",
+    "circuit-to-svg": "^0.0.167",
     "react": "18",
     "tsup": "^8.3.5"
   },

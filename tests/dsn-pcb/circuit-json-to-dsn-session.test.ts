@@ -70,7 +70,9 @@ test("convert dsn file -> circuit json -> dsn session -> circuit json", () => {
     .route[0]
   const smtPadFromRouteStarts = su(circuitJson as any).pcb_smtpad.list()[0]
   // Checking the same scale
+  // @ts-ignore - accessing x,y properties that exist on most pad types
   expect(pcbTraceFirstPoint.x).toEqual(smtPadFromRouteStarts.x)
+  // @ts-ignore - accessing x,y properties that exist on most pad types
   expect(pcbTraceFirstPoint.y).toEqual(smtPadFromRouteStarts.y)
 
   const session = convertCircuitJsonToDsnSession(dsnPcb, routedCircuitJson)
@@ -106,10 +108,14 @@ test("convert dsn file -> circuit json -> dsn session -> circuit json", () => {
     circuitJsonFromSession as any,
   ).pcb_smtpad.list()[0]
   // Checking the same scale
+  // @ts-ignore - accessing x,y properties that exist on most pad types
   expect(pcbTraceFirstPointFromSession.x).toEqual(
+    // @ts-ignore - accessing x,y properties that exist on most pad types
     smtPadFromRouteStartsFromSession.x,
   )
+  // @ts-ignore - accessing x,y properties that exist on most pad types
   expect(pcbTraceFirstPointFromSession.y).toEqual(
+    // @ts-ignore - accessing x,y properties that exist on most pad types
     smtPadFromRouteStartsFromSession.y,
   )
 

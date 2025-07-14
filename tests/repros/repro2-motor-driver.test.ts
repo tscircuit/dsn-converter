@@ -83,7 +83,9 @@ test("session file (motor driver breakout) -> circuit json", async () => {
 
   //expect the pcbsmtpad to not have x and y values as null
   pcbSmtpads.forEach((pcbSmtpad) => {
+    // @ts-ignore - accessing x,y properties that exist on most pad types
     expect(pcbSmtpad.x).not.toBeNull()
+    // @ts-ignore - accessing x,y properties that exist on most pad types
     expect(pcbSmtpad.y).not.toBeNull()
   })
 
