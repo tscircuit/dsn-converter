@@ -6,7 +6,11 @@ import {
 } from "lib"
 
 import circuitJson from "../assets/repro/motor-driver-breakout-circuit.json"
-import type { AnyCircuitElement, PcbSmtPad, PcbSmtPadCircle } from "circuit-json"
+import type {
+  AnyCircuitElement,
+  PcbSmtPad,
+  PcbSmtPadCircle,
+} from "circuit-json"
 import type { DsnPcb, DsnSession } from "lib"
 
 // @ts-ignore
