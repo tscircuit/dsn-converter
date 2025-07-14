@@ -13,24 +13,17 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
-    "@tscircuit/core": "^0.0.566",
-    "@tscircuit/math-utils": "^0.0.19",
-    "@tscircuit/props": "^0.0.258",
     "@types/bun": "latest",
     "@types/debug": "^4.1.12",
     "@types/react": "^19.0.1",
     "@types/uuid": "^10.0.0",
     "bun-match-svg": "^0.0.12",
-    "calculate-elbow": "^0.0.5",
-    "circuit-json": "^0.0.219",
-    "circuit-to-svg": "^0.0.167",
-    "graphics-debug": "^0.0.60",
     "react": "18",
+    "tscircuit": "^0.0.540",
     "tsup": "^8.3.5"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0",
-    "circuit-json": "*"
+    "typescript": "^5.0.0"
   },
   "dependencies": {
     "@tscircuit/soup-util": "^0.0.41",
