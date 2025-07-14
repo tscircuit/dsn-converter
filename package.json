@@ -24,6 +24,7 @@
     "calculate-elbow": "^0.0.5",
     "circuit-json": "^0.0.219",
     "circuit-to-svg": "^0.0.167",
+    "graphics-debug": "^0.0.60",
     "react": "18",
     "tsup": "^8.3.5"
   },
