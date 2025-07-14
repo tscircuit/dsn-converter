@@ -67,9 +67,7 @@ function convertCircuitJsonToMarkdown(circuitJson: any, title?: string) {
         const y = pad.points.length > 0 ? pad.points[0].y : 0
         markdown += `| ${shortId} | ${formatPoint(x, y)} | N/A |\n`
       } else {
-        // All other shapes have x and y properties
-        const padWithPosition = pad as PcbSmtPad & { x: number; y: number }
-        markdown += `| ${shortId} | ${formatPoint(padWithPosition.x, padWithPosition.y)} | N/A |\n`
+        markdown += `| ${shortId} | ${formatPoint(pad.x, pad.y)} | N/A |\n`
       }
     })
     markdown += "\n"

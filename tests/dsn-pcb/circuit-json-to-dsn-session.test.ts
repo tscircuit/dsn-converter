@@ -13,7 +13,12 @@ import {
 import dsnPcbContent from "../assets/testkicadproject/testkicadproject.dsn" with {
   type: "text",
 }
-import type { AnyCircuitElement, PcbTrace, PcbSmtPad } from "circuit-json"
+import type {
+  AnyCircuitElement,
+  PcbTrace,
+  PcbSmtPad,
+  PcbSmtPadCircle,
+} from "circuit-json"
 import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
 import { circuitJsonToTable, sessionFileToTable } from "../debug-utils"
 import Debug from "debug"
@@ -69,15 +74,11 @@ test("convert dsn file -> circuit json -> dsn session -> circuit json", () => {
   const pcbTraceFirstPoint = su(routedCircuitJson as any).pcb_trace.list()[0]
     .route[0]
   const smtPadFromRouteStarts = su(
-    circuitJson as any,
-  ).pcb_smtpad.list()[0] as PcbSmtPad
-  // Checking the same scale - casting to pad with x,y properties (circle, rect, etc.)
-  expect(pcbTraceFirstPoint.x).toEqual(
-    (smtPadFromRouteStarts as PcbSmtPad & { x: number }).x,
-  )
-  expect(pcbTraceFirstPoint.y).toEqual(
-    (smtPadFromRouteStarts as PcbSmtPad & { x: number; y: number }).y,
-  )
+    circuitJson as PcbSmtPadCircle[],
+  ).pcb_smtpad.list()[0] as PcbSmtPadCircle
+  // Checking the same scale - PcbSmtPadCircle has x,y properties
+  expect(pcbTraceFirstPoint.x).toEqual(smtPadFromRouteStarts.x)
+  expect(pcbTraceFirstPoint.y).toEqual(smtPadFromRouteStarts.y)
 
   const session = convertCircuitJsonToDsnSession(dsnPcb, routedCircuitJson)
 
@@ -109,15 +110,14 @@ test("convert dsn file -> circuit json -> dsn session -> circuit json", () => {
     circuitJsonFromSession as any,
   ).pcb_trace.list()[0].route[0]
   const smtPadFromRouteStartsFromSession = su(
-    circuitJsonFromSession as any,
-  ).pcb_smtpad.list()[0] as PcbSmtPad
-  // Checking the same scale - casting to pad with x,y properties (circle, rect, etc.)
+    circuitJsonFromSession as PcbSmtPadCircle[],
+  ).pcb_smtpad.list()[0] as PcbSmtPadCircle
+  // Checking the same scale - PcbSmtPadCircle has x,y properties
   expect(pcbTraceFirstPointFromSession.x).toEqual(
-    (smtPadFromRouteStartsFromSession as PcbSmtPad & { x: number }).x,
+    smtPadFromRouteStartsFromSession.x,
   )
   expect(pcbTraceFirstPointFromSession.y).toEqual(
-    (smtPadFromRouteStartsFromSession as PcbSmtPad & { x: number; y: number })
-      .y,
+    smtPadFromRouteStartsFromSession.y,
   )
 
   if (debug.enabled) {
