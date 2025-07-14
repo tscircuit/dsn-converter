@@ -13,7 +13,7 @@ import {
 import dsnPcbContent from "../assets/testkicadproject/testkicadproject.dsn" with {
   type: "text",
 }
-import type { AnyCircuitElement, PcbTrace } from "circuit-json"
+import type { AnyCircuitElement, PcbTrace, PcbSmtPad } from "circuit-json"
 import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
 import { circuitJsonToTable, sessionFileToTable } from "../debug-utils"
 import Debug from "debug"
@@ -68,12 +68,16 @@ test("convert dsn file -> circuit json -> dsn session -> circuit json", () => {
   const routedCircuitJson = circuitJson.concat(pcbTracesFromAutorouting)
   const pcbTraceFirstPoint = su(routedCircuitJson as any).pcb_trace.list()[0]
     .route[0]
-  const smtPadFromRouteStarts = su(circuitJson as any).pcb_smtpad.list()[0]
-  // Checking the same scale
-  // @ts-ignore - accessing x,y properties that exist on most pad types
-  expect(pcbTraceFirstPoint.x).toEqual(smtPadFromRouteStarts.x)
-  // @ts-ignore - accessing x,y properties that exist on most pad types
-  expect(pcbTraceFirstPoint.y).toEqual(smtPadFromRouteStarts.y)
+  const smtPadFromRouteStarts = su(
+    circuitJson as any,
+  ).pcb_smtpad.list()[0] as PcbSmtPad
+  // Checking the same scale - casting to pad with x,y properties (circle, rect, etc.)
+  expect(pcbTraceFirstPoint.x).toEqual(
+    (smtPadFromRouteStarts as PcbSmtPad & { x: number }).x,
+  )
+  expect(pcbTraceFirstPoint.y).toEqual(
+    (smtPadFromRouteStarts as PcbSmtPad & { x: number; y: number }).y,
+  )
 
   const session = convertCircuitJsonToDsnSession(dsnPcb, routedCircuitJson)
 
@@ -106,17 +110,14 @@ test("convert dsn file -> circuit json -> dsn session -> circuit json", () => {
   ).pcb_trace.list()[0].route[0]
   const smtPadFromRouteStartsFromSession = su(
     circuitJsonFromSession as any,
-  ).pcb_smtpad.list()[0]
-  // Checking the same scale
-  // @ts-ignore - accessing x,y properties that exist on most pad types
+  ).pcb_smtpad.list()[0] as PcbSmtPad
+  // Checking the same scale - casting to pad with x,y properties (circle, rect, etc.)
   expect(pcbTraceFirstPointFromSession.x).toEqual(
-    // @ts-ignore - accessing x,y properties that exist on most pad types
-    smtPadFromRouteStartsFromSession.x,
+    (smtPadFromRouteStartsFromSession as PcbSmtPad & { x: number }).x,
   )
-  // @ts-ignore - accessing x,y properties that exist on most pad types
   expect(pcbTraceFirstPointFromSession.y).toEqual(
-    // @ts-ignore - accessing x,y properties that exist on most pad types
-    smtPadFromRouteStartsFromSession.y,
+    (smtPadFromRouteStartsFromSession as PcbSmtPad & { x: number; y: number })
+      .y,
   )
 
   if (debug.enabled) {

@@ -61,15 +61,15 @@ function convertCircuitJsonToMarkdown(circuitJson: any, title?: string) {
       const shortId = pad.pcb_smtpad_id.split("_").slice(-3).join("-")
       if ("width" in pad && "height" in pad) {
         markdown += `| ${shortId} | ${formatPoint(pad.x, pad.y)} | ${formatNumber(pad.width)} × ${formatNumber(pad.height)} |\n`
-      } else if ("x" in pad && "y" in pad) {
-        markdown += `| ${shortId} | ${formatPoint(pad.x, pad.y)} | N/A |\n`
-      } else {
-        // For polygon pads without x,y - use first point or default
-        const x =
-          pad.shape === "polygon" && pad.points.length > 0 ? pad.points[0].x : 0
-        const y =
-          pad.shape === "polygon" && pad.points.length > 0 ? pad.points[0].y : 0
+      } else if (pad.shape === "polygon") {
+        // For polygon pads - use first point or default
+        const x = pad.points.length > 0 ? pad.points[0].x : 0
+        const y = pad.points.length > 0 ? pad.points[0].y : 0
         markdown += `| ${shortId} | ${formatPoint(x, y)} | N/A |\n`
+      } else {
+        // All other shapes have x and y properties
+        const padWithPosition = pad as PcbSmtPad & { x: number; y: number }
+        markdown += `| ${shortId} | ${formatPoint(padWithPosition.x, padWithPosition.y)} | N/A |\n`
       }
     })
     markdown += "\n"
