@@ -63,7 +63,7 @@ export function convertCircuitJsonToDsnJson(
         // Default clearance having fallback value
         clearances: [
           {
-            value: options.traceClearance ?? 300, // fallback gap between any <-> any
+            value: options.traceClearance ?? 150,
           },
           {
             value: 50,
@@ -111,7 +111,7 @@ export function convertCircuitJsonToDsnJson(
             // Actual value being used in the dsn for the specific network class
             clearances: [
               {
-                value: options.traceClearance ?? 300,
+                value: options.traceClearance ?? 150, // standard value
               },
             ],
             width: 150, // trace width used in freerouting
