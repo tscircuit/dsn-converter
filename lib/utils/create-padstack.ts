@@ -103,7 +103,7 @@ export function createRectangularPadstack(
   }
 }
 
-export function createRectangularHolePadstack(
+export function createCircularHoleRectangularPadstack(
   name: string,
   outerWidth: number,
   outerHeight: number,

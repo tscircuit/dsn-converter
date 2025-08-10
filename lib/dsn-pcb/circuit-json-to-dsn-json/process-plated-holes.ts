@@ -8,7 +8,7 @@ import type {
 import {
   createCircularPadstack,
   createOvalPadstack,
-  createRectangularHolePadstack,
+  createCircularHoleRectangularPadstack,
 } from "lib/utils/create-padstack"
 import { getFootprintName } from "lib/utils/get-footprint-name"
 import { getPadstackName } from "lib/utils/get-padstack-name"
@@ -131,7 +131,7 @@ export function processPlatedHoles(
           const holeDiameterInUm = Math.round(hole.hole_diameter * 1000)
 
           pcb.library.padstacks.push(
-            createRectangularHolePadstack(
+            createCircularHoleRectangularPadstack(
               padstackName,
               padOuterWidthInUm,
               padOuterHeightInUm,
