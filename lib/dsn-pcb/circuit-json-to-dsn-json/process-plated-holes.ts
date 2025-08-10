@@ -156,99 +156,127 @@ export function processPlatedHoles(
       }
       pcb.library.images.push(existingImage)
     }
-    const platedHolePins = pcb_plated_holes
-      .map((hole) => {
-        // Find the corresponding pcb_port and its source_port
-        const pcbPort = su(circuitElements)
-          .pcb_port.list()
-          .find((e) => e.pcb_port_id === hole.pcb_port_id)
-        const sourcePort =
-          pcbPort &&
-          su(circuitElements)
-            .source_port.list()
-            .find((e) => e.source_port_id === pcbPort.source_port_id)
 
-        if (hole.shape === "circle") {
-          const pin = {
-            padstack_name: getPadstackName({
-              shape: "circle",
-              holeDiameter: hole.hole_diameter * 1000,
-              outerDiameter: hole.outer_diameter * 1000,
-              layer: "all",
-            }),
-            pin_number:
-              sourcePort?.port_hints?.find(
-                (hint) => !Number.isNaN(Number(hint)),
-              ) || 1,
-            x: (Number(hole.x.toFixed(3)) - pcbComponent.center.x) * 1000,
-            y: (Number(hole.y.toFixed(3)) - pcbComponent.center.y) * 1000,
-          }
-
-          // Only return pin if it doesn't already exist in the image
-          return !existingImage.pins.some((existingPin) => {
-            const samePinNumber = existingPin.pin_number === pin.pin_number
-            const samePositionAndPadstack =
-              existingPin.x === pin.x &&
-              existingPin.y === pin.y &&
-              existingPin.padstack_name === pin.padstack_name
-            return samePinNumber || samePositionAndPadstack
-          })
-            ? pin
-            : undefined
-        } else if (hole.shape === "oval" || hole.shape === "pill") {
-          const pin = {
-            padstack_name: getPadstackName({
-              shape: hole.shape,
-              width: hole.hole_width * 1000,
-              height: hole.hole_height * 1000,
-              layer: "all",
-            }),
-            pin_number:
-              sourcePort?.port_hints?.find(
-                (hint) => !Number.isNaN(Number(hint)),
-              ) || 1,
-            x: (Number(hole.x.toFixed(3)) - pcbComponent.center.x) * 1000,
-            y: (Number(hole.y.toFixed(3)) - pcbComponent.center.y) * 1000,
-          }
-          // Only return pin if it doesn't already exist in the image
-          return !existingImage.pins.some(
-            (existingPin) =>
-              existingPin.x === pin.x &&
-              existingPin.y === pin.y &&
-              existingPin.padstack_name === pin.padstack_name,
+    // Counter for assigning automatic pin numbers when no numeric hint is available
+    let autoPinCounter = (() => {
+      const numericPins = existingImage.pins
+        .map((p) => {
+          const n = Number(
+            typeof p.pin_number === "string"
+              ? p.pin_number.replace(/pin/i, "")
+              : p.pin_number,
           )
-            ? pin
-            : undefined
-        } else if (hole.shape === "circular_hole_with_rect_pad") {
-          const pin = {
-            padstack_name: getPadstackName({
-              shape: "rect",
-              width: hole.rect_pad_width * 1000,
-              height: hole.rect_pad_height * 1000,
-              layer: "all",
-            }),
-            pin_number:
-              sourcePort?.port_hints?.find(
-                (hint) => !Number.isNaN(Number(hint)),
-              ) || 1,
-            x: (Number(hole.x.toFixed(3)) - pcbComponent.center.x) * 1000,
-            y: (Number(hole.y.toFixed(3)) - pcbComponent.center.y) * 1000,
-          }
+          return Number.isNaN(n) ? undefined : n
+        })
+        .filter((n): n is number => n !== undefined)
+      return numericPins.length > 0 ? Math.max(...numericPins) + 1 : 1
+    })()
+  const platedHolePins = pcb_plated_holes
+    .map((hole) => {
+      // Find the corresponding pcb_port and its source_port
+      const pcbPort = su(circuitElements)
+        .pcb_port.list()
+        .find((e) => e.pcb_port_id === hole.pcb_port_id)
+      const sourcePort =
+        pcbPort &&
+        su(circuitElements)
+          .source_port.list()
+          .find((e) => e.source_port_id === pcbPort.source_port_id)
 
-          // Only return pin if it doesn't already exist in the image
-          return !existingImage.pins.some(
-            (existingPin) =>
-              existingPin.x === pin.x &&
-              existingPin.y === pin.y &&
-              existingPin.padstack_name === pin.padstack_name,
-          )
-            ? pin
-            : undefined
+      if (hole.shape === "circle") {
+        const pin: Pin = {
+          padstack_name: getPadstackName({
+            shape: "circle",
+            holeDiameter: hole.hole_diameter * 1000,
+            outerDiameter: hole.outer_diameter * 1000,
+            layer: "all",
+          }),
+          pin_number:
+            (() => {
+              const hinted = sourcePort?.port_hints?.find(
+                (hint) => !Number.isNaN(Number(hint)),
+              )
+              if (hinted !== undefined) return Number(hinted)
+              return autoPinCounter++
+            })(),
+          x: (Number(hole.x.toFixed(3)) - pcbComponent.center.x) * 1000,
+          y: (Number(hole.y.toFixed(3)) - pcbComponent.center.y) * 1000,
         }
-      })
-      .filter((pin): pin is Pin => pin !== undefined)
 
-    existingImage.pins.push(...platedHolePins)
+        // Only return pin if it doesn't already exist in the image
+        return !existingImage.pins.some((existingPin) => {
+          const samePinNumber = existingPin.pin_number === pin.pin_number
+          const samePositionAndPadstack =
+            existingPin.x === pin.x &&
+            existingPin.y === pin.y &&
+            existingPin.padstack_name === pin.padstack_name
+          return samePinNumber || samePositionAndPadstack
+        })
+          ? pin
+          : undefined
+      } else if (hole.shape === "oval" || hole.shape === "pill") {
+        const pin: Pin = {
+          padstack_name: getPadstackName({
+            shape: hole.shape,
+            width: hole.hole_width * 1000,
+            height: hole.hole_height * 1000,
+            layer: "all",
+          }),
+          pin_number:
+            (() => {
+              const hinted = sourcePort?.port_hints?.find(
+                (hint) => !Number.isNaN(Number(hint)),
+              )
+              if (hinted !== undefined) return Number(hinted)
+              return autoPinCounter++
+            })(),
+          x: (Number(hole.x.toFixed(3)) - pcbComponent.center.x) * 1000,
+          y: (Number(hole.y.toFixed(3)) - pcbComponent.center.y) * 1000,
+        }
+        // Only return pin if it doesn't already exist in the image
+        return !existingImage.pins.some(
+          (existingPin) =>
+            existingPin.x === pin.x &&
+            existingPin.y === pin.y &&
+            existingPin.padstack_name === pin.padstack_name,
+        )
+          ? pin
+          : undefined
+      } else if (hole.shape === "circular_hole_with_rect_pad") {
+        const pin: Pin = {
+          padstack_name: getPadstackName({
+            shape: "rect",
+            width: hole.rect_pad_width * 1000,
+            height: hole.rect_pad_height * 1000,
+            layer: "all",
+          }),
+          pin_number:
+            (() => {
+              const hinted = sourcePort?.port_hints?.find(
+                (hint) => !Number.isNaN(Number(hint)),
+              )
+              if (hinted !== undefined) return Number(hinted)
+              return autoPinCounter++
+            })(),
+          x: (Number(hole.x.toFixed(3)) - pcbComponent.center.x) * 1000,
+          y: (Number(hole.y.toFixed(3)) - pcbComponent.center.y) * 1000,
+        }
+
+        // Only return pin if it doesn't already exist in the image
+        return !existingImage.pins.some(
+          (existingPin) =>
+            existingPin.x === pin.x &&
+            existingPin.y === pin.y &&
+            existingPin.padstack_name === pin.padstack_name,
+        )
+          ? pin
+          : undefined
+      }
+    })
+    .filter((pin): pin is Pin => pin !== undefined)
+
+  existingImage.pins.push(...platedHolePins)
+
   }
 
   // Add component placements for plated-hole-only components
