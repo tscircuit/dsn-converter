@@ -1,7 +1,7 @@
 {
   "name": "dsn-converter",
   "main": "dist/index.js",
-  "version": "0.0.81",
+  "version": "0.0.82",
   "type": "module",
   "files": [
     "dist"
