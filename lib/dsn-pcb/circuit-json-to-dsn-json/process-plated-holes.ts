@@ -57,9 +57,7 @@ export function processPlatedHoles(
           const iH = Math.round(hole.hole_height * 1000)
           const oW = Math.round(hole.outer_width * 1000)
           const oH = Math.round(hole.outer_height * 1000)
-          pcb.library.padstacks.push(
-            createOvalPadstack(name, oW, oH, iW, iH),
-          )
+          pcb.library.padstacks.push(createOvalPadstack(name, oW, oH, iW, iH))
           processedPadstacks.add(name)
         }
         return name
