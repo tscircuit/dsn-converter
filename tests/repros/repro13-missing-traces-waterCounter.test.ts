@@ -1,18 +1,14 @@
 import { expect, test } from "bun:test"
-import {
-  convertCircuitJsonToDsnString,
-  parseDsnToDsnJson,
-  convertDsnSessionToCircuitJson,
-} from "lib"
+import { parseDsnToDsnJson, convertDsnSessionToCircuitJson } from "lib"
 
-import circuitJson from "../../input_circuit.json"
-import type { AnyCircuitElement } from "circuit-json"
 import type { DsnPcb, DsnSession } from "lib/dsn-pcb/types"
 
+// @ts-ignore
 import input_dsn_local from "../assets/repro/repro13/input_dsn_local.dsn" with {
   type: "text",
 }
 
+// @ts-ignore
 import output_session from "../assets/repro/repro13/output_local.ses" with {
   type: "text",
 }
