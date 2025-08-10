@@ -102,3 +102,50 @@ export function createRectangularPadstack(
     attach: "off",
   }
 }
+
+export function createRectangularHolePadstack(
+  name: string,
+  outerWidth: number,
+  outerHeight: number,
+  holeDiameter: number,
+): Padstack {
+  const halfWidth = outerWidth / 2
+  const halfHeight = outerHeight / 2
+
+  // Define the rectangle polygon once so we can reuse for both layers
+  const rectPolygon = [
+    -halfWidth,
+    halfHeight, // Top-left
+    halfWidth,
+    halfHeight, // Top-right
+    halfWidth,
+    -halfHeight, // Bottom-right
+    -halfWidth,
+    -halfHeight, // Bottom-left
+    -halfWidth,
+    halfHeight, // Close the polygon
+  ]
+
+  return {
+    name,
+    shapes: [
+      {
+        shapeType: "polygon",
+        layer: "F.Cu",
+        width: 0,
+        coordinates: rectPolygon,
+      },
+      {
+        shapeType: "polygon",
+        layer: "B.Cu",
+        width: 0,
+        coordinates: rectPolygon,
+      },
+    ],
+    hole: {
+      shape: "circle",
+      diameter: holeDiameter,
+    },
+    attach: "off",
+  }
+}

@@ -8,6 +8,7 @@ import type {
 import {
   createCircularPadstack,
   createOvalPadstack,
+  createRectangularHolePadstack,
 } from "lib/utils/create-padstack"
 import { getFootprintName } from "lib/utils/get-footprint-name"
 import { getPadstackName } from "lib/utils/get-padstack-name"
@@ -115,6 +116,31 @@ export function processPlatedHoles(
           processedPadstacks.add(padstackName)
         }
       }
+      // Handle circular hole with rectangular pad shape
+      else if (hole.shape === "circular_hole_with_rect_pad") {
+        const padstackName = getPadstackName({
+          shape: "rect",
+          width: hole.rect_pad_width * 1000,
+          height: hole.rect_pad_height * 1000,
+          layer: "all",
+        })
+
+        if (!processedPadstacks.has(padstackName)) {
+          const padOuterWidthInUm = Math.round(hole.rect_pad_width * 1000)
+          const padOuterHeightInUm = Math.round(hole.rect_pad_height * 1000)
+          const holeDiameterInUm = Math.round(hole.hole_diameter * 1000)
+
+          pcb.library.padstacks.push(
+            createRectangularHolePadstack(
+              padstackName,
+              padOuterWidthInUm,
+              padOuterHeightInUm,
+              holeDiameterInUm,
+            ),
+          )
+          processedPadstacks.add(padstackName)
+        }
+      }
     }
 
     // Find existing image and add plated hole pins
@@ -184,6 +210,31 @@ export function processPlatedHoles(
             x: (Number(hole.x.toFixed(3)) - pcbComponent.center.x) * 1000,
             y: (Number(hole.y.toFixed(3)) - pcbComponent.center.y) * 1000,
           }
+          // Only return pin if it doesn't already exist in the image
+          return !existingImage.pins.some(
+            (existingPin) =>
+              existingPin.x === pin.x &&
+              existingPin.y === pin.y &&
+              existingPin.padstack_name === pin.padstack_name,
+          )
+            ? pin
+            : undefined
+        } else if (hole.shape === "circular_hole_with_rect_pad") {
+          const pin = {
+            padstack_name: getPadstackName({
+              shape: "rect",
+              width: hole.rect_pad_width * 1000,
+              height: hole.rect_pad_height * 1000,
+              layer: "all",
+            }),
+            pin_number:
+              sourcePort?.port_hints?.find(
+                (hint) => !Number.isNaN(Number(hint)),
+              ) || 1,
+            x: (Number(hole.x.toFixed(3)) - pcbComponent.center.x) * 1000,
+            y: (Number(hole.y.toFixed(3)) - pcbComponent.center.y) * 1000,
+          }
+
           // Only return pin if it doesn't already exist in the image
           return !existingImage.pins.some(
             (existingPin) =>
