@@ -4,6 +4,7 @@ import { processComponentsAndPads } from "./process-components-and-pads"
 import { processNets } from "./process-nets"
 import { processPcbTraces } from "./process-pcb-traces"
 import { processPlatedHoles } from "./process-plated-holes"
+import { generateLayers } from "lib/utils/generate-layers"
 
 export function convertCircuitJsonToDsnJson(
   circuitElements: AnyCircuitElement[],
@@ -18,7 +19,11 @@ export function convertCircuitJsonToDsnJson(
     width: number
     height: number
     center: { x: number; y: number }
+    num_layers?: number
   }
+
+  const numLayers = pcbBoard?.num_layers ?? 2
+  const layers = generateLayers(numLayers)
 
   const pcb: DsnPcb = {
     is_dsn_pcb: true,
@@ -35,22 +40,7 @@ export function convertCircuitJsonToDsnJson(
     },
     unit: "um",
     structure: {
-      layers: [
-        {
-          name: "F.Cu",
-          type: "signal",
-          property: {
-            index: 0,
-          },
-        },
-        {
-          name: "B.Cu",
-          type: "signal",
-          property: {
-            index: 1,
-          },
-        },
-      ],
+      layers,
       boundary: {
         path: {
           layer: "pcb",
