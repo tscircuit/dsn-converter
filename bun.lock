@@ -5,13 +5,13 @@
     "": {
       "name": "dsn-converter",
       "dependencies": {
-        "@tscircuit/soup-util": "^0.0.41",
         "debug": "^4.3.7",
         "uuid": "^10.0.0",
         "zod": "^3.23.8",
       },
       "devDependencies": {
         "@biomejs/biome": "^1.9.4",
+        "@tscircuit/circuit-json-util": "^0.0.72",
         "@tscircuit/core": "^0.0.349",
         "@types/bun": "latest",
         "@types/debug": "^4.1.12",
@@ -155,6 +155,8 @@
     "@rollup/rollup-win32-x64-msvc": ["@rollup/rollup-win32-x64-msvc@4.53.3", "", { "os": "win32", "cpu": "x64" }, "sha512-UhTd8u31dXadv0MopwGgNOBpUVROFKWVQgAg5N1ESyCz8AuBcMqm4AuTjrwgQKGDfoFuz02EuMRHQIw/frmYKQ=="],
 
     "@tscircuit/capacity-autorouter": ["@tscircuit/capacity-autorouter@0.0.20", "", { "peerDependencies": { "typescript": "^5.7.3" } }, "sha512-/eS+/O8jiW+zbEmLvhTK64oqzur1J8mEc+s3QcGmQG8XFdNQ0QsAeb/VSl+OAYRW1n2GPYwOoKLXd3PgZf2nkw=="],
+
+    "@tscircuit/circuit-json-util": ["@tscircuit/circuit-json-util@0.0.72", "", { "dependencies": { "parsel-js": "^1.1.2" }, "peerDependencies": { "circuit-json": "*", "transformation-matrix": "*", "zod": "3" } }, "sha512-8KqdPYz1Q+rYgPuP9VBBxusLgq0MmpVw4FjLORNHYr2qfWmM1m/1OQEokZHZZZLTUbfcn86zUOcv69+LqHa0FA=="],
 
     "@tscircuit/core": ["@tscircuit/core@0.0.349", "", { "dependencies": { "@lume/kiwi": "^0.4.3", "@tscircuit/capacity-autorouter": "^0.0.20", "@tscircuit/infgrid-ijump-astar": "^0.0.33", "@tscircuit/math-utils": "^0.0.9", "@tscircuit/props": "^0.0.159", "@tscircuit/schematic-autolayout": "^0.0.6", "@tscircuit/soup-util": "^0.0.41", "circuit-json": "^0.0.153", "circuit-json-to-connectivity-map": "^0.0.17", "format-si-unit": "^0.0.3", "nanoid": "^5.0.7", "performance-now": "^2.1.0", "react-reconciler": "^0.31.0", "react-reconciler-18": "npm:react-reconciler@0.29.2", "schematic-symbols": "^0.0.121", "transformation-matrix": "^2.16.1", "zod": "^3.23.8" }, "peerDependencies": { "@tscircuit/footprinter": "*", "typescript": "^5.0.0" } }, "sha512-VrR2s+p2Jm2/DjOueopf+4vkN83LHmC/ethmvNbO30JaO0+mr8ujToP2g74DE/MPhS+uqAysxhMFU+1ZFqbGpQ=="],
 
