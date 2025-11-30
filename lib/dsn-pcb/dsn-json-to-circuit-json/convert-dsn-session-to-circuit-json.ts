@@ -106,6 +106,102 @@ export function convertDsnSessionToCircuitJson(
       }
     })
 
+    // Deduplicate traces that have the same endpoints on the same layer
+    const pcbTraces = sessionElements.filter(
+      (elm) => elm.type === "pcb_trace",
+    ) as PcbTrace[]
+    const traceKeys = new Set<string>()
+    const tracesToRemove = new Set<string>()
+
+    pcbTraces.forEach((trace) => {
+      if (trace.route.length >= 2) {
+        const firstPoint = trace.route[0]
+        const lastPoint = trace.route[trace.route.length - 1]
+
+        // Get the layer from the first wire point
+        const firstWirePoint = trace.route.find(
+          (p) => p.route_type === "wire",
+        ) as PcbTraceRoutePointWire | undefined
+        const layer = firstWirePoint?.layer
+
+        // Create a normalized key (sort coordinates so direction doesn't matter)
+        const p1 = { x: firstPoint.x, y: firstPoint.y }
+        const p2 = { x: lastPoint.x, y: lastPoint.y }
+        const [start, end] = [p1, p2].sort((a, b) =>
+          a.x !== b.x ? a.x - b.x : a.y - b.y,
+        )
+        const key = `${start.x},${start.y}-${end.x},${end.y}-${layer}`
+
+        if (traceKeys.has(key)) {
+          // Mark this trace for removal
+          tracesToRemove.add(trace.pcb_trace_id)
+        } else {
+          traceKeys.add(key)
+        }
+      }
+    })
+
+    // Also remove traces that are simple 2-point connections to vias
+    // when there are already longer traces ending at the same via
+    const viaLocations = new Set<string>()
+    net.vias?.forEach((via) => {
+      const viaPoint = applyToPoint(transformUmToMm, { x: via.x, y: via.y })
+      const viaX = Number(viaPoint.x.toFixed(4))
+      const viaY = Number(viaPoint.y.toFixed(4))
+      viaLocations.add(`${viaX},${viaY}`)
+    })
+
+    // Find traces that connect to vias
+    pcbTraces.forEach((trace) => {
+      if (trace.route.length === 2) {
+        const firstPoint = trace.route[0]
+        const lastPoint = trace.route[1]
+        const firstKey = `${firstPoint.x},${firstPoint.y}`
+        const lastKey = `${lastPoint.x},${lastPoint.y}`
+
+        // Check if this is a simple 2-point trace ending at a via
+        if (viaLocations.has(firstKey) || viaLocations.has(lastKey)) {
+          const layer = (trace.route[0] as PcbTraceRoutePointWire).layer
+
+          // Check if there's a longer trace (3+ points) ending at the same via on the same layer
+          const hasLongerTrace = pcbTraces.some((otherTrace) => {
+            if (otherTrace.pcb_trace_id === trace.pcb_trace_id) return false
+            if (otherTrace.route.length < 3) return false
+
+            const otherLayer = (
+              otherTrace.route.find(
+                (p) => p.route_type === "wire",
+              ) as PcbTraceRoutePointWire
+            )?.layer
+            if (otherLayer !== layer) return false
+
+            const otherLast = otherTrace.route[otherTrace.route.length - 1]
+            const otherLastKey = `${otherLast.x},${otherLast.y}`
+
+            return (
+              viaLocations.has(otherLastKey) &&
+              (otherLastKey === firstKey || otherLastKey === lastKey)
+            )
+          })
+
+          if (hasLongerTrace) {
+            tracesToRemove.add(trace.pcb_trace_id)
+          }
+        }
+      }
+    })
+
+    // Remove duplicate and redundant traces
+    for (let i = sessionElements.length - 1; i >= 0; i--) {
+      const elm = sessionElements[i]
+      if (
+        elm.type === "pcb_trace" &&
+        tracesToRemove.has((elm as PcbTrace).pcb_trace_id)
+      ) {
+        sessionElements.splice(i, 1)
+      }
+    }
+
     // Get via padstack info if available
     const viaPadstackExists = dsnSession.routes.library_out?.padstacks?.find(
       (p) => p.name === "Via[0-1]_600:300_um",

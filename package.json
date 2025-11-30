@@ -20,7 +20,7 @@
     "@types/uuid": "^10.0.0",
     "bun-match-svg": "^0.0.3",
     "circuit-json": "^0.0.153",
-    "circuit-to-svg": "^0.0.175",
+    "circuit-to-svg": "^0.0.283",
     "react": "18",
     "tsup": "^8.3.5"
   },
