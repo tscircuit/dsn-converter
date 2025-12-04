@@ -36,12 +36,10 @@ test("Number of vias in the pcb_trace route should match the number of pcb_via e
     })
   })
 
-  // Each via point is counted twice (once for each layer)
-  routeViaPointsCount /= 2
-
   const outputPcbVias = circuitJsonFromSession.filter(
     (element) => element.type === "pcb_via",
   )
 
+  // Each via appears once in the route and once as a pcb_via element
   expect(routeViaPointsCount).toBe(outputPcbVias.length)
 })

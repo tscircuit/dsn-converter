@@ -142,8 +142,10 @@ export function convertDsnSessionToCircuitJson(
         const fromLayer = connectingWires[0]?.layer || "top"
         const toLayer = connectingWires[1]?.layer || "bottom"
 
-        // Add via point to each trace that connects to it
-        sessionElements.forEach((element) => {
+        // Add via point to the first trace that connects to it (not all traces)
+        let viaAdded = false
+        for (const element of sessionElements) {
+          if (viaAdded) break
           if (element.type === "pcb_trace") {
             const trace = element as PcbTrace
             // Check all points in the route, not just the last one
@@ -158,11 +160,12 @@ export function convertDsnSessionToCircuitJson(
                   from_layer: fromLayer,
                   to_layer: toLayer,
                 })
+                viaAdded = true
                 break // Found the matching point, no need to continue checking
               }
             }
           }
-        })
+        }
 
         sessionElements.push({
           ...convertViaToPcbVia({
