@@ -27,9 +27,16 @@ export function convertPadstacksToSmtPads(
     // Handle each placement for this component
     placementComponent.places.forEach((place) => {
       debug("processing place...", { place })
-      const { x: compX, y: compY, side } = place
+      const { x: compX, y: compY, side, rotation } = place
+      const rotRad = ((rotation || 0) * Math.PI) / 180
 
-      image.pins.forEach((pin) => {
+      image.pins.forEach((pin, pinIndex) => {
+        // Normalize pin_number: handle NaN, non-numeric strings, etc.
+        const pinLabel =
+          typeof pin.pin_number === "number" && Number.isNaN(pin.pin_number)
+            ? String(pinIndex + 1)
+            : String(pin.pin_number)
+
         // Find the corresponding padstack
         const padstack = padstacks.find((p) => p.name === pin.padstack_name)
         debug("found padstack", { padstack })
@@ -108,11 +115,14 @@ export function convertPadstacksToSmtPads(
           return
         }
 
+        // Apply component rotation to pin offset
+        const rotatedPinX = pin.x * Math.cos(rotRad) - pin.y * Math.sin(rotRad)
+        const rotatedPinY = pin.x * Math.sin(rotRad) + pin.y * Math.cos(rotRad)
+
         // Calculate position in circuit space using the transformation matrix
-        // Convert component position and pin offset to circuit coordinates
         const { x: circuitX, y: circuitY } = applyToPoint(transform, {
-          x: (compX || 0) + pin.x,
-          y: (compY || 0) + pin.y,
+          x: (compX || 0) + rotatedPinX,
+          y: (compY || 0) + rotatedPinY,
         })
 
         let pcbPad: PcbSmtPad
@@ -126,29 +136,29 @@ export function convertPadstacksToSmtPads(
           })
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pinIndex}`,
             pcb_component_id: `${componentId}_${place.refdes}`,
-            pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
+            pcb_port_id: `pcb_port_${componentId}-Pad${pinLabel}_${place.refdes}`,
             shape: "rect",
             x: circuitX,
             y: circuitY,
             width,
             height,
             layer,
-            port_hints: [pin.pin_number.toString()],
+            port_hints: [pinLabel],
           }
         } else {
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pinIndex}`,
             pcb_component_id: `${componentId}_${place.refdes}`,
-            pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
+            pcb_port_id: `pcb_port_${componentId}-Pad${pinLabel}_${place.refdes}`,
             shape: "circle",
             x: circuitX,
             y: circuitY,
             radius: circleShape!.diameter / 2 / 1000,
             layer: side === "front" ? "top" : "bottom",
-            port_hints: [pin.pin_number.toString()],
+            port_hints: [pinLabel],
           }
         }
 
