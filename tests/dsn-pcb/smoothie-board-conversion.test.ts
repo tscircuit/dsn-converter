@@ -30,17 +30,13 @@ describe("Smoothie Board DSN conversion", () => {
     }
 
     // EIA3216 should have pins A and C (not "rotate")
-    const eia = dsnJson.library.images.find((i) =>
-      i.name.includes("EIA3216"),
-    )!
+    const eia = dsnJson.library.images.find((i) => i.name.includes("EIA3216"))!
     expect(eia.pins[0].pin_number).toBe("A")
     expect(eia.pins[1].pin_number).toBe("C")
     expect(eia.pins[0].rotation).toBe(90)
 
     // TACTILE_SWITCH should have pins 4,3,2,1 (not "rotate")
-    const tac = dsnJson.library.images.find((i) =>
-      i.name.includes("TACTILE"),
-    )!
+    const tac = dsnJson.library.images.find((i) => i.name.includes("TACTILE"))!
     expect(tac.pins.map((p) => p.pin_number)).toEqual([4, 3, 2, 1])
     expect(tac.pins[0].x).toBe(2540)
     expect(tac.pins[0].y).toBe(-1905)

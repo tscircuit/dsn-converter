@@ -47,7 +47,10 @@ export function tokenizeDsn(input: string): Token[] {
     } else if (char === "-" || char === "+" || /\d/.test(char)) {
       // Check if '-' or '+' is followed by a digit (making it a negative/positive number)
       // Otherwise treat it as a symbol
-      if ((char === "-" || char === "+") && (i + 1 >= length || !/\d/.test(input[i + 1]))) {
+      if (
+        (char === "-" || char === "+") &&
+        (i + 1 >= length || !/\d/.test(input[i + 1]))
+      ) {
         // Standalone '-' or '+' is a symbol (e.g., pin names like '+' and '-')
         let sym = char
         i++

@@ -37,7 +37,11 @@ import type {
   Wiring,
 } from "../types"
 import Debug from "debug"
-import { getPinNum, getPinRotation, hasPinRotation } from "lib/utils/get-pin-number"
+import {
+  getPinNum,
+  getPinRotation,
+  hasPinRotation,
+} from "lib/utils/get-pin-number"
 import { getViaCoords } from "lib/utils/get-via-coordinates"
 
 const debug = Debug("dsn-converter:parse-dsn-to-dsn-json")
