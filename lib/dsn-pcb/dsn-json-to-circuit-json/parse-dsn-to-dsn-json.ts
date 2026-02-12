@@ -37,7 +37,7 @@ import type {
   Wiring,
 } from "../types"
 import Debug from "debug"
-import { getPinNum } from "lib/utils/get-pin-number"
+import { getPinNum, getPinRotation, hasPinRotation } from "lib/utils/get-pin-number"
 import { getViaCoords } from "lib/utils/get-via-coordinates"
 
 const debug = Debug("dsn-converter:parse-dsn-to-dsn-json")
@@ -577,18 +577,28 @@ function processPin(nodes: ASTNode[]): Pin | null {
       return null
     }
     pin.padstack_name = String(nodes[1].value)
-    // check if pin number is in a List structure
+
+    // Check for (rotate N) at nodes[2] and extract pin rotation
+    const hasRotation = hasPinRotation(nodes)
+    pin.rotation = getPinRotation(nodes)
+
+    // Extract pin number (handles rotate offset internally)
     const pinNumber = getPinNum(nodes)
-
     if (pinNumber === null) return null
-
     pin.pin_number = pinNumber
+
+    // Determine coordinate start index:
+    // Without rotate: (pin padstack pin_number x y) -> coords start after pin_number
+    // With rotate:    (pin padstack (rotate N) pin_number x y) -> coords start after pin_number
+    // The pin_number node index is 2 without rotate, 3 with rotate
+    const pinNumberIndex = hasRotation ? 3 : 2
+    const coordStartIndex = pinNumberIndex + 1
 
     // Parse coordinates
     let xValue: number | undefined
     let yValue: number | undefined
 
-    for (let i = 3; i < nodes.length; i++) {
+    for (let i = coordStartIndex; i < nodes.length; i++) {
       const node = nodes[i]
       const nextNode = nodes[i + 1]
 
