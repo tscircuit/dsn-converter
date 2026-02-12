@@ -44,18 +44,34 @@ export function tokenizeDsn(input: string): Token[] {
       }
       i++ // Skip the closing quote
       tokens.push({ type: "String", value })
-    } else if (char === "-" || /\d/.test(char)) {
-      // Parse number (integer or float)
-      let numStr = ""
-      if (char === "-") {
-        numStr += "-"
+    } else if (char === "-" || char === "+" || /\d/.test(char)) {
+      // Check if '-' or '+' is followed by a digit (making it a negative/positive number)
+      // Otherwise treat it as a symbol
+      if (
+        (char === "-" || char === "+") &&
+        (i + 1 >= length || !/\d/.test(input[i + 1]))
+      ) {
+        // Standalone '-' or '+' is a symbol (e.g., pin names like '+' and '-')
+        let sym = char
         i++
+        while (i < length && !/\s|\(|\)/.test(input[i])) {
+          sym += input[i]
+          i++
+        }
+        tokens.push({ type: "Symbol", value: sym })
+      } else {
+        // Parse number (integer or float, possibly negative)
+        let numStr = ""
+        if (char === "-" || char === "+") {
+          numStr += char
+          i++
+        }
+        while (i < length && /[\d.]/.test(input[i])) {
+          numStr += input[i]
+          i++
+        }
+        tokens.push({ type: "Number", value: parseFloat(numStr) })
       }
-      while (i < length && /[\d.]/.test(input[i])) {
-        numStr += input[i]
-        i++
-      }
-      tokens.push({ type: "Number", value: parseFloat(numStr) })
     } else {
       // Parse symbol
       let sym = ""

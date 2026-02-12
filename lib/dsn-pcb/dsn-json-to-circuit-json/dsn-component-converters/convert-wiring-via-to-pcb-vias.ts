@@ -5,6 +5,13 @@ import Debug from "debug"
 
 const debug = Debug("dsn-converter:convertWiringViaToPcbVias")
 
+// Global counter for unique via IDs
+let viaCounter = 0
+
+export const resetViaCounter = () => {
+  viaCounter = 0
+}
+
 export const convertWiringViaToPcbVias = ({
   wire,
   transformUmToMm,
@@ -25,7 +32,7 @@ export const convertWiringViaToPcbVias = ({
   const via: PcbVia = {
     type: "pcb_via",
     layers: ["top", "bottom"],
-    pcb_via_id: `pcb_via_${netName}`,
+    pcb_via_id: `pcb_via_${netName}_${viaCounter++}`,
     x: Number(circuitPoint.x.toFixed(4)),
     y: Number(circuitPoint.y.toFixed(4)),
     // TODO look up via size

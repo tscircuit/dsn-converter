@@ -7,6 +7,7 @@ import { convertWiresToPcbTraces } from "./dsn-component-converters/convert-wire
 import { pairs } from "lib/utils/pairs"
 import { convertNetsToSourceNetsAndTraces } from "./dsn-component-converters/convert-nets-to-source-nets-and-traces"
 import { convertDsnPcbComponentsToSourceComponentsAndPorts } from "./dsn-component-converters/convert-dsn-pcb-components-to-source-components-and-ports"
+import { resetViaCounter } from "./dsn-component-converters/convert-wiring-via-to-pcb-vias"
 import { su } from "@tscircuit/soup-util"
 
 export function convertDsnPcbToCircuitJson(
@@ -14,6 +15,9 @@ export function convertDsnPcbToCircuitJson(
   fromSessionSpace = false,
 ): AnyCircuitElement[] {
   const elements: AnyCircuitElement[] = []
+
+  // Reset via counter for each conversion
+  resetViaCounter()
 
   // TODO use pcb.resolution.unit and pcb.resolution.value
   const transformDsnUnitToMm = scale(1 / 1000)

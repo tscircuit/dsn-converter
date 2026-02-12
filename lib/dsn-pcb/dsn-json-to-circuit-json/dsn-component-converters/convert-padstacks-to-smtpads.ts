@@ -29,7 +29,10 @@ export function convertPadstacksToSmtPads(
       debug("processing place...", { place })
       const { x: compX, y: compY, side } = place
 
-      image.pins.forEach((pin) => {
+      // Component placement rotation in radians
+      const compRotRad = ((place.rotation || 0) * Math.PI) / 180
+
+      image.pins.forEach((pin, pinIndex) => {
         // Find the corresponding padstack
         const padstack = padstacks.find((p) => p.name === pin.padstack_name)
         debug("found padstack", { padstack })
@@ -38,6 +41,16 @@ export function convertPadstacksToSmtPads(
           console.warn(`No padstack found for pin: ${pin.padstack_name}`)
           return
         }
+
+        // Normalize pin label for IDs (handle non-numeric pin numbers)
+        const parsedPinNumber = Number(pin.pin_number)
+        const pinLabel =
+          typeof pin.pin_number === "number" && Number.isNaN(pin.pin_number)
+            ? String(pinIndex + 1)
+            : String(pin.pin_number)
+        const pinIndexForId = Number.isNaN(parsedPinNumber)
+          ? pinLabel
+          : String(parsedPinNumber - 1)
 
         // Find shape in padstack - try rectangle first, then polygon
         const rectShape = padstack.shapes.find(
@@ -69,8 +82,8 @@ export function convertPadstacksToSmtPads(
         if (rectShape) {
           // Handle rectangle shape
           const [x1, y1, x2, y2] = rectShape.coordinates
-          width = Math.abs(x2 - x1) / 1000 // Convert μm to mm
-          height = Math.abs(y2 - y1) / 1000 // Convert μm to mm
+          width = Math.abs(x2 - x1) / 1000 // Convert um to mm
+          height = Math.abs(y2 - y1) / 1000 // Convert um to mm
         } else if (polygonShape) {
           // Handle polygon shape
           const coordinates = polygonShape.coordinates
@@ -96,7 +109,7 @@ export function convertPadstacksToSmtPads(
           // For path shapes (oval/pill pads), width is the path width
           // and height is the distance between path endpoints
           const [x1, y1, x2, y2] = pathShape.coordinates
-          width = pathShape.width / 1000 // Convert μm to mm
+          width = pathShape.width / 1000 // Convert um to mm
           height = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) / 1000
         } else if (circleShape) {
           // Handle circle shape
@@ -108,11 +121,20 @@ export function convertPadstacksToSmtPads(
           return
         }
 
+        // Apply component rotation to pin offset
+        let pinOffsetX = pin.x
+        let pinOffsetY = pin.y
+        if (compRotRad !== 0) {
+          const cos = Math.cos(compRotRad)
+          const sin = Math.sin(compRotRad)
+          pinOffsetX = pin.x * cos - pin.y * sin
+          pinOffsetY = pin.x * sin + pin.y * cos
+        }
+
         // Calculate position in circuit space using the transformation matrix
-        // Convert component position and pin offset to circuit coordinates
         const { x: circuitX, y: circuitY } = applyToPoint(transform, {
-          x: (compX || 0) + pin.x,
-          y: (compY || 0) + pin.y,
+          x: (compX || 0) + pinOffsetX,
+          y: (compY || 0) + pinOffsetY,
         })
 
         let pcbPad: PcbSmtPad
@@ -126,29 +148,29 @@ export function convertPadstacksToSmtPads(
           })
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_pad${pinIndex}`,
             pcb_component_id: `${componentId}_${place.refdes}`,
-            pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
+            pcb_port_id: `pcb_port_${componentId}-Pad${pinLabel}_${place.refdes}_${pinIndex}`,
             shape: "rect",
             x: circuitX,
             y: circuitY,
             width,
             height,
             layer,
-            port_hints: [pin.pin_number.toString()],
+            port_hints: [pinLabel],
           }
         } else {
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_pad${pinIndex}`,
             pcb_component_id: `${componentId}_${place.refdes}`,
-            pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
+            pcb_port_id: `pcb_port_${componentId}-Pad${pinLabel}_${place.refdes}_${pinIndex}`,
             shape: "circle",
             x: circuitX,
             y: circuitY,
             radius: circleShape!.diameter / 2 / 1000,
             layer: side === "front" ? "top" : "bottom",
-            port_hints: [pin.pin_number.toString()],
+            port_hints: [pinLabel],
           }
         }
 
