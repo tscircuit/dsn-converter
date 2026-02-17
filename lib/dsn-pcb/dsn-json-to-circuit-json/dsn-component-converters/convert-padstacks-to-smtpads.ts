@@ -25,11 +25,12 @@ export function convertPadstacksToSmtPads(
     }
 
     // Handle each placement for this component
-    placementComponent.places.forEach((place) => {
+    placementComponent.places.forEach((place, placeIndex) => {
       debug("processing place...", { place })
       const { x: compX, y: compY, side } = place
+      const rotationRad = ((place.rotation || 0) * Math.PI) / 180
 
-      image.pins.forEach((pin) => {
+      image.pins.forEach((pin, pinIndex) => {
         // Find the corresponding padstack
         const padstack = padstacks.find((p) => p.name === pin.padstack_name)
         debug("found padstack", { padstack })
@@ -108,12 +109,21 @@ export function convertPadstacksToSmtPads(
           return
         }
 
+        // Apply component rotation to pin offset
+        const rotatedPinX =
+          pin.x * Math.cos(rotationRad) - pin.y * Math.sin(rotationRad)
+        const rotatedPinY =
+          pin.x * Math.sin(rotationRad) + pin.y * Math.cos(rotationRad)
+
         // Calculate position in circuit space using the transformation matrix
         // Convert component position and pin offset to circuit coordinates
         const { x: circuitX, y: circuitY } = applyToPoint(transform, {
-          x: (compX || 0) + pin.x,
-          y: (compY || 0) + pin.y,
+          x: (compX || 0) + rotatedPinX,
+          y: (compY || 0) + rotatedPinY,
         })
+
+        // Use pinIndex for unique IDs to avoid NaN from non-numeric pin names
+        const pinId = pinIndex
 
         let pcbPad: PcbSmtPad
         if (rectShape || polygonShape || pathShape) {
@@ -126,7 +136,7 @@ export function convertPadstacksToSmtPads(
           })
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pinId}`,
             pcb_component_id: `${componentId}_${place.refdes}`,
             pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
             shape: "rect",
@@ -140,7 +150,7 @@ export function convertPadstacksToSmtPads(
         } else {
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pinId}`,
             pcb_component_id: `${componentId}_${place.refdes}`,
             pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
             shape: "circle",

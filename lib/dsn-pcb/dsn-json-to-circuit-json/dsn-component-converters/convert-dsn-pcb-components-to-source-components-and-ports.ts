@@ -32,21 +32,35 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
 
       // Create ports for each pin in the image
       if (image.pins) {
-        for (const pin of image.pins) {
+        const rotationRad = ((place.rotation || 0) * Math.PI) / 180
+        for (let pinIdx = 0; pinIdx < image.pins.length; pinIdx++) {
+          const pin = image.pins[pinIdx]
+          // For non-numeric pin names, use the index as pin_number
+          const numericPinNumber =
+            typeof pin.pin_number === "number"
+              ? pin.pin_number
+              : parseInt(String(pin.pin_number), 10) || pinIdx + 1
           const port: SourcePort = {
             type: "source_port",
             source_port_id: `source_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,
             source_component_id: sourceComponent.source_component_id,
             name: `${place.refdes}-${pin.pin_number}`,
-            pin_number: Number(pin.pin_number),
+            pin_number: numericPinNumber,
             port_hints: [],
           }
           // Handle case where place coordinates might be null/undefined
           const placeX = place.x || 0
           const placeY = place.y || 0
+
+          // Apply component rotation to pin offset
+          const rotatedPinX =
+            pin.x * Math.cos(rotationRad) - pin.y * Math.sin(rotationRad)
+          const rotatedPinY =
+            pin.x * Math.sin(rotationRad) + pin.y * Math.cos(rotationRad)
+
           const pcb_port_center = applyToPoint(transformDsnUnitToMm, {
-            x: placeX + pin.x,
-            y: placeY + pin.y,
+            x: placeX + rotatedPinX,
+            y: placeY + rotatedPinY,
           })
           const pcb_port: PcbPort = {
             pcb_port_id: `pcb_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,

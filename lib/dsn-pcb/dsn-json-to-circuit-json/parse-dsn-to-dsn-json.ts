@@ -37,7 +37,7 @@ import type {
   Wiring,
 } from "../types"
 import Debug from "debug"
-import { getPinNum } from "lib/utils/get-pin-number"
+import { getPinNum, getPinNumberIndex } from "lib/utils/get-pin-number"
 import { getViaCoords } from "lib/utils/get-via-coordinates"
 
 const debug = Debug("dsn-converter:parse-dsn-to-dsn-json")
@@ -584,11 +584,15 @@ function processPin(nodes: ASTNode[]): Pin | null {
 
     pin.pin_number = pinNumber
 
+    // Determine where coordinates start (after pin number, skipping any (rotate N))
+    const pinIdx = getPinNumberIndex(nodes)
+    const coordStartIdx = pinIdx + 1
+
     // Parse coordinates
     let xValue: number | undefined
     let yValue: number | undefined
 
-    for (let i = 3; i < nodes.length; i++) {
+    for (let i = coordStartIdx; i < nodes.length; i++) {
       const node = nodes[i]
       const nextNode = nodes[i + 1]
 
