@@ -16,3 +16,18 @@ test("smoothieboard repro", async () => {
     import.meta.path,
   )
 })
+
+test("smoothieboard source_port pin_number has no NaN or null", () => {
+  const dsnJson = parseDsnToDsnJson(dsnFileWithFreeroutingTrace) as DsnPcb
+  const circuitJson = convertDsnPcbToCircuitJson(dsnJson)
+  const sourcePorts = circuitJson.filter((e) => e.type === "source_port")
+
+  expect(sourcePorts.length).toBeGreaterThan(0)
+
+  for (const sourcePort of sourcePorts) {
+    expect(sourcePort.pin_number).not.toBeNull()
+    if (typeof sourcePort.pin_number === "number") {
+      expect(Number.isNaN(sourcePort.pin_number)).toBe(false)
+    }
+  }
+})
