@@ -21,11 +21,21 @@ export function createPinForImage(
     layer: pad.layer as PcbSmtPad["layer"],
   }
 
+  // Pad positions in circuit JSON are in world coordinates (already rotated).
+  // DSN image pins need local (unrotated) coordinates, so un-rotate by the
+  // component's rotation angle.
+  const relX = pad.x - pcbComponent.center.x
+  const relY = pad.y - pcbComponent.center.y
+  const rotation = pcbComponent.rotation ?? 0
+  const rad = (-rotation * Math.PI) / 180
+  const localX = relX * Math.cos(rad) - relY * Math.sin(rad)
+  const localY = relX * Math.sin(rad) + relY * Math.cos(rad)
+
   return {
     padstack_name: getPadstackName(padstackParams),
     pin_number:
       sourcePort.port_hints?.find((hint) => !Number.isNaN(Number(hint))) || 1,
-    x: (pad.x - pcbComponent.center.x) * 1000,
-    y: (pad.y - pcbComponent.center.y) * 1000,
+    x: localX * 1000,
+    y: localY * 1000,
   }
 }

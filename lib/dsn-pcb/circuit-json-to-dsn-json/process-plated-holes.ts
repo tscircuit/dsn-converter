@@ -164,11 +164,20 @@ export function processPlatedHoles(
 
       const pinNumber = findNumericHint(sourcePort) ?? nextPinNumber()
 
+      // Hole positions in circuit JSON are in world coordinates (already rotated).
+      // DSN image pins need local (unrotated) coordinates.
+      const relX = Number(hole.x.toFixed(3)) - pcbComponent.center.x
+      const relY = Number(hole.y.toFixed(3)) - pcbComponent.center.y
+      const rotation = pcbComponent.rotation ?? 0
+      const rad = (-rotation * Math.PI) / 180
+      const localX = relX * Math.cos(rad) - relY * Math.sin(rad)
+      const localY = relX * Math.sin(rad) + relY * Math.cos(rad)
+
       const pin: Pin = {
         padstack_name: padstackName,
         pin_number: pinNumber,
-        x: (Number(hole.x.toFixed(3)) - pcbComponent.center.x) * 1000,
-        y: (Number(hole.y.toFixed(3)) - pcbComponent.center.y) * 1000,
+        x: localX * 1000,
+        y: localY * 1000,
       }
 
       // Avoid duplicates
@@ -205,7 +214,7 @@ export function processPlatedHoles(
         x: c.coordinates.x,
         y: c.coordinates.y,
         side: "front" as const,
-        rotation: c.rotation % 90,
+        rotation: c.rotation,
         PN: c.value,
       })),
     })
