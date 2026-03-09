@@ -2,11 +2,21 @@ import type { AnySourceComponent, PcbPort, SourcePort } from "circuit-json"
 import { applyToPoint, type Matrix } from "transformation-matrix"
 import type { DsnPcb, Image, Pin } from "lib/dsn-pcb/types"
 
-const normalizePinNumber = (pinNumber: Pin["pin_number"]): number | string => {
-  if (typeof pinNumber === "number") return pinNumber
+type SourcePortWithPinLabel = SourcePort & { pin_label?: string }
+
+const normalizePinNumber = (
+  pinNumber: Pin["pin_number"],
+): { pin_number: number | undefined; pin_label?: string } => {
+  if (typeof pinNumber === "number") {
+    return { pin_number: Number.isNaN(pinNumber) ? undefined : pinNumber }
+  }
 
   const parsed = Number(pinNumber)
-  return Number.isNaN(parsed) ? String(pinNumber) : parsed
+  if (!Number.isNaN(parsed)) {
+    return { pin_number: parsed }
+  }
+
+  return { pin_number: undefined, pin_label: String(pinNumber) }
 }
 
 export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
@@ -40,13 +50,17 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
       // Create ports for each pin in the image
       if (image.pins) {
         for (const pin of image.pins) {
-          const port: SourcePort = {
+          const normalizedPin = normalizePinNumber(pin.pin_number)
+          const port: SourcePortWithPinLabel = {
             type: "source_port",
             source_port_id: `source_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,
             source_component_id: sourceComponent.source_component_id,
             name: `${place.refdes}-${pin.pin_number}`,
-            pin_number: normalizePinNumber(pin.pin_number),
+            pin_number: normalizedPin.pin_number,
             port_hints: [],
+            ...(normalizedPin.pin_label
+              ? { pin_label: normalizedPin.pin_label }
+              : {}),
           }
           // Handle case where place coordinates might be null/undefined
           const placeX = place.x || 0
