@@ -20,7 +20,9 @@ test("smoothieboard repro", async () => {
 test("smoothieboard source_port pin_number has no NaN or null", () => {
   const dsnJson = parseDsnToDsnJson(dsnFileWithFreeroutingTrace) as DsnPcb
   const circuitJson = convertDsnPcbToCircuitJson(dsnJson)
-  const sourcePorts = circuitJson.filter((e) => e.type === "source_port") as Array<{
+  const sourcePorts = circuitJson.filter(
+    (e) => e.type === "source_port",
+  ) as Array<{
     pin_number?: number
     pin_label?: string
   }>
