@@ -72,6 +72,9 @@ export function convertDsnSessionToCircuitJson(
 
   const sessionElements: AnyCircuitElement[] = []
 
+  // Track via positions globally to deduplicate across all nets
+  const addedViaKeys = new Set<string>()
+
   // Process nets for vias and wires
   for (const net of dsnSession.routes.network_out.nets) {
     // Find corresponding source trace for this net
@@ -119,6 +122,13 @@ export function convertDsnSessionToCircuitJson(
         })
         const viaX = Number(viaPoint.x.toFixed(4))
         const viaY = Number(viaPoint.y.toFixed(4))
+
+        // Skip duplicate vias at the same coordinates
+        const viaKey = `${viaX},${viaY}`
+        if (addedViaKeys.has(viaKey)) {
+          return
+        }
+        addedViaKeys.add(viaKey)
 
         // Find the wire points that connect to this via across all route segments
         const connectingWires = sessionElements
