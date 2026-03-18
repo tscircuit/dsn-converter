@@ -174,7 +174,7 @@ export function processPcbTraces(
           // Create wire segment for via placement
           dsnWrapper.addWire({
             path: {
-              layer: layerRefToDsnLayer(point.from_layer),
+              layer: layerRefToDsnLayer(point.from_layer as LayerRef),
               width: DEFAULT_VIA_DIAMETER,
               coordinates: [
                 point.x * CJ_TO_DSN_SCALE,
