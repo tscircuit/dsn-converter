@@ -26,7 +26,7 @@ export function convertCircuitJsonToDsnSession(
     },
   }
 
-  processPcbTraces(circuitJson, session)
+  processPcbTraces(circuitJson, session, dsnPcb.structure.layers.length)
 
   return session
 }

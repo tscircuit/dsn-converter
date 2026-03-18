@@ -1,10 +1,14 @@
 import type { AnyCircuitElement } from "circuit-json"
-import type { DsnPcb, Padstack, ComponentGroup } from "../types"
+import {
+  generateLayerNames,
+  generateLayers,
+  getViaPadstackName,
+} from "lib/utils/generate-layers"
+import type { ComponentGroup, DsnPcb, Padstack } from "../types"
 import { processComponentsAndPads } from "./process-components-and-pads"
 import { processNets } from "./process-nets"
 import { processPcbTraces } from "./process-pcb-traces"
 import { processPlatedHoles } from "./process-plated-holes"
-import { generateLayers } from "lib/utils/generate-layers"
 
 export function convertCircuitJsonToDsnJson(
   circuitElements: AnyCircuitElement[],
@@ -24,6 +28,8 @@ export function convertCircuitJsonToDsnJson(
 
   const numLayers = pcbBoard?.num_layers ?? 2
   const layers = generateLayers(numLayers)
+  const layerNames = generateLayerNames(numLayers)
+  const defaultViaName = getViaPadstackName(numLayers, 600, 300)
 
   const pcb: DsnPcb = {
     is_dsn_pcb: true,
@@ -48,7 +54,7 @@ export function convertCircuitJsonToDsnJson(
           coordinates: calculateBoardBoundary(pcbBoard),
         },
       },
-      via: "Via[0-1]_600:300_um",
+      via: defaultViaName,
       rule: {
         // Default clearance having fallback value
         clearances: [
@@ -70,19 +76,12 @@ export function convertCircuitJsonToDsnJson(
       images: [],
       padstacks: [
         {
-          name: "Via[0-1]_600:300_um",
-          shapes: [
-            {
-              shapeType: "circle",
-              layer: "F.Cu",
-              diameter: 600,
-            },
-            {
-              shapeType: "circle",
-              layer: "B.Cu",
-              diameter: 600,
-            },
-          ],
+          name: defaultViaName,
+          shapes: layerNames.map((name) => ({
+            shapeType: "circle" as const,
+            layer: name,
+            diameter: 600,
+          })),
           attach: "off",
         },
       ],
@@ -95,7 +94,7 @@ export function convertCircuitJsonToDsnJson(
           description: "",
           net_names: [],
           circuit: {
-            use_via: "Via[0-1]_600:300_um",
+            use_via: defaultViaName,
           },
           rule: {
             // Actual value being used in the dsn for the specific network class
@@ -116,9 +115,9 @@ export function convertCircuitJsonToDsnJson(
 
   const componentGroups = groupComponents(circuitElements)
   processComponentsAndPads(componentGroups, circuitElements, pcb)
-  processPlatedHoles(componentGroups, circuitElements, pcb)
+  processPlatedHoles(componentGroups, circuitElements, pcb, numLayers)
   processNets(circuitElements, pcb)
-  processPcbTraces(circuitElements, pcb)
+  processPcbTraces(circuitElements, pcb, numLayers)
   return pcb
 }
 

@@ -1,15 +1,15 @@
+import { su } from "@tscircuit/soup-util"
 import type {
   AnyCircuitElement,
   LayerRef,
   PcbTrace,
   PcbTraceRoutePoint,
 } from "circuit-json"
-import type { DsnPcb, DsnSession } from "../../types"
 import Debug from "debug"
-import { findOrCreateViaPadstack } from "./findOrCreateViaPadstack"
-import { getDsnTraceOperationsWrapper } from "./DsnTraceOperationsWrapper"
-import { su } from "@tscircuit/soup-util"
 import { getCombinedSourcePortName } from "lib/utils/get-combined-source-port-name"
+import type { DsnPcb, DsnSession } from "../../types"
+import { getDsnTraceOperationsWrapper } from "./DsnTraceOperationsWrapper"
+import { findOrCreateViaPadstack } from "./findOrCreateViaPadstack"
 
 const debug = Debug("dsn-converter:processPcbTraces")
 
@@ -26,6 +26,16 @@ interface Wire {
   type: string
 }
 
+function layerRefToDsnLayer(layer: LayerRef): string {
+  if (layer === "top") return "F.Cu"
+  if (layer === "bottom") return "B.Cu"
+  // Inner layers: "inner1" → "In1.Cu", "inner2" → "In2.Cu", etc.
+  const innerMatch = String(layer).match(/^inner(\d+)$/)
+  if (innerMatch) return `In${innerMatch[1]}.Cu`
+  // Fallback: already a DSN layer name like "F.Cu", "In1.Cu"
+  return String(layer)
+}
+
 function createWire(opts: {
   layer: LayerRef
   widthMm: number
@@ -33,7 +43,7 @@ function createWire(opts: {
 }): Wire {
   return {
     path: {
-      layer: opts.layer === "top" ? "F.Cu" : "B.Cu",
+      layer: layerRefToDsnLayer(opts.layer),
       width: opts.widthMm,
       coordinates: [],
     },
@@ -45,6 +55,7 @@ function createWire(opts: {
 export function processPcbTraces(
   circuitElements: AnyCircuitElement[],
   pcb: DsnPcb | DsnSession,
+  numLayers = 2,
 ) {
   const dsnWrapper = getDsnTraceOperationsWrapper(pcb)
   const CJ_TO_DSN_SCALE = pcb.is_dsn_pcb ? 1000 : 10000
@@ -110,6 +121,7 @@ export function processPcbTraces(
               dsnWrapper,
               DEFAULT_VIA_DIAMETER,
               DEFAULT_VIA_HOLE,
+              numLayers,
             )
 
             // Add via reference to structure if not already there
@@ -120,7 +132,7 @@ export function processPcbTraces(
             // Create wire segment for via placement
             dsnWrapper.addWire({
               path: {
-                layer: currentLayer === "top" ? "F.Cu" : "B.Cu",
+                layer: layerRefToDsnLayer(currentLayer as LayerRef),
                 width: DEFAULT_VIA_DIAMETER,
                 coordinates: [
                   prevPoint.x * CJ_TO_DSN_SCALE,
@@ -149,6 +161,7 @@ export function processPcbTraces(
             dsnWrapper,
             DEFAULT_VIA_DIAMETER,
             DEFAULT_VIA_HOLE,
+            numLayers,
           )
 
           debug("VIA PADSTACK NAME:", viaPadstackName)
@@ -161,7 +174,7 @@ export function processPcbTraces(
           // Create wire segment for via placement
           dsnWrapper.addWire({
             path: {
-              layer: point.from_layer === "top" ? "F.Cu" : "B.Cu",
+              layer: layerRefToDsnLayer(point.from_layer),
               width: DEFAULT_VIA_DIAMETER,
               coordinates: [
                 point.x * CJ_TO_DSN_SCALE,

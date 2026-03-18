@@ -1,10 +1,10 @@
-import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
-import { convertDsnJsonToCircuitJson } from "../../lib/dsn-pcb/dsn-json-to-circuit-json/convert-dsn-json-to-circuit-json.ts"
 import { expect, test } from "bun:test"
+import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
 import { convertCircuitJsonToDsnString, parseDsnToDsnJson } from "lib"
+import { convertDsnJsonToCircuitJson } from "../../lib/dsn-pcb/dsn-json-to-circuit-json/convert-dsn-json-to-circuit-json.ts"
 
-import circuitJson from "../assets/repro/plated-hole-resistor-circuit.json"
 import differentSizedPlatedHolesCircuitJson from "../assets/repro/different-sized-plated-holes.json"
+import circuitJson from "../assets/repro/plated-hole-resistor-circuit.json"
 
 import type { AnyCircuitElement } from "circuit-json"
 import type { DsnPcb } from "lib"
@@ -31,9 +31,12 @@ test("circuit json (with plated hole) -> dsn file", async () => {
     (p) => p.name === "Round[A]Pad_700_1000_um",
   )
   expect(padstack).toBeDefined()
-  expect(padstack?.shapes).toHaveLength(2) // Top and bottom copper
+  expect(padstack?.shapes).toHaveLength(4) // All 4 copper layers
   expect(padstack?.shapes[0].shapeType).toBe("circle")
   expect(padstack?.shapes[0].layer).toBe("F.Cu")
+  expect(padstack?.shapes[1].layer).toBe("In1.Cu")
+  expect(padstack?.shapes[2].layer).toBe("In2.Cu")
+  expect(padstack?.shapes[3].layer).toBe("B.Cu")
   expect((padstack?.shapes[0] as any).diameter).toBe(1000) // Outer diameter in μm
 })
 
@@ -62,13 +65,13 @@ test("different sized plated holes", async () => {
     (p) => p.name === "Round[A]Pad_1000_1200_um",
   )
   expect(padstack1).toBeDefined()
-  expect(padstack1?.shapes).toHaveLength(2)
+  expect(padstack1?.shapes).toHaveLength(4) // All 4 copper layers
   expect((padstack1?.shapes[0] as any).diameter).toBe(1200)
 
   const padstack2 = dsnJson.library.padstacks.find(
     (p) => p.name === "Round[A]Pad_2000_2200_um",
   )
   expect(padstack2).toBeDefined()
-  expect(padstack2?.shapes).toHaveLength(2)
+  expect(padstack2?.shapes).toHaveLength(4) // All 4 copper layers
   expect((padstack2?.shapes[0] as any).diameter).toBe(2200)
 })

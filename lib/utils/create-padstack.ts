@@ -1,25 +1,20 @@
 import type { PcbSmtPad } from "circuit-json"
 import type { Padstack } from "../dsn-pcb/types"
+import { generateLayerNames } from "./generate-layers"
 
 export function createCircularPadstack(
   name: string,
   outerDiameter: number,
   holeDiameter: number,
+  numLayers = 2,
 ): Padstack {
   return {
     name,
-    shapes: [
-      {
-        shapeType: "circle",
-        layer: "F.Cu",
-        diameter: outerDiameter,
-      },
-      {
-        shapeType: "circle",
-        layer: "B.Cu",
-        diameter: outerDiameter,
-      },
-    ],
+    shapes: generateLayerNames(numLayers).map((layer) => ({
+      shapeType: "circle" as const,
+      layer,
+      diameter: outerDiameter,
+    })),
     hole: {
       shape: "circle",
       diameter: holeDiameter,
@@ -34,6 +29,7 @@ export function createOvalPadstack(
   outerHeight: number,
   holeWidth: number,
   holeHeight: number,
+  numLayers = 2,
 ): Padstack {
   const pathOffset = Math.abs(outerWidth - outerHeight) / 2
 
@@ -42,24 +38,14 @@ export function createOvalPadstack(
 
   return {
     name,
-    shapes: [
-      {
-        shapeType: "path",
-        layer: "F.Cu",
-        width: isHorizontal ? outerHeight : outerWidth,
-        coordinates: isHorizontal
-          ? [-pathOffset, 0, pathOffset, 0] // Horizontal oval
-          : [0, -pathOffset, 0, pathOffset], // Vertical oval
-      },
-      {
-        shapeType: "path",
-        layer: "B.Cu",
-        width: isHorizontal ? outerHeight : outerWidth,
-        coordinates: isHorizontal
-          ? [-pathOffset, 0, pathOffset, 0] // Horizontal oval
-          : [0, -pathOffset, 0, pathOffset], // Vertical oval
-      },
-    ],
+    shapes: generateLayerNames(numLayers).map((layer) => ({
+      shapeType: "path" as const,
+      layer,
+      width: isHorizontal ? outerHeight : outerWidth,
+      coordinates: isHorizontal
+        ? [-pathOffset, 0, pathOffset, 0] // Horizontal oval
+        : [0, -pathOffset, 0, pathOffset], // Vertical oval
+    })),
     hole: {
       shape: "oval",
       width: holeWidth,
@@ -108,11 +94,12 @@ export function createCircularHoleRectangularPadstack(
   outerWidth: number,
   outerHeight: number,
   holeDiameter: number,
+  numLayers = 2,
 ): Padstack {
   const halfWidth = outerWidth / 2
   const halfHeight = outerHeight / 2
 
-  // Define the rectangle polygon once so we can reuse for both layers
+  // Define the rectangle polygon once so we can reuse for all layers
   const rectPolygon = [
     -halfWidth,
     halfHeight, // Top-left
@@ -128,20 +115,12 @@ export function createCircularHoleRectangularPadstack(
 
   return {
     name,
-    shapes: [
-      {
-        shapeType: "polygon",
-        layer: "F.Cu",
-        width: 0,
-        coordinates: rectPolygon,
-      },
-      {
-        shapeType: "polygon",
-        layer: "B.Cu",
-        width: 0,
-        coordinates: rectPolygon,
-      },
-    ],
+    shapes: generateLayerNames(numLayers).map((layer) => ({
+      shapeType: "polygon" as const,
+      layer,
+      width: 0,
+      coordinates: rectPolygon,
+    })),
     hole: {
       shape: "circle",
       diameter: holeDiameter,
