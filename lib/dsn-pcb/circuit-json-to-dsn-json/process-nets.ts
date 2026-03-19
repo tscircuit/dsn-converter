@@ -29,7 +29,7 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
 
         if (sourcePort && "source_component_id" in sourcePort) {
           const componentName =
-            componentNameMap.get(sourcePort.source_component_id) || ""
+            componentNameMap.get(sourcePort.source_component_id ?? "") || ""
           const pinNumber = sourcePort.port_hints?.find(
             (hint) => !Number.isNaN(Number(hint)),
           )

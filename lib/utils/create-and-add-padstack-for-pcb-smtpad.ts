@@ -17,8 +17,8 @@ export function createAndAddPadstackFromPcbSmtPad(
     shape: isCircle ? "circle" : "rect",
     outerDiameter: isCircle ? pad.radius * 1000 * 2 : undefined, // Radius to diameter
     holeDiameter: isCircle ? pad.radius * 1000 * 2 : undefined, // Radius to diameter
-    width: isCircle ? undefined : pad.width * 1000,
-    height: isCircle ? undefined : pad.height * 1000,
+    width: isCircle ? undefined : (pad as { width: number }).width * 1000,
+    height: isCircle ? undefined : (pad as { height: number }).height * 1000,
     layer: pad.layer as PcbSmtPad["layer"],
   }
 

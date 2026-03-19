@@ -13,7 +13,7 @@ import sessionFile from "../assets/repro/thickness-of-trace.ses" with {
   type: "text",
 }
 import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
-import type { PcbTrace, PcbTraceRoutePointWire } from "circuit-json"
+import type { AnyCircuitElement, PcbTrace, PcbTraceRoutePointWire } from "circuit-json"
 
 test("circuit json thickness converted to dsn file", () => {
   const circuit = new Circuit()
@@ -27,7 +27,7 @@ test("circuit json thickness converted to dsn file", () => {
     </board>,
   )
 
-  const circuitJson = circuit.getCircuitJson()
+  const circuitJson = circuit.getCircuitJson() as AnyCircuitElement[]
   const source_trace = circuitJson.filter(
     (element) => element.type === "source_trace",
   )[0]
@@ -60,7 +60,7 @@ test("thickness of trace in dsn file to circuit json", async () => {
   )
 
   const dsnSession = parseDsnToDsnJson(sessionFile) as DsnSession
-  const dsnFile = convertCircuitJsonToDsnString(circuit.getCircuitJson())
+  const dsnFile = convertCircuitJsonToDsnString(circuit.getCircuitJson() as AnyCircuitElement[])
   const dsnPcb = parseDsnToDsnJson(dsnFile) as DsnPcb
   const circuitJsonWithOutputTraces = convertDsnSessionToCircuitJson(
     dsnPcb,
