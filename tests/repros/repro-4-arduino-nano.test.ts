@@ -1,9 +1,9 @@
 import { expect, test } from "bun:test"
 import { convertCircuitJsonToDsnString, parseDsnToDsnJson } from "lib"
 
-import circuitJson from "../assets/repro/arduino-nano.json"
 import type { AnyCircuitElement } from "circuit-json"
 import type { DsnPcb } from "lib"
+import circuitJson from "../assets/repro/arduino-nano.json"
 
 test("circuit json (arduino nano) -> dsn file", async () => {
   // Getting the dsn file from the circuit json

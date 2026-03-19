@@ -2,18 +2,18 @@ import { expect, test } from "bun:test"
 import {
   convertCircuitJsonToDsnString,
   convertDsnSessionToCircuitJson,
-  parseDsnToDsnJson,
   parseDsnToCircuitJson,
+  parseDsnToDsnJson,
 } from "lib"
 
 import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
 import type { DsnPcb, DsnSession } from "lib"
 // @ts-ignore
-import testSesFile from "../assets/repro/subcircuit_output.ses" with {
+import inputDsnFile from "../assets/repro/subcircuit_input.dsn" with {
   type: "text",
 }
 // @ts-ignore
-import inputDsnFile from "../assets/repro/subcircuit_input.dsn" with {
+import testSesFile from "../assets/repro/subcircuit_output.ses" with {
   type: "text",
 }
 

@@ -1,6 +1,12 @@
-import { Circuit } from "@tscircuit/core"
-import { parseDsnToDsnJson, type DsnPcb, type DsnSession } from "lib"
 import { expect, test } from "bun:test"
+import { Circuit } from "@tscircuit/core"
+import type {
+  AnyCircuitElement,
+  PcbTrace,
+  PcbTraceRoutePointWire,
+} from "circuit-json"
+import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
+import { type DsnPcb, type DsnSession, parseDsnToDsnJson } from "lib"
 import {
   convertCircuitJsonToDsnJson,
   convertCircuitJsonToDsnString,
@@ -12,8 +18,6 @@ import {
 import sessionFile from "../assets/repro/thickness-of-trace.ses" with {
   type: "text",
 }
-import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
-import type { AnyCircuitElement, PcbTrace, PcbTraceRoutePointWire } from "circuit-json"
 
 test("circuit json thickness converted to dsn file", () => {
   const circuit = new Circuit()
@@ -60,7 +64,9 @@ test("thickness of trace in dsn file to circuit json", async () => {
   )
 
   const dsnSession = parseDsnToDsnJson(sessionFile) as DsnSession
-  const dsnFile = convertCircuitJsonToDsnString(circuit.getCircuitJson() as AnyCircuitElement[])
+  const dsnFile = convertCircuitJsonToDsnString(
+    circuit.getCircuitJson() as AnyCircuitElement[],
+  )
   const dsnPcb = parseDsnToDsnJson(dsnFile) as DsnPcb
   const circuitJsonWithOutputTraces = convertDsnSessionToCircuitJson(
     dsnPcb,

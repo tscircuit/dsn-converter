@@ -1,7 +1,7 @@
 import type { AnyCircuitElement, PcbSmtPad } from "circuit-json"
+import Debug from "debug"
 import type { DsnPcb } from "lib/dsn-pcb/types"
 import { applyToPoint } from "transformation-matrix"
-import Debug from "debug"
 
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
 

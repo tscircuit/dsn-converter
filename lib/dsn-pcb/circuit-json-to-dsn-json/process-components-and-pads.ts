@@ -4,12 +4,12 @@ import type {
   PcbComponent,
   SourceComponentBase,
 } from "circuit-json"
+import { createAndAddPadstackFromPcbSmtPad } from "lib/utils/create-and-add-padstack-for-pcb-smtpad"
+import { createPinForImage } from "lib/utils/create-pin-for-image"
 import { getComponentValue } from "lib/utils/get-component-value"
 import { getFootprintName } from "lib/utils/get-footprint-name"
 import { applyToPoint, scale } from "transformation-matrix"
 import type { ComponentGroup, DsnPcb, Image, Pin } from "../types"
-import { createAndAddPadstackFromPcbSmtPad } from "lib/utils/create-and-add-padstack-for-pcb-smtpad"
-import { createPinForImage } from "lib/utils/create-pin-for-image"
 
 const transformMmToUm = scale(1000)
 

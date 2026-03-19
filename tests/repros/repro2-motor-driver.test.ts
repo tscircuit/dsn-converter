@@ -5,9 +5,9 @@ import {
   parseDsnToDsnJson,
 } from "lib"
 
-import circuitJson from "../assets/repro/motor-driver-breakout-circuit.json"
 import type { AnyCircuitElement } from "circuit-json"
 import type { DsnPcb, DsnSession } from "lib"
+import circuitJson from "../assets/repro/motor-driver-breakout-circuit.json"
 
 // @ts-ignore
 import sessionFile from "../assets/repro/motor-driver-breakout-dsn.ses" with {

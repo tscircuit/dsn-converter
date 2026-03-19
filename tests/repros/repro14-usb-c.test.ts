@@ -1,9 +1,9 @@
 import { expect, test } from "bun:test"
 import { convertCircuitJsonToDsnJson } from "lib"
 
-import circuitJson from "../assets/repro/repro14/usb-c-flashlight.json"
 import type { AnyCircuitElement } from "circuit-json"
 import type { DsnPcb } from "lib/dsn-pcb/types"
+import circuitJson from "../assets/repro/repro14/usb-c-flashlight.json"
 
 test("usb-c plated hole shpaed `Pill` shpuld have unique pin numbers", async () => {
   const dsnJson = convertCircuitJsonToDsnJson(

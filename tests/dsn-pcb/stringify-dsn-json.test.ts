@@ -1,9 +1,9 @@
-import { parseDsnToDsnJson, stringifyDsnJson, type DsnPcb } from "lib"
+import { expect, test } from "bun:test"
+import { type DsnPcb, parseDsnToDsnJson, stringifyDsnJson } from "lib"
 // @ts-ignore
 import testDsnFile from "../assets/testkicadproject/testkicadproject.dsn" with {
   type: "text",
 }
-import { expect, test } from "bun:test"
 
 test("stringify dsn json", () => {
   const dsnJson = parseDsnToDsnJson(testDsnFile) as DsnPcb

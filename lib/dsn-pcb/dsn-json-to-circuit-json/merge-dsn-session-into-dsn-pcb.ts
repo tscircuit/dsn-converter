@@ -1,5 +1,5 @@
-import type { DsnPcb, DsnSession } from "../types"
 import Debug from "debug"
+import type { DsnPcb, DsnSession } from "../types"
 
 const debug = Debug("dsn-converter:mergeDsnSessionIntoDsnPcb")
 

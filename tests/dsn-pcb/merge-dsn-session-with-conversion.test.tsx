@@ -1,21 +1,21 @@
-import { test, expect } from "bun:test"
+import { expect, test } from "bun:test"
 import { Circuit } from "@tscircuit/core"
+import { su } from "@tscircuit/soup-util"
+import type { AnyCircuitElement } from "circuit-json"
+import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
 import {
-  convertCircuitJsonToDsnString,
-  convertDsnPcbToCircuitJson,
-  parseDsnToDsnJson,
-  mergeDsnSessionIntoDsnPcb,
-  convertDsnSessionToCircuitJson,
   type DsnPcb,
   type DsnSession,
   convertCircuitJsonToDsnSession,
+  convertCircuitJsonToDsnString,
+  convertDsnPcbToCircuitJson,
+  convertDsnSessionToCircuitJson,
+  mergeDsnSessionIntoDsnPcb,
+  parseDsnToDsnJson,
   stringifyDsnJson,
 } from "lib"
 import looksSame from "looks-same"
 import { getTestDebugUtils } from "tests/fixtures/get-test-debug-utils"
-import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
-import { su } from "@tscircuit/soup-util"
-import type { AnyCircuitElement } from "circuit-json"
 
 test("merge-dsn-session-with-conversion", async () => {
   const { writeDebugFile, getDebugFilePath, debug } = getTestDebugUtils(
@@ -40,7 +40,8 @@ test("merge-dsn-session-with-conversion", async () => {
     </board>,
   )
 
-  const baseCircuitJson = await circuit.getCircuitJson() as AnyCircuitElement[]
+  const baseCircuitJson =
+    (await circuit.getCircuitJson()) as AnyCircuitElement[]
   writeDebugFile("base.circuit.json", JSON.stringify(baseCircuitJson, null, 2))
   const dsnFile = convertCircuitJsonToDsnString(baseCircuitJson)
   debug("DSN FILE\n--------\n", dsnFile)

@@ -1,22 +1,22 @@
-import { su } from "@tscircuit/soup-util"
 import { expect, test } from "bun:test"
+import { su } from "@tscircuit/soup-util"
+import type { AnyCircuitElement, PcbTrace } from "circuit-json"
+import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
+import Debug from "debug"
 import {
+  type DsnPcb,
   convertCircuitJsonToDsnSession,
   convertDsnJsonToCircuitJson,
   convertDsnPcbToCircuitJson,
   convertDsnSessionToCircuitJson,
   parseDsnToDsnJson,
   stringifyDsnSession,
-  type DsnPcb,
 } from "lib"
 // @ts-ignore
 import dsnPcbContent from "../assets/testkicadproject/testkicadproject.dsn" with {
   type: "text",
 }
-import type { AnyCircuitElement, PcbTrace } from "circuit-json"
-import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
 import { circuitJsonToTable, sessionFileToTable } from "../debug-utils"
-import Debug from "debug"
 
 test("convert dsn file -> circuit json -> dsn session -> circuit json", () => {
   const debug = Debug("tscircuit:dsn-converter")
@@ -68,7 +68,9 @@ test("convert dsn file -> circuit json -> dsn session -> circuit json", () => {
   const routedCircuitJson = circuitJson.concat(pcbTracesFromAutorouting)
   const pcbTraceFirstPoint = su(routedCircuitJson as any).pcb_trace.list()[0]
     .route[0]
-  const smtPadFromRouteStarts = su(circuitJson as any).pcb_smtpad.list()[0] as any
+  const smtPadFromRouteStarts = su(
+    circuitJson as any,
+  ).pcb_smtpad.list()[0] as any
   // Checking the same scale
   expect(pcbTraceFirstPoint.x).toEqual(smtPadFromRouteStarts.x)
   expect(pcbTraceFirstPoint.y).toEqual(smtPadFromRouteStarts.y)

@@ -2,7 +2,7 @@ import type { PcbSmtPad } from "circuit-json"
 
 import type { PcbComponent, SourcePort } from "circuit-json"
 import type { Pin } from "lib"
-import { getPadstackName, type PadstackNameArgs } from "./get-padstack-name"
+import { type PadstackNameArgs, getPadstackName } from "./get-padstack-name"
 
 export function createPinForImage(
   pad: any,

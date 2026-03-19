@@ -1,11 +1,11 @@
-import type { Padstack } from "lib"
 import type { PcbSmtPad } from "circuit-json"
-import { getPadstackName, type PadstackNameArgs } from "./get-padstack-name"
+import type { Padstack } from "lib"
 import type { DsnPcb } from "lib"
 import {
   createCircularPadstack,
   createRectangularPadstack,
 } from "./create-padstack"
+import { type PadstackNameArgs, getPadstackName } from "./get-padstack-name"
 
 export function createAndAddPadstackFromPcbSmtPad(
   pcb: DsnPcb,

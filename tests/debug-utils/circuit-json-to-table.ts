@@ -1,3 +1,5 @@
+import fs from "node:fs"
+import path from "node:path"
 import type {
   AnyCircuitElement,
   PcbPort,
@@ -5,8 +7,6 @@ import type {
   PcbTrace,
   PcbTraceRoutePoint,
 } from "circuit-json"
-import fs from "node:fs"
-import path from "node:path"
 
 function formatNumber(num: number) {
   return typeof num === "number" ? Number(num.toFixed(1)) : "N/A"

@@ -4,10 +4,10 @@ import type {
   PcbTraceRoutePointWire,
   SourceTrace,
 } from "circuit-json"
-import { type Matrix, applyToPoint } from "transformation-matrix"
-import type { Wiring } from "../../types"
 import Debug from "debug"
+import { type Matrix, applyToPoint } from "transformation-matrix"
 import { getTraceLength } from "../../../utils/get-trace-length"
+import type { Wiring } from "../../types"
 
 const debug = Debug("dsn-converter:convertWiringPathToPcbTraces")
 

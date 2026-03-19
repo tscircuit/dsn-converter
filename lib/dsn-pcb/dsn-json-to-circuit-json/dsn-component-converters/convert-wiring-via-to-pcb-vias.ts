@@ -1,7 +1,7 @@
 import type { PcbVia } from "circuit-json"
+import Debug from "debug"
 import type { Wiring } from "lib/dsn-pcb/types"
 import { type Matrix, applyToPoint } from "transformation-matrix"
-import Debug from "debug"
 
 const debug = Debug("dsn-converter:convertWiringViaToPcbVias")
 

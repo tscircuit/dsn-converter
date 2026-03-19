@@ -1,8 +1,8 @@
 import { expect, test } from "bun:test"
 import { convertCircuitJsonToDsnJson } from "lib"
 
-import circuitJson from "../assets/repro/XIAO_S3.json"
 import type { AnyCircuitElement } from "circuit-json"
+import circuitJson from "../assets/repro/XIAO_S3.json"
 
 test("configuration passed to converter", async () => {
   const dsnJson = convertCircuitJsonToDsnJson(

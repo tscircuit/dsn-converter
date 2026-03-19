@@ -1,9 +1,9 @@
 import type { PcbTrace } from "circuit-json"
-import type { Wiring } from "../../types"
-import { type Matrix, applyToPoint } from "transformation-matrix"
 import { chunks } from "lib/utils/chunks"
 import { computeSegIntersection } from "lib/utils/compute-seg-intersection"
 import { getTraceLength } from "lib/utils/get-trace-length"
+import { type Matrix, applyToPoint } from "transformation-matrix"
+import type { Wiring } from "../../types"
 
 export const convertPolylinePathToPcbTraces = ({
   wire,

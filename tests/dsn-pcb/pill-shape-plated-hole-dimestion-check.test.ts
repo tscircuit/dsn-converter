@@ -1,11 +1,11 @@
-import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
-import { convertDsnJsonToCircuitJson } from "../../lib/dsn-pcb/dsn-json-to-circuit-json/convert-dsn-json-to-circuit-json.ts"
 import { expect, test } from "bun:test"
+import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
 import { convertCircuitJsonToDsnString, parseDsnToDsnJson } from "lib"
+import { convertDsnJsonToCircuitJson } from "../../lib/dsn-pcb/dsn-json-to-circuit-json/convert-dsn-json-to-circuit-json.ts"
 
-import circuitJson from "../assets/repro/pill-shaped-plated-hole.json"
 import type { AnyCircuitElement } from "circuit-json"
 import type { DsnPcb } from "lib"
+import circuitJson from "../assets/repro/pill-shaped-plated-hole.json"
 
 test("check pill shape plated hole dimension", async () => {
   // Getting the dsn file from the circuit json

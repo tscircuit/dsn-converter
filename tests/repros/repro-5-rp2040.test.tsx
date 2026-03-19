@@ -1,9 +1,9 @@
 import { expect, test } from "bun:test"
 import { convertCircuitJsonToDsnString, parseDsnToDsnJson } from "lib"
 
-import circuitJson from "../assets/repro/rp2040-module.json"
 import type { AnyCircuitElement } from "circuit-json"
 import type { DsnPcb } from "lib"
+import circuitJson from "../assets/repro/rp2040-module.json"
 
 test("circuit json (rp2040) -> dsn file -> dsn json", async () => {
   // Getting the dsn file from the circuit json
