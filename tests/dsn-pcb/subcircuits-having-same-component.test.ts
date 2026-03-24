@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test"
-import { convertCircuitJsonToDsnString, convertCircuitJsonToDsnJson } from "lib"
-import inputCircuitFile from "../assets/repro/subcircuits-same-components.json"
 import type { AnyCircuitElement } from "circuit-json"
+import { convertCircuitJsonToDsnJson, convertCircuitJsonToDsnString } from "lib"
+import inputCircuitFile from "../assets/repro/subcircuits-same-components.json"
 
 test("convert circuit json to dsn pcb", async () => {
   const circuitJson = inputCircuitFile as AnyCircuitElement[]

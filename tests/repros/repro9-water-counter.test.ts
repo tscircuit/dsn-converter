@@ -1,8 +1,8 @@
 import { expect, test } from "bun:test"
 import { convertCircuitJsonToDsnJson } from "lib"
 
-import circuitJson from "../assets/repro/WaterCounter.json"
 import type { AnyCircuitElement } from "circuit-json"
+import circuitJson from "../assets/repro/WaterCounter.json"
 
 test("RoundRect padstack for chip with pad shape circle", async () => {
   const dsnJson = convertCircuitJsonToDsnJson(

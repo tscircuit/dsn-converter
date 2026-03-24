@@ -1,6 +1,6 @@
-import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
 import { expect, test } from "bun:test"
-import { convertDsnPcbToCircuitJson, parseDsnToDsnJson, type DsnPcb } from "lib"
+import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
+import { type DsnPcb, convertDsnPcbToCircuitJson, parseDsnToDsnJson } from "lib"
 
 // @ts-ignore
 import dsnFileWithFreeroutingTrace from "../assets/repro/smoothieboard-repro.dsn" with {

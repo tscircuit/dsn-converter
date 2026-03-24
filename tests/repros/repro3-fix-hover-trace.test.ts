@@ -5,9 +5,9 @@ import {
   parseDsnToDsnJson,
 } from "lib"
 
-import circuitJson from "../assets/repro/trace-id-fix-circuit.json"
 import type { AnyCircuitElement } from "circuit-json"
 import type { DsnPcb } from "lib"
+import circuitJson from "../assets/repro/trace-id-fix-circuit.json"
 
 test("check that on hover all the trace and connected pads are correctly linked", async () => {
   // Getting the dsn file from the circuit json

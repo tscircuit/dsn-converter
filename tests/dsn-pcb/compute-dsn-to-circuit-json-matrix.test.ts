@@ -1,4 +1,4 @@
-import { test, expect } from "bun:test"
+import { expect, test } from "bun:test"
 import { computeSegIntersection } from "lib/utils/compute-seg-intersection"
 
 test("compute dsn to circuit json matrix", () => {

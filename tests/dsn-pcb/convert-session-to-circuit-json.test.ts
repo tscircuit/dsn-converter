@@ -1,26 +1,26 @@
-import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
 import { expect, test } from "bun:test"
+import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
 import {
-  parseDsnToDsnJson,
-  convertDsnSessionToCircuitJson,
   type DsnPcb,
   type DsnSession,
+  convertDsnSessionToCircuitJson,
   parseDsnToCircuitJson,
+  parseDsnToDsnJson,
   stringifyDsnSession,
 } from "lib"
 
-// @ts-ignore
-import sessionFile from "../assets/freerouting-sessions/session1.ses" with {
-  type: "text",
-}
+import { su } from "@tscircuit/soup-util"
+import Debug from "debug"
 // @ts-ignore
 import pcbDsnFile from "../assets/freerouting-sessions/circuit1.dsn" with {
   type: "text",
 }
+// @ts-ignore
+import sessionFile from "../assets/freerouting-sessions/session1.ses" with {
+  type: "text",
+}
 import { circuitJsonToTable } from "../debug-utils/circuit-json-to-table.ts"
 import { sessionFileToTable } from "../debug-utils/index.ts"
-import Debug from "debug"
-import { su } from "@tscircuit/soup-util"
 
 test("convert session to circuit json", async () => {
   const debug = Debug("tscircuit:dsn-converter")

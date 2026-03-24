@@ -3,11 +3,11 @@ import type {
   PcbTrace,
   PcbTraceRoutePointWire,
 } from "circuit-json"
+import Debug from "debug"
 import { type Matrix, applyToPoint } from "transformation-matrix"
 import type { Network, Wiring } from "../../types"
 import { convertPolylinePathToPcbTraces } from "./convert-polyline-path-to-pcb-traces"
 import { convertWiringPathToPcbTraces } from "./convert-wiring-path-to-pcb-traces"
-import Debug from "debug"
 import { convertWiringViaToPcbVias } from "./convert-wiring-via-to-pcb-vias"
 
 const debug = Debug("dsn-converter:convertWiresToPcbTraces")

@@ -1,12 +1,12 @@
+// @ts-ignore
+import { expect, test } from "bun:test"
 import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
+import { type DsnPcb, parseDsnToDsnJson } from "lib"
 import { convertDsnJsonToCircuitJson } from "../../lib/dsn-pcb/dsn-json-to-circuit-json/convert-dsn-json-to-circuit-json.ts"
 // @ts-ignore
 import testDsnFile from "../assets/testkicadproject/testkicadproject.dsn" with {
   type: "text",
 }
-// @ts-ignore
-import { expect, test } from "bun:test"
-import { parseDsnToDsnJson, type DsnPcb } from "lib"
 
 // @ts-ignore
 

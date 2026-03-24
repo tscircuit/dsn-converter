@@ -1,3 +1,5 @@
+import fs from "node:fs"
+import path from "node:path"
 import type {
   AnyCircuitElement,
   PcbPort,
@@ -5,8 +7,6 @@ import type {
   PcbTrace,
   PcbTraceRoutePoint,
 } from "circuit-json"
-import fs from "node:fs"
-import path from "node:path"
 
 function formatNumber(num: number) {
   return typeof num === "number" ? Number(num.toFixed(1)) : "N/A"
@@ -62,7 +62,7 @@ function convertCircuitJsonToMarkdown(circuitJson: any, title?: string) {
       if ("width" in pad && "height" in pad) {
         markdown += `| ${shortId} | ${formatPoint(pad.x, pad.y)} | ${formatNumber(pad.width)} × ${formatNumber(pad.height)} |\n`
       } else {
-        markdown += `| ${shortId} | ${formatPoint(pad.x, pad.y)} | N/A |\n`
+        markdown += `| ${shortId} | ${formatPoint((pad as any).x, (pad as any).y)} | N/A |\n`
       }
     })
     markdown += "\n"

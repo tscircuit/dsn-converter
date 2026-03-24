@@ -1,19 +1,19 @@
+import { su } from "@tscircuit/soup-util"
 import type {
   AnyCircuitElement,
   SourceComponentBase,
   SourcePort,
 } from "circuit-json"
 import {
+  createCircularHoleRectangularPadstack,
   createCircularPadstack,
   createOvalPadstack,
-  createCircularHoleRectangularPadstack,
 } from "lib/utils/create-padstack"
+import { getComponentValue } from "lib/utils/get-component-value"
 import { getFootprintName } from "lib/utils/get-footprint-name"
 import { getPadstackName } from "lib/utils/get-padstack-name"
-import type { ComponentGroup, DsnPcb, Pin, Image } from "../types"
-import { getComponentValue } from "lib/utils/get-component-value"
 import { applyToPoint, scale } from "transformation-matrix"
-import { su } from "@tscircuit/soup-util"
+import type { ComponentGroup, DsnPcb, Image, Pin } from "../types"
 
 const transformMmToUm = scale(1000)
 
@@ -21,6 +21,7 @@ export function processPlatedHoles(
   componentGroups: ComponentGroup[],
   circuitElements: AnyCircuitElement[],
   pcb: DsnPcb,
+  numLayers = 2,
 ) {
   /**
    * Helpers
@@ -39,7 +40,9 @@ export function processPlatedHoles(
         })
         if (!processedPadstacks.has(name)) {
           const d = Math.round(hole.outer_diameter * 1000)
-          pcb.library.padstacks.push(createCircularPadstack(name, d, d))
+          pcb.library.padstacks.push(
+            createCircularPadstack(name, d, d, numLayers),
+          )
           processedPadstacks.add(name)
         }
         return name
@@ -57,7 +60,9 @@ export function processPlatedHoles(
           const iH = Math.round(hole.hole_height * 1000)
           const oW = Math.round(hole.outer_width * 1000)
           const oH = Math.round(hole.outer_height * 1000)
-          pcb.library.padstacks.push(createOvalPadstack(name, oW, oH, iW, iH))
+          pcb.library.padstacks.push(
+            createOvalPadstack(name, oW, oH, iW, iH, numLayers),
+          )
           processedPadstacks.add(name)
         }
         return name
@@ -74,7 +79,7 @@ export function processPlatedHoles(
           const oH = Math.round(hole.rect_pad_height * 1000)
           const hD = Math.round(hole.hole_diameter * 1000)
           pcb.library.padstacks.push(
-            createCircularHoleRectangularPadstack(name, oW, oH, hD),
+            createCircularHoleRectangularPadstack(name, oW, oH, hD, numLayers),
           )
           processedPadstacks.add(name)
         }

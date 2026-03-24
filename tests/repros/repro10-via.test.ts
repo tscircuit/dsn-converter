@@ -5,13 +5,13 @@ import {
   parseDsnToDsnJson,
 } from "lib"
 
+import type { AnyCircuitElement } from "circuit-json"
+import type { DsnSession } from "lib"
 import circuitJson from "../assets/repro/WaterCounter.json"
 // @ts-ignore
 import outputSesFile from "../assets/repro/output_water_counter.ses" with {
   type: "text",
 }
-import type { AnyCircuitElement } from "circuit-json"
-import type { DsnSession } from "lib"
 
 test("Number of vias in the pcb_trace route should match the number of pcb_via elements", async () => {
   const dsnPcb = convertCircuitJsonToDsnJson(circuitJson as AnyCircuitElement[])

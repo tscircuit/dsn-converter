@@ -1,12 +1,17 @@
 import type { DsnPcb, Padstack } from "lib/dsn-pcb/types"
+import {
+  generateLayerNames,
+  getViaPadstackName,
+} from "lib/utils/generate-layers"
 import type { DsnTraceOperationsWrapper } from "./DsnTraceOperationsWrapper"
 
 export function findOrCreateViaPadstack(
   pcb: DsnTraceOperationsWrapper,
   outerDiameter: number,
   holeDiameter: number,
+  numLayers = 2,
 ): string {
-  const viaName = `Via[0-1]_${outerDiameter}:${holeDiameter}_um`
+  const viaName = getViaPadstackName(numLayers, outerDiameter, holeDiameter)
 
   const library = pcb.getLibrary()
 
@@ -17,22 +22,14 @@ export function findOrCreateViaPadstack(
     return viaName
   }
 
-  // Create new padstack for via
   const viaPadstack: Padstack = {
     name: viaName,
     attach: "off",
-    shapes: [
-      {
-        shapeType: "circle",
-        layer: "F.Cu",
-        diameter: outerDiameter,
-      },
-      {
-        shapeType: "circle",
-        layer: "B.Cu",
-        diameter: outerDiameter,
-      },
-    ],
+    shapes: generateLayerNames(numLayers).map((layer) => ({
+      shapeType: "circle" as const,
+      layer,
+      diameter: outerDiameter,
+    })),
     hole: {
       shape: "circle",
       diameter: holeDiameter,

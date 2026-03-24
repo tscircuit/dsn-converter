@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test"
-import { parseDsnToDsnJson, type DsnSession } from "lib"
+import { type DsnSession, parseDsnToDsnJson } from "lib"
 // @ts-ignore
 import sessionFile from "../assets/freerouting-sessions/session1.ses" with {
   type: "text",

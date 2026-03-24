@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test"
-import { parseDsnToDsnJson, convertDsnSessionToCircuitJson } from "lib"
+import { convertDsnSessionToCircuitJson, parseDsnToDsnJson } from "lib"
 
 import type { DsnPcb, DsnSession } from "lib/dsn-pcb/types"
 
@@ -8,11 +8,11 @@ import input_dsn_local from "../assets/repro/repro13/input_dsn_local.dsn" with {
   type: "text",
 }
 
+import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
 // @ts-ignore
 import output_session from "../assets/repro/repro13/output_local.ses" with {
   type: "text",
 }
-import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
 
 // test("missing traces in waterCounter", async () => {
 //   const dsnString = convertCircuitJsonToDsnString(

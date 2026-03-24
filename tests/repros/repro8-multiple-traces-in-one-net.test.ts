@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test"
+import { su } from "@tscircuit/soup-util"
 import { convertCircuitJsonToDsnString, parseDsnToCircuitJson } from "lib"
 import threeSubcircuitCircuitConnectedToSamePorts from "../assets/repro/three-subcircuit-connected-to-same-ports.json"
-import { su } from "@tscircuit/soup-util"
 
 test("circuit json -> dsn -> circuit json", async () => {
   const dsnFile = convertCircuitJsonToDsnString(

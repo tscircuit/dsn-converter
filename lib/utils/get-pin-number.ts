@@ -1,5 +1,5 @@
-import type { ASTNode } from "../common/parse-sexpr"
 import Debug from "debug"
+import type { ASTNode } from "../common/parse-sexpr"
 
 const debug = Debug("dsn-converter:getPinNum")
 

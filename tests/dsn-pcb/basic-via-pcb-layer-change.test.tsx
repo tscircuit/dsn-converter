@@ -1,15 +1,16 @@
-import { test, expect } from "bun:test"
+import { expect, test } from "bun:test"
 import { Circuit } from "@tscircuit/core"
+import { su } from "@tscircuit/soup-util"
+import type { AnyCircuitElement } from "circuit-json"
+import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
 import {
+  type DsnPcb,
   convertCircuitJsonToDsnString,
   convertDsnPcbToCircuitJson,
   parseDsnToDsnJson,
-  type DsnPcb,
 } from "lib"
 import looksSame from "looks-same"
 import { getTestDebugUtils } from "tests/fixtures/get-test-debug-utils"
-import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
-import { su } from "@tscircuit/soup-util"
 
 test("basic-via-pcb-layer-change", async () => {
   const { writeDebugFile, getDebugFilePath } = getTestDebugUtils(
@@ -33,7 +34,8 @@ test("basic-via-pcb-layer-change", async () => {
     </board>,
   )
 
-  const circuitJsonBefore = await circuit.getCircuitJson()
+  const circuitJsonBefore =
+    (await circuit.getCircuitJson()) as AnyCircuitElement[]
 
   const dsnFile = convertCircuitJsonToDsnString(circuitJsonBefore)
 

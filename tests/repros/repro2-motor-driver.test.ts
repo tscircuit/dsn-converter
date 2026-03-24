@@ -5,9 +5,9 @@ import {
   parseDsnToDsnJson,
 } from "lib"
 
-import circuitJson from "../assets/repro/motor-driver-breakout-circuit.json"
 import type { AnyCircuitElement } from "circuit-json"
 import type { DsnPcb, DsnSession } from "lib"
+import circuitJson from "../assets/repro/motor-driver-breakout-circuit.json"
 
 // @ts-ignore
 import sessionFile from "../assets/repro/motor-driver-breakout-dsn.ses" with {
@@ -82,7 +82,7 @@ test("session file (motor driver breakout) -> circuit json", async () => {
   expect(pcbSmtpads?.length).toBe(46)
 
   //expect the pcbsmtpad to not have x and y values as null
-  pcbSmtpads.forEach((pcbSmtpad) => {
+  pcbSmtpads.forEach((pcbSmtpad: any) => {
     expect(pcbSmtpad.x).not.toBeNull()
     expect(pcbSmtpad.y).not.toBeNull()
   })

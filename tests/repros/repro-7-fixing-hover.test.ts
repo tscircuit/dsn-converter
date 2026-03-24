@@ -11,9 +11,9 @@ import outputSesFile from "../assets/repro/output_motor.ses" with {
   type: "text",
 }
 
+import { su } from "@tscircuit/soup-util"
 import type { AnyCircuitElement } from "circuit-json"
 import type { DsnSession } from "lib"
-import { su } from "@tscircuit/soup-util"
 
 // TODO: update with the new ses file cause the refdes format has changed
 test.skip("motor driver circuit with hover", async () => {

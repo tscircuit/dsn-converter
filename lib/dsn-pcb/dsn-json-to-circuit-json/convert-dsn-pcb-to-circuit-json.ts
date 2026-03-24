@@ -1,13 +1,13 @@
-import { fromTriangles, scale, applyToPoint } from "transformation-matrix"
+import { applyToPoint, fromTriangles, scale } from "transformation-matrix"
 
+import { su } from "@tscircuit/soup-util"
 import type { AnyCircuitElement, PcbBoard } from "circuit-json"
+import { pairs } from "lib/utils/pairs"
 import type { DsnPcb } from "../types"
+import { convertDsnPcbComponentsToSourceComponentsAndPorts } from "./dsn-component-converters/convert-dsn-pcb-components-to-source-components-and-ports"
+import { convertNetsToSourceNetsAndTraces } from "./dsn-component-converters/convert-nets-to-source-nets-and-traces"
 import { convertPadstacksToSmtPads } from "./dsn-component-converters/convert-padstacks-to-smtpads"
 import { convertWiresToPcbTraces } from "./dsn-component-converters/convert-wires-to-traces"
-import { pairs } from "lib/utils/pairs"
-import { convertNetsToSourceNetsAndTraces } from "./dsn-component-converters/convert-nets-to-source-nets-and-traces"
-import { convertDsnPcbComponentsToSourceComponentsAndPorts } from "./dsn-component-converters/convert-dsn-pcb-components-to-source-components-and-ports"
-import { su } from "@tscircuit/soup-util"
 
 export function convertDsnPcbToCircuitJson(
   dsnPcb: DsnPcb,
@@ -27,6 +27,7 @@ export function convertDsnPcbToCircuitJson(
     width: 10,
     height: 10,
     thickness: 1.4,
+    material: "fr4",
     num_layers: 4,
   }
   if (dsnPcb.structure.boundary.path) {
