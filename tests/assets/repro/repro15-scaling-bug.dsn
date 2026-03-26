@@ -1,0 +1,90 @@
+(pcb ./converted_dsn.dsn
+  (parser
+    (string_quote ")
+    (space_in_quoted_tokens on)
+    (host_cad "KiCad's Pcbnew")
+    (host_version "")
+  )
+  (resolution um 10)
+  (unit um)
+  (structure
+    (layer F.Cu
+      (type signal)
+      (property
+        (index 0)
+      )
+    )
+    (layer In1.Cu
+      (type signal)
+      (property
+        (index 1)
+      )
+    )
+    (layer In2.Cu
+      (type signal)
+      (property
+        (index 2)
+      )
+    )
+    (layer B.Cu
+      (type signal)
+      (property
+        (index 3)
+      )
+    )
+    (boundary
+      (path pcb 0  -10000 -10000 10000 -10000 10000 10000 -10000 10000 -10000 -10000)
+    )
+    (via "Via[0-3]_600:300_um")
+    (rule
+      (width 200)
+      (clearance 150)
+      (clearance 50 (type smd_smd))
+    )
+  )
+  (placement
+    (component "simple_resistor:1.5600x0.6400_mm"
+      (place R1_source_component_0 -4000 0 front 0 (PN "10k"))
+      (place R2_source_component_1 4000 0 front 0 (PN "10k"))
+    )
+  )
+  (library
+    (image "simple_resistor:1.5600x0.6400_mm"
+      (pin RoundRect[T]Pad_540x640_um 1 -509.9999999999998 0)
+      (pin RoundRect[T]Pad_540x640_um 2 509.9999999999998 0)
+    )
+    (padstack "Via[0-3]_600:300_um"
+      (shape (circle F.Cu 600))
+      (shape (circle In1.Cu 600))
+      (shape (circle In2.Cu 600))
+      (shape (circle B.Cu 600))
+      (attach off)
+    )
+    (padstack "RoundRect[T]Pad_540x640_um"
+      (shape (polygon F.Cu 0 -270 320 270 320 270 -320 -270 -320 -270 320))
+      (attach off)
+    )
+  )
+  (network
+    (net "Net-(R1_source_component_0-Pad2)"
+      (pins R1_source_component_0-2 R2_source_component_1-1)
+    )
+    (net "unconnected-(R1_source_component_0-Pad1)"
+      (pins R1_source_component_0-1)
+    )
+    (net "unconnected-(R2_source_component_1-Pad2)"
+      (pins R2_source_component_1-2)
+    )
+    (class "kicad_default" "" "Net-(R1_source_component_0-Pad2)" "unconnected-(R1_source_component_0-Pad1)" "unconnected-(R2_source_component_1-Pad2)"
+      (circuit
+        (use_via "Via[0-3]_600:300_um")
+      )
+      (rule
+        (width 150)
+        (clearance 150)
+      )
+    )
+  )
+  (wiring
+  )
+)
