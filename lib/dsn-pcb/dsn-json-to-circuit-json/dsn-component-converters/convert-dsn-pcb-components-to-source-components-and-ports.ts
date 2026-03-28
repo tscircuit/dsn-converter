@@ -33,22 +33,24 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
       // Create ports for each pin in the image
       if (image.pins) {
         for (const pin of image.pins) {
-          // Preserve the original pin identifier (numeric or named like "GND1", "A").
-          // Forcing Number() on a string label such as "GND2" produces NaN, which is
-          // invalid in circuit-json and breaks downstream consumers.
-          const pinNum =
-            typeof pin.pin_number === "number"
-              ? pin.pin_number
-              : /^\d+$/.test(String(pin.pin_number))
-                ? Number(pin.pin_number)
-                : pin.pin_number
+          // circuit-json's SourcePort.pin_number is typed as `number | undefined`.
+          // DSN pin identifiers can be numeric ("1", "100") or named ("GND1", "GND2",
+          // "+", "-", "A", "C"). For numeric pins, convert to a number. For named
+          // pins, omit pin_number and store the label in port_hints so downstream
+          // consumers can still resolve the port identity.
+          const pinLabel = String(pin.pin_number ?? "")
+          const isNumeric = /^\d+$/.test(pinLabel)
+          const pinNum: number | undefined = isNumeric
+            ? Number(pinLabel)
+            : undefined
+
           const port: SourcePort = {
             type: "source_port",
             source_port_id: `source_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,
             source_component_id: sourceComponent.source_component_id,
             name: `${place.refdes}-${pin.pin_number}`,
             pin_number: pinNum,
-            port_hints: [],
+            port_hints: isNumeric ? [] : [pinLabel],
           }
           // Handle case where place coordinates might be null/undefined
           const placeX = place.x || 0

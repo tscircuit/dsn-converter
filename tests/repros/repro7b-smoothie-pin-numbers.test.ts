@@ -16,10 +16,7 @@ test("smoothieboard: source_port pin_number should never be NaN", () => {
   expect(sourcePorts.length).toBeGreaterThan(0)
 
   const nanPorts = sourcePorts.filter(
-    (p) =>
-      p.pin_number === null ||
-      p.pin_number === undefined ||
-      (typeof p.pin_number === "number" && isNaN(p.pin_number)),
+    (p) => typeof p.pin_number === "number" && isNaN(p.pin_number),
   )
 
   if (nanPorts.length > 0) {
@@ -32,7 +29,7 @@ test("smoothieboard: source_port pin_number should never be NaN", () => {
   expect(nanPorts.length).toBe(0)
 })
 
-test("smoothieboard: named pins (e.g. GND1, GND2, +, -) are preserved as strings", () => {
+test("smoothieboard: named pins (e.g. GND1, GND2) are preserved in port_hints", () => {
   const circuitJson = parseDsnToCircuitJson(smoothieDsn)
   const sourcePorts = circuitJson.filter(
     (item): item is SourcePort => item.type === "source_port",
@@ -44,15 +41,19 @@ test("smoothieboard: named pins (e.g. GND1, GND2, +, -) are preserved as strings
   )
   expect(crystalPorts.length).toBeGreaterThan(0)
 
-  const namedPins = crystalPorts.filter((p) => typeof p.pin_number === "string")
+  // Named pins should have undefined pin_number but port_hints containing the label
+  const namedPins = crystalPorts.filter(
+    (p) =>
+      p.pin_number === undefined && p.port_hints && p.port_hints.length > 0,
+  )
   expect(namedPins.length).toBeGreaterThan(0)
 
-  const namedPinNames = namedPins.map((p) => p.pin_number)
-  expect(namedPinNames).toContain("GND1")
-  expect(namedPinNames).toContain("GND2")
+  const allHints = namedPins.flatMap((p) => p.port_hints ?? [])
+  expect(allHints).toContain("GND1")
+  expect(allHints).toContain("GND2")
 })
 
-test("smoothieboard: PANASONIC_E capacitor uses + and - pin labels", () => {
+test("smoothieboard: PANASONIC_E capacitor uses + and - pin labels in port_hints", () => {
   const circuitJson = parseDsnToCircuitJson(smoothieDsn)
   const sourcePorts = circuitJson.filter(
     (item): item is SourcePort => item.type === "source_port",
@@ -63,18 +64,16 @@ test("smoothieboard: PANASONIC_E capacitor uses + and - pin labels", () => {
   )
   expect(panasonicPorts.length).toBeGreaterThan(0)
 
-  // All PANASONIC_E ports must have valid pin identifiers (no NaN)
-  const invalidPorts = panasonicPorts.filter(
-    (p) =>
-      p.pin_number === null ||
-      p.pin_number === undefined ||
-      (typeof p.pin_number === "number" && isNaN(p.pin_number)),
+  // All PANASONIC_E ports must have no NaN pin_number
+  const nanPorts = panasonicPorts.filter(
+    (p) => typeof p.pin_number === "number" && isNaN(p.pin_number),
   )
-  expect(invalidPorts.length).toBe(0)
+  expect(nanPorts.length).toBe(0)
 
-  const pinValues = panasonicPorts.map((p) => p.pin_number)
-  expect(pinValues).toContain("+")
-  expect(pinValues).toContain("-")
+  // + and - are named pins, stored in port_hints
+  const allHints = panasonicPorts.flatMap((p) => p.port_hints ?? [])
+  expect(allHints).toContain("+")
+  expect(allHints).toContain("-")
 })
 
 test("smoothieboard: EIA3216 capacitor pins use letter labels (A, C) from rotation format", () => {
@@ -88,12 +87,9 @@ test("smoothieboard: EIA3216 capacitor pins use letter labels (A, C) from rotati
   )
   expect(eiaPorts.length).toBeGreaterThan(0)
 
-  // All EIA3216 ports must have valid pin identifiers (no NaN)
-  const invalidPorts = eiaPorts.filter(
-    (p) =>
-      p.pin_number === null ||
-      p.pin_number === undefined ||
-      (typeof p.pin_number === "number" && isNaN(p.pin_number)),
+  // All EIA3216 ports must have no NaN pin_number
+  const nanPorts = eiaPorts.filter(
+    (p) => typeof p.pin_number === "number" && isNaN(p.pin_number),
   )
-  expect(invalidPorts.length).toBe(0)
+  expect(nanPorts.length).toBe(0)
 })
