@@ -72,6 +72,10 @@ export function convertDsnSessionToCircuitJson(
 
   const sessionElements: AnyCircuitElement[] = []
 
+  // Track via positions globally to deduplicate across all nets.
+  // Maps "x,y" -> net name that first claimed the via.
+  const addedViaKeys = new Map<string, string>()
+
   // Process nets for vias and wires
   for (const net of dsnSession.routes.network_out.nets) {
     // Find corresponding source trace for this net
@@ -119,6 +123,19 @@ export function convertDsnSessionToCircuitJson(
         })
         const viaX = Number(viaPoint.x.toFixed(4))
         const viaY = Number(viaPoint.y.toFixed(4))
+
+        // Skip duplicate vias at the same coordinates
+        const viaKey = `${viaX},${viaY}`
+        const existingNet = addedViaKeys.get(viaKey)
+        if (existingNet) {
+          if (existingNet !== net.name) {
+            console.warn(
+              `[dsn-converter] Via at (${viaX}, ${viaY}) claimed by net "${existingNet}" also appears in net "${net.name}" — possible short circuit in routing`,
+            )
+          }
+          return
+        }
+        addedViaKeys.set(viaKey, net.name)
 
         // Find the wire points that connect to this via across all route segments
         const connectingWires = sessionElements
