@@ -44,8 +44,9 @@ export function tokenizeDsn(input: string): Token[] {
       }
       i++ // Skip the closing quote
       tokens.push({ type: "String", value })
-    } else if (char === "-" || /\d/.test(char)) {
+    } else if (/\d/.test(char) || (char === "-" && i + 1 < length && /\d/.test(input[i + 1]))) {
       // Parse number (integer or float)
+      // Only treat - as number start if followed by a digit (not standalone - symbol)
       let numStr = ""
       if (char === "-") {
         numStr += "-"
