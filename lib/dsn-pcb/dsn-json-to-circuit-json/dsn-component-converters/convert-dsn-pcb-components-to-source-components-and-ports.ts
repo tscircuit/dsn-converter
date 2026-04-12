@@ -32,14 +32,29 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
 
       // Create ports for each pin in the image
       if (image.pins) {
-        for (const pin of image.pins) {
+        for (let pinIdx = 0; pinIdx < image.pins.length; pinIdx++) {
+          const pin = image.pins[pinIdx]
+          // Resolve pin_number to an integer. For non-numeric pin names (e.g.
+          // "GND2", "A", "C", "+") use the pin's 1-based index within the
+          // image so that every source_port carries a valid pin_number.
+          const numericValue = Number(pin.pin_number)
+          const resolvedPinNumber = Number.isNaN(numericValue)
+            ? pinIdx + 1
+            : numericValue
+          // Preserve the original non-numeric name as a port hint so callers
+          // that need the schematic name (e.g. "A", "GND2") can retrieve it.
+          const portHints: string[] =
+            typeof pin.pin_number === "string" &&
+            Number.isNaN(Number(pin.pin_number))
+              ? [pin.pin_number]
+              : []
           const port: SourcePort = {
             type: "source_port",
             source_port_id: `source_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,
             source_component_id: sourceComponent.source_component_id,
             name: `${place.refdes}-${pin.pin_number}`,
-            pin_number: Number(pin.pin_number),
-            port_hints: [],
+            pin_number: resolvedPinNumber,
+            port_hints: portHints,
           }
           // Handle case where place coordinates might be null/undefined
           const placeX = place.x || 0
