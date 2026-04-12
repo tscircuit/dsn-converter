@@ -577,18 +577,21 @@ function processPin(nodes: ASTNode[]): Pin | null {
       return null
     }
     pin.padstack_name = String(nodes[1].value)
-    // check if pin number is in a List structure
-    const pinNumber = getPinNum(nodes)
+    // check if pin number is in a List structure (e.g. rotation spec)
+    const { pinNumber, hasRotation } = getPinNum(nodes)
 
     if (pinNumber === null) return null
 
     pin.pin_number = pinNumber
 
-    // Parse coordinates
+    // Parse coordinates — when a rotation spec is present at nodes[2] the
+    // actual pin number sits at nodes[3], so coordinates start at nodes[4].
+    // Without a rotation spec, coordinates start at nodes[3].
     let xValue: number | undefined
     let yValue: number | undefined
+    const coordStart = hasRotation ? 4 : 3
 
-    for (let i = 3; i < nodes.length; i++) {
+    for (let i = coordStart; i < nodes.length; i++) {
       const node = nodes[i]
       const nextNode = nodes[i + 1]
 
