@@ -25,9 +25,9 @@ test("smoothieboard converts correctly (unrouted board)", () => {
   expect(counts["pcb_trace"] ?? 0).toBe(0)
 
   // تحقق إن الإحداثيات معقولة (مش ضربة 1000)
-  const board = (result as any[]).find(el => el.type === "pcb_board")
+  const board = (result as any[]).find((el) => el.type === "pcb_board")
   console.log("Board center:", board.center)
   console.log("Board size:", board.width, "x", board.height, "mm")
-  expect(board.width).toBeGreaterThan(10)   // أكبر من 1 سم
-  expect(board.width).toBeLessThan(1000)    // أصغر من 1 متر
+  expect(board.width).toBeGreaterThan(10) // أكبر من 1 سم
+  expect(board.width).toBeLessThan(1000) // أصغر من 1 متر
 })

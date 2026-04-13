@@ -16,6 +16,7 @@ export function convertDsnPcbToCircuitJson(
   const elements: AnyCircuitElement[] = []
 
   // TODO use pcb.resolution.unit and pcb.resolution.value
+  // DSN coordinates are stored in micrometers; scale to mm = 1/1000
   const transformDsnUnitToMm = scale(1 / 1000)
 
   // Add the board
