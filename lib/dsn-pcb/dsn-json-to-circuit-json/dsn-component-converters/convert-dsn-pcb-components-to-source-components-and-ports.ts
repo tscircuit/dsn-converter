@@ -30,6 +30,15 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
       }
       result.push(sourceComponent)
 
+      // Apply rotation transform for pin positions
+      // DSN rotation is in degrees, convert to radians
+      const rotationRad = (place.rotation * Math.PI) / 180
+      const cosR = Math.cos(rotationRad)
+      const sinR = Math.sin(rotationRad)
+
+      // Handle back-side placement: mirror across Y axis
+      const mirrorY = place.side === "back" ? -1 : 1
+
       // Create ports for each pin in the image
       if (image.pins) {
         for (const pin of image.pins) {
@@ -44,9 +53,14 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
           // Handle case where place coordinates might be null/undefined
           const placeX = place.x || 0
           const placeY = place.y || 0
+
+          // Apply rotation to pin coordinates around origin
+          const rotatedPinX = pin.x * cosR - pin.y * sinR * mirrorY
+          const rotatedPinY = pin.x * sinR * mirrorY + pin.y * cosR
+
           const pcb_port_center = applyToPoint(transformDsnUnitToMm, {
-            x: placeX + pin.x,
-            y: placeY + pin.y,
+            x: placeX + rotatedPinX,
+            y: placeY + rotatedPinY,
           })
           const pcb_port: PcbPort = {
             pcb_port_id: `pcb_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,
