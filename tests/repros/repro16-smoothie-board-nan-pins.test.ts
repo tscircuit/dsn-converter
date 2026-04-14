@@ -34,7 +34,10 @@ test("repro16 smoothie-board: no NaN in any numeric field after DSN→CircuitJso
   findNaN(circuitJson, "", hits)
 
   if (hits.length > 0) {
-    const sample = hits.slice(0, 5).map((h) => h.path).join("\n  ")
+    const sample = hits
+      .slice(0, 5)
+      .map((h) => h.path)
+      .join("\n  ")
     throw new Error(
       `Found ${hits.length} NaN value(s) in converted circuit JSON. First 5:\n  ${sample}`,
     )
