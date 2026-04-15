@@ -1,0 +1,56 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`repro16 smoothie-board: source_port.pin_number samples are real values, not NaN 1`] = `
+[
+  {
+    "name": "JP36-2",
+    "pin_number": 2,
+    "pin_number_is_nan": false,
+  },
+  {
+    "name": "JP36-1",
+    "pin_number": 1,
+    "pin_number_is_nan": false,
+  },
+  {
+    "name": "JP30-2",
+    "pin_number": 2,
+    "pin_number_is_nan": false,
+  },
+  {
+    "name": "JP30-1",
+    "pin_number": 1,
+    "pin_number_is_nan": false,
+  },
+  {
+    "name": "JP31-2",
+    "pin_number": 2,
+    "pin_number_is_nan": false,
+  },
+  {
+    "name": "JP31-1",
+    "pin_number": 1,
+    "pin_number_is_nan": false,
+  },
+  {
+    "name": "JP13-2",
+    "pin_number": 2,
+    "pin_number_is_nan": false,
+  },
+  {
+    "name": "JP13-1",
+    "pin_number": 1,
+    "pin_number_is_nan": false,
+  },
+  {
+    "name": "IC1-100",
+    "pin_number": 100,
+    "pin_number_is_nan": false,
+  },
+  {
+    "name": "IC1-99",
+    "pin_number": 99,
+    "pin_number_is_nan": false,
+  },
+]
+`;
