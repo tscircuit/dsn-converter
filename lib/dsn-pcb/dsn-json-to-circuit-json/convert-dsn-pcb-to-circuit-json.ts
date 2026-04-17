@@ -3,6 +3,7 @@ import { applyToPoint, fromTriangles, scale } from "transformation-matrix"
 import { su } from "@tscircuit/soup-util"
 import type { AnyCircuitElement, PcbBoard } from "circuit-json"
 import { pairs } from "lib/utils/pairs"
+import { getLayerName } from "lib/utils/get-layer-name"
 import type { DsnPcb } from "../types"
 import { convertDsnPcbComponentsToSourceComponentsAndPorts } from "./dsn-component-converters/convert-dsn-pcb-components-to-source-components-and-ports"
 import { convertNetsToSourceNetsAndTraces } from "./dsn-component-converters/convert-nets-to-source-nets-and-traces"
@@ -28,7 +29,7 @@ export function convertDsnPcbToCircuitJson(
     height: 10,
     thickness: 1.4,
     material: "fr4",
-    num_layers: 4,
+    num_layers: dsnPcb.structure.layers.length,
   }
   if (dsnPcb.structure.boundary.path) {
     const boundaryPath = pairs(dsnPcb.structure.boundary.path.coordinates)
@@ -60,9 +61,25 @@ export function convertDsnPcbToCircuitJson(
         dsnPcb.wiring,
         dsnPcb.network,
         transformDsnUnitToMm,
+        dsnPcb,
         fromSessionSpace,
       ),
     )
+  }
+
+  // Convert planes to pcb_polygon elements
+  if (dsnPcb.structure.planes) {
+    for (const plane of dsnPcb.structure.planes) {
+      const layerName = getLayerName(plane.polygon.layer, dsnPcb)
+      const polygon = {
+        type: "pcb_polygon",
+        layer: layerName,
+        points: pairs(plane.polygon.coordinates).map(([x, y]) =>
+          applyToPoint(transformDsnUnitToMm, { x, y })
+        ),
+      }
+      elements.push(polygon as any)
+    }
   }
 
   elements.push(
