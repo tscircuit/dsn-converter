@@ -659,6 +659,41 @@ function processPadstack(nodes: ASTNode[]): Padstack {
           if (rest[0].type === "Atom" && typeof rest[0].value === "string") {
             padstack.attach = rest[0].value
           }
+        } else if (key === "hole") {
+          // Parse (hole <shape> <diameter>) or (hole <shape> <width> <height>)
+          // rest[0] is shape type (circle, oval, square), rest[1..] are dimensions
+          const holeShapeNode = rest[0]
+          if (
+            holeShapeNode?.type === "Atom" &&
+            typeof holeShapeNode.value === "string"
+          ) {
+            const holeShape = holeShapeNode.value as
+              | "circle"
+              | "oval"
+              | "square"
+            if (holeShape === "circle" && rest[1]) {
+              padstack.hole = {
+                shape: "circle",
+                diameter: Number(rest[1].value),
+              }
+            } else if (
+              (holeShape === "oval" || holeShape === "square") &&
+              rest[1] &&
+              rest[2]
+            ) {
+              padstack.hole = {
+                shape: holeShape === "oval" ? "oval" : "square",
+                width: Number(rest[1].value),
+                height: Number(rest[2].value),
+              }
+            }
+          } else if (rest[0]?.type === "Atom" && rest[1] === undefined) {
+            // Simple (hole <diameter>) format without explicit shape name
+            const diameter = Number(holeShapeNode?.value)
+            if (!Number.isNaN(diameter)) {
+              padstack.hole = { shape: "circle", diameter }
+            }
+          }
         }
       }
     }

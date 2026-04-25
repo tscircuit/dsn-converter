@@ -1,4 +1,8 @@
-import type { AnyCircuitElement, PcbSmtPad } from "circuit-json"
+import type {
+  AnyCircuitElement,
+  PcbPlatedHole,
+  PcbSmtPad,
+} from "circuit-json"
 import Debug from "debug"
 import type { DsnPcb } from "lib/dsn-pcb/types"
 import { applyToPoint } from "transformation-matrix"
@@ -39,7 +43,96 @@ export function convertPadstacksToSmtPads(
           return
         }
 
-        // Find shape in padstack - try rectangle first, then polygon
+        // Calculate position in circuit space using the transformation matrix
+        const { x: circuitX, y: circuitY } = applyToPoint(transform, {
+          x: (compX || 0) + pin.x,
+          y: (compY || 0) + pin.y,
+        })
+
+        // Detect plated through holes: padstack has a hole definition AND has
+        // copper shapes on multiple layers (front+back = through hole).
+        const isPlatedThroughHole =
+          padstack.hole != null &&
+          padstack.shapes.some((s) =>
+            ["F.Cu", "front", "top"].some((l) => s.layer.includes(l)),
+          ) &&
+          padstack.shapes.some((s) =>
+            ["B.Cu", "back", "bottom"].some((l) => s.layer.includes(l)),
+          )
+
+        if (isPlatedThroughHole) {
+          // Convert to pcb_plated_hole
+          const holeInfo = padstack.hole!
+          let platedHole: PcbPlatedHole
+
+          if (holeInfo.shape === "circle" && holeInfo.diameter != null) {
+            // Find the outer copper diameter from the first copper shape
+            const frontShape = padstack.shapes.find((s) =>
+              ["F.Cu", "front", "top"].some((l) => s.layer.includes(l)),
+            )
+            const outerDiameter =
+              frontShape?.shapeType === "circle"
+                ? (frontShape as any).diameter / 1000
+                : holeInfo.diameter / 1000
+
+            platedHole = {
+              type: "pcb_plated_hole",
+              pcb_plated_hole_id: `pcb_plated_hole_${componentId}_${place.refdes}_${pin.pin_number}`,
+              pcb_component_id: `${componentId}_${place.refdes}`,
+              pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
+              shape: "circle",
+              hole_diameter: holeInfo.diameter / 1000,
+              outer_diameter: outerDiameter,
+              x: circuitX,
+              y: circuitY,
+              layers: ["top", "bottom"],
+              port_hints: [pin.pin_number.toString()],
+            }
+          } else {
+            // Oval/pill hole
+            const w = holeInfo.width ?? holeInfo.diameter ?? 0
+            const h = holeInfo.height ?? holeInfo.diameter ?? 0
+            const frontShape = padstack.shapes.find((s) =>
+              ["F.Cu", "front", "top"].some((l) => s.layer.includes(l)),
+            )
+            let outerWidth = w / 1000
+            let outerHeight = h / 1000
+            if (frontShape?.shapeType === "path") {
+              outerWidth = (frontShape as any).width / 1000
+              const coords = (frontShape as any).coordinates ?? []
+              outerHeight =
+                coords.length >= 4
+                  ? Math.sqrt(
+                      (coords[2] - coords[0]) ** 2 +
+                        (coords[3] - coords[1]) ** 2,
+                    ) /
+                      1000 +
+                    outerWidth
+                  : outerWidth
+            }
+
+            platedHole = {
+              type: "pcb_plated_hole",
+              pcb_plated_hole_id: `pcb_plated_hole_${componentId}_${place.refdes}_${pin.pin_number}`,
+              pcb_component_id: `${componentId}_${place.refdes}`,
+              pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
+              shape: "pill",
+              hole_width: w / 1000,
+              hole_height: h / 1000,
+              outer_width: outerWidth,
+              outer_height: outerHeight,
+              x: circuitX,
+              y: circuitY,
+              layers: ["top", "bottom"],
+              port_hints: [pin.pin_number.toString()],
+            } as PcbPlatedHole
+          }
+
+          elements.push(platedHole)
+          return
+        }
+
+        // Not a plated hole — convert to SMT pad
         const rectShape = padstack.shapes.find(
           (shape) => shape.shapeType === "rect",
         )
@@ -107,13 +200,6 @@ export function convertPadstacksToSmtPads(
           console.warn(`No valid shape found for padstack: ${padstack.name}`)
           return
         }
-
-        // Calculate position in circuit space using the transformation matrix
-        // Convert component position and pin offset to circuit coordinates
-        const { x: circuitX, y: circuitY } = applyToPoint(transform, {
-          x: (compX || 0) + pin.x,
-          y: (compY || 0) + pin.y,
-        })
 
         let pcbPad: PcbSmtPad
         if (rectShape || polygonShape || pathShape) {
