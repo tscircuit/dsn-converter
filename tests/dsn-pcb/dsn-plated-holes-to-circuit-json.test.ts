@@ -99,7 +99,7 @@ test("DSN padstacks with hole definition are converted to pcb_plated_hole", () =
   // IC1 has 2 pins, both should be pcb_plated_hole
   expect(platedHoles.length).toBe(2)
 
-  const hole1 = platedHoles[0]
+  const hole1 = platedHoles[0] as Extract<PcbPlatedHole, { shape: "circle" }>
   expect(hole1.shape).toBe("circle")
   expect(hole1.hole_diameter).toBeCloseTo(0.7, 4) // 700um -> 0.7mm
   expect(hole1.outer_diameter).toBeCloseTo(1.0, 4) // 1000um -> 1.0mm
