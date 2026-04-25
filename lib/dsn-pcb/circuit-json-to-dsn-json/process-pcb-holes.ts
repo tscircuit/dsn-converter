@@ -57,8 +57,7 @@ export function processPcbHoles(
       processedPadstacks.add(padstackName)
     }
 
-    const holeId =
-      (hole as any).pcb_hole_id ?? `hole_${pcbHoles.indexOf(hole)}`
+    const holeId = (hole as any).pcb_hole_id ?? `hole_${pcbHoles.indexOf(hole)}`
     const imageName = `NPTH_${holeDiameterUm}_mm`
 
     // Add a library image for this hole type if not already present
@@ -85,9 +84,7 @@ export function processPcbHoles(
     const posUm = applyToPoint(transformMmToUm, { x: hole.x, y: -hole.y })
 
     // Find or create the placement component entry for this image
-    let component = pcb.placement.components.find(
-      (c) => c.name === imageName,
-    )
+    let component = pcb.placement.components.find((c) => c.name === imageName)
     if (!component) {
       component = { name: imageName, places: [] }
       pcb.placement.components.push(component)
