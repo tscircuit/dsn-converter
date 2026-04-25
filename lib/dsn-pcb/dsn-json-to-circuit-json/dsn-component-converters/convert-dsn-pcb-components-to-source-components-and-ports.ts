@@ -39,9 +39,7 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
             source_component_id: sourceComponent.source_component_id,
             name: `${place.refdes}-${pin.pin_number}`,
             pin_number:
-              typeof pin.pin_number === "number"
-                ? pin.pin_number
-                : undefined,
+              typeof pin.pin_number === "number" ? pin.pin_number : undefined,
             port_hints: [],
           }
           // Handle case where place coordinates might be null/undefined
