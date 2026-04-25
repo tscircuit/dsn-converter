@@ -107,8 +107,6 @@ test("DSN padstacks with hole definition are converted to pcb_plated_hole", () =
   expect(hole1.layers).toContain("bottom")
 
   // Should NOT have pcb_smtpad for these pins
-  const smtPads = circuitJson.filter(
-    (el) => el.type === "pcb_smtpad",
-  )
+  const smtPads = circuitJson.filter((el) => el.type === "pcb_smtpad")
   expect(smtPads.length).toBe(0)
 })

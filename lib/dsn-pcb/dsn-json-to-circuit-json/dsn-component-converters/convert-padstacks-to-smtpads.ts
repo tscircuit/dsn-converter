@@ -1,8 +1,4 @@
-import type {
-  AnyCircuitElement,
-  PcbPlatedHole,
-  PcbSmtPad,
-} from "circuit-json"
+import type { AnyCircuitElement, PcbPlatedHole, PcbSmtPad } from "circuit-json"
 import Debug from "debug"
 import type { DsnPcb } from "lib/dsn-pcb/types"
 import { applyToPoint } from "transformation-matrix"
