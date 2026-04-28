@@ -160,7 +160,7 @@ function groupComponents(
   const componentMap = new Map<string, ComponentGroup>()
 
   for (const element of circuitElements) {
-    if (element.type === "pcb_smtpad" || element.type === "pcb_plated_hole") {
+    if (element.type === "pcb_smtpad" || element.type === "pcb_plated_hole" || element.type === "pcb_hole") {
       const componentId = element.pcb_component_id ?? ""
 
       if (!componentMap.has(componentId)) {
@@ -174,6 +174,9 @@ function groupComponents(
       if (element.type === "pcb_smtpad") {
         componentMap.get(componentId)?.pcb_smtpads.push(element)
       } else if (element.type === "pcb_plated_hole") {
+        componentMap.get(componentId)?.pcb_plated_holes.push(element)
+      } else if (element.type === "pcb_hole") {
+        // pcb_hole is handled similarly to pcb_plated_hole for DSN conversion
         componentMap.get(componentId)?.pcb_plated_holes.push(element)
       }
     }
