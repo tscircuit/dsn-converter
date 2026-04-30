@@ -25,7 +25,7 @@ test("generateLayerNames creates 6 layers", () => {
 })
 
 test("getViaPadstackName formats correctly", () => {
-  const name = getViaPadstackName(4, 600)
+  const name = getViaPadstackName(4, 600, 300)
   expect(name).toContain("Via")
   expect(name).toContain("0-3")
 })

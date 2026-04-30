@@ -156,15 +156,16 @@ export function processPlatedHoles(
       const padstackName = ensurePadstack(hole)
 
       // Resolve sourcePort (if any)
-      const pcbPort = hole.pcb_port_id
-        ? su(circuitElements)
-            .pcb_port.list()
-            .find((e) => e.pcb_port_id === hole.pcb_port_id)
-        : undefined
-      const sourcePort = pcbPort
+      const pcbPortId =
+        "pcb_port_id" in hole && hole.pcb_port_id
+          ? su(circuitElements)
+              .pcb_port.list()
+              .find((e) => e.pcb_port_id === hole.pcb_port_id)
+          : undefined
+      const sourcePort = pcbPortId
         ? su(circuitElements)
             .source_port.list()
-            .find((e) => e.source_port_id === pcbPort.source_port_id)
+            .find((e) => e.source_port_id === pcbPortId.source_port_id)
         : undefined
 
       const pinNumber = findNumericHint(sourcePort) ?? nextPinNumber()
