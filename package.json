@@ -18,7 +18,7 @@
     "@types/debug": "^4.1.12",
     "@types/react": "^19.0.1",
     "@types/uuid": "^10.0.0",
-    "bun-match-svg": "^0.0.3",
+    "bun-match-svg": "^0.0.15",
     "circuit-json": "^0.0.405",
     "circuit-to-svg": "^0.0.175",
     "react": "18",

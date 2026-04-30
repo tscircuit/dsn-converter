@@ -160,7 +160,11 @@ function groupComponents(
   const componentMap = new Map<string, ComponentGroup>()
 
   for (const element of circuitElements) {
-    if (element.type === "pcb_smtpad" || element.type === "pcb_plated_hole" || element.type === "pcb_hole") {
+    if (
+      element.type === "pcb_smtpad" ||
+      element.type === "pcb_plated_hole" ||
+      element.type === "pcb_hole"
+    ) {
       const componentId = element.pcb_component_id ?? ""
 
       if (!componentMap.has(componentId)) {
