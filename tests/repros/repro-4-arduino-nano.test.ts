@@ -13,9 +13,9 @@ test("circuit json (arduino nano) -> dsn file", async () => {
 
   const dsnJson = parseDsnToDsnJson(dsnFile) as DsnPcb
 
-  // expect the json placemet to have length 3
-  expect(dsnJson.placement.components.length).toBe(7)
-  expect(dsnJson.library.images.length).toBe(7)
+  // expect the json placement to have length 8 (7 component footprints + 1 NPTH hole component)
+  expect(dsnJson.placement.components.length).toBe(8)
+  expect(dsnJson.library.images.length).toBe(8)
 
   // image of usbc
   const usbcImage = dsnJson.library.images[0]
@@ -37,8 +37,8 @@ test("circuit json (arduino nano) -> dsn file", async () => {
   expect(usbcImage.pins[19].x).toBe(-4325)
   expect(usbcImage.pins[19].y).toBe(-2486.500599999971)
 
-  // padstack length
-  expect(dsnJson.library.padstacks.length).toBe(10)
+  // padstack length: 10 original padstacks + 1 NPTH padstack for pcb_holes
+  expect(dsnJson.library.padstacks.length).toBe(11)
   // net length
   expect(dsnJson.network.nets.length).toBe(75)
 })
