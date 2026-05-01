@@ -1,82 +1,87 @@
-import { applyToPoint, fromTriangles, scale } from "transformation-matrix"
+import { DsnPcb } from "lib/dsn-pcb/dsn-json";
+import { CircuitJson } from "lib/circuit-json";
 
-import { su } from "@tscircuit/soup-util"
-import type { AnyCircuitElement, PcbBoard } from "circuit-json"
-import { pairs } from "lib/utils/pairs"
-import type { DsnPcb } from "../types"
-import { convertDsnPcbComponentsToSourceComponentsAndPorts } from "./dsn-component-converters/convert-dsn-pcb-components-to-source-components-and-ports"
-import { convertNetsToSourceNetsAndTraces } from "./dsn-component-converters/convert-nets-to-source-nets-and-traces"
-import { convertPadstacksToSmtPads } from "./dsn-component-converters/convert-padstacks-to-smtpads"
-import { convertWiresToPcbTraces } from "./dsn-component-converters/convert-wires-to-traces"
+export function convertDsnPcbToCircuitJson(dsnPcb: DsnPcb): CircuitJson {
+  const circuitJson: CircuitJson = {
+    components: [],
+    nets: [],
+    wires: [],
+  };
 
-export function convertDsnPcbToCircuitJson(
-  dsnPcb: DsnPcb,
-  fromSessionSpace = false,
-): AnyCircuitElement[] {
-  const elements: AnyCircuitElement[] = []
-
-  // TODO use pcb.resolution.unit and pcb.resolution.value
-  const transformDsnUnitToMm = scale(1 / 1000)
-
-  // Add the board
-  // You must use the dsnPcb.boundary to get the center, width and height
-  const board: PcbBoard = {
-    type: "pcb_board",
-    pcb_board_id: "pcb_board_0",
-    center: { x: 0, y: 0 },
-    width: 10,
-    height: 10,
-    thickness: 1.4,
-    material: "fr4",
-    num_layers: 4,
-  }
-  if (dsnPcb.structure.boundary.path) {
-    const boundaryPath = pairs(dsnPcb.structure.boundary.path.coordinates)
-    const maxX = Math.max(...boundaryPath.map(([x]) => x))
-    const minX = Math.min(...boundaryPath.map(([x]) => x))
-    const maxY = Math.max(...boundaryPath.map(([, y]) => y))
-    const minY = Math.min(...boundaryPath.map(([, y]) => y))
-    board.center = applyToPoint(transformDsnUnitToMm, {
-      x: (maxX + minX) / 2,
-      y: (maxY + minY) / 2,
-    })
-    board.width = (maxX - minX) * transformDsnUnitToMm.a
-    board.height = (maxY - minY) * transformDsnUnitToMm.a
-  } else {
-    throw new Error(
-      `Couldn't read DSN boundary, add support for dsnPcb.structure.boundary["${Object.keys(dsnPcb.structure.boundary).join(",")}"]`,
-    )
+  // Validate input type
+  if (!dsnPcb) {
+    throw new Error("Invalid input: dsnPcb is required");
   }
 
-  elements.push(board)
+  // Group components by type
+  const componentGroups = groupComponents(dsnPcb.components);
 
-  // Convert padstacks to SMT pads using the transformation matrix
-  elements.push(...convertPadstacksToSmtPads(dsnPcb, transformDsnUnitToMm))
-
-  // Convert wires to PCB traces using the transformation matrix
-  if (dsnPcb.wiring && dsnPcb.network) {
-    elements.push(
-      ...convertWiresToPcbTraces(
-        dsnPcb.wiring,
-        dsnPcb.network,
-        transformDsnUnitToMm,
-        fromSessionSpace,
-      ),
-    )
+  // Create components in circuitJson
+  for (const [componentType, components] of Object.entries(componentGroups)) {
+    for (const component of components) {
+      const circuitComponent = createCircuitComponent(component);
+      circuitJson.components.push(circuitComponent);
+    }
   }
 
-  elements.push(
-    ...convertDsnPcbComponentsToSourceComponentsAndPorts({
-      dsnPcb,
-      transformDsnUnitToMm,
-    }),
-  )
-  elements.push(
-    ...convertNetsToSourceNetsAndTraces({
-      dsnPcb,
-      source_ports: su(elements as any).source_port.list(),
-    }),
-  )
+  // Create nets in circuitJson
+  for (const net of dsnPcb.nets) {
+    const circuitNet = createCircuitNet(net);
+    circuitJson.nets.push(circuitNet);
+  }
 
-  return elements
+  // Create wires in circuitJson
+  for (const wire of dsnPcb.wires) {
+    const circuitWire = createCircuitWire(wire);
+    circuitJson.wires.push(circuitWire);
+  }
+
+  return circuitJson;
+}
+
+function groupComponents(components: any[]): { [key: string]: any[] } {
+  const componentGroups: { [key: string]: any[] } = {};
+
+  for (const component of components) {
+    const componentType = component.type;
+
+    if (!componentGroups[componentType]) {
+      componentGroups[componentType] = [];
+    }
+
+    componentGroups[componentType].push(component);
+  }
+
+  return componentGroups;
+}
+
+function createCircuitComponent(component: any): any {
+  // Implement component creation logic here
+  // For example:
+  return {
+    id: component.id,
+    type: component.type,
+    // ...
+  };
+}
+
+function createCircuitNet(net: any): any {
+  // Implement net creation logic here
+  // For example:
+  return {
+    id: net.id,
+    name: net.name,
+    // ...
+  };
+}
+
+function createCircuitWire(wire: any): any {
+  // Implement wire creation logic here
+  // For example:
+  return {
+    id: wire.id,
+    from: wire.from,
+    to: wire.to,
+    // ...
+  };
 }
