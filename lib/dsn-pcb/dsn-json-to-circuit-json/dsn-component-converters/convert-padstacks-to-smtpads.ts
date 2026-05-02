@@ -1,7 +1,7 @@
 import type { AnyCircuitElement, PcbSmtPad } from "circuit-json"
 import Debug from "debug"
 import type { DsnPcb } from "lib/dsn-pcb/types"
-import { applyToPoint } from "transformation-matrix"
+import { applyToPoint, rotate, scale } from "transformation-matrix"
 
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
 
@@ -27,9 +27,24 @@ export function convertPadstacksToSmtPads(
     // Handle each placement for this component
     placementComponent.places.forEach((place) => {
       debug("processing place...", { place })
-      const { x: compX, y: compY, side } = place
+      const { x: compX, y: compY, side, rotation = 0 } = place
+
+      // Create rotation transform for pin positions (in degrees, converted to radians)
+      // Rotation is applied around the component center (compX, compY)
+      const rotationRad = (rotation * Math.PI) / 180
+      const rotationTransform = rotate(rotationRad)
 
       image.pins.forEach((pin) => {
+        // Calculate position in circuit space
+        // First rotate pin offset around component center, then add component position
+        const rotatedOffset = applyToPoint(rotationTransform, {
+          x: pin.x,
+          y: pin.y,
+        })
+        const { x: circuitX, y: circuitY } = applyToPoint(transform, {
+          x: (compX || 0) + rotatedOffset.x,
+          y: (compY || 0) + rotatedOffset.y,
+        })
         // Find the corresponding padstack
         const padstack = padstacks.find((p) => p.name === pin.padstack_name)
         debug("found padstack", { padstack })
@@ -107,13 +122,6 @@ export function convertPadstacksToSmtPads(
           console.warn(`No valid shape found for padstack: ${padstack.name}`)
           return
         }
-
-        // Calculate position in circuit space using the transformation matrix
-        // Convert component position and pin offset to circuit coordinates
-        const { x: circuitX, y: circuitY } = applyToPoint(transform, {
-          x: (compX || 0) + pin.x,
-          y: (compY || 0) + pin.y,
-        })
 
         let pcbPad: PcbSmtPad
         if (rectShape || polygonShape || pathShape) {
