@@ -1,3 +1,4 @@
+import { getTraceLength } from "../../utils/get-trace-length"
 import { su } from "@tscircuit/soup-util"
 import type {
   AnyCircuitElement,
@@ -179,6 +180,21 @@ export function convertDsnSessionToCircuitJson(
       })
     }
   }
+
+  // Compute trace_length for session traces (traces from routing session)
+  sessionElements.forEach((element) => {
+    if (element.type === "pcb_trace") {
+      const trace = element as PcbTrace
+      if (!trace.trace_length) {
+        const wirePoints = trace.route
+          .filter((p) => p.route_type === "wire")
+          .map((p) => ({ x: p.x, y: p.y }))
+        if (wirePoints.length >= 2) {
+          trace.trace_length = getTraceLength(wirePoints)
+        }
+      }
+    }
+  })
 
   return [...inputPcbElms, ...sessionElements]
 }
