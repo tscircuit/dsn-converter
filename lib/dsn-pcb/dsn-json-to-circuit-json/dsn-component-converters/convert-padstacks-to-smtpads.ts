@@ -133,7 +133,8 @@ export function convertPadstacksToSmtPads(
         }
 
         if (padstack.hole) {
-          const holeDiam = (padstack.hole.diameter || padstack.hole.width || 0) / 1000
+          const holeDiam =
+            (padstack.hole.diameter || padstack.hole.width || 0) / 1000
           if (padstack.hole.shape === "circle") {
             pcbElement = {
               type: "pcb_plated_hole",
