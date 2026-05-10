@@ -10,6 +10,7 @@ import type { DsnPcb, DsnSession } from "../types"
 import { convertDsnPcbToCircuitJson } from "./convert-dsn-pcb-to-circuit-json"
 import { convertViaToPcbVia } from "./dsn-component-converters/convert-via-to-pcb-via"
 import { convertWiringPathToPcbTraces } from "./dsn-component-converters/convert-wiring-path-to-pcb-traces"
+import { parseViaSize } from "../utils/parse-via-size"
 
 const debug = Debug("dsn-converter")
 
@@ -107,12 +108,14 @@ export function convertDsnSessionToCircuitJson(
     })
 
     // Get via padstack info if available
-    const viaPadstackExists = dsnSession.routes.library_out?.padstacks?.find(
-      (p) => p.name === "Via[0-1]_600:300_um",
+    const viaPadstack = dsnSession.routes.library_out?.padstacks?.find(
+      (p) => p.name.startsWith("Via"),
     )
+    const viaSize = viaPadstack ? parseViaSize(viaPadstack.name) : null
+
     // Add associated vias if they exist at wire endpoints
-    if (viaPadstackExists && net.vias && net.vias.length > 0) {
-      net.vias.forEach((via) => {
+    if (net.vias && net.vias.length > 0) {
+      net.vias.forEach((via, viaIdx) => {
         const viaPoint = applyToPoint(transformUmToMm, {
           x: via.x,
           y: via.y,
@@ -174,6 +177,9 @@ export function convertDsnSessionToCircuitJson(
             netName: net.name,
             fromLayer,
             toLayer,
+            outerDiameter: viaSize?.outerDiameter,
+            holeDiameter: viaSize?.holeDiameter,
+            index: viaIdx,
           }),
         })
       })

@@ -29,7 +29,7 @@ export function convertPadstacksToSmtPads(
       debug("processing place...", { place })
       const { x: compX, y: compY, side, rotation } = place
 
-      image.pins.forEach((pin) => {
+      image.pins.forEach((pin, pinIdx) => {
         // Find the corresponding padstack
         const padstack = padstacks.find((p) => p.name === pin.padstack_name)
         debug("found padstack", { padstack })
@@ -130,8 +130,8 @@ export function convertPadstacksToSmtPads(
           })
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_Pad${pin.pin_number}`,
-            pcb_component_id: `sc_${componentId}_${place.refdes}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_Pad${pin.pin_number}_${pinIdx}`,
+            pcb_component_id: `pcb_component_${componentId}_${place.refdes}`,
             pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
             shape: "rect",
             x: circuitX,
@@ -144,8 +144,8 @@ export function convertPadstacksToSmtPads(
         } else {
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_Pad${pin.pin_number}`,
-            pcb_component_id: `sc_${componentId}_${place.refdes}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_Pad${pin.pin_number}_${pinIdx}`,
+            pcb_component_id: `pcb_component_${componentId}_${place.refdes}`,
             pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
             shape: "circle",
             x: circuitX,
