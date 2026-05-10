@@ -10,11 +10,13 @@ export const convertPolylinePathToPcbTraces = ({
   transformUmToMm,
   netName,
   fromSessionSpace = true,
+  index = 0,
 }: {
   wire: Wiring["wires"][number]
   transformUmToMm: Matrix
   netName: string
   fromSessionSpace?: boolean
+  index?: number
 }): PcbTrace[] => {
   const traces: PcbTrace[] = []
 
@@ -31,8 +33,8 @@ export const convertPolylinePathToPcbTraces = ({
 
   traces.push({
     type: "pcb_trace",
-    pcb_trace_id: `pcb_trace_${netName}`,
-    source_trace_id: netName,
+    pcb_trace_id: `pcb_trace_${netName}_${index}`,
+    source_trace_id: `source_trace_${netName}`,
     route: pointsOnTraceMm.map((point) => ({
       route_type: "wire" as const,
       x: Number(point.x.toFixed(4)),

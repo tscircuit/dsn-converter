@@ -35,7 +35,7 @@ export const convertNetsToSourceNetsAndTraces = ({
       type: "source_trace",
       connected_source_net_ids: [source_net.source_net_id],
       connected_source_port_ids,
-      source_trace_id: `source_trace_${source_trace_id}`,
+      source_trace_id: `source_trace_${name}`,
     }
     result.push(source_net, source_trace)
     source_trace_id++

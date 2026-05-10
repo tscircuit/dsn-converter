@@ -7,20 +7,26 @@ export const convertViaToPcbVia = ({
   netName,
   fromLayer,
   toLayer,
+  outerDiameter = 0.6,
+  holeDiameter = 0.3,
+  index,
 }: {
   x: number
   y: number
   netName: string
   fromLayer: LayerRef
   toLayer: LayerRef
+  outerDiameter?: number
+  holeDiameter?: number
+  index?: number
 }): PcbVia => {
   return {
     type: "pcb_via",
-    pcb_via_id: `pcb_via_${netName}_${x}_${y}`,
+    pcb_via_id: `pcb_via_${netName}_${x}_${y}${index !== undefined ? `_${index}` : ""}`,
     x,
     y,
-    outer_diameter: 0.6, // From session file "Via[0-1]_600:300_um"
-    hole_diameter: 0.3, // From session file "Via[0-1]_600:300_um"
+    outer_diameter: outerDiameter,
+    hole_diameter: holeDiameter,
     layers: [fromLayer, toLayer],
     pcb_trace_id: `pcb_trace_${netName}`,
     from_layer: fromLayer,

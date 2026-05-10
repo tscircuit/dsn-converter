@@ -16,12 +16,14 @@ export const convertWiringPathToPcbTraces = ({
   transformUmToMm,
   netName,
   fromSessionSpace = true,
+  index = 0,
 }: {
   wire: Wiring["wires"][number]
   transformUmToMm: Matrix
   netName: string
   fromSessionSpace?: boolean
-}): Array<PcbTrace | SourceTrace> => {
+  index?: number
+}): Array<PcbTrace> => {
   const coordinates = wire.path!.coordinates
   // Convert coordinates to circuit space using the transformation matrix
   const points: Array<{ x: number; y: number }> = []
@@ -50,19 +52,13 @@ export const convertWiringPathToPcbTraces = ({
 
     const pcbTrace: PcbTrace = {
       type: "pcb_trace",
-      pcb_trace_id: `pcb_trace_${netName}`,
-      source_trace_id: netName.split("-")[0],
+      pcb_trace_id: `pcb_trace_${netName}_${index}`,
+      source_trace_id: `source_trace_${netName}`,
       route: routePoints as PcbTraceRoutePointWire[],
       trace_length: getTraceLength(routePoints),
     }
 
-    const sourceTrace: SourceTrace = {
-      type: "source_trace",
-      source_trace_id: netName.split("--")[0],
-      connected_source_net_ids: [],
-      connected_source_port_ids: netName.split("--").slice(1),
-    }
-    return [pcbTrace, sourceTrace]
+    return [pcbTrace]
   }
 
   return []
