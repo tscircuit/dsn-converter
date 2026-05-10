@@ -12,10 +12,7 @@ export function getPinNum(nodes: ASTNode[]): number | string | null {
   let pinNumber
 
   // Check if nodes[2] is a (rotate N) modifier — skip it and read pin number from nodes[3]
-  if (
-    nodes[2]?.type === "List" &&
-    nodes[2].children?.[0]?.value === "rotate"
-  ) {
+  if (nodes[2]?.type === "List" && nodes[2].children?.[0]?.value === "rotate") {
     if (nodes[3]?.type === "Atom") {
       pinNumber = nodes[3].value
     } else {

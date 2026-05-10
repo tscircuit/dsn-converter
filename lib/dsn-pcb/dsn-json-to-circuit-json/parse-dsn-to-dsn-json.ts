@@ -590,8 +590,7 @@ function processPin(nodes: ASTNode[]): Pin | null {
 
     // If nodes[2] is a (rotate N) list, coordinates start at index 4; otherwise at 3
     const hasRotateModifier =
-      nodes[2]?.type === "List" &&
-      nodes[2].children?.[0]?.value === "rotate"
+      nodes[2]?.type === "List" && nodes[2].children?.[0]?.value === "rotate"
     const coordStart = hasRotateModifier ? 4 : 3
 
     for (let i = coordStart; i < nodes.length; i++) {
