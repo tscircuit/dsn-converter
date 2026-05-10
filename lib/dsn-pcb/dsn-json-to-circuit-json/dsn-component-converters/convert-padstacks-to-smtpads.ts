@@ -29,6 +29,9 @@ export function convertPadstacksToSmtPads(
       debug("processing place...", { place })
       const { x: compX, y: compY, side } = place
 
+      const rotationDeg = place.rotation ?? 0
+      const rotationRad = (rotationDeg * Math.PI) / 180
+
       image.pins.forEach((pin) => {
         // Find the corresponding padstack
         const padstack = padstacks.find((p) => p.name === pin.padstack_name)
@@ -108,11 +111,15 @@ export function convertPadstacksToSmtPads(
           return
         }
 
-        // Calculate position in circuit space using the transformation matrix
-        // Convert component position and pin offset to circuit coordinates
+        // Apply component rotation to pin offset before translating
+        const rotatedPinX =
+          pin.x * Math.cos(rotationRad) - pin.y * Math.sin(rotationRad)
+        const rotatedPinY =
+          pin.x * Math.sin(rotationRad) + pin.y * Math.cos(rotationRad)
+
         const { x: circuitX, y: circuitY } = applyToPoint(transform, {
-          x: (compX || 0) + pin.x,
-          y: (compY || 0) + pin.y,
+          x: (compX || 0) + rotatedPinX,
+          y: (compY || 0) + rotatedPinY,
         })
 
         let pcbPad: PcbSmtPad
