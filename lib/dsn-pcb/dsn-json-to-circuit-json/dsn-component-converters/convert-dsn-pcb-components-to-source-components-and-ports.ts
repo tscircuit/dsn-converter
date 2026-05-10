@@ -11,7 +11,7 @@ import {
   applyToPoint,
   compose,
   translate,
-  rotateDeg,
+  rotateDEG,
 } from "transformation-matrix"
 
 export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
@@ -59,6 +59,9 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
         }),
         rotation: place.rotation || 0,
         layer: place.side === "back" ? "bottom" : "top",
+        width: 0,
+        height: 0,
+        obstructs_within_bounds: false,
       }
       result.push(pcbComponent)
 
@@ -72,7 +75,7 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
             // Apply rotation and translation to each point in the outline
             const outlineTransform = compose(
               translate(place.x || 0, place.y || 0),
-              rotateDeg(place.rotation || 0),
+              rotateDEG(place.rotation || 0),
             )
             const fullTransform = compose(
               transformDsnUnitToMm,
@@ -122,7 +125,7 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
           // Apply rotation
           const pinTransform = compose(
             translate(placeX, placeY),
-            rotateDeg(place.rotation || 0),
+            rotateDEG(place.rotation || 0),
           )
 
           const pcb_port_center = applyToPoint(
