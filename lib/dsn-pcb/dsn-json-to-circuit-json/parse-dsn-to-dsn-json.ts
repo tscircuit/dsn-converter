@@ -27,6 +27,7 @@ import type {
   Parser as ParserType,
   Path,
   PathShape,
+  Plane,
   Pin,
   Placement,
   Places,
@@ -211,6 +212,7 @@ export function processResolution(nodes: ASTNode[]): Resolution {
 export function processStructure(nodes: ASTNode[]): Structure {
   const structure: Partial<Structure> = {
     layers: [],
+    planes: [],
   }
 
   nodes.forEach((node) => {
@@ -224,6 +226,9 @@ export function processStructure(nodes: ASTNode[]): Structure {
             break
           case "boundary":
             structure.boundary = processBoundary(node.children!.slice(1))
+            break
+          case "plane":
+            structure.planes!.push(processPlane(node.children!))
             break
           case "via":
             if (
@@ -242,6 +247,30 @@ export function processStructure(nodes: ASTNode[]): Structure {
   })
 
   return structure as Structure
+}
+
+function processPlane(nodes: ASTNode[]): Plane {
+  if (
+    nodes[1]?.type !== "Atom" ||
+    typeof nodes[1].value !== "string" ||
+    nodes[2]?.type !== "List"
+  ) {
+    throw new Error("Invalid plane format")
+  }
+
+  const polygonNodes = nodes[2].children
+  if (
+    !polygonNodes ||
+    polygonNodes[0]?.type !== "Atom" ||
+    polygonNodes[0].value !== "polygon"
+  ) {
+    throw new Error("Invalid plane polygon format")
+  }
+
+  return {
+    net_name: nodes[1].value,
+    polygon: processPolygonShape(polygonNodes),
+  }
 }
 
 function processLayer(nodes: ASTNode[]): Layer {
