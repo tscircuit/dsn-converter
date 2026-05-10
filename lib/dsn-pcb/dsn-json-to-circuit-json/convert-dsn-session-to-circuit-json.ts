@@ -108,8 +108,8 @@ export function convertDsnSessionToCircuitJson(
     })
 
     // Get via padstack info if available
-    const viaPadstack = dsnSession.routes.library_out?.padstacks?.find(
-      (p) => p.name.startsWith("Via"),
+    const viaPadstack = dsnSession.routes.library_out?.padstacks?.find((p) =>
+      p.name.startsWith("Via"),
     )
     const viaSize = viaPadstack ? parseViaSize(viaPadstack.name) : null
 

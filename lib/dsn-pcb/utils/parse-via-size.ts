@@ -1,4 +1,6 @@
-export function parseViaSize(viaName: string): { outerDiameter: number; holeDiameter: number } | null {
+export function parseViaSize(
+  viaName: string,
+): { outerDiameter: number; holeDiameter: number } | null {
   // Common format: Via[0-3]_800:400_um or Via[0-1]_600:300_um
   const match = viaName.match(/(\d+):(\d+)_(\w+)/)
   if (!match) return null

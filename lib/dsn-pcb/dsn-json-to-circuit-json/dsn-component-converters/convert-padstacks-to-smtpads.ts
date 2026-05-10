@@ -1,7 +1,12 @@
 import type { AnyCircuitElement, PcbSmtPad } from "circuit-json"
 import Debug from "debug"
 import type { DsnPcb } from "lib/dsn-pcb/types"
-import { applyToPoint, compose, translate, rotateDeg } from "transformation-matrix"
+import {
+  applyToPoint,
+  compose,
+  translate,
+  rotateDeg,
+} from "transformation-matrix"
 
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
 
@@ -111,12 +116,12 @@ export function convertPadstacksToSmtPads(
         // Calculate position in circuit space using the transformation matrix
         const pinTransform = compose(
           translate(compX || 0, compY || 0),
-          rotateDeg(rotation || 0)
+          rotateDeg(rotation || 0),
         )
 
         const { x: circuitX, y: circuitY } = applyToPoint(
           compose(transform, pinTransform),
-          { x: pin.x, y: pin.y }
+          { x: pin.x, y: pin.y },
         )
 
         let pcbElement: AnyCircuitElement
@@ -135,14 +140,16 @@ export function convertPadstacksToSmtPads(
             ...commonProps,
             shape: padstack.hole.shape === "circle" ? "circle" : "oval",
             outer_diameter: width, // Use pad width as outer diameter
-            hole_diameter: (padstack.hole.diameter || padstack.hole.width || 0) / 1000,
+            hole_diameter:
+              (padstack.hole.diameter || padstack.hole.width || 0) / 1000,
             layers: ["top", "bottom"],
           }
           if (pcbElement.shape === "oval") {
             ;(pcbElement as any).outer_width = width
             ;(pcbElement as any).outer_height = height
             ;(pcbElement as any).hole_width = (padstack.hole.width || 0) / 1000
-            ;(pcbElement as any).hole_height = (padstack.hole.height || 0) / 1000
+            ;(pcbElement as any).hole_height =
+              (padstack.hole.height || 0) / 1000
           }
         } else if (rectShape || polygonShape || pathShape) {
           const layer = padstack.shapes[0].layer.includes("B.")

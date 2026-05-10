@@ -24,7 +24,9 @@ export function convertWiresToPcbTraces(
   const viaCountByNet: Record<string, number> = {}
   const traceCountByNet: Record<string, number> = {}
 
-  const viaSize = dsnPcb.structure?.via ? parseViaSize(dsnPcb.structure.via) : null
+  const viaSize = dsnPcb.structure?.via
+    ? parseViaSize(dsnPcb.structure.via)
+    : null
 
   wiring.wires?.forEach((wire) => {
     debug("WIRE\n----\n", wire)
@@ -34,8 +36,8 @@ export function convertWiresToPcbTraces(
     if (wire.type === "shove_fixed") {
       return
     }
-    
-    // We don't want to skip traces for already processed nets because multiple 
+
+    // We don't want to skip traces for already processed nets because multiple
     // wire segments can belong to the same net.
     // processedNets.add(netName)
 
@@ -44,9 +46,9 @@ export function convertWiresToPcbTraces(
       const index = viaCountByNet[netName] || 0
       viaCountByNet[netName] = index + 1
       tracesAndVias.push(
-        ...convertWiringViaToPcbVias({ 
-          wire, 
-          transformUmToMm, 
+        ...convertWiringViaToPcbVias({
+          wire,
+          transformUmToMm,
           netName,
           outerDiameter: viaSize?.outerDiameter,
           holeDiameter: viaSize?.holeDiameter,
