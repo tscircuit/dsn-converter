@@ -9,6 +9,25 @@ import { convertNetsToSourceNetsAndTraces } from "./dsn-component-converters/con
 import { convertPadstacksToSmtPads } from "./dsn-component-converters/convert-padstacks-to-smtpads"
 import { convertWiresToPcbTraces } from "./dsn-component-converters/convert-wires-to-traces"
 
+function getBoundaryCoordinatePairs(
+  boundary: DsnPcb["structure"]["boundary"],
+): Array<[number, number]> {
+  if (boundary.path?.coordinates.length) {
+    return pairs(boundary.path.coordinates)
+  }
+  if (boundary.rect?.coordinates.length) {
+    const [x1, y1, x2, y2] = boundary.rect.coordinates
+    return [
+      [x1, y1],
+      [x2, y2],
+    ]
+  }
+  if (boundary.polygon?.coordinates.length) {
+    return pairs(boundary.polygon.coordinates)
+  }
+  return []
+}
+
 export function convertDsnPcbToCircuitJson(
   dsnPcb: DsnPcb,
   fromSessionSpace = false,
@@ -30,8 +49,8 @@ export function convertDsnPcbToCircuitJson(
     material: "fr4",
     num_layers: 4,
   }
-  if (dsnPcb.structure.boundary.path) {
-    const boundaryPath = pairs(dsnPcb.structure.boundary.path.coordinates)
+  const boundaryPath = getBoundaryCoordinatePairs(dsnPcb.structure.boundary)
+  if (boundaryPath.length > 0) {
     const maxX = Math.max(...boundaryPath.map(([x]) => x))
     const minX = Math.min(...boundaryPath.map(([x]) => x))
     const maxY = Math.max(...boundaryPath.map(([, y]) => y))
