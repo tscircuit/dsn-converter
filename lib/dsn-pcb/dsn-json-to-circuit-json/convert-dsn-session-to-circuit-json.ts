@@ -106,13 +106,20 @@ export function convertDsnSessionToCircuitJson(
       }
     })
 
-    // Get via padstack info if available
-    const viaPadstackExists = dsnSession.routes.library_out?.padstacks?.find(
+    const viaPadstacks = dsnSession.routes.library_out?.padstacks ?? []
+    const defaultViaPadstack = viaPadstacks.find(
       (p) => p.name === "Via[0-1]_600:300_um",
     )
+
     // Add associated vias if they exist at wire endpoints
-    if (viaPadstackExists && net.vias && net.vias.length > 0) {
+    if (net.vias && net.vias.length > 0) {
       net.vias.forEach((via) => {
+        const viaPadstack =
+          viaPadstacks.find((p) => p.name === via.padstack_name) ??
+          defaultViaPadstack
+
+        if (!viaPadstack) return
+
         const viaPoint = applyToPoint(transformUmToMm, {
           x: via.x,
           y: via.y,
@@ -174,6 +181,7 @@ export function convertDsnSessionToCircuitJson(
             netName: net.name,
             fromLayer,
             toLayer,
+            padstack: viaPadstack,
           }),
         })
       })
