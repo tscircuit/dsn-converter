@@ -108,7 +108,7 @@ export function convertDsnSessionToCircuitJson(
 
     // Get via padstack info if available
     const viaPadstackExists = dsnSession.routes.library_out?.padstacks?.find(
-      (p) => p.name === "Via[0-1]_600:300_um",
+      (p) => p.name.toLowerCase().includes("via"),
     )
     // Add associated vias if they exist at wire endpoints
     if (viaPadstackExists && net.vias && net.vias.length > 0) {
