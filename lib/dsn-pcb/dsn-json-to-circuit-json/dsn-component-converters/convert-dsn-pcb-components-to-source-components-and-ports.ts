@@ -1,6 +1,7 @@
 import type { AnySourceComponent, PcbPort, SourcePort } from "circuit-json"
-import type { DsnPcb, Image, Pin } from "lib/dsn-pcb/types"
+import type { DsnPcb } from "lib/dsn-pcb/types"
 import { type Matrix, applyToPoint } from "transformation-matrix"
+import { getPlacedPinPosition } from "./component-placement"
 
 export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
   dsnPcb,
@@ -41,18 +42,14 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
             pin_number: Number(pin.pin_number),
             port_hints: [],
           }
-          // Handle case where place coordinates might be null/undefined
-          const placeX = place.x || 0
-          const placeY = place.y || 0
           const pcb_port_center = applyToPoint(transformDsnUnitToMm, {
-            x: placeX + pin.x,
-            y: placeY + pin.y,
+            ...getPlacedPinPosition(place, pin),
           })
           const pcb_port: PcbPort = {
             pcb_port_id: `pcb_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,
             type: "pcb_port",
             source_port_id: port.source_port_id,
-            pcb_component_id: component.name,
+            pcb_component_id: `${component.name}_${place.refdes}`,
             x: pcb_port_center.x,
             y: pcb_port_center.y,
             layers: [place.side === "back" ? "bottom" : "top"],
