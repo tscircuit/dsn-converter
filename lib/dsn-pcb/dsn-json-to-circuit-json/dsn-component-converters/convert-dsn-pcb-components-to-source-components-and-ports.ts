@@ -52,7 +52,7 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
             pcb_port_id: `pcb_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,
             type: "pcb_port",
             source_port_id: port.source_port_id,
-            pcb_component_id: component.name,
+            pcb_component_id: `${component.name}_${place.refdes}`,
             x: pcb_port_center.x,
             y: pcb_port_center.y,
             layers: [place.side === "back" ? "bottom" : "top"],
