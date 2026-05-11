@@ -77,6 +77,7 @@ export interface DsnPcb {
          */
         coordinates: number[]
       }
+      padstack_name?: string
       net: string
       type: string
     }>
@@ -279,6 +280,7 @@ export interface Wire {
     width: number
     coordinates: number[]
   }
+  padstack_name?: string
   net?: string
   clearance_class?: string
   type?: string
