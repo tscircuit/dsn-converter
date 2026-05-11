@@ -296,14 +296,75 @@ function processBoundary(nodes: ASTNode[]): Boundary {
   const boundary: Partial<Boundary> = {}
   nodes.forEach((node) => {
     if (node.type === "List" && node.children![0].type === "Atom") {
-      boundary.path = processPath(node.children!)
+      const boundaryType = node.children![0].value
+      switch (boundaryType) {
+        case "path":
+          boundary.path = processPath(node.children!)
+          break
+        case "rect":
+          boundary.rect = processBoundaryRect(node.children!)
+          break
+        case "polygon":
+          boundary.polygon = processBoundaryPolygon(node.children!)
+          break
+      }
     }
   })
   // Ensure boundary.path is defined
-  if (!boundary.path) {
+  if (!boundary.path && !boundary.rect && !boundary.polygon) {
     boundary.path = { layer: "", width: 0, coordinates: [] }
   }
   return boundary as Boundary
+}
+
+function processBoundaryRect(nodes: ASTNode[]): NonNullable<Boundary["rect"]> {
+  let coordinateStartIndex = 1
+  const rect: NonNullable<Boundary["rect"]> = {
+    type: "rect",
+    coordinates: [],
+  }
+
+  if (nodes[1]?.type === "Atom" && typeof nodes[1].value === "string") {
+    rect.layer = nodes[1].value
+    coordinateStartIndex = 2
+  }
+
+  rect.coordinates = nodes
+    .slice(coordinateStartIndex)
+    .filter((node) => node.type === "Atom" && typeof node.value === "number")
+    .map((node) => node.value as number)
+
+  return rect
+}
+
+function processBoundaryPolygon(
+  nodes: ASTNode[],
+): NonNullable<Boundary["polygon"]> {
+  let currentIndex = 1
+  let currentNode = nodes[currentIndex]
+  const polygon: NonNullable<Boundary["polygon"]> = {
+    type: "polygon",
+    width: 0,
+    coordinates: [],
+  }
+
+  if (currentNode?.type === "Atom" && typeof currentNode.value === "string") {
+    polygon.layer = currentNode.value
+    currentIndex++
+    currentNode = nodes[currentIndex]
+  }
+
+  if (currentNode?.type === "Atom" && typeof currentNode.value === "number") {
+    polygon.width = currentNode.value
+    currentIndex++
+  }
+
+  polygon.coordinates = nodes
+    .slice(currentIndex)
+    .filter((node) => node.type === "Atom" && typeof node.value === "number")
+    .map((node) => node.value as number)
+
+  return polygon
 }
 
 function processPath(nodes: ASTNode[]): Path {
