@@ -32,10 +32,10 @@ export function convertDsnPcbToCircuitJson(
   }
   if (dsnPcb.structure.boundary.path) {
     const boundaryPath = pairs(dsnPcb.structure.boundary.path.coordinates)
-    const maxX = Math.max(...boundaryPath.map(([x]) => x))
-    const minX = Math.min(...boundaryPath.map(([x]) => x))
-    const maxY = Math.max(...boundaryPath.map(([, y]) => y))
-    const minY = Math.min(...boundaryPath.map(([, y]) => y))
+    const maxX = Math.max(...boundaryPath.map(([x]) => x as number))
+    const minX = Math.min(...boundaryPath.map(([x]) => x as number))
+    const maxY = Math.max(...boundaryPath.map(([, y]) => y as number))
+    const minY = Math.min(...boundaryPath.map(([, y]) => y as number))
     board.center = applyToPoint(transformDsnUnitToMm, {
       x: (maxX + minX) / 2,
       y: (maxY + minY) / 2,

@@ -1,4 +1,4 @@
-import type { PcbPlatedHole, PcbSmtPad } from "circuit-json"
+import type { PcbPlatedHole, PcbSmtPad, PcbHole } from "circuit-json"
 
 export interface DsnPcb {
   is_dsn_pcb: true
@@ -317,7 +317,7 @@ export interface DsnSession {
 export interface ComponentGroup {
   pcb_component_id: string
   pcb_smtpads: PcbSmtPad[]
-  pcb_plated_holes: PcbPlatedHole[]
+  pcb_plated_holes: (PcbPlatedHole | PcbHole)[]
 }
 
 export type DsnJson = DsnPcb | DsnSession
