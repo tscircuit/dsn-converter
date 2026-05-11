@@ -5,7 +5,7 @@ import type {
 } from "circuit-json"
 import Debug from "debug"
 import { type Matrix, applyToPoint } from "transformation-matrix"
-import type { Network, Wiring } from "../../types"
+import type { Network, Padstack, Wiring } from "../../types"
 import { convertPolylinePathToPcbTraces } from "./convert-polyline-path-to-pcb-traces"
 import { convertWiringPathToPcbTraces } from "./convert-wiring-path-to-pcb-traces"
 import { convertWiringViaToPcbVias } from "./convert-wiring-via-to-pcb-vias"
@@ -17,6 +17,7 @@ export function convertWiresToPcbTraces(
   network: Network,
   transformUmToMm: Matrix,
   fromSessionSpace?: boolean,
+  padstacks?: Padstack[],
 ): AnyCircuitElement[] {
   const tracesAndVias: AnyCircuitElement[] = []
   const processedNets = new Set<string>()
@@ -39,7 +40,12 @@ export function convertWiresToPcbTraces(
     if (wire.type === "via") {
       debug("wire is actually a via!")
       tracesAndVias.push(
-        ...convertWiringViaToPcbVias({ wire, transformUmToMm, netName }),
+        ...convertWiringViaToPcbVias({
+          wire,
+          transformUmToMm,
+          netName,
+          padstacks,
+        }),
       )
       return
     }
