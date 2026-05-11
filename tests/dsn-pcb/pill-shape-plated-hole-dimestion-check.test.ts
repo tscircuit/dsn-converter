@@ -16,14 +16,25 @@ test("check pill shape plated hole dimension", async () => {
   const dsnJson = parseDsnToDsnJson(dsnFile) as DsnPcb
   const circuitJson2 = convertDsnJsonToCircuitJson(dsnJson)
 
-  // TODO: udpate the test to convert this to plated_hole
-  // check if the smtpad has the correct dimensions
   const pcbSmtpads = circuitJson2.filter((e) => e.type === "pcb_smtpad")
-  expect(pcbSmtpads.length).toBe(1)
+  expect(pcbSmtpads.length).toBe(0)
 
-  expect(
-    pcbSmtpads.some(
-      (p) => p.shape === "rect" && p.width === 1.2 && p.height === 0.6,
-    ),
-  ).toBe(true)
+  const pcbPlatedHoles = circuitJson2.filter(
+    (e) => e.type === "pcb_plated_hole",
+  )
+  expect(pcbPlatedHoles.length).toBe(1)
+
+  const platedHole = pcbPlatedHoles[0]
+  expect(platedHole).toMatchObject({
+    type: "pcb_plated_hole",
+    shape: "pill",
+    layers: ["top", "bottom"],
+  })
+  if (platedHole.shape !== "pill") {
+    throw new Error(`Expected pill plated hole, got ${platedHole.shape}`)
+  }
+  expect(platedHole.outer_width).toBeCloseTo(1.2)
+  expect(platedHole.outer_height).toBeCloseTo(1.8)
+  expect(platedHole.hole_width).toBeCloseTo(0.8)
+  expect(platedHole.hole_height).toBeCloseTo(1.4)
 })
