@@ -93,11 +93,11 @@ export function convertPadstacksToSmtPads(
           width = Math.abs(maxX - minX) / 1000
           height = Math.abs(maxY - minY) / 1000
         } else if (pathShape) {
-          // For path shapes (oval/pill pads), width is the path width
-          // and height is the distance between path endpoints
+          // DSN path padstack shapes are stroked paths. The rendered pad
+          // extents are the centerline bounds plus the stroke width.
           const [x1, y1, x2, y2] = pathShape.coordinates
-          width = pathShape.width / 1000 // Convert μm to mm
-          height = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) / 1000
+          width = (Math.abs(x2 - x1) + pathShape.width) / 1000
+          height = (Math.abs(y2 - y1) + pathShape.width) / 1000
         } else if (circleShape) {
           // Handle circle shape
           const radius = circleShape.diameter / 2 / 1000
