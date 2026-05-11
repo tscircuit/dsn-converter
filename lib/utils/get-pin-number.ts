@@ -9,7 +9,7 @@ const debug = Debug("dsn-converter:getPinNum")
  */
 export function getPinNum(nodes: ASTNode[]): number | string | null {
   // Extract pin number from AST nodes
-  let pinNumber
+  let pinNumber: string | number | undefined
 
   if (nodes[2]?.type === "List" && nodes[2].children) {
     // Pin number is in a List structure
@@ -26,7 +26,11 @@ export function getPinNum(nodes: ASTNode[]): number | string | null {
   if (typeof pinNumber === "number") {
     return pinNumber
   }
-  // Try parsing as number first
-  const parsed = parseInt(String(pinNumber), 10)
-  return Number.isNaN(parsed) ? String(pinNumber) : parsed
+  const normalizedPinNumber = String(pinNumber)
+
+  // Only treat fully numeric labels as numbers. Labels such as "1A" are
+  // distinct DSN pin names and must not be truncated to 1.
+  return /^-?\d+$/.test(normalizedPinNumber)
+    ? Number(normalizedPinNumber)
+    : normalizedPinNumber
 }
