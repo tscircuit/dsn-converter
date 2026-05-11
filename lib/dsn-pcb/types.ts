@@ -229,6 +229,8 @@ export interface PolygonShape extends BaseShape {
 export interface CircleShape extends BaseShape {
   shapeType: "circle"
   diameter: number
+  x?: number
+  y?: number
 }
 
 export interface RectShape extends BaseShape {
