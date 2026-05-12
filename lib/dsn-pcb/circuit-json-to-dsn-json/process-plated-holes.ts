@@ -14,8 +14,7 @@ import { getFootprintName } from "lib/utils/get-footprint-name"
 import { getPadstackName } from "lib/utils/get-padstack-name"
 import { applyToPoint, scale } from "transformation-matrix"
 import type { ComponentGroup, DsnPcb, Image, Pin } from "../types"
-
-const transformMmToUm = scale(1000)
+import { getDsnUnitsPerMm, mmToDsnUnits } from "./dsn-unit-conversion"
 
 export function processPlatedHoles(
   componentGroups: ComponentGroup[],
@@ -23,6 +22,8 @@ export function processPlatedHoles(
   pcb: DsnPcb,
   numLayers = 2,
 ) {
+  const dsnUnitsPerMm = getDsnUnitsPerMm(pcb.resolution)
+  const transformMmToDsn = scale(dsnUnitsPerMm)
   /**
    * Helpers
    */
@@ -39,7 +40,7 @@ export function processPlatedHoles(
           layer: "all",
         })
         if (!processedPadstacks.has(name)) {
-          const d = Math.round(hole.outer_diameter * 1000)
+          const d = mmToDsnUnits(hole.outer_diameter, pcb.resolution)
           pcb.library.padstacks.push(
             createCircularPadstack(name, d, d, numLayers),
           )
@@ -56,10 +57,10 @@ export function processPlatedHoles(
           layer: "all",
         })
         if (!processedPadstacks.has(name)) {
-          const iW = Math.round(hole.hole_width * 1000)
-          const iH = Math.round(hole.hole_height * 1000)
-          const oW = Math.round(hole.outer_width * 1000)
-          const oH = Math.round(hole.outer_height * 1000)
+          const iW = mmToDsnUnits(hole.hole_width, pcb.resolution)
+          const iH = mmToDsnUnits(hole.hole_height, pcb.resolution)
+          const oW = mmToDsnUnits(hole.outer_width, pcb.resolution)
+          const oH = mmToDsnUnits(hole.outer_height, pcb.resolution)
           pcb.library.padstacks.push(
             createOvalPadstack(name, oW, oH, iW, iH, numLayers),
           )
@@ -75,9 +76,9 @@ export function processPlatedHoles(
           layer: "all",
         })
         if (!processedPadstacks.has(name)) {
-          const oW = Math.round(hole.rect_pad_width * 1000)
-          const oH = Math.round(hole.rect_pad_height * 1000)
-          const hD = Math.round(hole.hole_diameter * 1000)
+          const oW = mmToDsnUnits(hole.rect_pad_width, pcb.resolution)
+          const oH = mmToDsnUnits(hole.rect_pad_height, pcb.resolution)
+          const hD = mmToDsnUnits(hole.hole_diameter, pcb.resolution)
           pcb.library.padstacks.push(
             createCircularHoleRectangularPadstack(name, oW, oH, hD, numLayers),
           )
@@ -172,8 +173,12 @@ export function processPlatedHoles(
       const pin: Pin = {
         padstack_name: padstackName,
         pin_number: pinNumber,
-        x: (Number(hole.x.toFixed(3)) - pcbComponent.center.x) * 1000,
-        y: (Number(hole.y.toFixed(3)) - pcbComponent.center.y) * 1000,
+        x:
+          (Number(hole.x.toFixed(3)) - pcbComponent.center.x) *
+          dsnUnitsPerMm,
+        y:
+          (Number(hole.y.toFixed(3)) - pcbComponent.center.y) *
+          dsnUnitsPerMm,
       }
 
       // Avoid duplicates
@@ -193,7 +198,7 @@ export function processPlatedHoles(
 
       componentsByFootprint.get(key)!.push({
         componentName: sourceComponent?.name || "Unknown",
-        coordinates: applyToPoint(transformMmToUm, pcbComponent.center),
+        coordinates: applyToPoint(transformMmToDsn, pcbComponent.center),
         rotation: pcbComponent.rotation || 0,
         value: getComponentValue(sourceComponent),
         sourceComponent,
