@@ -5,6 +5,7 @@ import type { AnyCircuitElement, PcbBoard } from "circuit-json"
 import { pairs } from "lib/utils/pairs"
 import type { DsnPcb } from "../types"
 import { convertDsnPcbComponentsToSourceComponentsAndPorts } from "./dsn-component-converters/convert-dsn-pcb-components-to-source-components-and-ports"
+import { convertImageOutlinesToSilkscreenPaths } from "./dsn-component-converters/convert-image-outlines-to-silkscreen-paths"
 import { convertNetsToSourceNetsAndTraces } from "./dsn-component-converters/convert-nets-to-source-nets-and-traces"
 import { convertPadstacksToSmtPads } from "./dsn-component-converters/convert-padstacks-to-smtpads"
 import { convertWiresToPcbTraces } from "./dsn-component-converters/convert-wires-to-traces"
@@ -52,6 +53,13 @@ export function convertDsnPcbToCircuitJson(
 
   // Convert padstacks to SMT pads using the transformation matrix
   elements.push(...convertPadstacksToSmtPads(dsnPcb, transformDsnUnitToMm))
+
+  elements.push(
+    ...convertImageOutlinesToSilkscreenPaths({
+      dsnPcb,
+      transformDsnUnitToMm,
+    }),
+  )
 
   // Convert wires to PCB traces using the transformation matrix
   if (dsnPcb.wiring && dsnPcb.network) {
