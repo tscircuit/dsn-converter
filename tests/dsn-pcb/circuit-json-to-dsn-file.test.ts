@@ -28,3 +28,36 @@ test("circuit json to dsn file", async () => {
     import.meta.path,
   )
 })
+
+test("uses passive display values for placement PN metadata", () => {
+  const circuitElements = JSON.parse(
+    JSON.stringify(circuitJson),
+  ) as AnyCircuitElement[]
+
+  const resistor = circuitElements.find(
+    (element) =>
+      element.type === "source_component" &&
+      element.source_component_id === "source_component_0",
+  ) as any
+  resistor.display_resistance = "10kΩ"
+
+  const capacitor = circuitElements.find(
+    (element) =>
+      element.type === "source_component" &&
+      element.source_component_id === "source_component_1",
+  ) as any
+  capacitor.display_capacitance = "10nF"
+
+  const dsnFile = convertCircuitJsonToDsnString(circuitElements)
+  const dsnJson = parseDsnToDsnJson(dsnFile) as DsnPcb
+  const places = dsnJson.placement.components.flatMap(
+    (component) => component.places,
+  )
+
+  expect(places.find((place) => place.refdes.startsWith("R1_"))?.PN).toBe(
+    "10kΩ",
+  )
+  expect(places.find((place) => place.refdes.startsWith("C1_"))?.PN).toBe(
+    "10nF",
+  )
+})
