@@ -27,6 +27,7 @@ import type {
   Parser as ParserType,
   Path,
   PathShape,
+  Plane,
   Pin,
   Placement,
   Places,
@@ -211,6 +212,7 @@ export function processResolution(nodes: ASTNode[]): Resolution {
 export function processStructure(nodes: ASTNode[]): Structure {
   const structure: Partial<Structure> = {
     layers: [],
+    planes: [],
   }
 
   nodes.forEach((node) => {
@@ -225,6 +227,11 @@ export function processStructure(nodes: ASTNode[]): Structure {
           case "boundary":
             structure.boundary = processBoundary(node.children!.slice(1))
             break
+          case "plane": {
+            const plane = processPlane(node.children!)
+            if (plane) structure.planes!.push(plane)
+            break
+          }
           case "via":
             if (
               node.children![1].type === "Atom" &&
@@ -304,6 +311,27 @@ function processBoundary(nodes: ASTNode[]): Boundary {
     boundary.path = { layer: "", width: 0, coordinates: [] }
   }
   return boundary as Boundary
+}
+
+function processPlane(nodes: ASTNode[]): Plane | null {
+  const netNode = nodes[1]
+  const shapeNode = nodes.find(
+    (node) =>
+      node.type === "List" &&
+      node.children?.[0]?.type === "Atom" &&
+      ["polygon", "circle", "rect", "path"].includes(
+        String(node.children[0].value),
+      ),
+  )
+
+  if (!netNode || netNode.type !== "Atom" || !shapeNode?.children) {
+    return null
+  }
+
+  return {
+    net: String(netNode.value),
+    shape: processShapeContent(shapeNode.children),
+  }
 }
 
 function processPath(nodes: ASTNode[]): Path {
@@ -668,31 +696,35 @@ function processPadstack(nodes: ASTNode[]): Padstack {
 }
 
 function processShape(nodes: ASTNode[]): Shape {
-  const [_, shapeContentNode, ...rest] = nodes
+  const [_, shapeContentNode] = nodes
 
   if (shapeContentNode.type === "List") {
-    const [shapeTypeNode, layerNode, ...shapeData] = shapeContentNode.children!
-
-    if (
-      shapeTypeNode.type === "Atom" &&
-      typeof shapeTypeNode.value === "string"
-    ) {
-      const shapeType = shapeTypeNode.value
-
-      switch (shapeType) {
-        case "polygon":
-          return processPolygonShape(shapeContentNode.children!)
-        case "circle":
-          return processCircleShape(shapeContentNode.children!)
-        case "rect":
-          return processRectShape(shapeContentNode.children!)
-        case "path":
-          return processPathShape(shapeContentNode.children!)
-      }
-    }
+    return processShapeContent(shapeContentNode.children!)
   }
 
   console.error("Shape processing error for nodes:", nodes)
+  throw new Error(`Unknown shape type for nodes: ${JSON.stringify(nodes)}`)
+}
+
+function processShapeContent(nodes: ASTNode[]): Shape {
+  const [shapeTypeNode] = nodes
+
+  if (
+    shapeTypeNode.type === "Atom" &&
+    typeof shapeTypeNode.value === "string"
+  ) {
+    switch (shapeTypeNode.value) {
+      case "polygon":
+        return processPolygonShape(nodes)
+      case "circle":
+        return processCircleShape(nodes)
+      case "rect":
+        return processRectShape(nodes)
+      case "path":
+        return processPathShape(nodes)
+    }
+  }
+
   throw new Error(`Unknown shape type for nodes: ${JSON.stringify(nodes)}`)
 }
 

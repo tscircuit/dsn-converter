@@ -26,6 +26,22 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     return `${padding}(path ${path.layer} ${path.width}  ${stringifyCoordinates(path.coordinates)})`
   }
 
+  const stringifyShape = (shape: any): string => {
+    if (shape.shapeType === "polygon") {
+      return `(polygon ${shape.layer} ${shape.width} ${stringifyCoordinates(shape.coordinates)})`
+    }
+    if (shape.shapeType === "circle") {
+      return `(circle ${shape.layer} ${shape.diameter})`
+    }
+    if (shape.shapeType === "rect") {
+      return `(rect ${shape.layer} ${stringifyCoordinates(shape.coordinates)})`
+    }
+    if (shape.shapeType === "path") {
+      return `(path ${shape.layer} ${shape.width} ${stringifyCoordinates(shape.coordinates)})`
+    }
+    throw new Error(`Unknown DSN shape type: ${shape.shapeType}`)
+  }
+
   // Start with pcb
   result += `(pcb ${dsnJson.filename ? dsnJson.filename : "./converted_dsn.dsn"}\n`
 
@@ -56,6 +72,9 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     result += `${indent}${indent}${indent}${stringifyPath(dsnJson.structure.boundary.path, 0)}\n`
     result += `${indent}${indent})\n`
   }
+  ;(dsnJson.structure.planes ?? []).forEach((plane) => {
+    result += `${indent}${indent}(plane ${stringifyValue(plane.net)} ${stringifyShape(plane.shape)})\n`
+  })
   result += `${indent}${indent}(via ${stringifyValue(dsnJson.structure.via)})\n`
   result += `${indent}${indent}(rule\n`
   result += `${indent}${indent}${indent}(width ${dsnJson.structure.rule.width})\n`
@@ -93,12 +112,8 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   dsnJson.library.padstacks.forEach((padstack) => {
     result += `${indent}${indent}(padstack ${stringifyValue(padstack.name)}\n`
     padstack.shapes.forEach((shape) => {
-      if (shape.shapeType === "polygon") {
-        result += `${indent}${indent}${indent}(shape (polygon ${shape.layer} ${shape.width} ${stringifyCoordinates(shape.coordinates)}))\n`
-      } else if (shape.shapeType === "circle") {
-        result += `${indent}${indent}${indent}(shape (circle ${shape.layer} ${shape.diameter}))\n`
-      } else if (shape.shapeType === "path") {
-        result += `${indent}${indent}${indent}(shape (path ${shape.layer} ${shape.width} ${stringifyCoordinates(shape.coordinates)}))\n`
+      if (["polygon", "circle", "path"].includes(shape.shapeType)) {
+        result += `${indent}${indent}${indent}(shape ${stringifyShape(shape)})\n`
       }
     })
     result += `${indent}${indent}${indent}(attach ${padstack.attach})\n`
