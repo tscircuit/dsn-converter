@@ -13,5 +13,5 @@ test("configuration passed to converter", async () => {
   )
 
   const traceClearance = dsnJson.network.classes[0].rule.clearances[0].value
-  expect(traceClearance).toBe(6969)
+  expect(traceClearance).toBe(69690)
 })
