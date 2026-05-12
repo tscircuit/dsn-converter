@@ -142,6 +142,18 @@ export function processPcbTraces(
               net: netName,
               type: "via",
             })
+
+            currentWire = createWire({
+              layer: point.layer,
+              widthMm: point.width * CJ_TO_DSN_SCALE,
+              netName,
+            })
+            currentWire.path.coordinates.push(prevPoint.x * CJ_TO_DSN_SCALE)
+            currentWire.path.coordinates.push(prevPoint.y * CJ_TO_DSN_SCALE)
+            currentWire.path.coordinates.push(point.x * CJ_TO_DSN_SCALE)
+            currentWire.path.coordinates.push(point.y * CJ_TO_DSN_SCALE)
+            dsnWrapper.addWire(currentWire)
+            currentLayer = point.layer
           }
           continue
         }
