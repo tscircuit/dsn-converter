@@ -185,7 +185,8 @@ export interface Image {
 }
 
 export interface Outline {
-  path: Path
+  path?: Path
+  shape?: Shape
 }
 
 export interface Pin {

@@ -1,4 +1,4 @@
-import type { DsnPcb } from "../types"
+import type { DsnPcb, Outline, Shape } from "../types"
 
 export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   const indent = "  "
@@ -24,6 +24,30 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   const stringifyPath = (path: any, level: number): string => {
     const padding = indent.repeat(level)
     return `${padding}(path ${path.layer} ${path.width}  ${stringifyCoordinates(path.coordinates)})`
+  }
+
+  const stringifyShape = (shape: Shape, level: number): string => {
+    const padding = indent.repeat(level)
+    switch (shape.shapeType) {
+      case "polygon":
+        return `${padding}(polygon ${shape.layer} ${shape.width} ${stringifyCoordinates(shape.coordinates)})`
+      case "circle":
+        return `${padding}(circle ${shape.layer} ${shape.diameter})`
+      case "rect":
+        return `${padding}(rect ${shape.layer} ${stringifyCoordinates(shape.coordinates)})`
+      case "path":
+        return `${padding}(path ${shape.layer} ${shape.width}  ${stringifyCoordinates(shape.coordinates)})`
+    }
+  }
+
+  const stringifyOutline = (outline: Outline, level: number): string => {
+    if (outline.path) {
+      return stringifyPath(outline.path, level)
+    }
+    if (outline.shape) {
+      return stringifyShape(outline.shape, level)
+    }
+    return ""
   }
 
   // Start with pcb
@@ -83,7 +107,7 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   dsnJson.library.images.forEach((image) => {
     result += `${indent}${indent}(image ${stringifyValue(image.name)}\n`
     image.outlines.forEach((outline) => {
-      result += `${indent}${indent}${indent}(outline ${stringifyPath(outline.path, 4)})\n`
+      result += `${indent}${indent}${indent}(outline ${stringifyOutline(outline, 4)})\n`
     })
     image.pins.forEach((pin) => {
       result += `${indent}${indent}${indent}(pin ${pin.padstack_name} ${pin.pin_number} ${pin.x} ${pin.y})\n`

@@ -556,12 +556,23 @@ function processImage(nodes: ASTNode[]): Image {
 function processOutline(nodes: ASTNode[]): Outline {
   const outline: Partial<Outline> = {}
   nodes.forEach((node) => {
-    if (
-      node.type === "List" &&
-      node.children![0].type === "Atom" &&
-      node.children![0].value === "path"
-    ) {
-      outline.path = processPath(node.children!)
+    if (node.type !== "List" || node.children![0].type !== "Atom") {
+      return
+    }
+
+    switch (node.children![0].value) {
+      case "path":
+        outline.path = processPath(node.children!)
+        break
+      case "rect":
+        outline.shape = processRectShape(node.children!)
+        break
+      case "polygon":
+        outline.shape = processPolygonShape(node.children!)
+        break
+      case "circle":
+        outline.shape = processCircleShape(node.children!)
+        break
     }
   })
   return outline as Outline
