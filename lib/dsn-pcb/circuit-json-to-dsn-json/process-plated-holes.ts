@@ -51,8 +51,8 @@ export function processPlatedHoles(
       case "pill": {
         const name = getPadstackName({
           shape: hole.shape,
-          width: hole.hole_width * 1000,
-          height: hole.hole_height * 1000,
+          width: hole.outer_width * 1000,
+          height: hole.outer_height * 1000,
           layer: "all",
         })
         if (!processedPadstacks.has(name)) {
