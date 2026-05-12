@@ -655,6 +655,8 @@ function processPadstack(nodes: ASTNode[]): Padstack {
         const key = keyNode.value
         if (key === "shape") {
           padstack.shapes!.push(processShape(node.children!))
+        } else if (key === "hole") {
+          padstack.hole = processPadstackHole(node.children!)
         } else if (key === "attach") {
           if (rest[0].type === "Atom" && typeof rest[0].value === "string") {
             padstack.attach = rest[0].value
@@ -665,6 +667,39 @@ function processPadstack(nodes: ASTNode[]): Padstack {
   })
 
   return padstack as Padstack
+}
+
+function processPadstackHole(nodes: ASTNode[]): Padstack["hole"] {
+  const isNested = nodes[1]?.type === "List" && !!nodes[1].children
+  const holeNodes = isNested ? nodes[1].children! : nodes
+  const shapeNode = holeNodes[isNested ? 0 : 1]
+
+  if (shapeNode?.type !== "Atom" || typeof shapeNode.value !== "string") {
+    throw new Error("Invalid padstack hole format: missing hole shape")
+  }
+
+  const shape = shapeNode.value
+  if (shape !== "circle" && shape !== "square" && shape !== "oval") {
+    throw new Error(`Unsupported padstack hole shape: ${shape}`)
+  }
+
+  const numericValues = holeNodes
+    .slice(isNested ? 1 : 2)
+    .filter((node) => node.type === "Atom" && typeof node.value === "number")
+    .map((node) => node.value as number)
+
+  if (shape === "circle") {
+    if (numericValues[0] === undefined) {
+      throw new Error("Invalid circular padstack hole format: missing diameter")
+    }
+    return { shape, diameter: numericValues[0] }
+  }
+
+  if (numericValues[0] === undefined || numericValues[1] === undefined) {
+    throw new Error(`Invalid ${shape} padstack hole format: missing dimensions`)
+  }
+
+  return { shape, width: numericValues[0], height: numericValues[1] }
 }
 
 function processShape(nodes: ASTNode[]): Shape {
