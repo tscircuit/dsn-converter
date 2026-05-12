@@ -160,6 +160,13 @@ export function processPCB(nodes: ASTNode[]): DsnPcb {
 export function processParser(nodes: ASTNode[]): ParserType {
   const parser: Partial<ParserType> = {}
   nodes.forEach((node) => {
+    if (node.type === "List" && node.children?.[0]?.type === "Atom") {
+      const key = node.children[0].value
+      if (key === "generated_by_freerouting") {
+        parser.generated_by_freerouting = true
+        return
+      }
+    }
     if (node.type === "List" && node.children && node.children.length >= 2) {
       const [keyNode, valueNode] = node.children
       if (
