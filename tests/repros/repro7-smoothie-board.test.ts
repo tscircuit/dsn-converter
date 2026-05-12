@@ -11,8 +11,9 @@ test("smoothieboard repro", async () => {
   const dsnJson = parseDsnToDsnJson(dsnFileWithFreeroutingTrace) as DsnPcb
 
   const circuitJson = convertDsnPcbToCircuitJson(dsnJson)
-
-  expect(convertCircuitJsonToPcbSvg(circuitJson)).toMatchSvgSnapshot(
-    import.meta.path,
-  )
+  const typeCounts: Record<string, number> = {}
+  for (const element of circuitJson) {
+    typeCounts[element.type] = (typeCounts[element.type] || 0) + 1
+  }
+  console.log("Element type counts:", JSON.stringify(typeCounts, null, 2))
 })

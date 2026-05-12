@@ -112,6 +112,7 @@ export interface Structure {
   boundary: Boundary
   via: string
   rule: Rule
+  planes?: Plane[]
 }
 
 export interface Layer {
@@ -148,6 +149,11 @@ export interface Path {
 export interface Rule {
   width: number
   clearances: Clearance[]
+}
+
+export interface Plane {
+  net: string
+  polygon: PolygonShape
 }
 
 export interface Clearance {
@@ -193,6 +199,7 @@ export interface Pin {
   pin_number: number | string
   x: number
   y: number
+  rotation?: number
 }
 
 export interface Padstack {
