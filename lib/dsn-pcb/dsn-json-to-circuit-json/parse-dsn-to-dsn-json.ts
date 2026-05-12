@@ -36,6 +36,7 @@ import type {
   Rule,
   Shape,
   Structure,
+  ViaRule,
   Wire,
   Wiring,
 } from "../types"
@@ -796,6 +797,7 @@ function processCircleShape(nodes: ASTNode[]): CircleShape {
 export function processNetwork(nodes: ASTNode[]): Network {
   const network: Partial<Network> = {
     nets: [],
+    via_rules: [],
     classes: [],
   }
 
@@ -806,6 +808,8 @@ export function processNetwork(nodes: ASTNode[]): Network {
         const key = keyNode.value
         if (key === "net") {
           network.nets!.push(processNet(node.children!))
+        } else if (key === "via_rule") {
+          network.via_rules!.push(processViaRule(node.children!))
         } else if (key === "class") {
           network.classes!.push(processClass(node.children!))
         }
@@ -840,6 +844,13 @@ function processNet(nodes: ASTNode[]): Net {
     }
   })
   return net as Net
+}
+
+function processViaRule(nodes: ASTNode[]): ViaRule {
+  return {
+    name: nodes[1]?.value?.toString() ?? "",
+    padstack: nodes[2]?.value?.toString() ?? "",
+  }
 }
 
 function processClass(nodes: ASTNode[]): Class {
