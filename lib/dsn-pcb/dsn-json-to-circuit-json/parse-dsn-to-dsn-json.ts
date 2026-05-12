@@ -579,8 +579,13 @@ function processKeepout(nodes: ASTNode[]): Keepout | null {
 
 function processKeepoutShape(nodes: ASTNode[]): Shape {
   const shapeTypeNode = nodes[0]
-  if (shapeTypeNode?.type !== "Atom" || typeof shapeTypeNode.value !== "string") {
-    throw new Error(`Unknown keepout shape type for nodes: ${JSON.stringify(nodes)}`)
+  if (
+    shapeTypeNode?.type !== "Atom" ||
+    typeof shapeTypeNode.value !== "string"
+  ) {
+    throw new Error(
+      `Unknown keepout shape type for nodes: ${JSON.stringify(nodes)}`,
+    )
   }
 
   switch (shapeTypeNode.value) {
