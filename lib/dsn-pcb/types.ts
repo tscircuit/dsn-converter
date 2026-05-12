@@ -23,13 +23,8 @@ export interface DsnPcb {
         index: number
       }
     }>
-    boundary: {
-      path: {
-        layer: string
-        width: number
-        coordinates: number[]
-      }
-    }
+    boundary: Boundary
+    boundaries?: Boundary[]
     via: string
     rule: {
       clearances: Array<{
@@ -110,6 +105,7 @@ export interface Resolution {
 export interface Structure {
   layers: Layer[]
   boundary: Boundary
+  boundaries?: Boundary[]
   via: string
   rule: Rule
 }
