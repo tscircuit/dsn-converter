@@ -75,3 +75,12 @@ test("stringifies non-path image outlines", () => {
   )
   expect(dsnString).toContain("(outline         (circle F.SilkS 200))")
 })
+
+test("rejects unsupported image outlines instead of emitting empty DSN", () => {
+  const dsnJson = parseDsnToDsnJson(dsnWithNonPathOutlines) as DsnPcb
+  dsnJson.library.images[0]!.outlines.push({} as any)
+
+  expect(() => stringifyDsnJson(dsnJson)).toThrow(
+    "Cannot stringify unsupported image outline",
+  )
+})

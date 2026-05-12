@@ -47,7 +47,7 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     if (outline.shape) {
       return stringifyShape(outline.shape, level)
     }
-    return ""
+    throw new Error("Cannot stringify unsupported image outline")
   }
 
   // Start with pcb
