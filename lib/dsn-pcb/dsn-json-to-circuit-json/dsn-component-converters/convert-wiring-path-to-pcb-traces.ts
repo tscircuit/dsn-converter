@@ -9,6 +9,8 @@ import { type Matrix, applyToPoint } from "transformation-matrix"
 import { getTraceLength } from "../../../utils/get-trace-length"
 import type { Wiring } from "../../types"
 
+import { getLayerFromDsnLayer } from "../../../utils/get-layer-from-dsn-layer"
+
 const debug = Debug("dsn-converter:convertWiringPathToPcbTraces")
 
 export const convertWiringPathToPcbTraces = ({
@@ -23,6 +25,7 @@ export const convertWiringPathToPcbTraces = ({
   fromSessionSpace?: boolean
 }): Array<PcbTrace | SourceTrace> => {
   const coordinates = wire.path!.coordinates
+  const dsnLayer = wire.path!.layer
   // Convert coordinates to circuit space using the transformation matrix
   const points: Array<{ x: number; y: number }> = []
   for (let i = 0; i < coordinates.length; i += 2) {
@@ -45,7 +48,7 @@ export const convertWiringPathToPcbTraces = ({
       width: fromSessionSpace
         ? wire.path!.width / 10000 // session space to circuit space
         : wire.path!.width / 1000, // dsn space to circuit space
-      layer: wire.path!.layer.includes("F.") ? "top" : "bottom",
+      layer: getLayerFromDsnLayer(dsnLayer),
     }))
 
     const pcbTrace: PcbTrace = {
