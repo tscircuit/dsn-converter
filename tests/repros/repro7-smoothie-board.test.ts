@@ -16,3 +16,14 @@ test("smoothieboard repro", async () => {
     import.meta.path,
   )
 })
+
+test("smoothieboard vias use DSN padstack dimensions", async () => {
+  const dsnJson = parseDsnToDsnJson(dsnFileWithFreeroutingTrace) as DsnPcb
+
+  const circuitJson = convertDsnPcbToCircuitJson(dsnJson)
+  const via = circuitJson.find((element) => element.type === "pcb_via")
+
+  expect(via).toBeDefined()
+  expect(via?.outer_diameter).toBe(0.8)
+  expect(via?.hole_diameter).toBe(0.4)
+})
