@@ -901,6 +901,18 @@ function processCircuit(nodes: ASTNode[]): Circuit {
       ) {
         circuit.use_via = node.children![1].value
       }
+    } else if (
+      node.type === "List" &&
+      node.children![0].type === "Atom" &&
+      node.children![0].value === "use_layer"
+    ) {
+      circuit.use_layer = node
+        .children!.slice(1)
+        .filter(
+          (child): child is ASTNode & { value: string } =>
+            child.type === "Atom" && typeof child.value === "string",
+        )
+        .map((child) => child.value)
     }
   })
   return circuit as Circuit
