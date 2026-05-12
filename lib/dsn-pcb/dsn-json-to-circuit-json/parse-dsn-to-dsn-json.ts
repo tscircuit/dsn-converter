@@ -1073,6 +1073,31 @@ function processSessionNode(ast: ASTNode): DsnSession {
       child.children[0].value === "routes",
   )
   if (routesNode) {
+    const routesResolutionNode = routesNode.children!.find(
+      (child) =>
+        child.type === "List" &&
+        child.children?.[0].type === "Atom" &&
+        child.children[0].value === "resolution",
+    )
+    if (routesResolutionNode) {
+      session.routes.resolution = processResolution(
+        routesResolutionNode.children!,
+      )
+    }
+
+    const routesParserNode = routesNode.children!.find(
+      (child) =>
+        child.type === "List" &&
+        child.children?.[0].type === "Atom" &&
+        child.children[0].value === "parser",
+    )
+    if (routesParserNode) {
+      session.routes.parser = {
+        ...session.routes.parser,
+        ...processParser(routesParserNode.children!.slice(1)),
+      }
+    }
+
     // Extract library_out section
     const libraryNode = routesNode.children!.find(
       (child) =>

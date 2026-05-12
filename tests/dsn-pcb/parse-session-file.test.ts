@@ -60,3 +60,24 @@ test("parse session file", () => {
   expect(firstPadstack?.shapes[0].layer).toBe("F.Cu")
   expect((firstPadstack?.shapes[0] as any).diameter).toBe(6000)
 })
+
+test("parse session routes resolution and parser metadata", () => {
+  const sessionJson = parseDsnToDsnJson(`(session custom
+  (base_design custom)
+  (placement
+    (resolution um 10)
+  )
+  (routes
+    (resolution mm 1000)
+    (parser
+      (host_cad "Freerouting")
+      (host_version "1.9.0")
+    )
+    (network_out)
+  )
+)`) as DsnSession
+
+  expect(sessionJson.routes.resolution).toEqual({ unit: "mm", value: 1000 })
+  expect(sessionJson.routes.parser.host_cad).toBe("Freerouting")
+  expect(sessionJson.routes.parser.host_version).toBe("1.9.0")
+})
