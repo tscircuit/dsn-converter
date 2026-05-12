@@ -13,5 +13,20 @@ export function getComponentValue(sourceComponent: any): string {
       return `${(capacitanceUF).toFixed(3)}uF`
     }
   }
+  const supplierPartNumber = getFirstSupplierPartNumber(sourceComponent)
+  if (supplierPartNumber !== undefined) return supplierPartNumber
   return ""
+}
+
+function getFirstSupplierPartNumber(sourceComponent: any): string | undefined {
+  const supplierPartNumbers = sourceComponent.supplier_part_numbers
+  if (!supplierPartNumbers) return undefined
+
+  for (const partNumbers of Object.values(supplierPartNumbers)) {
+    if (Array.isArray(partNumbers) && partNumbers.length > 0) {
+      return String(partNumbers[0])
+    }
+  }
+
+  return undefined
 }
