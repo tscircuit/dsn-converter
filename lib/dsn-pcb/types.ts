@@ -180,6 +180,7 @@ export interface Library {
 
 export interface Image {
   name: string
+  side?: string
   outlines: Outline[]
   pins: Pin[]
 }
