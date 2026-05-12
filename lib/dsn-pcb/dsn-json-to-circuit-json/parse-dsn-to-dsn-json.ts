@@ -18,6 +18,7 @@ import type {
   DsnPcb,
   DsnSession,
   Image,
+  Keepout,
   Layer,
   Library,
   Net,
@@ -533,6 +534,7 @@ function processImage(nodes: ASTNode[]): Image {
     image.name = nodes[1].value
   }
   image.outlines = []
+  image.keepouts = []
   image.pins = []
 
   nodes.slice(2).forEach((node) => {
@@ -542,6 +544,9 @@ function processImage(nodes: ASTNode[]): Image {
         const key = keyNode.value
         if (key === "outline") {
           image.outlines!.push(processOutline(node.children!))
+        } else if (key === "keepout") {
+          const keepout = processKeepout(node.children!)
+          if (keepout) image.keepouts!.push(keepout)
         } else if (key === "pin") {
           const pin = processPin(node.children!)
           if (pin) image.pins!.push(pin)
@@ -551,6 +556,45 @@ function processImage(nodes: ASTNode[]): Image {
   })
 
   return image as Image
+}
+
+function processKeepout(nodes: ASTNode[]): Keepout | null {
+  const nameNode = nodes[1]
+  const shapeNode = nodes[2]
+
+  if (
+    nameNode?.type !== "Atom" ||
+    typeof nameNode.value !== "string" ||
+    shapeNode?.type !== "List"
+  ) {
+    debug("Unsupported keepout format:", nodes)
+    return null
+  }
+
+  return {
+    name: nameNode.value,
+    shape: processKeepoutShape(shapeNode.children!),
+  }
+}
+
+function processKeepoutShape(nodes: ASTNode[]): Shape {
+  const shapeTypeNode = nodes[0]
+  if (shapeTypeNode?.type !== "Atom" || typeof shapeTypeNode.value !== "string") {
+    throw new Error(`Unknown keepout shape type for nodes: ${JSON.stringify(nodes)}`)
+  }
+
+  switch (shapeTypeNode.value) {
+    case "circle":
+      return processCircleShape(nodes)
+    case "path":
+      return processPathShape(nodes)
+    case "polygon":
+      return processPolygonShape(nodes)
+    case "rect":
+      return processRectShape(nodes)
+    default:
+      throw new Error(`Unknown keepout shape type: ${shapeTypeNode.value}`)
+  }
 }
 
 function processOutline(nodes: ASTNode[]): Outline {
@@ -775,6 +819,15 @@ function processCircleShape(nodes: ASTNode[]): CircleShape {
   ) {
     circle.layer = shapeNodes[1].value
     circle.diameter = shapeNodes[2].value
+    if (
+      shapeNodes[3]?.type === "Atom" &&
+      typeof shapeNodes[3].value === "number" &&
+      shapeNodes[4]?.type === "Atom" &&
+      typeof shapeNodes[4].value === "number"
+    ) {
+      circle.x = shapeNodes[3].value
+      circle.y = shapeNodes[4].value
+    }
     return circle as CircleShape
   } else {
     // Try to extract coordinates if they exist
