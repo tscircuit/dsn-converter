@@ -999,6 +999,9 @@ function processWire(nodes: ASTNode[]): Wire {
             if (rest[0].type === "Atom" && typeof rest[0].value === "string") {
               wire.net = rest[0].value
             }
+            if (rest[1]?.type === "Atom" && typeof rest[1].value === "number") {
+              wire.net_number = rest[1].value
+            }
             break
           case "clearance_class":
             if (rest[0].type === "Atom" && typeof rest[0].value === "string") {
