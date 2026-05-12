@@ -45,6 +45,7 @@ export interface DsnPcb {
   library: {
     images: Image[]
     padstacks: Padstack[]
+    default_via?: string
   }
   network: {
     nets: Array<{
@@ -176,6 +177,7 @@ export interface Places {
 export interface Library {
   images: Image[]
   padstacks: Padstack[]
+  default_via?: string
 }
 
 export interface Image {
