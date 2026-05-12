@@ -78,6 +78,7 @@ export interface DsnPcb {
         coordinates: number[]
       }
       net: string
+      net_number?: number
       type: string
     }>
   }
@@ -280,6 +281,7 @@ export interface Wire {
     coordinates: number[]
   }
   net?: string
+  net_number?: number
   clearance_class?: string
   type?: string
 }
