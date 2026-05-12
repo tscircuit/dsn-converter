@@ -13,6 +13,23 @@ export function tokenizeDsn(input: string): Token[] {
   let i = 0
   const length = input.length
 
+  const isStringQuoteValue = () => {
+    const previousToken = tokens[tokens.length - 1]
+    if (
+      previousToken?.type !== "Symbol" ||
+      previousToken.value !== "string_quote"
+    ) {
+      return false
+    }
+
+    let nextIndex = i + 1
+    while (nextIndex < length && /\s/.test(input[nextIndex])) {
+      nextIndex++
+    }
+
+    return input[nextIndex] === ")"
+  }
+
   while (i < length) {
     const char = input[i]
 
@@ -24,6 +41,9 @@ export function tokenizeDsn(input: string): Token[] {
       i++
     } else if (/\s/.test(char)) {
       // Ignore whitespace
+      i++
+    } else if (char === '"' && isStringQuoteValue()) {
+      tokens.push({ type: "String", value: '"' })
       i++
     } else if (char === '"') {
       // Parse quoted string
