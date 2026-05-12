@@ -15,6 +15,10 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     return value.toString()
   }
 
+  const stringifyRootFilename = (filename?: string): string => {
+    return JSON.stringify(filename || "./converted_dsn.dsn")
+  }
+
   // Helper function to stringify an array of coordinates
   const stringifyCoordinates = (coordinates: number[]): string => {
     return coordinates.join(" ")
@@ -27,7 +31,7 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   }
 
   // Start with pcb
-  result += `(pcb ${dsnJson.filename ? dsnJson.filename : "./converted_dsn.dsn"}\n`
+  result += `(pcb ${stringifyRootFilename(dsnJson.filename)}\n`
 
   // Parser section
   result += `${indent}(parser\n`
