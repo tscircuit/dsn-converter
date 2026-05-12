@@ -78,10 +78,12 @@ export function processPcbTraces(
         circuitElements,
         source_trace?.connected_source_port_ids || [],
       )
+      const sourceTraceNetName =
+        pcbTrace.source_trace_id && sourceTraceConnectedPortIds
+          ? `${pcbTrace.source_trace_id}--${sourceTraceConnectedPortIds}`
+          : undefined
       const netName =
-        source_net?.name ||
-        `${pcbTrace.source_trace_id}--${sourceTraceConnectedPortIds}` ||
-        dsnWrapper.getNextNetId()
+        source_net?.name || sourceTraceNetName || dsnWrapper.getNextNetId()
 
       let currentLayer = ""
       let currentWire: Wire | null = null
