@@ -558,10 +558,16 @@ function processOutline(nodes: ASTNode[]): Outline {
   nodes.forEach((node) => {
     if (
       node.type === "List" &&
-      node.children![0].type === "Atom" &&
-      node.children![0].value === "path"
+      node.children?.[0]?.type === "Atom" &&
+      node.children[0].value === "path"
     ) {
       outline.path = processPath(node.children!)
+    } else if (
+      node.type === "List" &&
+      node.children?.[0]?.type === "Atom" &&
+      typeof node.children[0].value === "string"
+    ) {
+      outline.shape = processShapeContent(node.children!)
     }
   })
   return outline as Outline
@@ -671,24 +677,31 @@ function processShape(nodes: ASTNode[]): Shape {
   const [_, shapeContentNode, ...rest] = nodes
 
   if (shapeContentNode.type === "List") {
-    const [shapeTypeNode, layerNode, ...shapeData] = shapeContentNode.children!
+    return processShapeContent(shapeContentNode.children!)
+  }
 
-    if (
-      shapeTypeNode.type === "Atom" &&
-      typeof shapeTypeNode.value === "string"
-    ) {
-      const shapeType = shapeTypeNode.value
+  console.error("Shape processing error for nodes:", nodes)
+  throw new Error(`Unknown shape type for nodes: ${JSON.stringify(nodes)}`)
+}
 
-      switch (shapeType) {
-        case "polygon":
-          return processPolygonShape(shapeContentNode.children!)
-        case "circle":
-          return processCircleShape(shapeContentNode.children!)
-        case "rect":
-          return processRectShape(shapeContentNode.children!)
-        case "path":
-          return processPathShape(shapeContentNode.children!)
-      }
+function processShapeContent(nodes: ASTNode[]): Shape {
+  const [shapeTypeNode] = nodes
+
+  if (
+    shapeTypeNode.type === "Atom" &&
+    typeof shapeTypeNode.value === "string"
+  ) {
+    const shapeType = shapeTypeNode.value
+
+    switch (shapeType) {
+      case "polygon":
+        return processPolygonShape(nodes)
+      case "circle":
+        return processCircleShape(nodes)
+      case "rect":
+        return processRectShape(nodes)
+      case "path":
+        return processPathShape(nodes)
     }
   }
 
@@ -775,6 +788,13 @@ function processCircleShape(nodes: ASTNode[]): CircleShape {
   ) {
     circle.layer = shapeNodes[1].value
     circle.diameter = shapeNodes[2].value
+    const coordinates = shapeNodes
+      .slice(3)
+      .filter((node) => node.type === "Atom" && typeof node.value === "number")
+      .map((node) => node.value as number)
+    if (coordinates.length > 0) {
+      circle.coordinates = coordinates
+    }
     return circle as CircleShape
   } else {
     // Try to extract coordinates if they exist
