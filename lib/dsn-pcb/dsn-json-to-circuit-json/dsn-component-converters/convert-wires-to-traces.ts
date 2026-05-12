@@ -26,9 +26,6 @@ export function convertWiresToPcbTraces(
     const netName = wire.net
     if (!netName) return
 
-    if (wire.type === "shove_fixed") {
-      return
-    }
     if (processedNets.has(netName)) {
       debug(
         `Already processed wire for net "${netName}" but got another (hopefully not a duplicate wire!)`,
