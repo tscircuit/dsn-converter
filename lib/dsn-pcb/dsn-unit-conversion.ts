@@ -1,4 +1,4 @@
-import type { Resolution } from "../types"
+import type { Resolution } from "./types"
 
 function getResolutionValue(resolution?: Resolution): number {
   return resolution?.value && Number.isFinite(resolution.value)
@@ -29,8 +29,19 @@ export function getDsnUnitsPerMm(resolution?: Resolution): number {
   }
 }
 
+export function getMmPerDsnUnit(resolution?: Resolution): number {
+  return 1 / getDsnUnitsPerMm(resolution)
+}
+
 export function mmToDsnUnits(mm: number, resolution?: Resolution): number {
   return cleanDsnUnits(mm * getDsnUnitsPerMm(resolution))
+}
+
+export function dsnUnitsToMm(
+  dsnUnits: number,
+  resolution?: Resolution,
+): number {
+  return dsnUnits * getMmPerDsnUnit(resolution)
 }
 
 export function micronsToDsnUnits(

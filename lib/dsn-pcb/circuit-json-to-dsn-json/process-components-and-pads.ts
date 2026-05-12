@@ -9,8 +9,8 @@ import { createPinForImage } from "lib/utils/create-pin-for-image"
 import { getComponentValue } from "lib/utils/get-component-value"
 import { getFootprintName } from "lib/utils/get-footprint-name"
 import { applyToPoint, scale } from "transformation-matrix"
+import { getDsnUnitsPerMm } from "../dsn-unit-conversion"
 import type { ComponentGroup, DsnPcb, Image, Pin } from "../types"
-import { getDsnUnitsPerMm } from "./dsn-unit-conversion"
 
 export function processComponentsAndPads(
   componentGroups: ComponentGroup[],

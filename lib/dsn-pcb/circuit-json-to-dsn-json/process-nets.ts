@@ -1,7 +1,7 @@
 import { su } from "@tscircuit/soup-util"
 import type { AnyCircuitElement, SourceTrace } from "circuit-json"
+import { micronsToDsnUnits } from "../dsn-unit-conversion"
 import type { DsnPcb } from "../types"
-import { micronsToDsnUnits } from "./dsn-unit-conversion"
 
 export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
   const componentNameMap = new Map<string, string>()

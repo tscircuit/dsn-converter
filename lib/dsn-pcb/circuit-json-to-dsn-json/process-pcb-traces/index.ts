@@ -7,8 +7,8 @@ import type {
 } from "circuit-json"
 import Debug from "debug"
 import { getCombinedSourcePortName } from "lib/utils/get-combined-source-port-name"
+import { getDsnUnitsPerMm, micronsToDsnUnits } from "../../dsn-unit-conversion"
 import type { DsnPcb, DsnSession, Resolution } from "../../types"
-import { getDsnUnitsPerMm, micronsToDsnUnits } from "../dsn-unit-conversion"
 import { getDsnTraceOperationsWrapper } from "./DsnTraceOperationsWrapper"
 import { findOrCreateViaPadstack } from "./findOrCreateViaPadstack"
 

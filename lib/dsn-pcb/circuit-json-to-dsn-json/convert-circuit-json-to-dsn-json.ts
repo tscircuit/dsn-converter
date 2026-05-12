@@ -4,9 +4,9 @@ import {
   generateLayers,
   getViaPadstackName,
 } from "lib/utils/generate-layers"
+import { micronsToDsnUnits, mmToDsnUnits } from "../dsn-unit-conversion"
 import type { ComponentGroup, DsnPcb, Padstack } from "../types"
 import { processComponentsAndPads } from "./process-components-and-pads"
-import { micronsToDsnUnits, mmToDsnUnits } from "./dsn-unit-conversion"
 import { processNets } from "./process-nets"
 import { processPcbTraces } from "./process-pcb-traces"
 import { processPlatedHoles } from "./process-plated-holes"

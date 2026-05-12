@@ -3,7 +3,7 @@ import {
   generateLayerNames,
   getViaPadstackName,
 } from "lib/utils/generate-layers"
-import { micronsToDsnUnits } from "../dsn-unit-conversion"
+import { micronsToDsnUnits } from "../../dsn-unit-conversion"
 import type { DsnTraceOperationsWrapper } from "./DsnTraceOperationsWrapper"
 
 export function findOrCreateViaPadstack(

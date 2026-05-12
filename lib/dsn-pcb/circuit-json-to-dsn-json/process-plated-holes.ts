@@ -13,8 +13,8 @@ import { getComponentValue } from "lib/utils/get-component-value"
 import { getFootprintName } from "lib/utils/get-footprint-name"
 import { getPadstackName } from "lib/utils/get-padstack-name"
 import { applyToPoint, scale } from "transformation-matrix"
+import { getDsnUnitsPerMm, mmToDsnUnits } from "../dsn-unit-conversion"
 import type { ComponentGroup, DsnPcb, Image, Pin } from "../types"
-import { getDsnUnitsPerMm, mmToDsnUnits } from "./dsn-unit-conversion"
 
 export function processPlatedHoles(
   componentGroups: ComponentGroup[],
