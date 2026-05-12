@@ -69,6 +69,7 @@ export interface DsnPcb {
   }
   wiring: {
     wires: Array<{
+      via_name?: string
       path: {
         layer: string
         width: number
@@ -269,6 +270,7 @@ export interface Wiring {
 }
 
 export interface Wire {
+  via_name?: string
   polyline_path?: {
     layer: string
     width: number
