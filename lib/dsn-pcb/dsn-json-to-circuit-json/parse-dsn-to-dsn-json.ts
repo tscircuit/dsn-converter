@@ -160,6 +160,15 @@ export function processPCB(nodes: ASTNode[]): DsnPcb {
 export function processParser(nodes: ASTNode[]): ParserType {
   const parser: Partial<ParserType> = {}
   nodes.forEach((node) => {
+    if (
+      node.type === "List" &&
+      node.children?.length === 1 &&
+      node.children[0]?.type === "Atom" &&
+      node.children[0].value === "host_version"
+    ) {
+      parser.host_version = ""
+      return
+    }
     if (node.type === "List" && node.children && node.children.length >= 2) {
       const [keyNode, valueNode] = node.children
       if (

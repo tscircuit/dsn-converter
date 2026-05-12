@@ -34,7 +34,7 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   result += `${indent}${indent}(string_quote ")\n`
   result += `${indent}${indent}(space_in_quoted_tokens on)\n`
   result += `${indent}${indent}(host_cad "KiCad's Pcbnew")\n`
-  result += `${indent}${indent}(host_version "${dsnJson.parser.host_version}")\n`
+  result += `${indent}${indent}(host_version "${dsnJson.parser.host_version ?? ""}")\n`
   result += `${indent})\n`
 
   // Resolution and unit
