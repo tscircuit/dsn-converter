@@ -188,7 +188,7 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
 
   // Create a map of unique trace widths to class names
   const traceWidthClassMap = new Map<number, string>()
-  const defaultTraceWidth = 200 // Default width in μm
+  const defaultTraceWidth = 150 // Default network-class trace width in μm
 
   // Always include the default class
   traceWidthClassMap.set(defaultTraceWidth, "kicad_default")
