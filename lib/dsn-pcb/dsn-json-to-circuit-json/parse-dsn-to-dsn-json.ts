@@ -876,6 +876,14 @@ function processClass(nodes: ASTNode[]): Class {
         const key = keyNode.value
         if (key === "circuit") {
           classObj.circuit = processCircuit(node.children!.slice(1))
+        } else if (key === "clearance_class") {
+          if (rest[0]?.type === "Atom" && typeof rest[0].value === "string") {
+            classObj.clearance_class = rest[0].value
+          }
+        } else if (key === "via_rule") {
+          if (rest[0]?.type === "Atom" && typeof rest[0].value === "string") {
+            classObj.via_rule = rest[0].value
+          }
         } else if (key === "rule") {
           classObj.rule = processRule(node.children!.slice(1))
         }
