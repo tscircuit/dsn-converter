@@ -138,7 +138,15 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     if (wire.type === "via") {
       result += `${indent}${indent}(via ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)}))\n`
     } else {
-      result += `${indent}${indent}(wire ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)})(type ${wire.type}))\n`
+      const wirePath = wire.path
+        ? stringifyPath(wire.path, 3)
+        : wire.polyline_path
+          ? `${indent.repeat(3)}(polyline_path ${wire.polyline_path.layer} ${wire.polyline_path.width}  ${stringifyCoordinates(wire.polyline_path.coordinates)})`
+          : null
+      if (!wirePath) {
+        throw new Error("Expected wire to contain path or polyline_path")
+      }
+      result += `${indent}${indent}(wire ${wirePath}(net ${stringifyValue(wire.net)})(type ${wire.type}))\n`
     }
   })
   result += `${indent})\n`
