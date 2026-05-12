@@ -211,6 +211,7 @@ export function processResolution(nodes: ASTNode[]): Resolution {
 export function processStructure(nodes: ASTNode[]): Structure {
   const structure: Partial<Structure> = {
     layers: [],
+    boundaries: [],
   }
 
   nodes.forEach((node) => {
@@ -224,6 +225,7 @@ export function processStructure(nodes: ASTNode[]): Structure {
             break
           case "boundary":
             structure.boundary = processBoundary(node.children!.slice(1))
+            structure.boundaries!.push(structure.boundary)
             break
           case "via":
             if (
@@ -296,14 +298,51 @@ function processBoundary(nodes: ASTNode[]): Boundary {
   const boundary: Partial<Boundary> = {}
   nodes.forEach((node) => {
     if (node.type === "List" && node.children![0].type === "Atom") {
-      boundary.path = processPath(node.children!)
+      const shapeType = node.children![0].value
+      if (shapeType === "path") {
+        boundary.path = processPath(node.children!)
+      } else if (shapeType === "rect") {
+        boundary.rect = processBoundaryRect(node.children!)
+      } else if (shapeType === "polygon") {
+        boundary.polygon = processBoundaryPolygon(node.children!)
+      }
     }
   })
   // Ensure boundary.path is defined
-  if (!boundary.path) {
+  if (!boundary.path && !boundary.rect && !boundary.polygon) {
     boundary.path = { layer: "", width: 0, coordinates: [] }
   }
   return boundary as Boundary
+}
+
+function processBoundaryRect(nodes: ASTNode[]): Boundary["rect"] {
+  return {
+    type:
+      nodes[1]?.type === "Atom" && typeof nodes[1].value === "string"
+        ? nodes[1].value
+        : "",
+    coordinates: nodes
+      .slice(2)
+      .filter((node) => node.type === "Atom" && typeof node.value === "number")
+      .map((node) => node.value as number),
+  }
+}
+
+function processBoundaryPolygon(nodes: ASTNode[]): Boundary["polygon"] {
+  return {
+    type:
+      nodes[1]?.type === "Atom" && typeof nodes[1].value === "string"
+        ? nodes[1].value
+        : "",
+    width:
+      nodes[2]?.type === "Atom" && typeof nodes[2].value === "number"
+        ? nodes[2].value
+        : 0,
+    coordinates: nodes
+      .slice(3)
+      .filter((node) => node.type === "Atom" && typeof node.value === "number")
+      .map((node) => node.value as number),
+  }
 }
 
 function processPath(nodes: ASTNode[]): Path {
