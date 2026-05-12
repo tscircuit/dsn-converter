@@ -49,6 +49,7 @@ export interface DsnPcb {
   network: {
     nets: Array<{
       name: string
+      net_number?: number
       pins: string[]
     }>
     classes: Array<{
@@ -249,6 +250,7 @@ export interface Network {
 
 export interface Net {
   name: string
+  net_number?: number
   pins: string[]
 }
 

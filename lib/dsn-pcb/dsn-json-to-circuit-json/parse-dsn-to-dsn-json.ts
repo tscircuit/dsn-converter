@@ -824,7 +824,13 @@ function processNet(nodes: ASTNode[]): Net {
     debug("net name was not a string", net.name)
   }
 
-  nodes.slice(2).forEach((node) => {
+  let metadataStartIndex = 2
+  if (nodes[2]?.type === "Atom" && typeof nodes[2].value === "number") {
+    net.net_number = nodes[2].value
+    metadataStartIndex = 3
+  }
+
+  nodes.slice(metadataStartIndex).forEach((node) => {
     if (
       node.type === "List" &&
       node.children![0].type === "Atom" &&
