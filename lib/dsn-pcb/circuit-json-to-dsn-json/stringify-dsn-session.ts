@@ -63,6 +63,12 @@ export const stringifyDsnSession = (session: DsnSession): string => {
         result += `${indent}${indent}${indent}${indent}${indent}(path ${wire.path.layer} ${wire.path.width}\n`
         result += `${indent}${indent}${indent}${indent}${indent}${indent}${wire.path.coordinates.join(" ")}\n`
         result += `${indent}${indent}${indent}${indent}${indent})\n`
+        if (wire.clearance_class) {
+          result += `${indent}${indent}${indent}${indent}${indent}(clearance_class ${JSON.stringify(wire.clearance_class)})\n`
+        }
+        if (wire.type && wire.type !== "route") {
+          result += `${indent}${indent}${indent}${indent}${indent}(type ${wire.type})\n`
+        }
         result += `${indent}${indent}${indent}${indent})\n`
       }
     })
