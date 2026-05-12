@@ -236,12 +236,42 @@ export function processStructure(nodes: ASTNode[]): Structure {
           case "rule":
             structure.rule = processRule(node.children!.slice(1))
             break
+          case "snap_angle":
+            if (
+              node.children![1]?.type === "Atom" &&
+              typeof node.children![1].value === "string"
+            ) {
+              structure.snap_angle = node.children![1].value
+            }
+            break
+          case "control":
+            structure.control = processControl(node.children!.slice(1))
+            break
         }
       }
     }
   })
 
   return structure as Structure
+}
+
+function processControl(nodes: ASTNode[]): Structure["control"] {
+  const control: NonNullable<Structure["control"]> = {}
+
+  nodes.forEach((node) => {
+    if (node.type !== "List") return
+    const [keyNode, valueNode] = node.children!
+    if (
+      keyNode.type === "Atom" &&
+      keyNode.value === "via_at_smd" &&
+      valueNode?.type === "Atom" &&
+      typeof valueNode.value === "string"
+    ) {
+      control.via_at_smd = valueNode.value
+    }
+  })
+
+  return control
 }
 
 function processLayer(nodes: ASTNode[]): Layer {

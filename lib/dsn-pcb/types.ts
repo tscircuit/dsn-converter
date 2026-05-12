@@ -31,6 +31,10 @@ export interface DsnPcb {
       }
     }
     via: string
+    snap_angle?: string
+    control?: {
+      via_at_smd?: string
+    }
     rule: {
       clearances: Array<{
         value: number
@@ -111,6 +115,10 @@ export interface Structure {
   layers: Layer[]
   boundary: Boundary
   via: string
+  snap_angle?: string
+  control?: {
+    via_at_smd?: string
+  }
   rule: Rule
 }
 
