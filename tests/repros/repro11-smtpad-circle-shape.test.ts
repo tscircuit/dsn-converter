@@ -16,5 +16,5 @@ test("smtpad shape circle have correct padstack name", async () => {
   expect(padstackName?.length).toBe(1)
   expect(padstackName?.[0].shapes.length).toBe(2)
   expect(padstackName?.[0].hole?.shape).toBe("circle")
-  expect(padstackName?.[0].hole?.diameter).toBe(1600)
+  expect(padstackName?.[0].hole?.diameter).toBe(16000)
 })

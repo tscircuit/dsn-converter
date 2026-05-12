@@ -1,5 +1,6 @@
 import { su } from "@tscircuit/soup-util"
 import type { AnyCircuitElement, SourceTrace } from "circuit-json"
+import { micronsToDsnUnits } from "../dsn-unit-conversion"
 import type { DsnPcb } from "../types"
 
 export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
@@ -213,11 +214,11 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
         rule: {
           clearances: [
             {
-              value: 200,
+              value: micronsToDsnUnits(200, pcb.resolution),
               type: "",
             },
           ],
-          width: traceWidth,
+          width: micronsToDsnUnits(traceWidth, pcb.resolution),
         },
       })
     }

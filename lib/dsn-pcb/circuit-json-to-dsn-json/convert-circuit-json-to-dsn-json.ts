@@ -4,6 +4,7 @@ import {
   generateLayers,
   getViaPadstackName,
 } from "lib/utils/generate-layers"
+import { micronsToDsnUnits, mmToDsnUnits } from "../dsn-unit-conversion"
 import type { ComponentGroup, DsnPcb, Padstack } from "../types"
 import { processComponentsAndPads } from "./process-components-and-pads"
 import { processNets } from "./process-nets"
@@ -29,7 +30,12 @@ export function convertCircuitJsonToDsnJson(
   const numLayers = pcbBoard?.num_layers ?? 2
   const layers = generateLayers(numLayers)
   const layerNames = generateLayerNames(numLayers)
+  const resolution = {
+    unit: "um",
+    value: 10,
+  }
   const defaultViaName = getViaPadstackName(numLayers, 600, 300)
+  const defaultViaDiameter = micronsToDsnUnits(600, resolution)
 
   const pcb: DsnPcb = {
     is_dsn_pcb: true,
@@ -40,10 +46,7 @@ export function convertCircuitJsonToDsnJson(
       space_in_quoted_tokens: "",
       host_cad: "",
     },
-    resolution: {
-      unit: "um",
-      value: 10,
-    },
+    resolution,
     unit: "um",
     structure: {
       layers,
@@ -51,7 +54,7 @@ export function convertCircuitJsonToDsnJson(
         path: {
           layer: "pcb",
           width: 0,
-          coordinates: calculateBoardBoundary(pcbBoard),
+          coordinates: calculateBoardBoundary(pcbBoard, resolution),
         },
       },
       via: defaultViaName,
@@ -59,14 +62,14 @@ export function convertCircuitJsonToDsnJson(
         // Default clearance having fallback value
         clearances: [
           {
-            value: options.traceClearance ?? 150,
+            value: micronsToDsnUnits(options.traceClearance ?? 150, resolution),
           },
           {
-            value: 50,
+            value: micronsToDsnUnits(50, resolution),
             type: "smd_smd",
           },
         ],
-        width: 200,
+        width: micronsToDsnUnits(200, resolution),
       },
     },
     placement: {
@@ -80,7 +83,7 @@ export function convertCircuitJsonToDsnJson(
           shapes: layerNames.map((name) => ({
             shapeType: "circle" as const,
             layer: name,
-            diameter: 600,
+            diameter: defaultViaDiameter,
           })),
           attach: "off",
         },
@@ -100,10 +103,13 @@ export function convertCircuitJsonToDsnJson(
             // Actual value being used in the dsn for the specific network class
             clearances: [
               {
-                value: options.traceClearance ?? 150, // standard value
+                value: micronsToDsnUnits(
+                  options.traceClearance ?? 150,
+                  resolution,
+                ), // standard value
               },
             ],
-            width: 150, // trace width used in freerouting
+            width: micronsToDsnUnits(150, resolution), // trace width used in freerouting
           },
         },
       ],
@@ -121,11 +127,14 @@ export function convertCircuitJsonToDsnJson(
   return pcb
 }
 
-function calculateBoardBoundary(pcbBoard: {
-  width: number
-  height: number
-  center: { x: number; y: number }
-}): number[] {
+function calculateBoardBoundary(
+  pcbBoard: {
+    width: number
+    height: number
+    center: { x: number; y: number }
+  },
+  resolution: DsnPcb["resolution"],
+): number[] {
   // default to 100mm x 100mm if not provided
   const width = pcbBoard?.width ?? 100
   const height = pcbBoard?.height ?? 100
@@ -133,10 +142,10 @@ function calculateBoardBoundary(pcbBoard: {
   const y = pcbBoard?.center?.y ?? 0
 
   // Convert dimensions from mm to μm and calculate corners
-  const halfWidth = (width * 1000) / 2
-  const halfHeight = (height * 1000) / 2
-  const centerX = x * 1000
-  const centerY = y * 1000
+  const halfWidth = mmToDsnUnits(width / 2, resolution)
+  const halfHeight = mmToDsnUnits(height / 2, resolution)
+  const centerX = mmToDsnUnits(x, resolution)
+  const centerY = mmToDsnUnits(y, resolution)
 
   // Return coordinates for a rectangular boundary path
   // Format: [x1, y1, x2, y2, x3, y3, x4, y4, x1, y1] to close the path

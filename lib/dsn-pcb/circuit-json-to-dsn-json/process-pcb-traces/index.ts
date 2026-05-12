@@ -7,7 +7,8 @@ import type {
 } from "circuit-json"
 import Debug from "debug"
 import { getCombinedSourcePortName } from "lib/utils/get-combined-source-port-name"
-import type { DsnPcb, DsnSession } from "../../types"
+import { getDsnUnitsPerMm, micronsToDsnUnits } from "../../dsn-unit-conversion"
+import type { DsnPcb, DsnSession, Resolution } from "../../types"
 import { getDsnTraceOperationsWrapper } from "./DsnTraceOperationsWrapper"
 import { findOrCreateViaPadstack } from "./findOrCreateViaPadstack"
 
@@ -58,7 +59,11 @@ export function processPcbTraces(
   numLayers = 2,
 ) {
   const dsnWrapper = getDsnTraceOperationsWrapper(pcb)
-  const CJ_TO_DSN_SCALE = pcb.is_dsn_pcb ? 1000 : 10000
+  const resolution: Resolution = pcb.is_dsn_pcb
+    ? pcb.resolution
+    : pcb.routes.resolution
+  const CJ_TO_DSN_SCALE = getDsnUnitsPerMm(resolution)
+  const defaultViaDiameter = micronsToDsnUnits(DEFAULT_VIA_DIAMETER, resolution)
 
   for (const element of circuitElements) {
     if (element.type === "pcb_trace") {
@@ -122,6 +127,7 @@ export function processPcbTraces(
               DEFAULT_VIA_DIAMETER,
               DEFAULT_VIA_HOLE,
               numLayers,
+              resolution,
             )
 
             // Add via reference to structure if not already there
@@ -133,7 +139,7 @@ export function processPcbTraces(
             dsnWrapper.addWire({
               path: {
                 layer: layerRefToDsnLayer(currentLayer as LayerRef),
-                width: DEFAULT_VIA_DIAMETER,
+                width: defaultViaDiameter,
                 coordinates: [
                   prevPoint.x * CJ_TO_DSN_SCALE,
                   prevPoint.y * CJ_TO_DSN_SCALE,
@@ -162,6 +168,7 @@ export function processPcbTraces(
             DEFAULT_VIA_DIAMETER,
             DEFAULT_VIA_HOLE,
             numLayers,
+            resolution,
           )
 
           debug("VIA PADSTACK NAME:", viaPadstackName)
@@ -175,7 +182,7 @@ export function processPcbTraces(
           dsnWrapper.addWire({
             path: {
               layer: layerRefToDsnLayer(point.from_layer),
-              width: DEFAULT_VIA_DIAMETER,
+              width: defaultViaDiameter,
               coordinates: [
                 point.x * CJ_TO_DSN_SCALE,
                 point.y * CJ_TO_DSN_SCALE,
