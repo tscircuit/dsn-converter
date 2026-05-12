@@ -1,8 +1,9 @@
-import type { DsnPcb, Padstack } from "lib/dsn-pcb/types"
+import type { DsnPcb, Padstack, Resolution } from "lib/dsn-pcb/types"
 import {
   generateLayerNames,
   getViaPadstackName,
 } from "lib/utils/generate-layers"
+import { micronsToDsnUnits } from "../dsn-unit-conversion"
 import type { DsnTraceOperationsWrapper } from "./DsnTraceOperationsWrapper"
 
 export function findOrCreateViaPadstack(
@@ -10,8 +11,11 @@ export function findOrCreateViaPadstack(
   outerDiameter: number,
   holeDiameter: number,
   numLayers = 2,
+  resolution?: Resolution,
 ): string {
   const viaName = getViaPadstackName(numLayers, outerDiameter, holeDiameter)
+  const outerDiameterDsnUnits = micronsToDsnUnits(outerDiameter, resolution)
+  const holeDiameterDsnUnits = micronsToDsnUnits(holeDiameter, resolution)
 
   const library = pcb.getLibrary()
 
@@ -28,11 +32,11 @@ export function findOrCreateViaPadstack(
     shapes: generateLayerNames(numLayers).map((layer) => ({
       shapeType: "circle" as const,
       layer,
-      diameter: outerDiameter,
+      diameter: outerDiameterDsnUnits,
     })),
     hole: {
       shape: "circle",
-      diameter: holeDiameter,
+      diameter: holeDiameterDsnUnits,
     },
   }
 
