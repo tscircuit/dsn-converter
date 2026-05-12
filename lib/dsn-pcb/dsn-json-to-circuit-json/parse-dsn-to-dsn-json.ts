@@ -816,7 +816,9 @@ export function processNetwork(nodes: ASTNode[]): Network {
 }
 
 function processNet(nodes: ASTNode[]): Net {
-  const net: Partial<Net> = {}
+  const net: Partial<Net> = {
+    pins: [],
+  }
   if (nodes[1].type === "Atom" && typeof nodes[1].value === "string") {
     net.name = nodes[1].value
   } else {
