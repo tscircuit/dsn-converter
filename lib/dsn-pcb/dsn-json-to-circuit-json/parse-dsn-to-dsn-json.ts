@@ -890,17 +890,26 @@ function processClass(nodes: ASTNode[]): Class {
 function processCircuit(nodes: ASTNode[]): Circuit {
   const circuit: Partial<Circuit> = {}
   nodes.forEach((node) => {
-    if (
-      node.type === "List" &&
-      node.children![0].type === "Atom" &&
-      node.children![0].value === "use_via"
-    ) {
-      if (
-        node.children![1].type === "Atom" &&
-        typeof node.children![1].value === "string"
-      ) {
-        circuit.use_via = node.children![1].value
-      }
+    if (node.type !== "List" || node.children![0].type !== "Atom") {
+      return
+    }
+
+    const key = node.children![0].value
+    const valueNode = node.children![1]
+    if (valueNode?.type !== "Atom" || typeof valueNode.value !== "string") {
+      return
+    }
+
+    switch (key) {
+      case "clearance_class":
+        circuit.clearance_class = valueNode.value
+        break
+      case "use_via":
+        circuit.use_via = valueNode.value
+        break
+      case "via_rule":
+        circuit.via_rule = valueNode.value
+        break
     }
   })
   return circuit as Circuit
