@@ -85,6 +85,8 @@ export function processPcbTraces(
 
       let currentLayer = ""
       let currentWire: Wire | null = null
+      let pendingWireStart: { x: number; y: number; layer: LayerRef } | null =
+        null
 
       // Process each point in the route
       for (let i = 0; i < pcbTrace.route.length; i++) {
@@ -106,6 +108,16 @@ export function processPcbTraces(
 
             dsnWrapper.addWire(currentWire)
             currentLayer = point.layer
+
+            if (pendingWireStart) {
+              if (pendingWireStart.layer === point.layer) {
+                currentWire.path.coordinates.push(
+                  pendingWireStart.x * CJ_TO_DSN_SCALE,
+                  pendingWireStart.y * CJ_TO_DSN_SCALE,
+                )
+              }
+              pendingWireStart = null
+            }
           }
 
           if (currentWire && !hasLayerChanged) {
@@ -186,6 +198,11 @@ export function processPcbTraces(
           })
 
           currentLayer = point.to_layer
+          pendingWireStart = {
+            x: point.x,
+            y: point.y,
+            layer: point.to_layer,
+          }
           currentWire = null // Start fresh wire after via
         }
       }
