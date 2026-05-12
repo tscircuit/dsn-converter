@@ -31,6 +31,7 @@ export interface DsnPcb {
       }
     }
     via: string
+    vias?: string[]
     rule: {
       clearances: Array<{
         value: number
@@ -111,6 +112,7 @@ export interface Structure {
   layers: Layer[]
   boundary: Boundary
   via: string
+  vias?: string[]
   rule: Rule
 }
 

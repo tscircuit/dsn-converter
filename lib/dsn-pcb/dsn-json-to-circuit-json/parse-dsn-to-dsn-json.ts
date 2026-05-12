@@ -226,11 +226,18 @@ export function processStructure(nodes: ASTNode[]): Structure {
             structure.boundary = processBoundary(node.children!.slice(1))
             break
           case "via":
-            if (
-              node.children![1].type === "Atom" &&
-              typeof node.children![1].value === "string"
-            ) {
-              structure.via = node.children![1].value
+            {
+              const vias = node
+                .children!.slice(1)
+                .filter(
+                  (child) =>
+                    child.type === "Atom" && typeof child.value === "string",
+                )
+                .map((child) => child.value as string)
+              if (vias.length > 0) {
+                structure.vias = vias
+                structure.via = vias[0]
+              }
             }
             break
           case "rule":
