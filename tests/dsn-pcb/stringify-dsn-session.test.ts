@@ -25,3 +25,37 @@ test("stringify session file", () => {
   expect(reparsedNet.name).toBe(originalNet.name)
   expect(reparsedNet.wires).toHaveLength(originalNet.wires.length)
 })
+
+test("stringify session parser quote metadata", () => {
+  const sessionJson: DsnSession = {
+    is_dsn_session: true,
+    filename: "session.ses",
+    placement: {
+      resolution: { unit: "um", value: 10 },
+      components: [],
+    },
+    routes: {
+      resolution: { unit: "um", value: 10 },
+      parser: {
+        string_quote: "'",
+        space_in_quoted_tokens: "off",
+        host_cad: "Custom CAD",
+        host_version: "1.2.3",
+      },
+      library_out: {
+        images: [],
+        padstacks: [],
+      },
+      network_out: {
+        nets: [],
+      },
+    },
+  }
+
+  const stringified = stringifyDsnSession(sessionJson)
+
+  expect(stringified).toContain("(string_quote ')")
+  expect(stringified).toContain("(space_in_quoted_tokens off)")
+  expect(stringified).toContain('(host_cad "Custom CAD")')
+  expect(stringified).toContain('(host_version "1.2.3")')
+})
