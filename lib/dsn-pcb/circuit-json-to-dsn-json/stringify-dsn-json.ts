@@ -111,7 +111,7 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   dsnJson.network.nets.forEach((net) => {
     result += `${indent}${indent}(net ${stringifyValue(net.name)}\n`
     if (net.pins.length > 0) {
-      result += `${indent}${indent}${indent}(pins ${net.pins.join(" ")})\n`
+      result += `${indent}${indent}${indent}(pins ${net.pins.map(stringifyValue).join(" ")})\n`
     }
     result += `${indent}${indent})\n`
   })
