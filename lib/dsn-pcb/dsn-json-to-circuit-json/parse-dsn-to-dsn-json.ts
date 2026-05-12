@@ -29,6 +29,7 @@ import type {
   PathShape,
   Pin,
   Placement,
+  PlacementPin,
   Places,
   PolygonShape,
   RectShape,
@@ -477,7 +478,9 @@ function processPlace(nodes: ASTNode[]): Places {
     }
   }
 
-  // Process optional PN (part number) if present
+  const placementPins: PlacementPin[] = []
+
+  // Process optional PN (part number) and per-pin metadata if present
   for (let i = coordIndex + 4; i < nodes.length; i++) {
     const node = nodes[i]
     if (
@@ -489,8 +492,19 @@ function processPlace(nodes: ASTNode[]): Places {
       node.children[1].type === "Atom"
     ) {
       places.PN = String(node.children[1].value)
-      break
+    } else if (
+      node.type === "List" &&
+      node.children &&
+      node.children[0].type === "Atom" &&
+      node.children[0].value === "pin"
+    ) {
+      const pin = processPlacementPin(node.children)
+      if (pin) placementPins.push(pin)
     }
+  }
+
+  if (placementPins.length > 0) {
+    places.pins = placementPins
   }
 
   // Set default values if not present
@@ -499,6 +513,35 @@ function processPlace(nodes: ASTNode[]): Places {
   places.rotation = places.rotation || 0
 
   return places as Places
+}
+
+function processPlacementPin(nodes: ASTNode[]): PlacementPin | null {
+  const pinNumberNode = nodes[1]
+  if (
+    !pinNumberNode ||
+    pinNumberNode.type !== "Atom" ||
+    (typeof pinNumberNode.value !== "number" &&
+      typeof pinNumberNode.value !== "string")
+  ) {
+    return null
+  }
+
+  const pin: PlacementPin = {
+    pin_number: pinNumberNode.value,
+  }
+
+  nodes.slice(2).forEach((node) => {
+    if (
+      node.type === "List" &&
+      node.children?.[0]?.type === "Atom" &&
+      node.children[0].value === "clearance_class" &&
+      node.children[1]?.type === "Atom"
+    ) {
+      pin.clearance_class = String(node.children[1].value)
+    }
+  })
+
+  return pin
 }
 
 export function processLibrary(nodes: ASTNode[]): Library {
