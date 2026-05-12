@@ -817,10 +817,13 @@ export function processNetwork(nodes: ASTNode[]): Network {
 
 function processNet(nodes: ASTNode[]): Net {
   const net: Partial<Net> = {}
-  if (nodes[1].type === "Atom" && typeof nodes[1].value === "string") {
+  if (
+    nodes[1].type === "Atom" &&
+    (typeof nodes[1].value === "string" || typeof nodes[1].value === "number")
+  ) {
     net.name = nodes[1].value
   } else {
-    net.name = nodes[1].value?.toString()
+    net.name = String(nodes[1].value)
     debug("net name was not a string", net.name)
   }
 

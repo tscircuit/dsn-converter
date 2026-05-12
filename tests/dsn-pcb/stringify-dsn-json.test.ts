@@ -68,9 +68,11 @@ test("preserves numeric class net references", () => {
 
   const dsnJson = parseDsnToDsnJson(dsnString) as DsnPcb
 
+  expect(dsnJson.network.nets.map((net) => net.name)).toEqual([1, 2])
   expect(dsnJson.network.classes[0].net_names).toEqual([1, 2])
 
   const reparsedJson = parseDsnToDsnJson(stringifyDsnJson(dsnJson)) as DsnPcb
 
+  expect(reparsedJson.network.nets.map((net) => net.name)).toEqual([1, 2])
   expect(reparsedJson.network.classes[0].net_names).toEqual([1, 2])
 })
