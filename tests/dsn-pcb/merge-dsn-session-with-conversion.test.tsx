@@ -14,13 +14,10 @@ import {
   parseDsnToDsnJson,
   stringifyDsnJson,
 } from "lib"
-import looksSame from "looks-same"
 import { getTestDebugUtils } from "tests/fixtures/get-test-debug-utils"
 
 test("merge-dsn-session-with-conversion", async () => {
-  const { writeDebugFile, getDebugFilePath, debug } = getTestDebugUtils(
-    import.meta.path,
-  )
+  const { writeDebugFile, debug } = getTestDebugUtils(import.meta.path)
 
   // Create initial circuit with two resistors
   const circuit = new Circuit()
@@ -112,11 +109,7 @@ test("merge-dsn-session-with-conversion", async () => {
   }
 
   // Compare SVGs
-  const looksSameResult = await looksSame(
-    getDebugFilePath("circuit.original.svg"),
-    getDebugFilePath("circuit.merged.svg"),
-  )
   // TODO requires fix inside convertCircuitJsonToDsnSession, currently the vias
   // aren't converted properly- reference or adapt the code in processPcbTraces
-  expect(looksSameResult.equal).toBe(true) // Should be identical after merge
+  expect(svgMerged).toBe(svgOriginal) // Should be identical after merge
 })
