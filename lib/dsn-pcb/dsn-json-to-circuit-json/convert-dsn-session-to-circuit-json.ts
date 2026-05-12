@@ -6,6 +6,7 @@ import type {
 } from "circuit-json"
 import Debug from "debug"
 import { applyToPoint, scale } from "transformation-matrix"
+import { getMmPerDsnUnit } from "../dsn-unit-conversion"
 import type { DsnPcb, DsnSession } from "../types"
 import { convertDsnPcbToCircuitJson } from "./convert-dsn-pcb-to-circuit-json"
 import { convertViaToPcbVia } from "./dsn-component-converters/convert-via-to-pcb-via"
@@ -19,7 +20,7 @@ export function convertDsnSessionToCircuitJson(
   circuitJson?: AnyCircuitElement[],
 ): AnyCircuitElement[] {
   // From sesssion space to circuit space
-  const transformUmToMm = scale(1 / 10000)
+  const transformUmToMm = scale(getMmPerDsnUnit(dsnSession.routes.resolution))
   const inputPcbElms = convertDsnPcbToCircuitJson(
     dsnInput as DsnPcb,
     true, // from session space to circuit space
