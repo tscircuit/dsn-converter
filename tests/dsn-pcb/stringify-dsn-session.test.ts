@@ -25,3 +25,43 @@ test("stringify session file", () => {
   expect(reparsedNet.name).toBe(originalNet.name)
   expect(reparsedNet.wires).toHaveLength(originalNet.wires.length)
 })
+
+test("stringify session preserves network_out wire metadata", () => {
+  const sessionJson = parseDsnToDsnJson(`(session routed.ses
+    (base_design board.dsn)
+    (placement
+      (resolution um 10)
+    )
+    (was_is)
+    (routes
+      (resolution um 10)
+      (parser
+        (host_cad "freerouting")
+        (host_version "1.0")
+      )
+      (network_out
+        (net "Net 1"
+          (wire
+            (path F.Cu 200
+              0 0 1000 0
+            )
+            (clearance_class "tight class")
+            (type protect)
+          )
+        )
+      )
+    )
+  )`) as DsnSession
+
+  const stringified = stringifyDsnSession(sessionJson)
+  const reparsed = parseDsnToDsnJson(stringified) as DsnSession
+  const wire = reparsed.routes.network_out.nets[0].wires[0]
+
+  expect(wire.path).toEqual({
+    layer: "F.Cu",
+    width: 200,
+    coordinates: [0, 0, 1000, 0],
+  })
+  expect(wire.clearance_class).toBe("tight class")
+  expect(wire.type).toBe("protect")
+})

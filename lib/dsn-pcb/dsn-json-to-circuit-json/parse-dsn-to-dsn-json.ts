@@ -1128,9 +1128,8 @@ function processSessionNode(ast: ASTNode): DsnSession {
         const net = {
           name: netName,
           wires: wireNodes.map((wireNode) => ({
-            path: processPath(wireNode.children!.slice(1)),
+            ...processWire(wireNode.children!),
             net: netName,
-            type: "route",
           })),
           vias: viaNodes.map((viaNode) => ({
             x: viaNode.children![2].value as number,
