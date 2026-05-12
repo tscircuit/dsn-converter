@@ -63,10 +63,7 @@ export function processPcbTraces(
     ? pcb.resolution
     : pcb.routes.resolution
   const CJ_TO_DSN_SCALE = getDsnUnitsPerMm(resolution)
-  const defaultViaDiameter = micronsToDsnUnits(
-    DEFAULT_VIA_DIAMETER,
-    resolution,
-  )
+  const defaultViaDiameter = micronsToDsnUnits(DEFAULT_VIA_DIAMETER, resolution)
 
   for (const element of circuitElements) {
     if (element.type === "pcb_trace") {

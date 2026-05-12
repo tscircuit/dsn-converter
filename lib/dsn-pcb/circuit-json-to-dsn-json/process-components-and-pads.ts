@@ -112,12 +112,7 @@ export function processComponentsAndPads(
             .source_port.list()
             .find((e) => e.source_port_id === pcbPort?.source_port_id)
 
-          return createPinForImage(
-            pad,
-            pcbComponent,
-            sourcePort,
-            dsnUnitsPerMm,
-          )
+          return createPinForImage(pad, pcbComponent, sourcePort, dsnUnitsPerMm)
         })
         .filter((pin): pin is Pin => pin !== undefined),
     }

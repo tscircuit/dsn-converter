@@ -173,12 +173,8 @@ export function processPlatedHoles(
       const pin: Pin = {
         padstack_name: padstackName,
         pin_number: pinNumber,
-        x:
-          (Number(hole.x.toFixed(3)) - pcbComponent.center.x) *
-          dsnUnitsPerMm,
-        y:
-          (Number(hole.y.toFixed(3)) - pcbComponent.center.y) *
-          dsnUnitsPerMm,
+        x: (Number(hole.x.toFixed(3)) - pcbComponent.center.x) * dsnUnitsPerMm,
+        y: (Number(hole.y.toFixed(3)) - pcbComponent.center.y) * dsnUnitsPerMm,
       }
 
       // Avoid duplicates

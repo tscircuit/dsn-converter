@@ -127,11 +127,14 @@ export function convertCircuitJsonToDsnJson(
   return pcb
 }
 
-function calculateBoardBoundary(pcbBoard: {
-  width: number
-  height: number
-  center: { x: number; y: number }
-}, resolution: DsnPcb["resolution"]): number[] {
+function calculateBoardBoundary(
+  pcbBoard: {
+    width: number
+    height: number
+    center: { x: number; y: number }
+  },
+  resolution: DsnPcb["resolution"],
+): number[] {
   // default to 100mm x 100mm if not provided
   const width = pcbBoard?.width ?? 100
   const height = pcbBoard?.height ?? 100
