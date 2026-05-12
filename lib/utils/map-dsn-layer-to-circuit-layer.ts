@@ -15,7 +15,7 @@ export function mapDsnLayerToCircuitLayer(layerName?: string): LayerRef {
     return "bottom"
   }
 
-  const innerLayerMatch = normalized?.match(/^in([1-6])\.cu$/)
+  const innerLayerMatch = normalized?.match(/^in([1-9]\d*)\.cu$/)
   if (innerLayerMatch) {
     return `inner${innerLayerMatch[1]}` as LayerRef
   }
