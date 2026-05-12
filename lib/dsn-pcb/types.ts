@@ -50,6 +50,9 @@ export interface DsnPcb {
     nets: Array<{
       name: string
       pins: string[]
+      property?: {
+        index?: number
+      }
     }>
     classes: Array<{
       name: string
@@ -250,6 +253,9 @@ export interface Network {
 export interface Net {
   name: string
   pins: string[]
+  property?: {
+    index?: number
+  }
 }
 
 export interface Class {

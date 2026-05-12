@@ -837,6 +837,12 @@ function processNet(nodes: ASTNode[]): Net {
           throw new Error("Invalid pin in net")
         }
       })
+    } else if (
+      node.type === "List" &&
+      node.children![0].type === "Atom" &&
+      node.children![0].value === "property"
+    ) {
+      net.property = processProperty(node.children!.slice(1))
     }
   })
   return net as Net
