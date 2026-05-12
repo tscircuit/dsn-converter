@@ -54,5 +54,18 @@ export function mergeDsnSessionIntoDsnPcb(
     })
   }
 
+  // Add any images from session's library_out to PCB's library
+  if (dsnSession.routes?.library_out?.images) {
+    const existingImageNames = new Set(
+      mergedPcb.library.images.map((image) => image.name),
+    )
+
+    dsnSession.routes.library_out.images.forEach((image) => {
+      if (!existingImageNames.has(image.name)) {
+        mergedPcb.library.images.push(image)
+      }
+    })
+  }
+
   return mergedPcb
 }
