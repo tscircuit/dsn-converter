@@ -817,10 +817,13 @@ export function processNetwork(nodes: ASTNode[]): Network {
 
 function processNet(nodes: ASTNode[]): Net {
   const net: Partial<Net> = {}
-  if (nodes[1].type === "Atom" && typeof nodes[1].value === "string") {
+  if (
+    nodes[1].type === "Atom" &&
+    (typeof nodes[1].value === "string" || typeof nodes[1].value === "number")
+  ) {
     net.name = nodes[1].value
   } else {
-    net.name = nodes[1].value?.toString()
+    net.name = String(nodes[1].value)
     debug("net name was not a string", net.name)
   }
 
@@ -860,10 +863,9 @@ function processClass(nodes: ASTNode[]): Class {
   while (
     i < nodes.length &&
     nodes[i].type === "Atom" &&
-    typeof nodes[i].value === "string" &&
-    nodes[i].value !== undefined
+    (typeof nodes[i].value === "string" || typeof nodes[i].value === "number")
   ) {
-    classObj.net_names.push(nodes[i].value as string)
+    classObj.net_names.push(nodes[i].value as string | number)
     i++
   }
 

@@ -48,13 +48,13 @@ export interface DsnPcb {
   }
   network: {
     nets: Array<{
-      name: string
+      name: string | number
       pins: string[]
     }>
     classes: Array<{
       name: string
       description: string
-      net_names: string[]
+      net_names: Array<string | number>
       circuit: {
         use_via: string
       }
@@ -248,14 +248,14 @@ export interface Network {
 }
 
 export interface Net {
-  name: string
+  name: string | number
   pins: string[]
 }
 
 export interface Class {
   name: string
   description: string
-  net_names: string[]
+  net_names: Array<string | number>
   circuit: Circuit
   rule: Rule
 }
