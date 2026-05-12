@@ -25,3 +25,29 @@ test("stringify session file", () => {
   expect(reparsedNet.name).toBe(originalNet.name)
   expect(reparsedNet.wires).toHaveLength(originalNet.wires.length)
 })
+
+test("stringify session file preserves was_is mappings", () => {
+  const sessionWithWasIs = `(session routed.ses
+  (base_design board.dsn)
+  (placement
+    (resolution um 10)
+  )
+  (was_is
+    (component U1 U1_RENAMED)
+    (net "Net With Spaces" "Net_Renamed")
+  )
+  (routes
+    (resolution um 10)
+    (network_out)
+  )
+)`
+
+  const sessionJson = parseDsnToDsnJson(sessionWithWasIs) as DsnSession
+  const stringified = stringifyDsnSession(sessionJson)
+  const reparsed = parseDsnToDsnJson(stringified) as DsnSession
+
+  expect(reparsed.was_is).toEqual([
+    "(component U1 U1_RENAMED)",
+    '(net "Net With Spaces" Net_Renamed)',
+  ])
+})

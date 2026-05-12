@@ -1065,6 +1065,16 @@ function processSessionNode(ast: ASTNode): DsnSession {
     ).components
   }
 
+  const wasIsNode = ast.children!.find(
+    (child) =>
+      child.type === "List" &&
+      child.children?.[0].type === "Atom" &&
+      child.children[0].value === "was_is",
+  )
+  if (wasIsNode) {
+    session.was_is = wasIsNode.children!.slice(1).map(stringifyAstNode)
+  }
+
   // Extract routes section
   const routesNode = ast.children!.find(
     (child) =>
@@ -1144,6 +1154,19 @@ function processSessionNode(ast: ASTNode): DsnSession {
   }
 
   return session
+}
+
+function stringifyAstNode(node: ASTNode): string {
+  if (node.type === "Atom") {
+    if (typeof node.value === "string") {
+      return /[\s()"]/.test(node.value) || node.value === ""
+        ? JSON.stringify(node.value)
+        : node.value
+    }
+    return String(node.value)
+  }
+
+  return `(${node.children!.map(stringifyAstNode).join(" ")})`
 }
 
 function processPathShape(nodes: ASTNode[]): PathShape {
