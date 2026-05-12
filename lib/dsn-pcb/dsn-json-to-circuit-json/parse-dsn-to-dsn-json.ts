@@ -683,6 +683,7 @@ function processShape(nodes: ASTNode[]): Shape {
         case "polygon":
           return processPolygonShape(shapeContentNode.children!)
         case "circle":
+        case "circ":
           return processCircleShape(shapeContentNode.children!)
         case "rect":
           return processRectShape(shapeContentNode.children!)
@@ -764,7 +765,7 @@ function processCircleShape(nodes: ASTNode[]): CircleShape {
     shapeType: "circle",
   }
 
-  // Handle both direct circle nodes and nested shape nodes
+  // Handle both direct circle/circ nodes and nested shape nodes
   const shapeNodes = nodes[0].value === "shape" ? nodes[1].children! : nodes
 
   if (
