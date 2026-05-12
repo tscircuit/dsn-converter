@@ -19,7 +19,7 @@ test("parses leading-dot decimal DSN path coordinates", () => {
       )
     )
     (boundary
-      (path F.Cu 0.15 .5 1.5 2 .25)
+      (path F.Cu 0.15 .5 1.5 2 .25 5.6843418860808015e-11)
     )
     (via "")
     (rule
@@ -41,7 +41,7 @@ test("parses leading-dot decimal DSN path coordinates", () => {
   const parsed = parseDsnToDsnJson(dsn) as DsnPcb
 
   expect(parsed.structure.boundary.path.coordinates).toEqual([
-    0.5, 1.5, 2, 0.25,
+    0.5, 1.5, 2, 0.25, 5.6843418860808015e-11,
   ])
   expect(parsed.wiring.wires[0].path?.coordinates).toEqual([
     0.5, 0.75, 1.25, 0.25,
@@ -50,7 +50,7 @@ test("parses leading-dot decimal DSN path coordinates", () => {
 
   const reparsed = parseDsnToDsnJson(stringifyDsnJson(parsed)) as DsnPcb
   expect(reparsed.structure.boundary.path.coordinates).toEqual([
-    0.5, 1.5, 2, 0.25,
+    0.5, 1.5, 2, 0.25, 5.6843418860808015e-11,
   ])
   expect(reparsed.wiring.wires[0].path?.coordinates).toEqual([
     0.5, 0.75, 1.25, 0.25,

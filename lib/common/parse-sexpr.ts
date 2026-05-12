@@ -7,7 +7,7 @@ interface Token {
   value?: string | number
 }
 
-const dsnNumberAtomRegex = /^-?(?:\d+(?:\.\d*)?|\.\d+)$/
+const dsnNumberAtomRegex = /^-?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/
 
 // **Tokenizer Function**
 export function tokenizeDsn(input: string): Token[] {
