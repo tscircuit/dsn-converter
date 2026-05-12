@@ -798,6 +798,8 @@ export function processNetwork(nodes: ASTNode[]): Network {
     nets: [],
     classes: [],
   }
+  const netNodes: ASTNode[] = []
+  const classNodes: ASTNode[] = []
 
   nodes.forEach((node) => {
     if (node.type === "List") {
@@ -805,18 +807,23 @@ export function processNetwork(nodes: ASTNode[]): Network {
       if (keyNode.type === "Atom" && typeof keyNode.value === "string") {
         const key = keyNode.value
         if (key === "net") {
-          network.nets!.push(processNet(node.children!))
+          netNodes.push(node)
         } else if (key === "class") {
-          network.classes!.push(
-            processClass(
-              node.children!,
-              network.nets!.map((net) => net.name),
-            ),
-          )
+          classNodes.push(node)
         }
       }
     }
   })
+
+  netNodes.forEach((node) => {
+    network.nets!.push(processNet(node.children!))
+  })
+
+  const knownNetNames = network.nets!.map((net) => net.name)
+  classNodes.forEach((node) => {
+    network.classes!.push(processClass(node.children!, knownNetNames))
+  })
+
   return network as Network
 }
 
