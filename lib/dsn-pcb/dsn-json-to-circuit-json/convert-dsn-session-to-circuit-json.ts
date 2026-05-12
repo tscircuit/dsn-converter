@@ -144,6 +144,7 @@ export function convertDsnSessionToCircuitJson(
 
         // Add via point to the first trace that connects to it (not all traces)
         let viaAdded = false
+        let linkedPcbTraceId: string | undefined
         for (const element of sessionElements) {
           if (viaAdded) break
           if (element.type === "pcb_trace") {
@@ -160,6 +161,7 @@ export function convertDsnSessionToCircuitJson(
                   from_layer: fromLayer,
                   to_layer: toLayer,
                 })
+                linkedPcbTraceId = trace.pcb_trace_id
                 viaAdded = true
                 break // Found the matching point, no need to continue checking
               }
@@ -167,15 +169,17 @@ export function convertDsnSessionToCircuitJson(
           }
         }
 
-        sessionElements.push({
-          ...convertViaToPcbVia({
-            x: viaX,
-            y: viaY,
-            netName: net.name,
-            fromLayer,
-            toLayer,
-          }),
+        const pcbVia = convertViaToPcbVia({
+          x: viaX,
+          y: viaY,
+          netName: net.name,
+          fromLayer,
+          toLayer,
         })
+        if (linkedPcbTraceId) {
+          pcbVia.pcb_trace_id = linkedPcbTraceId
+        }
+        sessionElements.push(pcbVia)
       })
     }
   }
