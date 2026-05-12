@@ -20,6 +20,18 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     return coordinates.join(" ")
   }
 
+  const stringifyPinIdentifier = (value: string | number): string => {
+    if (typeof value === "number") {
+      return value.toString()
+    }
+    return /^(?!0$)0\d+$/.test(value) ||
+      /^[+-]\d+$/.test(value) ||
+      /^\d*\.\d+(?:[eE][+-]?\d+)?$/.test(value) ||
+      /^\d+[eE][+-]?\d+$/.test(value)
+      ? stringifyValue(value)
+      : value
+  }
+
   // Helper function to stringify a path
   const stringifyPath = (path: any, level: number): string => {
     const padding = indent.repeat(level)
@@ -86,7 +98,7 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
       result += `${indent}${indent}${indent}(outline ${stringifyPath(outline.path, 4)})\n`
     })
     image.pins.forEach((pin) => {
-      result += `${indent}${indent}${indent}(pin ${pin.padstack_name} ${pin.pin_number} ${pin.x} ${pin.y})\n`
+      result += `${indent}${indent}${indent}(pin ${pin.padstack_name} ${stringifyPinIdentifier(pin.pin_number)} ${pin.x} ${pin.y})\n`
     })
     result += `${indent}${indent})\n`
   })

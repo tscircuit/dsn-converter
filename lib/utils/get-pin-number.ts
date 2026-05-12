@@ -3,13 +3,17 @@ import type { ASTNode } from "../common/parse-sexpr"
 
 const debug = Debug("dsn-converter:getPinNum")
 
+const isCanonicalIntegerString = (value: string) =>
+  /^(?:0|[1-9]\d*)$/.test(value)
+
 /**
- * Process pin identifier from AST nodes and convert to appropriate type
- * Handles both extraction from nodes and type conversion in one step
+ * Process pin identifier from AST nodes and preserve string identifiers.
+ * Bare numeric DSN pins are already tokenized as numbers; string values came
+ * from quoted identifiers or symbols and should not be coerced.
  */
 export function getPinNum(nodes: ASTNode[]): number | string | null {
   // Extract pin number from AST nodes
-  let pinNumber
+  let pinNumber: string | number | undefined
 
   if (nodes[2]?.type === "List" && nodes[2].children) {
     // Pin number is in a List structure
@@ -22,11 +26,9 @@ export function getPinNum(nodes: ASTNode[]): number | string | null {
     return null
   }
 
-  // Now process the extracted/direct value
   if (typeof pinNumber === "number") {
     return pinNumber
   }
-  // Try parsing as number first
-  const parsed = parseInt(String(pinNumber), 10)
-  return Number.isNaN(parsed) ? String(pinNumber) : parsed
+  const pinString = String(pinNumber)
+  return isCanonicalIntegerString(pinString) ? Number(pinString) : pinString
 }
