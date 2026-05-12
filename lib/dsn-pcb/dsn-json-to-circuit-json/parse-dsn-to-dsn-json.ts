@@ -798,6 +798,8 @@ export function processNetwork(nodes: ASTNode[]): Network {
     nets: [],
     classes: [],
   }
+  const netNodes: ASTNode[] = []
+  const classNodes: ASTNode[] = []
 
   nodes.forEach((node) => {
     if (node.type === "List") {
@@ -805,13 +807,23 @@ export function processNetwork(nodes: ASTNode[]): Network {
       if (keyNode.type === "Atom" && typeof keyNode.value === "string") {
         const key = keyNode.value
         if (key === "net") {
-          network.nets!.push(processNet(node.children!))
+          netNodes.push(node)
         } else if (key === "class") {
-          network.classes!.push(processClass(node.children!))
+          classNodes.push(node)
         }
       }
     }
   })
+
+  netNodes.forEach((node) => {
+    network.nets!.push(processNet(node.children!))
+  })
+
+  const knownNetNames = network.nets!.map((net) => net.name)
+  classNodes.forEach((node) => {
+    network.classes!.push(processClass(node.children!, knownNetNames))
+  })
+
   return network as Network
 }
 
@@ -842,20 +854,27 @@ function processNet(nodes: ASTNode[]): Net {
   return net as Net
 }
 
-function processClass(nodes: ASTNode[]): Class {
+function processClass(nodes: ASTNode[], knownNetNames: string[] = []): Class {
   const classObj: Partial<Class> = {}
-  if (
-    nodes[1].type === "Atom" &&
-    typeof nodes[1].value === "string" &&
-    nodes[2].type === "Atom" &&
-    typeof nodes[2].value === "string"
-  ) {
+  if (nodes[1].type === "Atom" && typeof nodes[1].value === "string") {
     classObj.name = nodes[1].value
-    classObj.description = nodes[2].value
+  }
+
+  const knownNetNameSet = new Set(knownNetNames)
+  let i = 2
+  const maybeDescriptionNode = nodes[i]
+  if (
+    maybeDescriptionNode?.type === "Atom" &&
+    typeof maybeDescriptionNode.value === "string" &&
+    !knownNetNameSet.has(maybeDescriptionNode.value)
+  ) {
+    classObj.description = maybeDescriptionNode.value
+    i++
+  } else {
+    classObj.description = ""
   }
 
   // The next nodes until 'circuit' are net names
-  let i = 3
   classObj.net_names = []
   while (
     i < nodes.length &&
