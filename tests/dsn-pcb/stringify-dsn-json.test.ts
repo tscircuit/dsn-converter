@@ -17,3 +17,63 @@ test("stringify dsn json", () => {
   // Test that we can parse the generated string back to the same structure
   // expect(reparsedJson).toEqual(dsnJson)
 })
+
+test("preserves library image side metadata when stringifying", () => {
+  const dsnJson = parseDsnToDsnJson(`(pcb image-side.dsn
+  (parser
+    (string_quote ")
+    (space_in_quoted_tokens on)
+    (host_cad "KiCad's Pcbnew")
+    (host_version "9.0")
+  )
+  (resolution um 10)
+  (unit um)
+  (structure
+    (layer F.Cu
+      (type signal)
+      (property
+        (index 0)
+      )
+    )
+    (boundary
+      (path pcb 0 0 0 1000 0 1000 1000 0 1000 0 0)
+    )
+    (via Via[0-1]_600:300_um)
+    (rule
+      (width 100)
+      (clearance 50)
+    )
+  )
+  (placement)
+  (library
+    (image "Back Side Footprint"
+      (side back)
+      (pin Pad_1 1 0 0)
+    )
+    (padstack Pad_1
+      (shape (circle F.Cu 100))
+      (attach off)
+    )
+  )
+  (network
+    (class kicad_default ""
+      (circuit
+        (use_via Via[0-1]_600:300_um)
+      )
+      (rule
+        (width 100)
+        (clearance 50)
+      )
+    )
+  )
+  (wiring)
+)`) as DsnPcb
+
+  expect(dsnJson.library.images[0].side).toBe("back")
+
+  const dsnString = stringifyDsnJson(dsnJson)
+  expect(dsnString).toContain('(side "back")')
+
+  const reparsedJson = parseDsnToDsnJson(dsnString) as DsnPcb
+  expect(reparsedJson.library.images[0].side).toBe("back")
+})
