@@ -29,6 +29,7 @@ import type {
   PathShape,
   Pin,
   Placement,
+  PlacementPin,
   Places,
   PolygonShape,
   RectShape,
@@ -489,7 +490,19 @@ function processPlace(nodes: ASTNode[]): Places {
       node.children[1].type === "Atom"
     ) {
       places.PN = String(node.children[1].value)
-      break
+    }
+
+    if (
+      node.type === "List" &&
+      node.children &&
+      node.children[0].type === "Atom" &&
+      node.children[0].value === "pin"
+    ) {
+      const pin = processPlacementPin(node.children)
+      if (pin) {
+        places.pins ??= []
+        places.pins.push(pin)
+      }
     }
   }
 
@@ -499,6 +512,30 @@ function processPlace(nodes: ASTNode[]): Places {
   places.rotation = places.rotation || 0
 
   return places as Places
+}
+
+function processPlacementPin(nodes: ASTNode[]): PlacementPin | null {
+  const pinNumberNode = nodes[1]
+  if (pinNumberNode?.type !== "Atom") {
+    return null
+  }
+
+  const pin: PlacementPin = {
+    pin_number: pinNumberNode.value as number | string,
+  }
+
+  for (const node of nodes.slice(2)) {
+    if (
+      node.type === "List" &&
+      node.children?.[0]?.type === "Atom" &&
+      node.children[0].value === "clearance_class" &&
+      node.children[1]?.type === "Atom"
+    ) {
+      pin.clearance_class = String(node.children[1].value)
+    }
+  }
+
+  return pin
 }
 
 export function processLibrary(nodes: ASTNode[]): Library {
