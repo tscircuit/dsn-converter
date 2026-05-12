@@ -27,6 +27,7 @@ export function processComponentsAndPads(
       rotation: number
       value: string
       sourceComponent: SourceComponentBase | undefined
+      side: "front" | "back"
     }>
   >()
 
@@ -48,6 +49,11 @@ export function processComponentsAndPads(
       transformMmToUm,
       pcbComponent!.center,
     )
+    const side =
+      (pcbComponent as { layer?: string }).layer === "bottom" ||
+      pcb_smtpads.every((pad) => pad.layer === "bottom")
+        ? "back"
+        : "front"
 
     if (!componentsByFootprint.has(footprintName)) {
       componentsByFootprint.set(footprintName, [])
@@ -59,6 +65,7 @@ export function processComponentsAndPads(
       rotation: pcbComponent?.rotation || 0,
       value: getComponentValue(sourceComponent),
       sourceComponent,
+      side,
     })
   }
 
@@ -119,7 +126,7 @@ export function processComponentsAndPads(
         refdes: `${component.componentName}_${component.sourceComponent?.source_component_id}`,
         x: component.coordinates.x,
         y: component.coordinates.y,
-        side: "front" as const,
+        side: component.side,
         rotation: component.rotation % 90,
         PN: component.value,
       })),
