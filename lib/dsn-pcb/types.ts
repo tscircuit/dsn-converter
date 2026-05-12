@@ -54,7 +54,7 @@ export interface DsnPcb {
     classes: Array<{
       name: string
       description: string
-      net_names: string[]
+      net_names: Array<string | number>
       circuit: {
         use_via: string
       }
@@ -255,7 +255,7 @@ export interface Net {
 export interface Class {
   name: string
   description: string
-  net_names: string[]
+  net_names: Array<string | number>
   circuit: Circuit
   rule: Rule
 }
