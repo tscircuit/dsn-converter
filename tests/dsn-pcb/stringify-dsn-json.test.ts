@@ -17,3 +17,55 @@ test("stringify dsn json", () => {
   // Test that we can parse the generated string back to the same structure
   // expect(reparsedJson).toEqual(dsnJson)
 })
+
+test("preserves empty parser host version", () => {
+  const dsnJson = parseDsnToDsnJson(`(pcb empty-host-version.dsn
+  (parser
+    (string_quote ")
+    (space_in_quoted_tokens on)
+    (host_cad "KiCad's Pcbnew")
+    (host_version )
+  )
+  (resolution um 10)
+  (unit um)
+  (structure
+    (layer F.Cu
+      (type signal)
+      (property
+        (index 0)
+      )
+    )
+    (boundary
+      (path pcb 0 0 0 1000 0 1000 1000 0 1000 0 0)
+    )
+    (via Via[0-1]_600:300_um)
+    (rule
+      (width 100)
+      (clearance 50)
+    )
+  )
+  (placement)
+  (library)
+  (network
+    (class kicad_default ""
+      (circuit
+        (use_via Via[0-1]_600:300_um)
+      )
+      (rule
+        (width 100)
+        (clearance 50)
+      )
+    )
+  )
+  (wiring)
+)`) as DsnPcb
+
+  expect(dsnJson.parser.host_version).toBe("")
+
+  const dsnString = stringifyDsnJson(dsnJson)
+  expect(dsnString).toContain('(host_version "")')
+  expect(dsnString).not.toContain("undefined")
+
+  const reparsedJson = parseDsnToDsnJson(dsnString) as DsnPcb
+  expect(reparsedJson.parser.host_version).toBe("")
+})
