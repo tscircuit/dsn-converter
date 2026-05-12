@@ -17,3 +17,41 @@ test("stringify dsn json", () => {
   // Test that we can parse the generated string back to the same structure
   // expect(reparsedJson).toEqual(dsnJson)
 })
+
+test("parses numeric atoms in network pin lists as pin references", () => {
+  const dsnJson = parseDsnToDsnJson(`(pcb numeric-net-pins
+  (parser
+    (string_quote ")
+    (space_in_quoted_tokens on)
+    (host_cad "fixture")
+    (host_version "1")
+  )
+  (resolution um 10)
+  (unit um)
+  (structure
+    (layer F.Cu
+      (type signal)
+      (property
+        (index 0)
+      )
+    )
+    (via "")
+    (rule
+      (width 100)
+    )
+  )
+  (placement)
+  (library)
+  (network
+    (net "N1"
+      (pins 1 U1-2 3)
+    )
+  )
+  (wiring)
+)`) as DsnPcb
+
+  expect(dsnJson.network.nets[0].pins).toEqual(["1", "U1-2", "3"])
+
+  const reparsedJson = parseDsnToDsnJson(stringifyDsnJson(dsnJson)) as DsnPcb
+  expect(reparsedJson.network.nets[0].pins).toEqual(["1", "U1-2", "3"])
+})

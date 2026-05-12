@@ -831,11 +831,14 @@ function processNet(nodes: ASTNode[]): Net {
       node.children![0].value === "pins"
     ) {
       net.pins = node.children!.slice(1).map((pinNode) => {
-        if (pinNode.type === "Atom" && typeof pinNode.value === "string") {
-          return pinNode.value
-        } else {
-          throw new Error("Invalid pin in net")
+        if (
+          pinNode.type === "Atom" &&
+          (typeof pinNode.value === "string" ||
+            typeof pinNode.value === "number")
+        ) {
+          return String(pinNode.value)
         }
+        throw new Error("Invalid pin in net")
       })
     }
   })
