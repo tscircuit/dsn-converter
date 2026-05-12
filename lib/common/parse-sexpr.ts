@@ -7,6 +7,8 @@ interface Token {
   value?: string | number
 }
 
+const dsnNumberAtomRegex = /^-?(?:\d+(?:\.\d*)?|\.\d+)$/
+
 // **Tokenizer Function**
 export function tokenizeDsn(input: string): Token[] {
   const tokens: Token[] = []
@@ -44,30 +46,18 @@ export function tokenizeDsn(input: string): Token[] {
       }
       i++ // Skip the closing quote
       tokens.push({ type: "String", value })
-    } else if (
-      char === "-" ||
-      (char === "." && /\d/.test(input[i + 1] ?? "")) ||
-      /\d/.test(char)
-    ) {
-      // Parse number (integer or float)
-      let numStr = ""
-      if (char === "-") {
-        numStr += "-"
-        i++
-      }
-      while (i < length && /[\d.]/.test(input[i])) {
-        numStr += input[i]
-        i++
-      }
-      tokens.push({ type: "Number", value: parseFloat(numStr) })
     } else {
-      // Parse symbol
-      let sym = ""
+      let atom = ""
       while (i < length && !/\s|\(|\)/.test(input[i])) {
-        sym += input[i]
+        atom += input[i]
         i++
       }
-      tokens.push({ type: "Symbol", value: sym })
+
+      if (dsnNumberAtomRegex.test(atom)) {
+        tokens.push({ type: "Number", value: parseFloat(atom) })
+      } else {
+        tokens.push({ type: "Symbol", value: atom })
+      }
     }
   }
 

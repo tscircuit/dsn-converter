@@ -26,7 +26,11 @@ test("parses leading-dot decimal DSN path coordinates", () => {
       (width 0.15)
     )
   )
-  (placement)
+  (placement
+    (component C0603
+      (place C1 0 0 front 0 (PN .1uF))
+    )
+  )
   (library)
   (network)
   (wiring
@@ -42,6 +46,7 @@ test("parses leading-dot decimal DSN path coordinates", () => {
   expect(parsed.wiring.wires[0].path?.coordinates).toEqual([
     0.5, 0.75, 1.25, 0.25,
   ])
+  expect(parsed.placement.components[0].places[0].PN).toBe(".1uF")
 
   const reparsed = parseDsnToDsnJson(stringifyDsnJson(parsed)) as DsnPcb
   expect(reparsed.structure.boundary.path.coordinates).toEqual([
@@ -50,4 +55,5 @@ test("parses leading-dot decimal DSN path coordinates", () => {
   expect(reparsed.wiring.wires[0].path?.coordinates).toEqual([
     0.5, 0.75, 1.25, 0.25,
   ])
+  expect(reparsed.placement.components[0].places[0].PN).toBe(".1uF")
 })
