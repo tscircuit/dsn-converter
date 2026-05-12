@@ -10,6 +10,9 @@ test("stringify dsn json", () => {
   const dsnString = stringifyDsnJson(dsnJson)
   const reparsedJson = parseDsnToDsnJson(dsnString) as DsnPcb
 
+  expect(dsnString).toContain('(string_quote "\\"")')
+  expect(reparsedJson.parser).toEqual(dsnJson.parser)
+
   for (const key of Object.keys(reparsedJson) as Array<keyof DsnPcb>) {
     expect(reparsedJson[key]).toEqual(dsnJson[key] as any)
   }
