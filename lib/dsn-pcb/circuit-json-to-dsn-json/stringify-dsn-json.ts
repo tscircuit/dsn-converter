@@ -86,7 +86,9 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
       result += `${indent}${indent}${indent}(outline ${stringifyPath(outline.path, 4)})\n`
     })
     image.pins.forEach((pin) => {
-      result += `${indent}${indent}${indent}(pin ${pin.padstack_name} ${pin.pin_number} ${pin.x} ${pin.y})\n`
+      const rotation =
+        typeof pin.rotation === "number" ? `(rotate ${pin.rotation}) ` : ""
+      result += `${indent}${indent}${indent}(pin ${pin.padstack_name} ${rotation}${pin.pin_number} ${pin.x} ${pin.y})\n`
     })
     result += `${indent}${indent})\n`
   })
