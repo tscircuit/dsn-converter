@@ -3,6 +3,8 @@ import Debug from "debug"
 import type { DsnPcb } from "lib/dsn-pcb/types"
 import { applyToPoint } from "transformation-matrix"
 
+import { getLayerFromDsnLayer } from "../../../utils/get-layer-from-dsn-layer"
+
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
 
 export function convertPadstacksToSmtPads(
@@ -117,9 +119,7 @@ export function convertPadstacksToSmtPads(
 
         let pcbPad: PcbSmtPad
         if (rectShape || polygonShape || pathShape) {
-          const layer = padstack.shapes[0].layer.includes("B.")
-            ? "bottom"
-            : "top"
+          const layer = getLayerFromDsnLayer(padstack.shapes[0].layer)
           debug("determining layer with padstack shapes", {
             shapes: padstack.shapes,
             layer,

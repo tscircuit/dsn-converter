@@ -28,7 +28,7 @@ export function convertDsnPcbToCircuitJson(
     height: 10,
     thickness: 1.4,
     material: "fr4",
-    num_layers: 4,
+    num_layers: dsnPcb.structure?.layer?.length ?? 2,
   }
   if (dsnPcb.structure.boundary.path) {
     const boundaryPath = pairs(dsnPcb.structure.boundary.path.coordinates)
