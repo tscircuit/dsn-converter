@@ -27,7 +27,7 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   }
 
   // Start with pcb
-  result += `(pcb ${dsnJson.filename ? dsnJson.filename : "./converted_dsn.dsn"}\n`
+  result += `(pcb ${stringifyValue(dsnJson.filename || "./converted_dsn.dsn")}\n`
 
   // Parser section
   result += `${indent}(parser\n`
