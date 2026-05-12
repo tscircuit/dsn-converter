@@ -25,3 +25,36 @@ test("stringify session file", () => {
   expect(reparsedNet.name).toBe(originalNet.name)
   expect(reparsedNet.wires).toHaveLength(originalNet.wires.length)
 })
+
+test("stringify session preserves placement identifiers with spaces", () => {
+  const sessionJson = parseDsnToDsnJson(`(session routed.ses
+    (base_design board.dsn)
+    (placement
+      (resolution um 10)
+      (component "USB Connector"
+        (place "J 1" 1250 2500 front 90)
+      )
+    )
+    (was_is)
+    (routes
+      (resolution um 10)
+      (parser
+        (host_cad "freerouting")
+        (host_version "1.0")
+      )
+      (network_out)
+    )
+  )`) as DsnSession
+
+  const stringified = stringifyDsnSession(sessionJson)
+  const reparsed = parseDsnToDsnJson(stringified) as DsnSession
+  const component = reparsed.placement.components[0]
+  const place = component.places[0]
+
+  expect(component.name).toBe("USB Connector")
+  expect(place.refdes).toBe("J 1")
+  expect(place.x).toBe(1250)
+  expect(place.y).toBe(2500)
+  expect(place.side).toBe("front")
+  expect(place.rotation).toBe(90)
+})
