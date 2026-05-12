@@ -17,3 +17,23 @@ test("stringify dsn json", () => {
   // Test that we can parse the generated string back to the same structure
   // expect(reparsedJson).toEqual(dsnJson)
 })
+
+test("preserves network class use_layer constraints", () => {
+  const dsnWithUseLayer = testDsnFile.replace(
+    "(use_via Via[0-1]_600:300_um)",
+    "(use_layer F.Cu B.Cu)\n        (use_via Via[0-1]_600:300_um)",
+  )
+  const dsnJson = parseDsnToDsnJson(dsnWithUseLayer) as DsnPcb
+
+  expect(dsnJson.network.classes.map((cls) => cls.circuit.use_layer)).toEqual([
+    ["F.Cu", "B.Cu"],
+  ])
+
+  const dsnString = stringifyDsnJson(dsnJson)
+  expect(dsnString).toContain("(use_layer F.Cu B.Cu)")
+
+  const reparsedJson = parseDsnToDsnJson(dsnString) as DsnPcb
+  expect(
+    reparsedJson.network.classes.map((cls) => cls.circuit.use_layer),
+  ).toEqual([["F.Cu", "B.Cu"]])
+})
