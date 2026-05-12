@@ -5,6 +5,12 @@ import { applyToPoint } from "transformation-matrix"
 
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
 
+function getLayerForCircleShape(shapeLayer: string, placementSide: string) {
+  if (shapeLayer.includes("B.") || shapeLayer === "Bottom") return "bottom"
+  if (shapeLayer.includes("F.") || shapeLayer === "Top") return "top"
+  return placementSide === "front" ? "top" : "bottom"
+}
+
 export function convertPadstacksToSmtPads(
   pcb: DsnPcb,
   transform: any,
@@ -147,7 +153,7 @@ export function convertPadstacksToSmtPads(
             x: circuitX,
             y: circuitY,
             radius: circleShape!.diameter / 2 / 1000,
-            layer: side === "front" ? "top" : "bottom",
+            layer: getLayerForCircleShape(circleShape!.layer, side),
             port_hints: [pin.pin_number.toString()],
           }
         }
