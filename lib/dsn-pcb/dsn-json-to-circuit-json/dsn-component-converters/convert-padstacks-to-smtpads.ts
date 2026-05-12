@@ -5,6 +5,13 @@ import { applyToPoint } from "transformation-matrix"
 
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
 
+function dsnShapeLayerToCircuitLayer(layer: string): "top" | "bottom" {
+  const normalizedLayer = layer.toLowerCase()
+  return normalizedLayer.includes("b.") || normalizedLayer === "bottom"
+    ? "bottom"
+    : "top"
+}
+
 export function convertPadstacksToSmtPads(
   pcb: DsnPcb,
   transform: any,
@@ -117,9 +124,7 @@ export function convertPadstacksToSmtPads(
 
         let pcbPad: PcbSmtPad
         if (rectShape || polygonShape || pathShape) {
-          const layer = padstack.shapes[0].layer.includes("B.")
-            ? "bottom"
-            : "top"
+          const layer = dsnShapeLayerToCircuitLayer(padstack.shapes[0].layer)
           debug("determining layer with padstack shapes", {
             shapes: padstack.shapes,
             layer,
