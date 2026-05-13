@@ -50,10 +50,14 @@ export function parseDsnToDsnJson(dsnString: string): DsnJson {
   // Check if this is a session file or PCB file
   if (ast.type === "List" && ast.children && ast.children[0].type === "Atom") {
     const rootNode = ast.children[0].value
-    if (rootNode === "session") {
+    if (typeof rootNode !== "string") {
+      throw new Error("Invalid DSN file format")
+    }
+    const normalizedRootNode = rootNode.toLowerCase()
+    if (normalizedRootNode === "session") {
       const session = processSessionNode(ast)
       return session
-    } else if (rootNode === "pcb") {
+    } else if (normalizedRootNode === "pcb") {
       // Regular PCB file processing
       const pcb = processPcbNode(ast) as DsnPcb
       return pcb
@@ -70,7 +74,7 @@ function processPcbNode(node: ASTNode): any {
   if (node.type === "List") {
     const [head, ...tail] = node.children!
     if (head.type === "Atom" && typeof head.value === "string") {
-      switch (head.value) {
+      switch (head.value.toLowerCase()) {
         case "session":
           return processSessionNode(node)
         case "pcb":
@@ -583,12 +587,27 @@ function processPin(nodes: ASTNode[]): Pin | null {
     if (pinNumber === null) return null
 
     pin.pin_number = pinNumber
+    const rotateNode = nodes[2]
+    const hasRotateModifier =
+      rotateNode?.type === "List" &&
+      rotateNode.children?.[0]?.type === "Atom" &&
+      rotateNode.children[0].value === "rotate"
+
+    if (
+      hasRotateModifier &&
+      rotateNode.children?.[1]?.type === "Atom" &&
+      typeof rotateNode.children[1].value === "number"
+    ) {
+      pin.rotation = rotateNode.children[1].value
+    }
 
     // Parse coordinates
     let xValue: number | undefined
     let yValue: number | undefined
 
-    for (let i = 3; i < nodes.length; i++) {
+    const coordStartIndex = hasRotateModifier ? 4 : 3
+
+    for (let i = coordStartIndex; i < nodes.length; i++) {
       const node = nodes[i]
       const nextNode = nodes[i + 1]
 
@@ -832,7 +851,7 @@ function processNet(nodes: ASTNode[]): Net {
     ) {
       net.pins = node.children!.slice(1).map((pinNode) => {
         if (pinNode.type === "Atom" && typeof pinNode.value === "string") {
-          return pinNode.value
+          return pinNode.value.replaceAll('"', "")
         } else {
           throw new Error("Invalid pin in net")
         }
