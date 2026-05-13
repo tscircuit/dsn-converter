@@ -485,10 +485,9 @@ function processPlace(nodes: ASTNode[]): Places {
       node.children &&
       node.children[0].type === "Atom" &&
       node.children[0].value === "PN" &&
-      node.children[1] &&
-      node.children[1].type === "Atom"
+      node.children.length > 1
     ) {
-      places.PN = String(node.children[1].value)
+      places.PN = stringifyPlaceMetadataAtoms(node.children.slice(1))
       break
     }
   }
@@ -499,6 +498,13 @@ function processPlace(nodes: ASTNode[]): Places {
   places.rotation = places.rotation || 0
 
   return places as Places
+}
+
+function stringifyPlaceMetadataAtoms(nodes: ASTNode[]): string {
+  return nodes
+    .filter((node) => node.type === "Atom" && node.value !== undefined)
+    .map((node) => String(node.value))
+    .join("")
 }
 
 export function processLibrary(nodes: ASTNode[]): Library {
