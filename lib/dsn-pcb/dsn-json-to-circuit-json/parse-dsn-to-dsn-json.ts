@@ -1,5 +1,4 @@
 import Debug from "debug"
-import { getPinNum } from "lib/utils/get-pin-number"
 import { getViaCoords } from "lib/utils/get-via-coordinates"
 import {
   type ASTNode,
@@ -577,8 +576,37 @@ function processPin(nodes: ASTNode[]): Pin | null {
       return null
     }
     pin.padstack_name = String(nodes[1].value)
-    // check if pin number is in a List structure
-    const pinNumber = getPinNum(nodes)
+
+    let pinNumberNodeIndex = 2
+    const maybeRotationNode = nodes[pinNumberNodeIndex]
+    if (
+      maybeRotationNode?.type === "List" &&
+      maybeRotationNode.children?.[0]?.type === "Atom" &&
+      maybeRotationNode.children[0].value === "rotate"
+    ) {
+      const rotationNode = maybeRotationNode.children[1]
+      if (
+        rotationNode?.type === "Atom" &&
+        typeof rotationNode.value === "number"
+      ) {
+        pin.rotation = rotationNode.value
+      }
+      pinNumberNodeIndex++
+    }
+
+    const pinNumberNode = nodes[pinNumberNodeIndex]
+    let pinNumber: number | string | null = null
+    if (pinNumberNode?.type === "Atom") {
+      const rawPinNumber = pinNumberNode.value
+      if (typeof rawPinNumber === "number") {
+        pinNumber = rawPinNumber
+      } else {
+        const parsed = parseInt(String(rawPinNumber), 10)
+        pinNumber = Number.isNaN(parsed) ? String(rawPinNumber) : parsed
+      }
+    } else {
+      debug("Unsupported pin number format:", nodes)
+    }
 
     if (pinNumber === null) return null
 
@@ -588,7 +616,7 @@ function processPin(nodes: ASTNode[]): Pin | null {
     let xValue: number | undefined
     let yValue: number | undefined
 
-    for (let i = 3; i < nodes.length; i++) {
+    for (let i = pinNumberNodeIndex + 1; i < nodes.length; i++) {
       const node = nodes[i]
       const nextNode = nodes[i + 1]
 
