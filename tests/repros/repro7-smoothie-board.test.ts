@@ -16,6 +16,19 @@ test("smoothieboard repro", async () => {
   )
 
   expect(rotatedPinsParsedAsPinNumbers).toHaveLength(0)
+
+  const tactileSwitchImage = dsnJson.library.images.find(
+    (image) => image.name === "smoothieboard-5driver:TACTILE_SWITCH_SMD",
+  )
+
+  expect(tactileSwitchImage?.pins).toContainEqual(
+    expect.objectContaining({
+      pin_number: 4,
+      x: 2540,
+      y: -1905,
+    }),
+  )
+
   expect(
     circuitJson.filter((element: any) =>
       Object.values(element).some((value) =>
