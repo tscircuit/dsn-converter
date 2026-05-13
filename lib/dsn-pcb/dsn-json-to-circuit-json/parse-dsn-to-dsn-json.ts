@@ -646,7 +646,6 @@ function processPadstack(nodes: ASTNode[]): Padstack {
     padstack.name = nodes[1].value
   }
   padstack.shapes = []
-  padstack.attach = "off" // default value
 
   nodes.slice(2).forEach((node) => {
     if (node.type === "List") {

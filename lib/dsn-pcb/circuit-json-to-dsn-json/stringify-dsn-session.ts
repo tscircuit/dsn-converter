@@ -47,7 +47,9 @@ export const stringifyDsnSession = (session: DsnSession): string => {
           result += `${indent}${indent}${indent}${indent})\n`
         }
       })
-      result += `${indent}${indent}${indent}${indent}(attach ${padstack.attach})\n`
+      if (padstack.attach !== undefined) {
+        result += `${indent}${indent}${indent}${indent}(attach ${padstack.attach})\n`
+      }
       result += `${indent}${indent}${indent})\n`
     })
     result += `${indent}${indent})\n`
