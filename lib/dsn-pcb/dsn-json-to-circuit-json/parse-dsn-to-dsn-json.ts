@@ -906,8 +906,8 @@ function processCircuit(nodes: ASTNode[]): Circuit {
       node.children![0].type === "Atom" &&
       node.children![0].value === "use_layer"
     ) {
-      circuit.use_layer = node.children!
-        .slice(1)
+      circuit.use_layer = node
+        .children!.slice(1)
         .filter(
           (layerNode) =>
             layerNode.type === "Atom" && typeof layerNode.value === "string",
