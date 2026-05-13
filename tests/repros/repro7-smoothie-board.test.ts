@@ -37,6 +37,32 @@ test("smoothieboard repro", async () => {
     ),
   ).toHaveLength(0)
 
+  expect(
+    circuitJson.filter((element: any) =>
+      Object.values(element).some(
+        (value) => typeof value === "number" && !Number.isFinite(value),
+      ),
+    ),
+  ).toHaveLength(0)
+
+  expect(
+    circuitJson.filter((element: any) =>
+      Object.values(element).some((value) => String(value).includes("NaN")),
+    ),
+  ).toHaveLength(0)
+
+  const stringPinSourcePort = circuitJson.find(
+    (element: any) =>
+      element.type === "source_port" && element.name === "Q2-GND2",
+  ) as any
+
+  expect(stringPinSourcePort).toEqual(
+    expect.objectContaining({
+      port_hints: ["GND2"],
+    }),
+  )
+  expect("pin_number" in stringPinSourcePort).toBe(false)
+
   expect(convertCircuitJsonToPcbSvg(circuitJson)).toMatchSvgSnapshot(
     import.meta.path,
   )
