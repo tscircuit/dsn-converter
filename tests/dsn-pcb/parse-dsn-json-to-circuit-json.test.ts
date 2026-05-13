@@ -15,6 +15,21 @@ test("parse s-expr to json", async () => {
   expect(pcbJson).toBeTruthy()
 })
 
+test("parse uppercase PCB root", async () => {
+  const lowerRootPcb = parseDsnToDsnJson(testDsnFile) as DsnPcb
+  const upperRootDsn = testDsnFile.replace(/^\(pcb\b/, "(PCB")
+  const upperRootPcb = parseDsnToDsnJson(upperRootDsn) as DsnPcb
+
+  expect(upperRootPcb.is_dsn_pcb).toBe(true)
+  expect(upperRootPcb.filename).toBe(lowerRootPcb.filename)
+  expect(upperRootPcb.structure.layers.length).toBe(
+    lowerRootPcb.structure.layers.length,
+  )
+  expect(upperRootPcb.library.images.length).toBe(
+    lowerRootPcb.library.images.length,
+  )
+})
+
 test("parse json to circuit json", async () => {
   const pcb = parseDsnToDsnJson(testDsnFile) as DsnPcb
   const circuitJson = convertDsnJsonToCircuitJson(pcb)

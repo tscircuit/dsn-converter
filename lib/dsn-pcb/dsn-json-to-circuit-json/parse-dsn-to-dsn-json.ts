@@ -50,10 +50,14 @@ export function parseDsnToDsnJson(dsnString: string): DsnJson {
   // Check if this is a session file or PCB file
   if (ast.type === "List" && ast.children && ast.children[0].type === "Atom") {
     const rootNode = ast.children[0].value
-    if (rootNode === "session") {
+    if (typeof rootNode !== "string") {
+      throw new Error("Invalid DSN file format")
+    }
+    const normalizedRootNode = rootNode.toLowerCase()
+    if (normalizedRootNode === "session") {
       const session = processSessionNode(ast)
       return session
-    } else if (rootNode === "pcb") {
+    } else if (normalizedRootNode === "pcb") {
       // Regular PCB file processing
       const pcb = processPcbNode(ast) as DsnPcb
       return pcb
@@ -70,7 +74,7 @@ function processPcbNode(node: ASTNode): any {
   if (node.type === "List") {
     const [head, ...tail] = node.children!
     if (head.type === "Atom" && typeof head.value === "string") {
-      switch (head.value) {
+      switch (head.value.toLowerCase()) {
         case "session":
           return processSessionNode(node)
         case "pcb":
