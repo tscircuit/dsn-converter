@@ -851,7 +851,7 @@ function processNet(nodes: ASTNode[]): Net {
     ) {
       net.pins = node.children!.slice(1).map((pinNode) => {
         if (pinNode.type === "Atom" && typeof pinNode.value === "string") {
-          return pinNode.value
+          return pinNode.value.replaceAll('"', "")
         } else {
           throw new Error("Invalid pin in net")
         }

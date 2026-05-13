@@ -9,6 +9,18 @@ import dsnFileWithFreeroutingTrace from "../assets/repro/smoothieboard-repro.dsn
 const getId = (element: Record<string, unknown>) =>
   Object.entries(element).find(([key]) => key.endsWith("_id"))?.[1]
 
+const getUnmatchedNetPins = (dsnJson: DsnPcb, circuitJson: any[]) => {
+  const sourcePortNames = new Set(
+    circuitJson
+      .filter((element) => element.type === "source_port")
+      .map((element) => element.name),
+  )
+  return dsnJson.network.nets
+    .filter((net) => !net.name?.startsWith("unconnected-"))
+    .flatMap((net) => net.pins ?? [])
+    .filter((pin) => !sourcePortNames.has(pin))
+}
+
 const findNonFiniteNumbers = (
   value: unknown,
   path = "root",
@@ -64,6 +76,7 @@ test("smoothieboard converts without malformed Circuit JSON", () => {
   expect(findNonFiniteNumbers(circuitJson)).toEqual([])
   expect(JSON.stringify(circuitJson)).not.toContain("NaN")
   expect(new Set(ids).size).toBe(ids.length)
+  expect(getUnmatchedNetPins(dsnJson, circuitJson)).toEqual([])
   expect(counts.pcb_board).toBe(1)
   expect(counts.pcb_smtpad).toBe(1055)
   expect(counts.pcb_via).toBe(42)
