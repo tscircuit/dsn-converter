@@ -9,9 +9,19 @@ const debug = Debug("dsn-converter:getPinNum")
  */
 export function getPinNum(nodes: ASTNode[]): number | string | null {
   // Extract pin number from AST nodes
-  let pinNumber
+  let pinNumber: string | number | undefined
 
-  if (nodes[2]?.type === "List" && nodes[2].children) {
+  if (
+    nodes[2]?.type === "List" &&
+    nodes[2].children?.[0]?.type === "Atom" &&
+    nodes[2].children[0].value === "rotate"
+  ) {
+    if (nodes[3]?.type !== "Atom") {
+      debug("Unsupported pin number after rotate modifier:", nodes)
+      return null
+    }
+    pinNumber = nodes[3].value
+  } else if (nodes[2]?.type === "List" && nodes[2].children) {
     // Pin number is in a List structure
     pinNumber = nodes[2].children[0]?.value
   } else if (nodes[2]?.type === "Atom") {
@@ -27,6 +37,8 @@ export function getPinNum(nodes: ASTNode[]): number | string | null {
     return pinNumber
   }
   // Try parsing as number first
-  const parsed = parseInt(String(pinNumber), 10)
-  return Number.isNaN(parsed) ? String(pinNumber) : parsed
+  const pinNumberString = String(pinNumber)
+  return /^-?\d+(?:\.\d+)?$/.test(pinNumberString)
+    ? Number(pinNumberString)
+    : pinNumberString
 }

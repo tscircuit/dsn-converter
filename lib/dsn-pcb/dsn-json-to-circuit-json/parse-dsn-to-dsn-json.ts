@@ -587,12 +587,27 @@ function processPin(nodes: ASTNode[]): Pin | null {
     if (pinNumber === null) return null
 
     pin.pin_number = pinNumber
+    const rotateNode = nodes[2]
+    const hasRotateModifier =
+      rotateNode?.type === "List" &&
+      rotateNode.children?.[0]?.type === "Atom" &&
+      rotateNode.children[0].value === "rotate"
+
+    if (
+      hasRotateModifier &&
+      rotateNode.children?.[1]?.type === "Atom" &&
+      typeof rotateNode.children[1].value === "number"
+    ) {
+      pin.rotation = rotateNode.children[1].value
+    }
 
     // Parse coordinates
     let xValue: number | undefined
     let yValue: number | undefined
 
-    for (let i = 3; i < nodes.length; i++) {
+    const coordStartIndex = hasRotateModifier ? 4 : 3
+
+    for (let i = coordStartIndex; i < nodes.length; i++) {
       const node = nodes[i]
       const nextNode = nodes[i + 1]
 
