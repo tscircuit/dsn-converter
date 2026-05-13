@@ -8,6 +8,7 @@ import Debug from "debug"
 import { applyToPoint, scale } from "transformation-matrix"
 import type { DsnPcb, DsnSession } from "../types"
 import { convertDsnPcbToCircuitJson } from "./convert-dsn-pcb-to-circuit-json"
+import { convertPolylinePathToPcbTraces } from "./dsn-component-converters/convert-polyline-path-to-pcb-traces"
 import { convertViaToPcbVia } from "./dsn-component-converters/convert-via-to-pcb-via"
 import { convertWiringPathToPcbTraces } from "./dsn-component-converters/convert-wiring-path-to-pcb-traces"
 
@@ -88,11 +89,27 @@ export function convertDsnSessionToCircuitJson(
 
     // Process wires and vias together in routes
     net.wires?.forEach((wire, wireIdx) => {
+      const netName = `${net.name}_${wireIdx}`
       if ("path" in wire) {
         const traces = convertWiringPathToPcbTraces({
           wire,
           transformUmToMm,
-          netName: `${net.name}_${wireIdx}`,
+          netName,
+        })
+
+        // Update trace IDs to maintain proper linkage
+        traces.forEach((trace) => {
+          trace.source_trace_id = sourceTrace
+            ? sourceTrace.source_trace_id
+            : `source_trace_${net.name}`
+        })
+
+        sessionElements.push(...traces)
+      } else if ("polyline_path" in wire) {
+        const traces = convertPolylinePathToPcbTraces({
+          wire,
+          transformUmToMm,
+          netName,
         })
 
         // Update trace IDs to maintain proper linkage
