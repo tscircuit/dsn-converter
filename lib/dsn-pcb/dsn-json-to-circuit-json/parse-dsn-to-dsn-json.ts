@@ -1,5 +1,5 @@
 import Debug from "debug"
-import { getPinNum } from "lib/utils/get-pin-number"
+import { getPinNum, getPinNumberNodeIndex } from "lib/utils/get-pin-number"
 import { getViaCoords } from "lib/utils/get-via-coordinates"
 import {
   type ASTNode,
@@ -578,9 +578,10 @@ function processPin(nodes: ASTNode[]): Pin | null {
     }
     pin.padstack_name = String(nodes[1].value)
     // check if pin number is in a List structure
+    const pinNumberNodeIndex = getPinNumberNodeIndex(nodes)
     const pinNumber = getPinNum(nodes)
 
-    if (pinNumber === null) return null
+    if (pinNumberNodeIndex === null || pinNumber === null) return null
 
     pin.pin_number = pinNumber
 
@@ -588,7 +589,7 @@ function processPin(nodes: ASTNode[]): Pin | null {
     let xValue: number | undefined
     let yValue: number | undefined
 
-    for (let i = 3; i < nodes.length; i++) {
+    for (let i = pinNumberNodeIndex + 1; i < nodes.length; i++) {
       const node = nodes[i]
       const nextNode = nodes[i + 1]
 
