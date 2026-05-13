@@ -88,6 +88,7 @@ export interface ComponentPlacement {
   places: Array<{
     refdes: string
     PN?: string
+    mirror?: string
     x: number
     y: number
     side: "front" | "back"
@@ -170,6 +171,7 @@ export interface Places {
   y: number
   side: string
   rotation: number
+  mirror?: string
   PN: string
 }
 
