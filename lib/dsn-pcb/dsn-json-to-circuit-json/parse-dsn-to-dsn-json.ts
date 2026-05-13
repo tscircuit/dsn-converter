@@ -225,6 +225,14 @@ export function processStructure(nodes: ASTNode[]): Structure {
           case "boundary":
             structure.boundary = processBoundary(node.children!.slice(1))
             break
+          case "place_boundary":
+            structure.place_boundaries ??= []
+            if (node.children![1]) {
+              structure.place_boundaries.push(
+                processShapeContent(node.children![1]),
+              )
+            }
+            break
           case "via":
             if (
               node.children![1].type === "Atom" &&
@@ -668,8 +676,15 @@ function processPadstack(nodes: ASTNode[]): Padstack {
 }
 
 function processShape(nodes: ASTNode[]): Shape {
-  const [_, shapeContentNode, ...rest] = nodes
+  const shapeContentNode =
+    nodes[0]?.type === "Atom" && nodes[0].value === "shape"
+      ? nodes[1]
+      : nodes[0]
 
+  return processShapeContent(shapeContentNode)
+}
+
+function processShapeContent(shapeContentNode: ASTNode): Shape {
   if (shapeContentNode.type === "List") {
     const [shapeTypeNode, layerNode, ...shapeData] = shapeContentNode.children!
 
@@ -692,8 +707,10 @@ function processShape(nodes: ASTNode[]): Shape {
     }
   }
 
-  console.error("Shape processing error for nodes:", nodes)
-  throw new Error(`Unknown shape type for nodes: ${JSON.stringify(nodes)}`)
+  console.error("Shape processing error for node:", shapeContentNode)
+  throw new Error(
+    `Unknown shape type for node: ${JSON.stringify(shapeContentNode)}`,
+  )
 }
 
 function processRectShape(nodes: ASTNode[]): RectShape {
