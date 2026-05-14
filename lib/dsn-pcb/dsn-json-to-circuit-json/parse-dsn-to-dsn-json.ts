@@ -659,6 +659,19 @@ function processPadstack(nodes: ASTNode[]): Padstack {
           if (rest[0].type === "Atom" && typeof rest[0].value === "string") {
             padstack.attach = rest[0].value
           }
+          const useViaNode = rest.find(
+            (child) =>
+              child.type === "List" &&
+              child.children?.[0]?.type === "Atom" &&
+              child.children[0].value === "use_via",
+          )
+          if (
+            useViaNode?.type === "List" &&
+            useViaNode.children?.[1]?.type === "Atom" &&
+            typeof useViaNode.children[1].value === "string"
+          ) {
+            padstack.attach_use_via = useViaNode.children[1].value
+          }
         }
       }
     }
