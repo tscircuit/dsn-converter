@@ -138,7 +138,7 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     if (wire.type === "via") {
       result += `${indent}${indent}(via ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)}))\n`
     } else {
-      result += `${indent}${indent}(wire ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)})(type ${wire.type}))\n`
+      result += `${indent}${indent}(wire ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)})(type ${wire.type})${wire.attr ? `(attr ${wire.attr})` : ""}${wire.shield ? `(shield ${wire.shield})` : ""}${wire.supply ? "(supply)" : ""})\n`
     }
   })
   result += `${indent})\n`
