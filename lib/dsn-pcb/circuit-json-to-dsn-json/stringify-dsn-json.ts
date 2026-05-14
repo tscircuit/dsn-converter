@@ -102,6 +102,12 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
       }
     })
     result += `${indent}${indent}${indent}(attach ${padstack.attach})\n`
+    if (padstack.rotate) {
+      result += `${indent}${indent}${indent}(rotate ${padstack.rotate})\n`
+    }
+    if (padstack.absolute) {
+      result += `${indent}${indent}${indent}(absolute ${padstack.absolute})\n`
+    }
     result += `${indent}${indent})\n`
   })
   result += `${indent})\n`

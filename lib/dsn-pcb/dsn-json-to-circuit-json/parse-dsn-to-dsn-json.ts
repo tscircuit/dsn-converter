@@ -659,6 +659,14 @@ function processPadstack(nodes: ASTNode[]): Padstack {
           if (rest[0].type === "Atom" && typeof rest[0].value === "string") {
             padstack.attach = rest[0].value
           }
+        } else if (key === "rotate") {
+          if (rest[0].type === "Atom" && typeof rest[0].value === "string") {
+            padstack.rotate = rest[0].value
+          }
+        } else if (key === "absolute") {
+          if (rest[0].type === "Atom" && typeof rest[0].value === "string") {
+            padstack.absolute = rest[0].value
+          }
         }
       }
     }
