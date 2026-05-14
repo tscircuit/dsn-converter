@@ -1010,6 +1010,19 @@ function processWire(nodes: ASTNode[]): Wire {
               wire.type = rest[0].value
             }
             break
+          case "attr":
+            if (rest[0].type === "Atom" && typeof rest[0].value === "string") {
+              wire.attr = rest[0].value
+            }
+            break
+          case "shield":
+            if (rest[0].type === "Atom" && typeof rest[0].value === "string") {
+              wire.shield = rest[0].value
+            }
+            break
+          case "supply":
+            wire.supply = true
+            break
         }
       }
     }
