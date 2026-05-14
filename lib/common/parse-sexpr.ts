@@ -45,7 +45,7 @@ export function tokenizeDsn(input: string): Token[] {
       i++ // Skip the closing quote
       tokens.push({ type: "String", value })
     } else if (char === "-" || /\d/.test(char)) {
-      // Parse number (integer or float)
+      // Parse number or symbol starting with digit/minus (e.g. "3.3V", "5V", "-5V")
       let numStr = ""
       if (char === "-") {
         numStr += "-"
@@ -55,7 +55,27 @@ export function tokenizeDsn(input: string): Token[] {
         numStr += input[i]
         i++
       }
-      tokens.push({ type: "Number", value: parseFloat(numStr) })
+      // Handle scientific notation (e.g. 1.23e-10, 5E+3)
+      if (
+        i < length &&
+        (input[i] === "e" || input[i] === "E") &&
+        i + 1 < length &&
+        (/\d/.test(input[i + 1]) ||
+          ((input[i + 1] === "-" || input[i + 1] === "+") &&
+            i + 2 < length &&
+            /\d/.test(input[i + 2])))
+      ) {
+        numStr += input[i++]
+        if (input[i] === "-" || input[i] === "+") numStr += input[i++]
+        while (i < length && /\d/.test(input[i])) numStr += input[i++]
+      }
+      // If followed by a non-delimiter, this is a symbol not a plain number
+      if (i < length && !/[\s()"]/.test(input[i])) {
+        while (i < length && !/[\s()"]/.test(input[i])) numStr += input[i++]
+        tokens.push({ type: "Symbol", value: numStr })
+      } else {
+        tokens.push({ type: "Number", value: parseFloat(numStr) })
+      }
     } else {
       // Parse symbol
       let sym = ""
