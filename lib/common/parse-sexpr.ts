@@ -33,10 +33,7 @@ export function tokenizeDsn(input: string): Token[] {
       ) {
         nextNonWhitespace++
       }
-      if (
-        nextNonWhitespace >= length ||
-        input[nextNonWhitespace] === ")"
-      ) {
+      if (nextNonWhitespace >= length || input[nextNonWhitespace] === ")") {
         tokens.push({ type: "String", value: '"' })
         i++
         continue
