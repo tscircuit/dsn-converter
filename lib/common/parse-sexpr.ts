@@ -26,6 +26,19 @@ export function tokenizeDsn(input: string): Token[] {
       // Ignore whitespace
       i++
     } else if (char === '"') {
+      let nextNonWhitespace = i + 1
+      while (
+        nextNonWhitespace < length &&
+        /\s/.test(input[nextNonWhitespace])
+      ) {
+        nextNonWhitespace++
+      }
+      if (nextNonWhitespace >= length || input[nextNonWhitespace] === ")") {
+        tokens.push({ type: "String", value: '"' })
+        i++
+        continue
+      }
+
       // Parse quoted string
       let value = ""
       i++ // Skip the opening quote
