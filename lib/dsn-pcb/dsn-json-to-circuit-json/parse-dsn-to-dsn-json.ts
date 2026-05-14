@@ -184,6 +184,12 @@ export function processParser(nodes: ASTNode[]): ParserType {
           case "host_version":
             if (typeof value === "string") parser.host_version = value
             break
+          case "case_sensitive":
+            if (typeof value === "string") parser.case_sensitive = value
+            break
+          case "rotate_first":
+            if (typeof value === "string") parser.rotate_first = value
+            break
         }
       }
     }
