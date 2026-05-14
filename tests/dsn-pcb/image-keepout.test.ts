@@ -27,6 +27,7 @@ const dsnWithImageKeepouts = `(pcb "./image-keepout.dsn"
   (library
     (image "MountingHole"
       (keepout "" (circle Top 3600 10 -20))
+      (keepout (rect Top -5 -6 5 6))
       (via_keepout "hole-copper" (rect Bottom -10 -20 10 20))
     )
   )
@@ -49,6 +50,14 @@ test("preserves image keepout descriptors", () => {
       },
     },
     {
+      type: "keepout",
+      shape: {
+        shapeType: "rect",
+        layer: "Top",
+        values: [-5, -6, 5, 6],
+      },
+    },
+    {
       type: "via_keepout",
       name: "hole-copper",
       shape: {
@@ -61,6 +70,7 @@ test("preserves image keepout descriptors", () => {
 
   const stringified = stringifyDsnJson(dsnJson)
   expect(stringified).toContain('(keepout "" (circle Top 3600 10 -20))')
+  expect(stringified).toContain("(keepout (rect Top -5 -6 5 6))")
   expect(stringified).toContain(
     '(via_keepout "hole-copper" (rect Bottom -10 -20 10 20))',
   )

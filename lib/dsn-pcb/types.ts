@@ -191,7 +191,7 @@ export interface Outline {
 
 export interface ImageKeepout {
   type: "keepout" | "via_keepout"
-  name: string
+  name?: string
   shape: ImageKeepoutShape
 }
 

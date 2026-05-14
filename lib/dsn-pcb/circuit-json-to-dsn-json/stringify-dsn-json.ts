@@ -102,7 +102,9 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
       result += `${indent}${indent}${indent}(pin ${pin.padstack_name} ${pin.pin_number} ${pin.x} ${pin.y})\n`
     })
     image.keepouts?.forEach((keepout) => {
-      result += `${indent}${indent}${indent}(${keepout.type} ${stringifyValue(keepout.name)} ${stringifyImageKeepoutShape(keepout.shape)})\n`
+      const namePart =
+        keepout.name === undefined ? "" : `${stringifyValue(keepout.name)} `
+      result += `${indent}${indent}${indent}(${keepout.type} ${namePart}${stringifyImageKeepoutShape(keepout.shape)})\n`
     })
     result += `${indent}${indent})\n`
   })

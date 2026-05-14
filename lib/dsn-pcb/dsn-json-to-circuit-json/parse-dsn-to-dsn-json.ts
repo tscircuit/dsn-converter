@@ -562,25 +562,38 @@ function processImage(nodes: ASTNode[]): Image {
 }
 
 function processImageKeepout(nodes: ASTNode[]): ImageKeepout | null {
-  const [typeNode, nameNode, shapeNode] = nodes
+  const [typeNode, maybeNameNode, maybeShapeNode] = nodes
 
   if (
     typeNode?.type !== "Atom" ||
-    (typeNode.value !== "keepout" && typeNode.value !== "via_keepout") ||
-    nameNode?.type !== "Atom" ||
-    shapeNode?.type !== "List"
+    (typeNode.value !== "keepout" && typeNode.value !== "via_keepout")
   ) {
     return null
   }
 
+  let name: string | undefined
+  let shapeNode: ASTNode | undefined
+
+  if (maybeNameNode?.type === "List") {
+    shapeNode = maybeNameNode
+  } else if (maybeNameNode?.type === "Atom") {
+    name = String(maybeNameNode.value ?? "")
+    shapeNode = maybeShapeNode
+  }
+
+  if (shapeNode?.type !== "List") return null
+
   const shape = processImageKeepoutShape(shapeNode.children ?? [])
   if (!shape) return null
 
-  return {
+  const keepout: ImageKeepout = {
     type: typeNode.value,
-    name: String(nameNode.value ?? ""),
     shape,
   }
+
+  if (name !== undefined) keepout.name = name
+
+  return keepout
 }
 
 function processImageKeepoutShape(nodes: ASTNode[]): ImageKeepoutShape | null {
