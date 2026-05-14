@@ -35,6 +35,12 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   result += `${indent}${indent}(space_in_quoted_tokens on)\n`
   result += `${indent}${indent}(host_cad "KiCad's Pcbnew")\n`
   result += `${indent}${indent}(host_version "${dsnJson.parser.host_version}")\n`
+  if (dsnJson.parser.routes_include?.length) {
+    result += `${indent}${indent}(routes_include ${dsnJson.parser.routes_include.join(" ")})\n`
+  }
+  if (dsnJson.parser.wires_include?.length) {
+    result += `${indent}${indent}(wires_include ${dsnJson.parser.wires_include.join(" ")})\n`
+  }
   result += `${indent})\n`
 
   // Resolution and unit
