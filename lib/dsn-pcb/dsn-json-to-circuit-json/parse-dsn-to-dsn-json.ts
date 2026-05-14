@@ -540,7 +540,11 @@ function processImage(nodes: ASTNode[]): Image {
       const [keyNode, ...rest] = node.children!
       if (keyNode.type === "Atom" && typeof keyNode.value === "string") {
         const key = keyNode.value
-        if (key === "outline") {
+        if (key === "unit") {
+          if (rest[0]?.type === "Atom" && typeof rest[0].value === "string") {
+            image.unit = rest[0].value
+          }
+        } else if (key === "outline") {
           image.outlines!.push(processOutline(node.children!))
         } else if (key === "pin") {
           const pin = processPin(node.children!)
