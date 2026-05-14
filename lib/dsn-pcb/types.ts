@@ -88,6 +88,7 @@ export interface ComponentPlacement {
   places: Array<{
     refdes: string
     PN?: string
+    lock_type?: string[]
     x: number
     y: number
     side: "front" | "back"
@@ -171,6 +172,7 @@ export interface Places {
   side: string
   rotation: number
   PN: string
+  lock_type?: string[]
 }
 
 export interface Library {
