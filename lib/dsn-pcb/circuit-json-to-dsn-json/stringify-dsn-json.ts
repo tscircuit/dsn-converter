@@ -102,6 +102,13 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
       }
     })
     result += `${indent}${indent}${indent}(attach ${padstack.attach})\n`
+    padstack.via_sites?.forEach((viaSite) => {
+      if (viaSite === "off") {
+        result += `${indent}${indent}${indent}(via_site off)\n`
+      } else {
+        result += `${indent}${indent}${indent}(via_site ${viaSite.x} ${viaSite.y})\n`
+      }
+    })
     result += `${indent}${indent})\n`
   })
   result += `${indent})\n`

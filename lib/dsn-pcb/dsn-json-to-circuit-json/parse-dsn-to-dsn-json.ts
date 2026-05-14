@@ -659,6 +659,22 @@ function processPadstack(nodes: ASTNode[]): Padstack {
           if (rest[0].type === "Atom" && typeof rest[0].value === "string") {
             padstack.attach = rest[0].value
           }
+        } else if (key === "via_site") {
+          if (rest[0]?.type === "Atom" && rest[0].value === "off") {
+            padstack.via_sites ??= []
+            padstack.via_sites.push("off")
+          } else if (
+            rest[0]?.type === "Atom" &&
+            typeof rest[0].value === "number" &&
+            rest[1]?.type === "Atom" &&
+            typeof rest[1].value === "number"
+          ) {
+            padstack.via_sites ??= []
+            padstack.via_sites.push({
+              x: rest[0].value,
+              y: rest[1].value,
+            })
+          }
         }
       }
     }
