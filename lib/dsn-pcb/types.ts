@@ -67,20 +67,7 @@ export interface DsnPcb {
       }
     }>
   }
-  wiring: {
-    wires: Array<{
-      path: {
-        layer: string
-        width: number
-        /**
-         * TODO UNIT?
-         */
-        coordinates: number[]
-      }
-      net: string
-      type: string
-    }>
-  }
+  wiring: Wiring
 }
 
 export interface ComponentPlacement {
