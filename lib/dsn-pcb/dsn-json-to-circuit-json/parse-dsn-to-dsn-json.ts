@@ -1133,6 +1133,10 @@ function processSessionNode(ast: ASTNode): DsnSession {
             type: "route",
           })),
           vias: viaNodes.map((viaNode) => ({
+            padstack_name:
+              viaNode.children![1].type === "Atom"
+                ? String(viaNode.children![1].value)
+                : undefined,
             x: viaNode.children![2].value as number,
             y: viaNode.children![3].value as number,
           })),
