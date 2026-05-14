@@ -1,6 +1,7 @@
 import type { AnyCircuitElement, PcbSmtPad } from "circuit-json"
 import Debug from "debug"
 import type { DsnPcb } from "lib/dsn-pcb/types"
+import { isQuarterTurn, rotatePoint } from "lib/utils/rotate-point"
 import { applyToPoint } from "transformation-matrix"
 
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
@@ -108,11 +109,20 @@ export function convertPadstacksToSmtPads(
           return
         }
 
+        if (isQuarterTurn(place.rotation)) {
+          ;[width, height] = [height, width]
+        }
+
+        const rotatedPinOffset = rotatePoint(
+          { x: pin.x, y: pin.y },
+          place.rotation,
+        )
+
         // Calculate position in circuit space using the transformation matrix
         // Convert component position and pin offset to circuit coordinates
         const { x: circuitX, y: circuitY } = applyToPoint(transform, {
-          x: (compX || 0) + pin.x,
-          y: (compY || 0) + pin.y,
+          x: (compX || 0) + rotatedPinOffset.x,
+          y: (compY || 0) + rotatedPinOffset.y,
         })
 
         let pcbPad: PcbSmtPad
