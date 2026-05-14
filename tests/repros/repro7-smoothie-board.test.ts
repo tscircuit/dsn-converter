@@ -9,6 +9,11 @@ import dsnFileWithFreeroutingTrace from "../assets/repro/smoothieboard-repro.dsn
 
 test("smoothieboard repro", async () => {
   const dsnJson = parseDsnToDsnJson(dsnFileWithFreeroutingTrace) as DsnPcb
+  const netNames = dsnJson.network.nets.map((net) => net.name)
+
+  expect(netNames).toContain("3.3V")
+  expect(netNames).toContain("5V")
+  expect(netNames).toContain("12VREG")
 
   const circuitJson = convertDsnPcbToCircuitJson(dsnJson)
 
