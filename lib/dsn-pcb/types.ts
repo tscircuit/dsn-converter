@@ -55,9 +55,7 @@ export interface DsnPcb {
       name: string
       description: string
       net_names: string[]
-      circuit: {
-        use_via: string
-      }
+      circuit: Circuit
       rule: {
         clearances: Array<{
           type?: any
@@ -262,6 +260,7 @@ export interface Class {
 
 export interface Circuit {
   use_via: string
+  priority?: number
 }
 
 export interface Wiring {

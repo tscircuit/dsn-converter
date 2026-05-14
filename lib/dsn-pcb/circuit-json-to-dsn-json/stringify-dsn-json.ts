@@ -119,6 +119,9 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     result += `${indent}${indent}(class ${stringifyValue(cls.name)} ${stringifyValue(cls.description)}${cls.net_names.map((n) => ` ${stringifyValue(n)}`).join("")}\n`
     result += `${indent}${indent}${indent}(circuit\n`
     result += `${indent}${indent}${indent}${indent}(use_via ${stringifyValue(cls.circuit.use_via)})\n`
+    if (cls.circuit.priority !== undefined) {
+      result += `${indent}${indent}${indent}${indent}(priority ${cls.circuit.priority})\n`
+    }
     result += `${indent}${indent}${indent})\n`
     if (cls.rule) {
       result += `${indent}${indent}${indent}(rule\n`
