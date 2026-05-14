@@ -8,6 +8,13 @@ test("tokenizes a bare DSN quote value without swallowing following content", ()
   expect(ast.children?.[1]?.children?.[1]?.value).toBe('"')
 })
 
+test("tokenizes a whitespace-separated bare DSN quote value", () => {
+  const ast = parseSexprToAst(tokenizeDsn('(parser (string_quote " ))'))
+
+  expect(ast.children?.[1]?.children?.[0]?.value).toBe("string_quote")
+  expect(ast.children?.[1]?.children?.[1]?.value).toBe('"')
+})
+
 test("preserves quoted strings that begin with whitespace", () => {
   const ast = parseSexprToAst(tokenizeDsn('(net " GND" 1)'))
 
