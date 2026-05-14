@@ -18,6 +18,8 @@ import type {
   DsnPcb,
   DsnSession,
   Image,
+  ImageKeepout,
+  ImageKeepoutShape,
   Layer,
   Library,
   Net,
@@ -545,12 +547,67 @@ function processImage(nodes: ASTNode[]): Image {
         } else if (key === "pin") {
           const pin = processPin(node.children!)
           if (pin) image.pins!.push(pin)
+        } else if (key === "keepout" || key === "via_keepout") {
+          const keepout = processImageKeepout(node.children!)
+          if (keepout) {
+            image.keepouts ??= []
+            image.keepouts.push(keepout)
+          }
         }
       }
     }
   })
 
   return image as Image
+}
+
+function processImageKeepout(nodes: ASTNode[]): ImageKeepout | null {
+  const [typeNode, nameNode, shapeNode] = nodes
+
+  if (
+    typeNode?.type !== "Atom" ||
+    (typeNode.value !== "keepout" && typeNode.value !== "via_keepout") ||
+    nameNode?.type !== "Atom" ||
+    shapeNode?.type !== "List"
+  ) {
+    return null
+  }
+
+  const shape = processImageKeepoutShape(shapeNode.children ?? [])
+  if (!shape) return null
+
+  return {
+    type: typeNode.value,
+    name: String(nameNode.value ?? ""),
+    shape,
+  }
+}
+
+function processImageKeepoutShape(nodes: ASTNode[]): ImageKeepoutShape | null {
+  const [shapeTypeNode, layerNode, ...valueNodes] = nodes
+
+  if (
+    shapeTypeNode?.type !== "Atom" ||
+    layerNode?.type !== "Atom" ||
+    typeof shapeTypeNode.value !== "string" ||
+    typeof layerNode.value !== "string"
+  ) {
+    return null
+  }
+
+  const values = valueNodes
+    .filter(
+      (node) =>
+        node.type === "Atom" &&
+        (typeof node.value === "number" || typeof node.value === "string"),
+    )
+    .map((node) => node.value as string | number)
+
+  return {
+    shapeType: shapeTypeNode.value,
+    layer: layerNode.value,
+    values,
+  }
 }
 
 function processOutline(nodes: ASTNode[]): Outline {

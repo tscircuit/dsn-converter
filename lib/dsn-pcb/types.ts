@@ -182,10 +182,23 @@ export interface Image {
   name: string
   outlines: Outline[]
   pins: Pin[]
+  keepouts?: ImageKeepout[]
 }
 
 export interface Outline {
   path: Path
+}
+
+export interface ImageKeepout {
+  type: "keepout" | "via_keepout"
+  name: string
+  shape: ImageKeepoutShape
+}
+
+export interface ImageKeepoutShape {
+  shapeType: string
+  layer: string
+  values: Array<string | number>
 }
 
 export interface Pin {

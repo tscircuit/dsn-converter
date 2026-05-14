@@ -26,6 +26,19 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     return `${padding}(path ${path.layer} ${path.width}  ${stringifyCoordinates(path.coordinates)})`
   }
 
+  const stringifyImageKeepoutShape = (shape: {
+    shapeType: string
+    layer: string
+    values: Array<string | number>
+  }): string => {
+    const values = shape.values
+      .map((value) =>
+        typeof value === "string" ? stringifyValue(value) : value,
+      )
+      .join(" ")
+    return `(${shape.shapeType} ${shape.layer}${values ? ` ${values}` : ""})`
+  }
+
   // Start with pcb
   result += `(pcb ${dsnJson.filename ? dsnJson.filename : "./converted_dsn.dsn"}\n`
 
@@ -87,6 +100,9 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     })
     image.pins.forEach((pin) => {
       result += `${indent}${indent}${indent}(pin ${pin.padstack_name} ${pin.pin_number} ${pin.x} ${pin.y})\n`
+    })
+    image.keepouts?.forEach((keepout) => {
+      result += `${indent}${indent}${indent}(${keepout.type} ${stringifyValue(keepout.name)} ${stringifyImageKeepoutShape(keepout.shape)})\n`
     })
     result += `${indent}${indent})\n`
   })
