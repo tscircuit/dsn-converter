@@ -16,7 +16,11 @@ export const stringifyDsnSession = (session: DsnSession): string => {
   session.placement.components.forEach((component) => {
     result += `${indent}${indent}(component ${component.name}\n`
     component.places.forEach((place) => {
-      result += `${indent}${indent}${indent}(place ${place.refdes} ${place.x} ${place.y} ${place.side} ${place.rotation})\n`
+      const lockType =
+        place.lock_type && place.lock_type.length > 0
+          ? ` (lock_type ${place.lock_type.join(" ")})`
+          : ""
+      result += `${indent}${indent}${indent}(place ${place.refdes} ${place.x} ${place.y} ${place.side} ${place.rotation}${lockType})\n`
     })
     result += `${indent}${indent})\n`
   })

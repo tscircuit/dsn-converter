@@ -493,6 +493,29 @@ function processPlace(nodes: ASTNode[]): Places {
     }
   }
 
+  // Process optional lock_type descriptors used in session placement files.
+  for (let i = coordIndex + 4; i < nodes.length; i++) {
+    const node = nodes[i]
+    if (
+      node.type === "List" &&
+      node.children &&
+      node.children[0].type === "Atom" &&
+      node.children[0].value === "lock_type"
+    ) {
+      const lockTypes = node.children
+        .slice(1)
+        .filter(
+          (child) => child.type === "Atom" && typeof child.value === "string",
+        )
+        .map((child) => String(child.value))
+
+      if (lockTypes.length > 0) {
+        places.lock_type = lockTypes
+      }
+      break
+    }
+  }
+
   // Set default values if not present
   places.PN = places.PN || ""
   places.side = places.side || "front"
