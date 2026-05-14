@@ -184,6 +184,22 @@ export function processParser(nodes: ASTNode[]): ParserType {
           case "host_version":
             if (typeof value === "string") parser.host_version = value
             break
+          case "constant":
+            if (
+              valueNode.type === "Atom" &&
+              (typeof valueNode.value === "string" ||
+                typeof valueNode.value === "number") &&
+              node.children[2]?.type === "Atom" &&
+              (typeof node.children[2].value === "string" ||
+                typeof node.children[2].value === "number")
+            ) {
+              parser.constants ??= []
+              parser.constants.push({
+                name: String(valueNode.value),
+                value: String(node.children[2].value),
+              })
+            }
+            break
         }
       }
     }
