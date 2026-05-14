@@ -3,12 +3,14 @@ import type { DsnSession } from "../types"
 export const stringifyDsnSession = (session: DsnSession): string => {
   const indent = "  "
   let result = ""
+  const stringifyToken = (value: string): string =>
+    /[\s()"]/.test(value) ? JSON.stringify(value) : value
 
   // Start with session
   result += `(session ${session.filename}\n`
 
   // Base design
-  result += `${indent}(base_design ${session.filename})\n`
+  result += `${indent}(base_design ${stringifyToken(session.base_design ?? session.filename)})\n`
 
   // Placement section
   result += `${indent}(placement\n`

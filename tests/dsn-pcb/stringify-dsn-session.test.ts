@@ -25,3 +25,29 @@ test("stringify session file", () => {
   expect(reparsedNet.name).toBe(originalNet.name)
   expect(reparsedNet.wires).toHaveLength(originalNet.wires.length)
 })
+
+test("preserves session base_design metadata", () => {
+  const sessionJson = parseDsnToDsnJson(`(session routed-output.ses
+  (base_design "original board.dsn")
+  (placement
+    (resolution um 10)
+  )
+  (was_is)
+  (routes
+    (resolution um 10)
+    (parser
+      (host_cad "Freerouting")
+      (host_version "1.0")
+    )
+    (network_out)
+  )
+)`) as DsnSession
+
+  expect(sessionJson.base_design).toBe("original board.dsn")
+
+  const stringified = stringifyDsnSession(sessionJson)
+  expect(stringified).toContain('(base_design "original board.dsn")')
+
+  const reparsed = parseDsnToDsnJson(stringified) as DsnSession
+  expect(reparsed.base_design).toBe("original board.dsn")
+})

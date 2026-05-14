@@ -1043,6 +1043,16 @@ function processSessionNode(ast: ASTNode): DsnSession {
     },
   }
 
+  const baseDesignNode = ast.children!.find(
+    (child) =>
+      child.type === "List" &&
+      child.children?.[0].type === "Atom" &&
+      child.children[0].value === "base_design",
+  )
+  if (baseDesignNode?.children?.[1]?.type === "Atom") {
+    session.base_design = String(baseDesignNode.children[1].value)
+  }
+
   // Extract placement section
   const placementNode = ast.children!.find(
     (child) =>
