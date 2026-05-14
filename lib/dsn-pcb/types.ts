@@ -40,6 +40,7 @@ export interface DsnPcb {
     }
   }
   placement: {
+    unit?: string
     components: Array<ComponentPlacement>
   }
   library: {
@@ -156,6 +157,7 @@ export interface Clearance {
 }
 
 export interface Placement {
+  unit?: string
   components: ComponentPlacement[]
 }
 
