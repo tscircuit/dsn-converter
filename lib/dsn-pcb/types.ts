@@ -43,6 +43,7 @@ export interface DsnPcb {
     components: Array<ComponentPlacement>
   }
   library: {
+    directory?: string
     images: Image[]
     padstacks: Padstack[]
   }
@@ -174,6 +175,7 @@ export interface Places {
 }
 
 export interface Library {
+  directory?: string
   images: Image[]
   padstacks: Padstack[]
 }
