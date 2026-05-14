@@ -57,6 +57,9 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     result += `${indent}${indent})\n`
   }
   result += `${indent}${indent}(via ${stringifyValue(dsnJson.structure.via)})\n`
+  dsnJson.structure.grids?.forEach((grid) => {
+    result += `${indent}${indent}(grid ${grid.kind} ${grid.value})\n`
+  })
   result += `${indent}${indent}(rule\n`
   result += `${indent}${indent}${indent}(width ${dsnJson.structure.rule.width})\n`
   dsnJson.structure.rule.clearances.forEach((clearance) => {
