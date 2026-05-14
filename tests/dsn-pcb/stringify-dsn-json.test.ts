@@ -17,3 +17,18 @@ test("stringify dsn json", () => {
   // Test that we can parse the generated string back to the same structure
   // expect(reparsedJson).toEqual(dsnJson)
 })
+
+test("stringify dsn json quotes filenames with spaces", () => {
+  const dsnJson = parseDsnToDsnJson(testDsnFile) as DsnPcb
+  const spacedFilenameJson: DsnPcb = {
+    ...dsnJson,
+    filename: "board export.dsn",
+  }
+
+  const dsnString = stringifyDsnJson(spacedFilenameJson)
+
+  expect(dsnString.startsWith('(pcb "board export.dsn"')).toBe(true)
+  expect(parseDsnToDsnJson(dsnString)).toMatchObject({
+    filename: "board export.dsn",
+  })
+})

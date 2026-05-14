@@ -26,8 +26,16 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     return `${padding}(path ${path.layer} ${path.width}  ${stringifyCoordinates(path.coordinates)})`
   }
 
+  const stringifyFilename = (filename: string): string => {
+    if (/^[A-Za-z0-9._\/-]+$/.test(filename)) {
+      return filename
+    }
+
+    return `"${filename.replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`
+  }
+
   // Start with pcb
-  result += `(pcb ${dsnJson.filename ? dsnJson.filename : "./converted_dsn.dsn"}\n`
+  result += `(pcb ${stringifyFilename(dsnJson.filename ? dsnJson.filename : "./converted_dsn.dsn")}\n`
 
   // Parser section
   result += `${indent}(parser\n`
