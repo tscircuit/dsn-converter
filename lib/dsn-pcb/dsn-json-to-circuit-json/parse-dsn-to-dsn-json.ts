@@ -28,6 +28,7 @@ import type {
   Path,
   PathShape,
   Pin,
+  PlaceControl,
   Placement,
   Places,
   PolygonShape,
@@ -404,16 +405,33 @@ export function processPlacement(nodes: ASTNode[]): Placement {
   }
 
   nodes.forEach((node) => {
-    if (
-      node.type === "List" &&
-      node.children![0].type === "Atom" &&
-      node.children![0].value === "component"
-    ) {
-      placement.components!.push(processComponent(node.children!))
+    if (node.type === "List" && node.children?.[0].type === "Atom") {
+      if (node.children[0].value === "component") {
+        placement.components!.push(processComponent(node.children))
+      } else if (node.children[0].value === "place_control") {
+        placement.place_control = processPlaceControl(node.children)
+      }
     }
   })
 
   return placement as Placement
+}
+
+function processPlaceControl(nodes: ASTNode[]): PlaceControl {
+  const placeControl: PlaceControl = {}
+
+  for (const node of nodes.slice(1)) {
+    if (
+      node.type === "List" &&
+      node.children?.[0].type === "Atom" &&
+      node.children[0].value === "flip_style" &&
+      node.children[1]?.type === "Atom"
+    ) {
+      placeControl.flip_style = String(node.children[1].value)
+    }
+  }
+
+  return placeControl
 }
 
 function processComponent(nodes: ASTNode[]): ComponentPlacement {
@@ -1060,9 +1078,9 @@ function processSessionNode(ast: ASTNode): DsnSession {
     if (resolutionNode) {
       session.placement.resolution = processResolution(resolutionNode.children!)
     }
-    session.placement.components = processPlacement(
-      placementNode.children!.slice(1),
-    ).components
+    const placement = processPlacement(placementNode.children!.slice(1))
+    session.placement.place_control = placement.place_control
+    session.placement.components = placement.components
   }
 
   // Extract routes section
