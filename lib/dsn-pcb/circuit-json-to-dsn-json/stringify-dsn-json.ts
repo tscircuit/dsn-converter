@@ -80,6 +80,9 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
 
   // Library section
   result += `${indent}(library\n`
+  if (dsnJson.library.directory) {
+    result += `${indent}${indent}(directory ${stringifyValue(dsnJson.library.directory)})\n`
+  }
   dsnJson.library.images.forEach((image) => {
     result += `${indent}${indent}(image ${stringifyValue(image.name)}\n`
     image.outlines.forEach((outline) => {
