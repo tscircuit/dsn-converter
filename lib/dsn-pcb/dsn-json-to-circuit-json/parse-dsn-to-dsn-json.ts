@@ -17,6 +17,7 @@ import type {
   DsnJson,
   DsnPcb,
   DsnSession,
+  Grid,
   Image,
   Layer,
   Library,
@@ -211,6 +212,7 @@ export function processResolution(nodes: ASTNode[]): Resolution {
 export function processStructure(nodes: ASTNode[]): Structure {
   const structure: Partial<Structure> = {
     layers: [],
+    grids: [],
   }
 
   nodes.forEach((node) => {
@@ -224,6 +226,9 @@ export function processStructure(nodes: ASTNode[]): Structure {
             break
           case "boundary":
             structure.boundary = processBoundary(node.children!.slice(1))
+            break
+          case "grid":
+            structure.grids!.push(processGrid(node.children!))
             break
           case "via":
             if (
@@ -242,6 +247,22 @@ export function processStructure(nodes: ASTNode[]): Structure {
   })
 
   return structure as Structure
+}
+
+function processGrid(nodes: ASTNode[]): Grid {
+  if (
+    nodes[1]?.type === "Atom" &&
+    typeof nodes[1].value === "string" &&
+    nodes[2]?.type === "Atom" &&
+    typeof nodes[2].value === "number"
+  ) {
+    return {
+      kind: nodes[1].value,
+      value: nodes[2].value,
+    }
+  }
+
+  throw new Error("Invalid grid format")
 }
 
 function processLayer(nodes: ASTNode[]): Layer {
