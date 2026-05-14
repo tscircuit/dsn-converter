@@ -391,6 +391,19 @@ function processClearance(nodes: ASTNode[]): Clearance {
         typeof valueNode.value === "string"
       ) {
         clearance.type = valueNode.value
+        const layerDepthNode = node.children!.find(
+          (child) =>
+            child.type === "List" &&
+            child.children?.[0]?.type === "Atom" &&
+            child.children[0].value === "layer_depth",
+        )
+        if (
+          layerDepthNode?.type === "List" &&
+          layerDepthNode.children?.[1]?.type === "Atom" &&
+          typeof layerDepthNode.children[1].value === "number"
+        ) {
+          clearance.layer_depth = layerDepthNode.children[1].value
+        }
       }
     }
   }
