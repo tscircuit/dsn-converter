@@ -184,6 +184,18 @@ export function processParser(nodes: ASTNode[]): ParserType {
           case "host_version":
             if (typeof value === "string") parser.host_version = value
             break
+          case "write_resolution":
+            if (
+              typeof value === "string" &&
+              node.children[2]?.type === "Atom" &&
+              typeof node.children[2].value === "number"
+            ) {
+              parser.write_resolution = {
+                unit: value,
+                value: node.children[2].value,
+              }
+            }
+            break
         }
       }
     }
