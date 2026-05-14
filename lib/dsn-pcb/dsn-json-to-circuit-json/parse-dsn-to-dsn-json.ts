@@ -18,6 +18,7 @@ import type {
   DsnPcb,
   DsnSession,
   Image,
+  ImageProperty,
   Layer,
   Library,
   Net,
@@ -545,12 +546,43 @@ function processImage(nodes: ASTNode[]): Image {
         } else if (key === "pin") {
           const pin = processPin(node.children!)
           if (pin) image.pins!.push(pin)
+        } else if (key === "property") {
+          image.properties = processImageProperties(rest)
         }
       }
     }
   })
 
   return image as Image
+}
+
+function processImageProperties(nodes: ASTNode[]): ImageProperty[] {
+  const properties: ImageProperty[] = []
+
+  nodes.forEach((node) => {
+    if (
+      node.type === "List" &&
+      node.children?.[0]?.type === "Atom" &&
+      typeof node.children[0].value === "string"
+    ) {
+      const [nameNode, valueNode] = node.children
+      const property: ImageProperty = {
+        name: String(nameNode.value),
+      }
+
+      if (
+        valueNode?.type === "Atom" &&
+        (typeof valueNode.value === "string" ||
+          typeof valueNode.value === "number")
+      ) {
+        property.value = valueNode.value
+      }
+
+      properties.push(property)
+    }
+  })
+
+  return properties
 }
 
 function processOutline(nodes: ASTNode[]): Outline {

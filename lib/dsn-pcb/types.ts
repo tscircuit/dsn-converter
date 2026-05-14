@@ -182,10 +182,16 @@ export interface Image {
   name: string
   outlines: Outline[]
   pins: Pin[]
+  properties?: ImageProperty[]
 }
 
 export interface Outline {
   path: Path
+}
+
+export interface ImageProperty {
+  name: string
+  value?: string | number
 }
 
 export interface Pin {
