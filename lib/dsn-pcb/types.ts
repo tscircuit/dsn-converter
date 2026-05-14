@@ -88,6 +88,7 @@ export interface ComponentPlacement {
   places: Array<{
     refdes: string
     PN?: string
+    logical_part?: string
     x: number
     y: number
     side: "front" | "back"
@@ -171,6 +172,7 @@ export interface Places {
   side: string
   rotation: number
   PN: string
+  logical_part?: string
 }
 
 export interface Library {

@@ -493,6 +493,22 @@ function processPlace(nodes: ASTNode[]): Places {
     }
   }
 
+  // Process optional logical_part descriptors used in session placement files.
+  for (let i = coordIndex + 4; i < nodes.length; i++) {
+    const node = nodes[i]
+    if (
+      node.type === "List" &&
+      node.children &&
+      node.children[0].type === "Atom" &&
+      node.children[0].value === "logical_part" &&
+      node.children[1] &&
+      node.children[1].type === "Atom"
+    ) {
+      places.logical_part = String(node.children[1].value)
+      break
+    }
+  }
+
   // Set default values if not present
   places.PN = places.PN || ""
   places.side = places.side || "front"
