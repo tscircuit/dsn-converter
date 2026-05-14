@@ -825,18 +825,25 @@ function processNet(nodes: ASTNode[]): Net {
   }
 
   nodes.slice(2).forEach((node) => {
-    if (
-      node.type === "List" &&
-      node.children![0].type === "Atom" &&
-      node.children![0].value === "pins"
-    ) {
-      net.pins = node.children!.slice(1).map((pinNode) => {
-        if (pinNode.type === "Atom" && typeof pinNode.value === "string") {
-          return pinNode.value
-        } else {
-          throw new Error("Invalid pin in net")
-        }
-      })
+    if (node.type === "List" && node.children![0].type === "Atom") {
+      const key = node.children![0].value
+      if (key === "pins") {
+        net.pins = node.children!.slice(1).map((pinNode) => {
+          if (pinNode.type === "Atom" && typeof pinNode.value === "string") {
+            return pinNode.value
+          } else {
+            throw new Error("Invalid pin in net")
+          }
+        })
+      } else if (key === "expose" || key === "noexpose") {
+        net[key] = node
+          .children!.slice(1)
+          .filter(
+            (pinNode) =>
+              pinNode.type === "Atom" && typeof pinNode.value === "string",
+          )
+          .map((pinNode) => String(pinNode.value))
+      }
     }
   })
   return net as Net

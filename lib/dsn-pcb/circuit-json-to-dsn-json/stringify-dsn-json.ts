@@ -113,6 +113,12 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     if (net.pins.length > 0) {
       result += `${indent}${indent}${indent}(pins ${net.pins.join(" ")})\n`
     }
+    if (net.expose?.length) {
+      result += `${indent}${indent}${indent}(expose ${net.expose.join(" ")})\n`
+    }
+    if (net.noexpose?.length) {
+      result += `${indent}${indent}${indent}(noexpose ${net.noexpose.join(" ")})\n`
+    }
     result += `${indent}${indent})\n`
   })
   dsnJson.network.classes.forEach((cls) => {
