@@ -67,6 +67,12 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
 
   // Placement section
   result += `${indent}(placement\n`
+  if (dsnJson.placement.place_control) {
+    const flipStyle = dsnJson.placement.place_control.flip_style
+      ? ` (flip_style ${dsnJson.placement.place_control.flip_style})`
+      : ""
+    result += `${indent}${indent}(place_control${flipStyle})\n`
+  }
   dsnJson.placement.components.forEach((component) => {
     result += `${indent}${indent}(component ${stringifyValue(component.name)}\n`
     if (component.places) {

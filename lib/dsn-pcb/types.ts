@@ -40,6 +40,7 @@ export interface DsnPcb {
     }
   }
   placement: {
+    place_control?: PlaceControl
     components: Array<ComponentPlacement>
   }
   library: {
@@ -156,7 +157,12 @@ export interface Clearance {
 }
 
 export interface Placement {
+  place_control?: PlaceControl
   components: ComponentPlacement[]
+}
+
+export interface PlaceControl {
+  flip_style?: string
 }
 
 export interface Component {
@@ -295,6 +301,7 @@ export interface DsnSession {
   filename: string
   placement: {
     resolution: Resolution
+    place_control?: PlaceControl
     components: Array<ComponentPlacement>
   }
   routes: {

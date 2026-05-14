@@ -13,6 +13,12 @@ export const stringifyDsnSession = (session: DsnSession): string => {
   // Placement section
   result += `${indent}(placement\n`
   result += `${indent}${indent}(resolution ${session.placement.resolution.unit} ${session.placement.resolution.value})\n`
+  if (session.placement.place_control) {
+    const flipStyle = session.placement.place_control.flip_style
+      ? ` (flip_style ${session.placement.place_control.flip_style})`
+      : ""
+    result += `${indent}${indent}(place_control${flipStyle})\n`
+  }
   session.placement.components.forEach((component) => {
     result += `${indent}${indent}(component ${component.name}\n`
     component.places.forEach((place) => {
