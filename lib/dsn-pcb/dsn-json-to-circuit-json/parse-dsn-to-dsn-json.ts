@@ -14,6 +14,7 @@ import type {
   Clearance,
   Component,
   ComponentPlacement,
+  DsnColorRecord,
   DsnJson,
   DsnPcb,
   DsnSession,
@@ -134,6 +135,9 @@ export function processPCB(nodes: ASTNode[]): DsnPcb {
               pcb.unit = element.children![1].value
             }
             break
+          case "colors":
+            pcb.colors = processColors(element.children!.slice(1))
+            break
           case "structure":
             pcb.structure = processStructure(element.children!.slice(1)) as any
             break
@@ -155,6 +159,31 @@ export function processPCB(nodes: ASTNode[]): DsnPcb {
   }
 
   return pcb as DsnPcb
+}
+
+function processColors(nodes: ASTNode[]): DsnColorRecord[] {
+  return nodes.flatMap((node) => {
+    if (
+      node.type !== "List" ||
+      !node.children ||
+      node.children[0]?.type !== "Atom" ||
+      typeof node.children[0].value !== "string"
+    ) {
+      return []
+    }
+
+    const values = node.children.slice(1).flatMap((child) => {
+      if (
+        child.type === "Atom" &&
+        (typeof child.value === "string" || typeof child.value === "number")
+      ) {
+        return [child.value]
+      }
+      return []
+    })
+
+    return [{ kind: node.children[0].value, values }]
+  })
 }
 
 export function processParser(nodes: ASTNode[]): ParserType {
