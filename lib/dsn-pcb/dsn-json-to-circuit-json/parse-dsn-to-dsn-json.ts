@@ -959,6 +959,17 @@ function processVia(nodes: ASTNode[]): Wire | null {
     wire.net = String(netNode.children[1].value)
   }
 
+  const typeNode = nodes.find(
+    (node) =>
+      node.type === "List" &&
+      node.children?.[0]?.type === "Atom" &&
+      node.children[0].value === "type",
+  )
+
+  if (typeNode?.children?.[1]?.type === "Atom") {
+    wire.via_type = String(typeNode.children[1].value)
+  }
+
   return wire as Wire
 }
 
