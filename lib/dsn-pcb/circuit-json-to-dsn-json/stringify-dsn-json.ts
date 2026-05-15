@@ -41,6 +41,17 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   result += `${indent}(resolution ${dsnJson.resolution.unit} ${dsnJson.resolution.value})\n`
   result += `${indent}(unit ${dsnJson.unit})\n`
 
+  if (dsnJson.colors?.length) {
+    result += `${indent}(colors\n`
+    dsnJson.colors.forEach((colorRecord) => {
+      const values = colorRecord.values
+        .map((value) => stringifyValue(value))
+        .join(" ")
+      result += `${indent}${indent}(${colorRecord.kind}${values ? ` ${values}` : ""})\n`
+    })
+    result += `${indent})\n`
+  }
+
   // Structure section
   result += `${indent}(structure\n`
   dsnJson.structure.layers.forEach((layer) => {
