@@ -7,6 +7,7 @@ import {
   tokenizeDsn,
 } from "../../common/parse-sexpr"
 import type {
+  AutorouteSettings,
   Boundary,
   CircleShape,
   Circuit,
@@ -233,6 +234,9 @@ export function processStructure(nodes: ASTNode[]): Structure {
               structure.via = node.children![1].value
             }
             break
+          case "autoroute_settings":
+            structure.autoroute_settings = processAutorouteSettings(rest)
+            break
           case "rule":
             structure.rule = processRule(node.children!.slice(1))
             break
@@ -242,6 +246,34 @@ export function processStructure(nodes: ASTNode[]): Structure {
   })
 
   return structure as Structure
+}
+
+function processAutorouteSettings(nodes: ASTNode[]): AutorouteSettings {
+  const autorouteSettings: AutorouteSettings = {}
+
+  nodes.forEach((node) => {
+    if (node.type !== "List") return
+    const [keyNode, valueNode] = node.children!
+    if (
+      keyNode?.type !== "Atom" ||
+      typeof keyNode.value !== "string" ||
+      valueNode?.type !== "Atom" ||
+      typeof valueNode.value !== "number"
+    ) {
+      return
+    }
+
+    switch (keyNode.value) {
+      case "via_costs":
+        autorouteSettings.via_costs = valueNode.value
+        break
+      case "plane_via_costs":
+        autorouteSettings.plane_via_costs = valueNode.value
+        break
+    }
+  })
+
+  return autorouteSettings
 }
 
 function processLayer(nodes: ASTNode[]): Layer {
