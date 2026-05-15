@@ -282,6 +282,7 @@ export interface Wire {
   net?: string
   clearance_class?: string
   type?: string
+  via_type?: string
 }
 
 export interface Via {

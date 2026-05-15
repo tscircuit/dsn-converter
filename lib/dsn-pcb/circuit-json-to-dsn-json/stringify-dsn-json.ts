@@ -144,7 +144,8 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   result += `${indent}(wiring\n`
   ;(dsnJson.wiring?.wires ?? []).forEach((wire) => {
     if (wire.type === "via") {
-      result += `${indent}${indent}(via ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)}))\n`
+      const viaWire = wire as typeof wire & { via_type?: string }
+      result += `${indent}${indent}(via ${stringifyPath(viaWire.path, 3)}(net ${stringifyValue(viaWire.net)})${viaWire.via_type ? `(type ${viaWire.via_type})` : ""})\n`
     } else {
       result += `${indent}${indent}(wire ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)})(type ${wire.type}))\n`
     }

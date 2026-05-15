@@ -32,3 +32,33 @@ test("stringify dsn json quotes filenames with spaces", () => {
     filename: "board export.dsn",
   })
 })
+
+test("stringify dsn json preserves wiring via type metadata", () => {
+  const dsnJson = parseDsnToDsnJson(testDsnFile) as DsnPcb
+  const viaTypeJson: DsnPcb = {
+    ...dsnJson,
+    wiring: {
+      wires: [
+        {
+          type: "via",
+          via_type: "protect",
+          net: "AGND",
+          path: {
+            layer: "all",
+            width: 0,
+            coordinates: [174879, -77089],
+          },
+        },
+      ],
+    },
+  }
+
+  const dsnString = stringifyDsnJson(viaTypeJson)
+  const reparsedJson = parseDsnToDsnJson(dsnString) as DsnPcb
+
+  expect(dsnString).toContain("(type protect)")
+  expect(reparsedJson.wiring.wires[0]).toMatchObject({
+    type: "via",
+    via_type: "protect",
+  })
+})
