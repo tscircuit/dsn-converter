@@ -41,3 +41,50 @@ test("smoothieboard rotated pin identifiers are preserved", () => {
     c7Cathode!.source_port_id,
   )
 })
+
+test("smoothieboard special pin identifiers are preserved and connected", () => {
+  const dsnJson = parseDsnToDsnJson(smoothieboardDsn) as DsnPcb
+  const circuitJson = convertDsnPcbToCircuitJson(dsnJson)
+
+  const sourcePorts = circuitJson.filter(
+    (element): element is SourcePort => element.type === "source_port",
+  )
+  const sourceTraces = circuitJson.filter(
+    (element): element is SourceTrace => element.type === "source_trace",
+  )
+
+  const sourcePortByName = new Map(
+    sourcePorts.map((port) => [port.name, port] as const),
+  )
+  const traceByNetName = new Map(
+    sourceTraces.map((trace) => [
+      trace.connected_source_net_ids[0].replace(/^source_net_/, ""),
+      trace,
+    ]),
+  )
+
+  expect(sourcePortByName.has("C60--")).toBe(true)
+  expect(sourcePortByName.has("C60-NaN")).toBe(false)
+  expect(sourcePortByName.has("IC11-2@1")).toBe(true)
+
+  const sourcePortIds = sourcePorts.map((port) => port.source_port_id)
+  expect(new Set(sourcePortIds).size).toBe(sourcePortIds.length)
+
+  const expectedConnections = [
+    { net: "AGND", port: "C60--" },
+    { net: "AGND", port: "IC11-2@1" },
+    { net: "Net-(R9-Pad1)", port: "X14-D-" },
+    { net: "/smoothieboard-5driver_3/RD-", port: "RJ1-RD-" },
+    { net: "/smoothieboard-5driver_3/TD-", port: "RJ1-TD-" },
+    { net: "Net-(R50-Pad2)", port: "RJ1-Y-" },
+    { net: "Net-(R61-Pad2)", port: "RJ1-G-" },
+  ]
+
+  for (const { net, port } of expectedConnections) {
+    const sourcePort = sourcePortByName.get(port)
+    expect(sourcePort).toBeDefined()
+    expect(traceByNetName.get(net)?.connected_source_port_ids).toContain(
+      sourcePort!.source_port_id,
+    )
+  }
+})
