@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test"
-import type { SourcePort, SourceTrace } from "circuit-json"
+import type { PcbSmtPad, SourcePort, SourceTrace } from "circuit-json"
 import { type DsnPcb, convertDsnPcbToCircuitJson, parseDsnToDsnJson } from "lib"
 
 // @ts-ignore
@@ -87,4 +87,25 @@ test("smoothieboard special pin identifiers are preserved and connected", () => 
       sourcePort!.source_port_id,
     )
   }
+})
+
+test("smoothieboard smt pad ids preserve nonnumeric pin identifiers", () => {
+  const dsnJson = parseDsnToDsnJson(smoothieboardDsn) as DsnPcb
+  const circuitJson = convertDsnPcbToCircuitJson(dsnJson)
+
+  const pcbSmtPads = circuitJson.filter(
+    (element): element is PcbSmtPad => element.type === "pcb_smtpad",
+  )
+  const pcbSmtPadIds = pcbSmtPads.map((pad) => pad.pcb_smtpad_id)
+
+  expect(pcbSmtPads.some((pad) => pad.pcb_smtpad_id.includes("NaN"))).toBe(
+    false,
+  )
+  expect(new Set(pcbSmtPadIds).size).toBe(pcbSmtPadIds.length)
+  expect(pcbSmtPadIds).toContain(
+    "pcb_smtpad_smoothieboard-5driver:EIA3216_C7_A",
+  )
+  expect(pcbSmtPadIds).toContain(
+    "pcb_smtpad_smoothieboard-5driver:EIA3216_C7_C",
+  )
 })
