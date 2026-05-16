@@ -55,6 +55,7 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
         layer: place.side === "back" ? "bottom" : "top",
         width: 0,
         height: 0,
+        obstructs_within_bounds: true,
       }
       result.push(pcbComponent)
 
