@@ -25,7 +25,7 @@ export const convertWiringViaToPcbVias = ({
   const via: PcbVia = {
     type: "pcb_via",
     layers: ["top", "bottom"],
-    pcb_via_id: `pcb_via_${netName}`,
+    pcb_via_id: `pcb_via_${netName}_${circuitPoint.x}_${circuitPoint.y}`,
     x: Number(circuitPoint.x.toFixed(4)),
     y: Number(circuitPoint.y.toFixed(4)),
     // TODO look up via size
