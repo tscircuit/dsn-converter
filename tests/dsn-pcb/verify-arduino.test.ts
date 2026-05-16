@@ -27,8 +27,8 @@ test("Verify Arduino Nano bounty ($300) - Roundtrip DSN -> Circuit JSON", async 
     (e) => e.type === "pcb_component",
   )
 
-  expect(sourceComponents.length).toBe(7)
-  expect(pcbComponents.length).toBe(7)
+  expect(sourceComponents.length).toBe(13)
+  expect(pcbComponents.length).toBe(13)
 
   // Check for NaN
   resultCircuitJson.forEach((e) => {
