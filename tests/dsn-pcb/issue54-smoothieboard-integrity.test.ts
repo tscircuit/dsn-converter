@@ -1,9 +1,5 @@
 import { expect, test } from "bun:test"
-import {
-  type DsnPcb,
-  convertDsnPcbToCircuitJson,
-  parseDsnToDsnJson,
-} from "lib"
+import { type DsnPcb, convertDsnPcbToCircuitJson, parseDsnToDsnJson } from "lib"
 import type { AnyCircuitElement } from "circuit-json"
 
 // @ts-ignore
