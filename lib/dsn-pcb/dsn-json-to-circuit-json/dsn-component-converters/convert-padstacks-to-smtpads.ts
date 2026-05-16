@@ -108,12 +108,25 @@ export function convertPadstacksToSmtPads(
           return
         }
 
+        // Calculate rotation in radians
+        const rotationRad = (place.rotation * Math.PI) / 180
+        const cos = Math.cos(rotationRad)
+        const sin = Math.sin(rotationRad)
+
+        // Rotate pin offset
+        const rotatedPinX = pin.x * cos - pin.y * sin
+        const rotatedPinY = pin.x * sin + pin.y * cos
+
         // Calculate position in circuit space using the transformation matrix
-        // Convert component position and pin offset to circuit coordinates
         const { x: circuitX, y: circuitY } = applyToPoint(transform, {
-          x: (compX || 0) + pin.x,
-          y: (compY || 0) + pin.y,
+          x: (compX || 0) + rotatedPinX,
+          y: (compY || 0) + rotatedPinY,
         })
+
+        const safePinNum =
+          typeof pin.pin_number === "string" && !isNaN(Number(pin.pin_number))
+            ? Number(pin.pin_number)
+            : pin.pin_number
 
         let pcbPad: PcbSmtPad
         if (rectShape || polygonShape || pathShape) {
@@ -126,7 +139,7 @@ export function convertPadstacksToSmtPads(
           })
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pin.pin_number}`,
             pcb_component_id: `${componentId}_${place.refdes}`,
             pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
             shape: "rect",
@@ -140,7 +153,7 @@ export function convertPadstacksToSmtPads(
         } else {
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pin.pin_number}`,
             pcb_component_id: `${componentId}_${place.refdes}`,
             pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
             shape: "circle",
