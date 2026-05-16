@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test"
 import { parseDsnToDsnJson, convertDsnPcbToCircuitJson } from "lib"
-import { DsnPcb } from "lib/dsn-pcb/types"
+import type { DsnPcb } from "lib/dsn-pcb/types"
 import fs from "node:fs"
 import path from "node:path"
 
