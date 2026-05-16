@@ -12,6 +12,7 @@ export function tokenizeDsn(input: string): Token[] {
   const tokens: Token[] = []
   let i = 0
   const length = input.length
+  let lastSymbol = ""
 
   while (i < length) {
     const char = input[i]
@@ -19,13 +20,22 @@ export function tokenizeDsn(input: string): Token[] {
     if (char === "(") {
       tokens.push({ type: "LParen" })
       i++
+      lastSymbol = ""
     } else if (char === ")") {
       tokens.push({ type: "RParen" })
       i++
+      lastSymbol = ""
     } else if (/\s/.test(char)) {
       // Ignore whitespace
       i++
     } else if (char === '"') {
+      // Special case for (string_quote ")
+      if (lastSymbol === "string_quote") {
+        tokens.push({ type: "Symbol", value: '"' })
+        i++
+        lastSymbol = ""
+        continue
+      }
       // Parse quoted string
       let value = ""
       i++ // Skip the opening quote
@@ -44,6 +54,7 @@ export function tokenizeDsn(input: string): Token[] {
       }
       i++ // Skip the closing quote
       tokens.push({ type: "String", value })
+      lastSymbol = ""
     } else if (char === "-" || /\d/.test(char)) {
       // Parse number (integer or float)
       let numStr = ""
@@ -56,6 +67,7 @@ export function tokenizeDsn(input: string): Token[] {
         i++
       }
       tokens.push({ type: "Number", value: parseFloat(numStr) })
+      lastSymbol = ""
     } else {
       // Parse symbol
       let sym = ""
@@ -64,6 +76,7 @@ export function tokenizeDsn(input: string): Token[] {
         i++
       }
       tokens.push({ type: "Symbol", value: sym })
+      lastSymbol = sym
     }
   }
 
@@ -78,43 +91,48 @@ export interface ASTNode {
 }
 
 export function parseSexprToAst(tokens: Token[]): ASTNode {
-  let i = 0
+  const stack: ASTNode[] = []
+  let root: ASTNode | null = null
 
-  function parseExpression(): ASTNode {
+  for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i]
 
-    if (!token) {
-      throw new Error("Unexpected end of input")
-    }
-
     if (token.type === "LParen") {
-      i++ // Consume '('
-      const node: ASTNode = { type: "List", children: [] }
-      while (i < tokens.length && tokens[i].type !== "RParen") {
-        node.children!.push(parseExpression())
+      const newNode: ASTNode = { type: "List", children: [] }
+      if (stack.length > 0) {
+        stack[stack.length - 1].children!.push(newNode)
+      } else if (!root) {
+        root = newNode
+      } else {
+        throw new Error("Unexpected extra root node (LParen)")
       }
-      if (tokens[i]?.type !== "RParen") {
-        throw new Error('Expected ")"')
+      stack.push(newNode)
+    } else if (token.type === "RParen") {
+      if (stack.length === 0) {
+        throw new Error('Unexpected ")" without opening parenthesis')
       }
-      i++ // Consume ')'
-      return node
-    } else if (
-      token.type === "Symbol" ||
-      token.type === "String" ||
-      token.type === "Number"
-    ) {
-      i++ // Consume token
-      return { type: "Atom", value: token.value }
+      stack.pop()
     } else {
-      throw new Error(`Unexpected token: ${JSON.stringify(token)}`)
+      // Atom (Symbol, String, or Number)
+      const newNode: ASTNode = { type: "Atom", value: token.value }
+      if (stack.length > 0) {
+        stack[stack.length - 1].children!.push(newNode)
+      } else if (!root) {
+        // A single atom can be a valid S-expression root
+        root = newNode
+      } else {
+        throw new Error(`Unexpected extra root node (Atom: ${token.value})`)
+      }
     }
   }
 
-  const ast = parseExpression()
-
-  if (i < tokens.length) {
-    throw new Error("Unexpected tokens after end of expression")
+  if (stack.length > 0) {
+    throw new Error('Expected ")"')
   }
 
-  return ast
+  if (!root) {
+    throw new Error("Empty input")
+  }
+
+  return root
 }

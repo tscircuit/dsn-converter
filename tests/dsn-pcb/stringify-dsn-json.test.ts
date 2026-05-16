@@ -11,7 +11,14 @@ test("stringify dsn json", () => {
   const reparsedJson = parseDsnToDsnJson(dsnString) as DsnPcb
 
   for (const key of Object.keys(reparsedJson) as Array<keyof DsnPcb>) {
-    expect(reparsedJson[key]).toEqual(dsnJson[key] as any)
+    try {
+      expect(reparsedJson[key]).toEqual(dsnJson[key] as any)
+    } catch (e) {
+      console.log(`Key: ${key}`)
+      console.log("Original:", JSON.stringify(dsnJson[key], null, 2))
+      console.log("Reparsed:", JSON.stringify(reparsedJson[key], null, 2))
+      throw e
+    }
   }
 
   // Test that we can parse the generated string back to the same structure
