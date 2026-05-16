@@ -26,10 +26,10 @@ test("circuit json (arduino nano) -> dsn file", async () => {
     expect(pin.pin_number).toBeLessThanOrEqual(20)
   })
   expect(usbcImage.pins).toHaveLength(20)
-  
+
   // Verify correct padstack name and scaling
   expect(usbcImage.pins[0].padstack_name).toBe("RoundRect[T]Pad_3000x13000_um")
-  
+
   // padstack length
   expect(dsnJson.library.padstacks.length).toBe(10)
   // net length
