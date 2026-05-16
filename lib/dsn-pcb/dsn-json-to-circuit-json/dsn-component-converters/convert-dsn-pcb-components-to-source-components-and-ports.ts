@@ -53,6 +53,8 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
         center: pcb_component_center,
         rotation: place.rotation || 0,
         layer: place.side === "back" ? "bottom" : "top",
+        width: 0,
+        height: 0,
       }
       result.push(pcbComponent)
 

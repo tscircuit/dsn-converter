@@ -66,8 +66,13 @@ export function tokenizeDsn(input: string): Token[] {
         numStr += input[i]
         i++
       }
-      tokens.push({ type: "Number", value: parseFloat(numStr) })
-      lastSymbol = ""
+      if (numStr === "-") {
+        tokens.push({ type: "Symbol", value: "-" })
+        lastSymbol = "-"
+      } else {
+        tokens.push({ type: "Number", value: parseFloat(numStr) })
+        lastSymbol = ""
+      }
     } else {
       // Parse symbol
       let sym = ""
