@@ -45,17 +45,22 @@ export function tokenizeDsn(input: string): Token[] {
       i++ // Skip the closing quote
       tokens.push({ type: "String", value })
     } else if (char === "-" || /\d/.test(char)) {
-      // Parse number (integer or float)
-      let numStr = ""
-      if (char === "-") {
-        numStr += "-"
+      // Standalone "-" is a pin name, not a negative number
+      if (char === "-" && (i + 1 >= length || !/[\d.]/.test(input[i + 1]!))) {
+        tokens.push({ type: "Symbol", value: "-" })
         i++
+      } else {
+        let numStr = ""
+        if (char === "-") {
+          numStr += "-"
+          i++
+        }
+        while (i < length && /[\d.]/.test(input[i]!)) {
+          numStr += input[i]
+          i++
+        }
+        tokens.push({ type: "Number", value: parseFloat(numStr) })
       }
-      while (i < length && /[\d.]/.test(input[i])) {
-        numStr += input[i]
-        i++
-      }
-      tokens.push({ type: "Number", value: parseFloat(numStr) })
     } else {
       // Parse symbol
       let sym = ""
