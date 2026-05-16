@@ -25,13 +25,12 @@ export function getPadstackName({
     }[layer as string] ?? "T"
   switch (shape) {
     case "circle":
-      return `Round[${layerCode}]Pad_${holeDiameter}_${outerDiameter}_um`
+      return `Round[${layerCode}]Pad_${Math.round(holeDiameter!)}_${Math.round(outerDiameter!)}_um`
     case "oval":
-      return `Oval[${layerCode}]Pad_${width}x${height}_um`
     case "pill":
-      return `Oval[${layerCode}]Pad_${width}x${height}_um`
+      return `Oval[${layerCode}]Pad_${Math.round(width!)}x${Math.round(height!)}_um`
     case "rect":
-      return `RoundRect[${layerCode}]Pad_${width}x${height}_um`
+      return `RoundRect[${layerCode}]Pad_${Math.round(width!)}x${Math.round(height!)}_um`
     default:
       return "default_pad"
   }

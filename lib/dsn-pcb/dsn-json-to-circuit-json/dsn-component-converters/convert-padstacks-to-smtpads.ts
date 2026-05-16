@@ -69,8 +69,8 @@ export function convertPadstacksToSmtPads(
         if (rectShape) {
           // Handle rectangle shape
           const [x1, y1, x2, y2] = rectShape.coordinates
-          width = Math.abs(x2 - x1) / 1000 // Convert μm to mm
-          height = Math.abs(y2 - y1) / 1000 // Convert μm to mm
+          width = Math.abs(x2 - x1) * transform.a
+          height = Math.abs(y2 - y1) * transform.a
         } else if (polygonShape) {
           // Handle polygon shape
           const coordinates = polygonShape.coordinates
@@ -90,17 +90,17 @@ export function convertPadstacksToSmtPads(
             maxY = Math.max(maxY, y)
           }
 
-          width = Math.abs(maxX - minX) / 1000
-          height = Math.abs(maxY - minY) / 1000
+          width = Math.abs(maxX - minX) * transform.a
+          height = Math.abs(maxY - minY) * transform.a
         } else if (pathShape) {
           // For path shapes (oval/pill pads), width is the path width
           // and height is the distance between path endpoints
           const [x1, y1, x2, y2] = pathShape.coordinates
-          width = pathShape.width / 1000 // Convert μm to mm
-          height = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) / 1000
+          width = pathShape.width * transform.a
+          height = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) * transform.a
         } else if (circleShape) {
           // Handle circle shape
-          const radius = circleShape.diameter / 2 / 1000
+          const radius = (circleShape.diameter / 2) * transform.a
           width = radius
           height = radius
         } else {
@@ -108,12 +108,25 @@ export function convertPadstacksToSmtPads(
           return
         }
 
+        // Calculate rotation in radians
+        const rotationRad = (place.rotation * Math.PI) / 180
+        const cos = Math.cos(rotationRad)
+        const sin = Math.sin(rotationRad)
+
+        // Rotate pin offset
+        const rotatedPinX = pin.x * cos - pin.y * sin
+        const rotatedPinY = pin.x * sin + pin.y * cos
+
         // Calculate position in circuit space using the transformation matrix
-        // Convert component position and pin offset to circuit coordinates
         const { x: circuitX, y: circuitY } = applyToPoint(transform, {
-          x: (compX || 0) + pin.x,
-          y: (compY || 0) + pin.y,
+          x: (compX || 0) + rotatedPinX,
+          y: (compY || 0) + rotatedPinY,
         })
+
+        const safePinNum =
+          typeof pin.pin_number === "string" && !isNaN(Number(pin.pin_number))
+            ? Number(pin.pin_number)
+            : pin.pin_number
 
         let pcbPad: PcbSmtPad
         if (rectShape || polygonShape || pathShape) {
@@ -126,7 +139,7 @@ export function convertPadstacksToSmtPads(
           })
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pin.pin_number}`,
             pcb_component_id: `${componentId}_${place.refdes}`,
             pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
             shape: "rect",
@@ -140,13 +153,13 @@ export function convertPadstacksToSmtPads(
         } else {
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pin.pin_number}`,
             pcb_component_id: `${componentId}_${place.refdes}`,
             pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
             shape: "circle",
             x: circuitX,
             y: circuitY,
-            radius: circleShape!.diameter / 2 / 1000,
+            radius: (circleShape!.diameter / 2) * transform.a,
             layer: side === "front" ? "top" : "bottom",
             port_hints: [pin.pin_number.toString()],
           }

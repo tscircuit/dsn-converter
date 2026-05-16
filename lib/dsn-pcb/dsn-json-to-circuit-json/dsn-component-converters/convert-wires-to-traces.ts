@@ -19,7 +19,8 @@ export function convertWiresToPcbTraces(
   fromSessionSpace?: boolean,
 ): AnyCircuitElement[] {
   const tracesAndVias: AnyCircuitElement[] = []
-  const processedNets = new Set<string>()
+  let viaCount = 0
+  let traceCount = 0
 
   wiring.wires?.forEach((wire) => {
     debug("WIRE\n----\n", wire)
@@ -29,42 +30,50 @@ export function convertWiresToPcbTraces(
     if (wire.type === "shove_fixed") {
       return
     }
-    if (processedNets.has(netName)) {
-      debug(
-        `Already processed wire for net "${netName}" but got another (hopefully not a duplicate wire!)`,
-      )
-    }
-    processedNets.add(netName)
 
     if (wire.type === "via") {
       debug("wire is actually a via!")
       tracesAndVias.push(
-        ...convertWiringViaToPcbVias({ wire, transformUmToMm, netName }),
+        ...convertWiringViaToPcbVias({
+          wire,
+          transformUmToMm,
+          netName,
+          index: viaCount++,
+        }),
       )
       return
     }
 
     if ("polyline_path" in wire) {
-      tracesAndVias.push(
-        ...convertPolylinePathToPcbTraces({
-          wire,
-          transformUmToMm,
-          netName,
-          fromSessionSpace,
-        }),
-      )
+      const traces = convertPolylinePathToPcbTraces({
+        wire,
+        transformUmToMm,
+        netName,
+        fromSessionSpace,
+      })
+      // Ensure unique IDs for traces if they don't have them
+      traces.forEach((t) => {
+        if (t.type === "pcb_trace") {
+          t.pcb_trace_id = `${t.pcb_trace_id}_${traceCount++}`
+        }
+      })
+      tracesAndVias.push(...traces)
       return
     }
 
     if ("path" in wire) {
-      tracesAndVias.push(
-        ...convertWiringPathToPcbTraces({
-          wire,
-          transformUmToMm,
-          netName,
-          fromSessionSpace,
-        }),
-      )
+      const traces = convertWiringPathToPcbTraces({
+        wire,
+        transformUmToMm,
+        netName,
+        fromSessionSpace,
+      })
+      traces.forEach((t) => {
+        if (t.type === "pcb_trace") {
+          t.pcb_trace_id = `${t.pcb_trace_id}_${traceCount++}`
+        }
+      })
+      tracesAndVias.push(...traces)
       return
     }
   })

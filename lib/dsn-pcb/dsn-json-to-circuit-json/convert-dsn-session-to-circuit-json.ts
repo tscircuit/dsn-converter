@@ -19,7 +19,21 @@ export function convertDsnSessionToCircuitJson(
   circuitJson?: AnyCircuitElement[],
 ): AnyCircuitElement[] {
   // From sesssion space to circuit space
-  const transformUmToMm = scale(1 / 10000)
+  // Calculate scaling factor from session units to mm
+  let scalingFactor = 1 / 10000 // default to 0.1um -> mm
+  if (dsnSession.routes?.resolution) {
+    const { unit, value } = dsnSession.routes.resolution
+    const unitToMm = {
+      inch: 25.4,
+      mil: 0.0254,
+      cm: 10,
+      mm: 1,
+      um: 0.001,
+    }
+    const baseMm = unitToMm[unit as keyof typeof unitToMm] || 0.001
+    scalingFactor = baseMm / value
+  }
+  const transformUmToMm = scale(scalingFactor)
   const inputPcbElms = convertDsnPcbToCircuitJson(
     dsnInput as DsnPcb,
     true, // from session space to circuit space
@@ -107,9 +121,9 @@ export function convertDsnSessionToCircuitJson(
     })
 
     // Get via padstack info if available
-    const viaPadstackExists = dsnSession.routes.library_out?.padstacks?.find(
-      (p) => p.name === "Via[0-1]_600:300_um",
-    )
+    // Get via padstack info if available (any padstack can potentially be a via)
+    const viaPadstackExists =
+      (dsnSession.routes.library_out?.padstacks?.length ?? 0) > 0
     // Add associated vias if they exist at wire endpoints
     if (viaPadstackExists && net.vias && net.vias.length > 0) {
       net.vias.forEach((via) => {
