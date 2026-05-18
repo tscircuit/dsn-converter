@@ -1065,6 +1065,16 @@ function processSessionNode(ast: ASTNode): DsnSession {
     ).components
   }
 
+  const wasIsNode = ast.children!.find(
+    (child) =>
+      child.type === "List" &&
+      child.children?.[0].type === "Atom" &&
+      child.children[0].value === "was_is",
+  )
+  if (wasIsNode) {
+    session.was_is = processWasIs(wasIsNode.children!.slice(1))
+  }
+
   // Extract routes section
   const routesNode = ast.children!.find(
     (child) =>
@@ -1144,6 +1154,29 @@ function processSessionNode(ast: ASTNode): DsnSession {
   }
 
   return session
+}
+
+function processWasIs(nodes: ASTNode[]): DsnSession["was_is"] {
+  return nodes
+    .map((node) => {
+      if (
+        node.type === "List" &&
+        node.children?.[0].type === "Atom" &&
+        typeof node.children[0].value === "string" &&
+        node.children[1]?.type === "Atom" &&
+        node.children[2]?.type === "Atom"
+      ) {
+        return {
+          type: node.children[0].value,
+          from: String(node.children[1].value),
+          to: String(node.children[2].value),
+        }
+      }
+      return null
+    })
+    .filter((entry): entry is NonNullable<DsnSession["was_is"]>[number] =>
+      Boolean(entry),
+    )
 }
 
 function processPathShape(nodes: ASTNode[]): PathShape {
