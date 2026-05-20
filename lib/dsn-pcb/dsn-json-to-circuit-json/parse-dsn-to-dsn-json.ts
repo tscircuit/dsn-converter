@@ -296,14 +296,57 @@ function processBoundary(nodes: ASTNode[]): Boundary {
   const boundary: Partial<Boundary> = {}
   nodes.forEach((node) => {
     if (node.type === "List" && node.children![0].type === "Atom") {
-      boundary.path = processPath(node.children!)
+      switch (node.children![0].value) {
+        case "path":
+          boundary.path = processPath(node.children!)
+          break
+        case "rect":
+          boundary.rect = processBoundaryRect(node.children!)
+          break
+        case "polygon":
+          boundary.polygon = processBoundaryPolygon(node.children!)
+          break
+      }
     }
   })
-  // Ensure boundary.path is defined
-  if (!boundary.path) {
+  if (!boundary.path && !boundary.rect && !boundary.polygon) {
     boundary.path = { layer: "", width: 0, coordinates: [] }
   }
   return boundary as Boundary
+}
+
+function processBoundaryRect(nodes: ASTNode[]): NonNullable<Boundary["rect"]> {
+  if (nodes[1]?.type !== "Atom" || typeof nodes[1].value !== "string") {
+    throw new Error("Invalid boundary rect format")
+  }
+
+  return {
+    type: nodes[1].value,
+    coordinates: nodes
+      .slice(2)
+      .filter((node) => node.type === "Atom" && typeof node.value === "number")
+      .map((node) => node.value as number),
+  }
+}
+
+function processBoundaryPolygon(
+  nodes: ASTNode[],
+): NonNullable<Boundary["polygon"]> {
+  if (nodes[1]?.type !== "Atom" || typeof nodes[1].value !== "string") {
+    throw new Error("Invalid boundary polygon format")
+  }
+  if (nodes[2]?.type !== "Atom" || typeof nodes[2].value !== "number") {
+    throw new Error("Invalid boundary polygon width")
+  }
+
+  return {
+    type: nodes[1].value,
+    width: nodes[2].value,
+    coordinates: nodes
+      .slice(3)
+      .filter((node) => node.type === "Atom" && typeof node.value === "number")
+      .map((node) => node.value as number),
+  }
 }
 
 function processPath(nodes: ASTNode[]): Path {
