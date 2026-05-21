@@ -9,6 +9,10 @@ import {
 import testDsnFile from "../assets/testkicadproject/testkicadproject.dsn" with {
   type: "text",
 }
+// @ts-ignore
+import smoothieBoundaryShapesDsn from "../assets/repro/smoothieboard-boundary-shapes.dsn" with {
+  type: "text",
+}
 
 const getBoard = (dsnJson: DsnPcb) => {
   const board = convertDsnPcbToCircuitJson(dsnJson).find(
@@ -130,4 +134,27 @@ test("preserves polygon structure boundary shapes when stringifying", () => {
   const board = getBoard(reparsedJson)
   expect(board.width).toBeCloseTo(0.04)
   expect(board.height).toBeCloseTo(0.06)
+})
+
+test("round-trips Smoothieboard rect and polygon boundary shapes from fixture", () => {
+  const dsnJson = parseDsnToDsnJson(smoothieBoundaryShapesDsn) as DsnPcb
+
+  expect(dsnJson.structure.boundary).toEqual({
+    rect: {
+      type: "pcb",
+      coordinates: [82550, -159512, 214376, -50673],
+    },
+    polygon: {
+      type: "pcb",
+      width: 0,
+      coordinates: [
+        82550, -159512, 214376, -159512, 214376, -50673, 82550, -50673,
+      ],
+    },
+  })
+
+  const dsnString = stringifyDsnJson(dsnJson)
+  const reparsedJson = parseDsnToDsnJson(dsnString) as DsnPcb
+
+  expect(reparsedJson.structure.boundary).toEqual(dsnJson.structure.boundary)
 })
