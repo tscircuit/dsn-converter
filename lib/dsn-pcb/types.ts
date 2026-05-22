@@ -88,6 +88,10 @@ export interface ComponentPlacement {
   places: Array<{
     refdes: string
     PN?: string
+    pins?: Array<{
+      pin_number: string | number
+      clearance_class?: string
+    }>
     x: number
     y: number
     side: "front" | "back"
@@ -171,6 +175,10 @@ export interface Places {
   side: string
   rotation: number
   PN: string
+  pins?: Array<{
+    pin_number: string | number
+    clearance_class?: string
+  }>
 }
 
 export interface Library {

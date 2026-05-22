@@ -477,7 +477,7 @@ function processPlace(nodes: ASTNode[]): Places {
     }
   }
 
-  // Process optional PN (part number) if present
+  // Process optional PN (part number) and per-place pin metadata if present
   for (let i = coordIndex + 4; i < nodes.length; i++) {
     const node = nodes[i]
     if (
@@ -489,7 +489,33 @@ function processPlace(nodes: ASTNode[]): Places {
       node.children[1].type === "Atom"
     ) {
       places.PN = String(node.children[1].value)
-      break
+    } else if (
+      node.type === "List" &&
+      node.children &&
+      node.children[0].type === "Atom" &&
+      node.children[0].value === "pin" &&
+      node.children[1] &&
+      node.children[1].type === "Atom"
+    ) {
+      const pin: NonNullable<Places["pins"]>[number] = {
+        pin_number: node.children[1].value as string | number,
+      }
+
+      for (const pinChild of node.children.slice(2)) {
+        if (
+          pinChild.type === "List" &&
+          pinChild.children &&
+          pinChild.children[0].type === "Atom" &&
+          pinChild.children[0].value === "clearance_class" &&
+          pinChild.children[1] &&
+          pinChild.children[1].type === "Atom"
+        ) {
+          pin.clearance_class = String(pinChild.children[1].value)
+        }
+      }
+
+      places.pins ??= []
+      places.pins.push(pin)
     }
   }
 
