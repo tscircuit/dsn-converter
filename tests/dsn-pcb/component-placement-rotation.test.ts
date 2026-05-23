@@ -3,7 +3,10 @@ import { convertDsnPcbToCircuitJson } from "lib"
 import type { DsnPcb } from "lib/dsn-pcb/types"
 
 const baseDsnPcb: DsnPcb = {
-  parser: { string_quote: '"', space_in_quoted_tokens: false, host_cad: "" },
+  is_dsn_pcb: true,
+  filename: "test.dsn",
+  unit: "um",
+  parser: { string_quote: '"', space_in_quoted_tokens: "false", host_cad: "", host_version: "" },
   resolution: { unit: "um", value: 1 },
   structure: {
     layers: [],
@@ -15,7 +18,10 @@ const baseDsnPcb: DsnPcb = {
       },
     },
     via: "",
-    rules: {},
+    rule: {
+      width: 0,
+      clearances: [],
+    },
   },
   placement: {
     components: [
@@ -63,7 +69,7 @@ const baseDsnPcb: DsnPcb = {
       },
     ],
   },
-  network: { nets: [] },
+  network: { nets: [], classes: [] },
   wiring: { wires: [] },
 }
 
