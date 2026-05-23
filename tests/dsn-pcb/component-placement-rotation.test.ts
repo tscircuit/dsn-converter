@@ -6,7 +6,12 @@ const baseDsnPcb: DsnPcb = {
   is_dsn_pcb: true,
   filename: "test.dsn",
   unit: "um",
-  parser: { string_quote: '"', space_in_quoted_tokens: "false", host_cad: "", host_version: "" },
+  parser: {
+    string_quote: '"',
+    space_in_quoted_tokens: "false",
+    host_cad: "",
+    host_version: "",
+  },
   resolution: { unit: "um", value: 1 },
   structure: {
     layers: [],
