@@ -1,4 +1,4 @@
-import { expect, test } from "bun:test"
+import { expect, spyOn, test } from "bun:test"
 import { computeSegIntersection } from "lib/utils/compute-seg-intersection"
 
 test("compute dsn to circuit json matrix", () => {
@@ -37,4 +37,20 @@ test("compute dsn to circuit json matrix", () => {
   expect(P2.y).toBeCloseTo(approximateOutputPoints[1].y, 0.1)
   expect(P3.x).toBeCloseTo(approximateOutputPoints[2].x, 0.1)
   expect(P3.y).toBeCloseTo(approximateOutputPoints[2].y, 0.1)
+})
+
+test("compute segment intersection returns null for parallel segments without logging", () => {
+  const logSpy = spyOn(console, "log")
+
+  try {
+    const intersection = computeSegIntersection(
+      { x1: 0, y1: 0, x2: 1, y2: 0 },
+      { x1: 0, y1: 1, x2: 1, y2: 1 },
+    )
+
+    expect(intersection).toBeNull()
+    expect(logSpy).not.toHaveBeenCalled()
+  } finally {
+    logSpy.mockRestore()
+  }
 })

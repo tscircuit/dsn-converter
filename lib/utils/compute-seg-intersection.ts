@@ -13,7 +13,6 @@ export const computeSegIntersection = (
 
   // Check if lines are parallel (cross product near 0)
   if (Math.abs(cross) < 0.00000001) {
-    console.log("lines are parallel")
     return null
   }
 
