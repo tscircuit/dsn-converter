@@ -24,6 +24,7 @@ interface Wire {
   }
   net: string
   type: string
+  padstack_name?: string
 }
 
 function layerRefToDsnLayer(layer: LayerRef): string {
@@ -141,6 +142,7 @@ export function processPcbTraces(
               },
               net: netName,
               type: "via",
+              padstack_name: viaPadstackName,
             })
           }
           continue
@@ -183,6 +185,7 @@ export function processPcbTraces(
             },
             net: netName,
             type: "via",
+            padstack_name: viaPadstackName,
           })
 
           currentLayer = point.to_layer
