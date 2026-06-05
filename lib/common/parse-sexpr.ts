@@ -44,18 +44,23 @@ export function tokenizeDsn(input: string): Token[] {
       }
       i++ // Skip the closing quote
       tokens.push({ type: "String", value })
-    } else if (char === "-" || /\d/.test(char)) {
-      // Parse number (integer or float)
-      let numStr = ""
-      if (char === "-") {
-        numStr += "-"
+    } else if (
+      /\d/.test(char) ||
+      (char === "-" && i + 1 < length && /[\d.]/.test(input[i + 1]))
+    ) {
+      // Parse a complete token first. DSN pin names can start with digits,
+      // e.g. "2@1", so only treat the token as a number if the whole token
+      // matches a numeric format.
+      let token = ""
+      while (i < length && !/\s|\(|\)/.test(input[i])) {
+        token += input[i]
         i++
       }
-      while (i < length && /[\d.]/.test(input[i])) {
-        numStr += input[i]
-        i++
+      if (/^-?(?:\d+\.?\d*|\.\d+)(?:e-?\d+)?$/i.test(token)) {
+        tokens.push({ type: "Number", value: Number(token) })
+      } else {
+        tokens.push({ type: "Symbol", value: token })
       }
-      tokens.push({ type: "Number", value: parseFloat(numStr) })
     } else {
       // Parse symbol
       let sym = ""
