@@ -21,6 +21,8 @@ import type {
   Layer,
   Library,
   Net,
+  NetFromTo,
+  NetFromToEndpoint,
   Network,
   Outline,
   Padstack,
@@ -837,9 +839,64 @@ function processNet(nodes: ASTNode[]): Net {
           throw new Error("Invalid pin in net")
         }
       })
+    } else if (
+      node.type === "List" &&
+      node.children![0].type === "Atom" &&
+      node.children![0].value === "fromto"
+    ) {
+      net.fromtos ??= []
+      net.fromtos.push(processNetFromTo(node.children!))
     }
   })
   return net as Net
+}
+
+function processNetFromTo(nodes: ASTNode[]): NetFromTo {
+  const from = processNetFromToEndpoint(nodes[1])
+  const to = processNetFromToEndpoint(nodes[2])
+  const fromto: NetFromTo = { from, to }
+
+  const circuitNode = nodes.find(
+    (node) =>
+      node.type === "List" &&
+      node.children?.[0]?.type === "Atom" &&
+      node.children[0].value === "circuit",
+  )
+
+  const lengthNode = circuitNode?.children?.find(
+    (node) =>
+      node.type === "List" &&
+      node.children?.[0]?.type === "Atom" &&
+      node.children[0].value === "length",
+  )
+
+  const length = lengthNode?.children
+    ?.slice(1)
+    .filter((node) => node.type === "Atom" && typeof node.value === "number")
+    .map((node) => node.value as number)
+
+  if (length?.length) {
+    fromto.circuit = { length }
+  }
+
+  return fromto
+}
+
+function processNetFromToEndpoint(node: ASTNode): NetFromToEndpoint {
+  if (node.type === "Atom") {
+    return String(node.value)
+  }
+
+  if (
+    node.type === "List" &&
+    node.children?.[0]?.type === "Atom" &&
+    node.children[0].value === "virtual_pin" &&
+    node.children[1]?.type === "Atom"
+  ) {
+    return { virtual_pin: String(node.children[1].value) }
+  }
+
+  throw new Error(`Invalid fromto endpoint: ${JSON.stringify(node)}`)
 }
 
 function processClass(nodes: ASTNode[]): Class {
