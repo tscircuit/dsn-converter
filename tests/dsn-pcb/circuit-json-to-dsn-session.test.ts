@@ -1,12 +1,14 @@
 import { expect, test } from "bun:test"
 import { su } from "@tscircuit/soup-util"
-import type { AnyCircuitElement, PcbTrace } from "circuit-json"
+import type {
+  PcbTrace,
+  PcbTraceRoutePointWire,
+} from "circuit-json"
 import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
 import Debug from "debug"
 import {
   type DsnPcb,
   convertCircuitJsonToDsnSession,
-  convertDsnJsonToCircuitJson,
   convertDsnPcbToCircuitJson,
   convertDsnSessionToCircuitJson,
   parseDsnToDsnJson,
@@ -67,7 +69,7 @@ test("convert dsn file -> circuit json -> dsn session -> circuit json", () => {
 
   const routedCircuitJson = circuitJson.concat(pcbTracesFromAutorouting)
   const pcbTraceFirstPoint = su(routedCircuitJson as any).pcb_trace.list()[0]
-    .route[0]
+    .route[0] as PcbTraceRoutePointWire
   const smtPadFromRouteStarts = su(
     circuitJson as any,
   ).pcb_smtpad.list()[0] as any
@@ -103,7 +105,7 @@ test("convert dsn file -> circuit json -> dsn session -> circuit json", () => {
   const circuitJsonFromSession = convertDsnSessionToCircuitJson(dsnPcb, session)
   const pcbTraceFirstPointFromSession = su(
     circuitJsonFromSession as any,
-  ).pcb_trace.list()[0].route[0]
+  ).pcb_trace.list()[0].route[0] as PcbTraceRoutePointWire
   const smtPadFromRouteStartsFromSession = su(
     circuitJsonFromSession as any,
   ).pcb_smtpad.list()[0] as any
