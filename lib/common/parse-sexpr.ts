@@ -45,7 +45,9 @@ export function tokenizeDsn(input: string): Token[] {
       i++ // Skip the closing quote
       tokens.push({ type: "String", value })
     } else if (char === "-" || /\d/.test(char)) {
-      // Parse number (integer or float)
+      // Parse number (integer or float, including scientific notation).
+      // If non-numeric, non-delimiter chars follow the digits (e.g. "3.3V",
+      // "5V"), the token is actually a symbol.
       let numStr = ""
       if (char === "-") {
         numStr += "-"
@@ -55,7 +57,41 @@ export function tokenizeDsn(input: string): Token[] {
         numStr += input[i]
         i++
       }
-      tokens.push({ type: "Number", value: parseFloat(numStr) })
+      // Handle scientific notation: e.g. 5.68e-11, 1.2E+3
+      if (
+        i < length &&
+        (input[i] === "e" || input[i] === "E") &&
+        i + 1 < length &&
+        (/\d/.test(input[i + 1]) ||
+          ((input[i + 1] === "-" || input[i + 1] === "+") &&
+            i + 2 < length &&
+            /\d/.test(input[i + 2])))
+      ) {
+        numStr += input[i] // 'e' or 'E'
+        i++
+        if (input[i] === "-" || input[i] === "+") {
+          numStr += input[i]
+          i++
+        }
+        while (i < length && /\d/.test(input[i])) {
+          numStr += input[i]
+          i++
+        }
+      }
+      if (i < length && !/\s|\(|\)/.test(input[i])) {
+        // Continuation char found — treat the whole run as a symbol.
+        let sym = numStr
+        while (i < length && !/\s|\(|\)/.test(input[i])) {
+          sym += input[i]
+          i++
+        }
+        tokens.push({ type: "Symbol", value: sym })
+      } else if (numStr === "-" || numStr === "") {
+        // Bare "-" with no digits is a symbol, not a number.
+        tokens.push({ type: "Symbol", value: numStr || "-" })
+      } else {
+        tokens.push({ type: "Number", value: parseFloat(numStr) })
+      }
     } else {
       // Parse symbol
       let sym = ""
