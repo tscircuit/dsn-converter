@@ -1,9 +1,6 @@
 import { expect, test } from "bun:test"
 import { su } from "@tscircuit/soup-util"
-import type {
-  PcbTrace,
-  PcbTraceRoutePointWire,
-} from "circuit-json"
+import type { PcbTrace, PcbTraceRoutePointWire } from "circuit-json"
 import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
 import Debug from "debug"
 import {
