@@ -30,10 +30,10 @@ export function createAndAddPadstackFromPcbSmtPad(
     const padstack: Padstack =
       geometry.padstackShape === "circle"
         ? createCircularPadstack(
-          padstackName,
-          padstackParams.outerDiameter!,
-          padstackParams.holeDiameter!,
-        )
+            padstackName,
+            padstackParams.outerDiameter!,
+            padstackParams.holeDiameter!,
+          )
         : geometry.padstackShape === "polygon"
           ? createPolygonPadstack(
               padstackName,
@@ -41,11 +41,11 @@ export function createAndAddPadstackFromPcbSmtPad(
               geometry.layer,
             )
           : createRectangularPadstack(
-          padstackName,
-          padstackParams.width!,
-          padstackParams.height!,
-          geometry.layer,
-        )
+              padstackName,
+              padstackParams.width!,
+              padstackParams.height!,
+              geometry.layer,
+            )
 
     pcb.library.padstacks.push(padstack)
     processedPadstacks.add(padstackName)
