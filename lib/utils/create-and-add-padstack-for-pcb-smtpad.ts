@@ -3,8 +3,10 @@ import type { Padstack } from "lib"
 import type { DsnPcb } from "lib"
 import {
   createCircularPadstack,
+  createPolygonPadstack,
   createRectangularPadstack,
 } from "./create-padstack"
+import { getSmtPadGeometry } from "./get-smtpad-geometry"
 import { type PadstackNameArgs, getPadstackName } from "./get-padstack-name"
 
 export function createAndAddPadstackFromPcbSmtPad(
@@ -12,30 +14,37 @@ export function createAndAddPadstackFromPcbSmtPad(
   pad: PcbSmtPad,
   processedPadstacks: Set<string>,
 ): string {
-  const isCircle = pad.shape === "circle"
+  const geometry = getSmtPadGeometry(pad)
   const padstackParams: PadstackNameArgs = {
-    shape: isCircle ? "circle" : "rect",
-    outerDiameter: isCircle ? pad.radius * 1000 * 2 : undefined, // Radius to diameter
-    holeDiameter: isCircle ? pad.radius * 1000 * 2 : undefined, // Radius to diameter
-    width: isCircle ? undefined : (pad as { width: number }).width * 1000,
-    height: isCircle ? undefined : (pad as { height: number }).height * 1000,
-    layer: pad.layer as PcbSmtPad["layer"],
+    shape: geometry.padstackShape,
+    outerDiameter: geometry.outerDiameter,
+    holeDiameter: geometry.holeDiameter,
+    width: geometry.width,
+    height: geometry.height,
+    layer: geometry.layer,
   }
 
   const padstackName = getPadstackName(padstackParams)
 
   if (!processedPadstacks.has(padstackName)) {
-    const padstack: Padstack = isCircle
-      ? createCircularPadstack(
+    const padstack: Padstack =
+      geometry.padstackShape === "circle"
+        ? createCircularPadstack(
           padstackName,
           padstackParams.outerDiameter!,
           padstackParams.holeDiameter!,
         )
-      : createRectangularPadstack(
+        : geometry.padstackShape === "polygon"
+          ? createPolygonPadstack(
+              padstackName,
+              geometry.coordinates!,
+              geometry.layer,
+            )
+          : createRectangularPadstack(
           padstackName,
           padstackParams.width!,
           padstackParams.height!,
-          pad.layer,
+          geometry.layer,
         )
 
     pcb.library.padstacks.push(padstack)

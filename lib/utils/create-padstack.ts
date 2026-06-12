@@ -89,6 +89,25 @@ export function createRectangularPadstack(
   }
 }
 
+export function createPolygonPadstack(
+  name: string,
+  coordinates: number[],
+  layer: PcbSmtPad["layer"],
+): Padstack {
+  return {
+    name,
+    shapes: [
+      {
+        shapeType: "polygon",
+        layer: layer === "bottom" ? "B.Cu" : "F.Cu",
+        width: 0,
+        coordinates,
+      },
+    ],
+    attach: "off",
+  }
+}
+
 export function createCircularHoleRectangularPadstack(
   name: string,
   outerWidth: number,
