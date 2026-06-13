@@ -37,11 +37,6 @@ test("repro-coordinates-10x-too-large-with-circuit", async () => {
   // This means that for a physical coordinate of 4mm (4000um), the DSN coordinate
   // should be 40,000 (4000um * 10 units/um).
   //
-  // CURRENT (BUGGY) RESULT:
-  // The converter currently only scales by 1000 (mm to um), but fails to multiply by the resolution.
-  // Result: (place pcb_component_1 4000 0 front 0 )
-  // When interpreted with resolution 10, this is 400um = 0.4mm, which is 10x too small.
-  //
   // EXPECTED RESULT:
   // The coordinate should be 40000.
   // Expected: (place pcb_component_1 40000 0 front 0 )
@@ -49,7 +44,9 @@ test("repro-coordinates-10x-too-large-with-circuit", async () => {
   // Verify resolution is 10
   expect(dsnString).toContain("(resolution um 10)")
 
-  // Verify faulty coordinates (confirming the bug exists)
-  expect(dsnString).toContain("(place R1_source_component_0 -4000 0 front 0")
-  expect(dsnString).toContain("(place R2_source_component_1 4000 0 front 0")
+  expect(dsnString).toContain("(place R1_source_component_0 -40000 0 front 0")
+  expect(dsnString).toContain("(place R2_source_component_1 40000 0 front 0")
+  expect(dsnString).toContain(
+    "(path pcb 0  -100000 -100000 100000 -100000 100000 100000 -100000 100000 -100000 -100000)",
+  )
 })

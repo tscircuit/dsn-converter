@@ -8,6 +8,7 @@ export function createPinForImage(
   pad: any,
   pcbComponent: PcbComponent,
   sourcePort: SourcePort | undefined,
+  dsnUnitsPerMm = 1000,
 ): Pin | undefined {
   if (!sourcePort) return undefined
 
@@ -25,7 +26,7 @@ export function createPinForImage(
     padstack_name: getPadstackName(padstackParams),
     pin_number:
       sourcePort.port_hints?.find((hint) => !Number.isNaN(Number(hint))) || 1,
-    x: (pad.x - pcbComponent.center.x) * 1000,
-    y: (pad.y - pcbComponent.center.y) * 1000,
+    x: (pad.x - pcbComponent.center.x) * dsnUnitsPerMm,
+    y: (pad.y - pcbComponent.center.y) * dsnUnitsPerMm,
   }
 }

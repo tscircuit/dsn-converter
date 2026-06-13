@@ -11,6 +11,7 @@ export function convertPadstacksToSmtPads(
 ): AnyCircuitElement[] {
   const elements: AnyCircuitElement[] = []
   const { padstacks, images } = pcb.library
+  const dsnUnitToMm = transform.a
 
   debug("processing padstacks...")
   images.forEach((image) => {
@@ -69,8 +70,8 @@ export function convertPadstacksToSmtPads(
         if (rectShape) {
           // Handle rectangle shape
           const [x1, y1, x2, y2] = rectShape.coordinates
-          width = Math.abs(x2 - x1) / 1000 // Convert μm to mm
-          height = Math.abs(y2 - y1) / 1000 // Convert μm to mm
+          width = Math.abs(x2 - x1) * dsnUnitToMm
+          height = Math.abs(y2 - y1) * dsnUnitToMm
         } else if (polygonShape) {
           // Handle polygon shape
           const coordinates = polygonShape.coordinates
@@ -90,17 +91,17 @@ export function convertPadstacksToSmtPads(
             maxY = Math.max(maxY, y)
           }
 
-          width = Math.abs(maxX - minX) / 1000
-          height = Math.abs(maxY - minY) / 1000
+          width = Math.abs(maxX - minX) * dsnUnitToMm
+          height = Math.abs(maxY - minY) * dsnUnitToMm
         } else if (pathShape) {
           // For path shapes (oval/pill pads), width is the path width
           // and height is the distance between path endpoints
           const [x1, y1, x2, y2] = pathShape.coordinates
-          width = pathShape.width / 1000 // Convert μm to mm
-          height = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) / 1000
+          width = pathShape.width * dsnUnitToMm
+          height = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) * dsnUnitToMm
         } else if (circleShape) {
           // Handle circle shape
-          const radius = circleShape.diameter / 2 / 1000
+          const radius = (circleShape.diameter / 2) * dsnUnitToMm
           width = radius
           height = radius
         } else {
@@ -146,7 +147,7 @@ export function convertPadstacksToSmtPads(
             shape: "circle",
             x: circuitX,
             y: circuitY,
-            radius: circleShape!.diameter / 2 / 1000,
+            radius: (circleShape!.diameter / 2) * dsnUnitToMm,
             layer: side === "front" ? "top" : "bottom",
             port_hints: [pin.pin_number.toString()],
           }

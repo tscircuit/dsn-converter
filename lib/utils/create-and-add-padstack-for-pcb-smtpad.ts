@@ -11,6 +11,7 @@ export function createAndAddPadstackFromPcbSmtPad(
   pcb: DsnPcb,
   pad: PcbSmtPad,
   processedPadstacks: Set<string>,
+  dsnUnitsPerMm = 1000,
 ): string {
   const isCircle = pad.shape === "circle"
   const padstackParams: PadstackNameArgs = {
@@ -21,6 +22,18 @@ export function createAndAddPadstackFromPcbSmtPad(
     height: isCircle ? undefined : (pad as { height: number }).height * 1000,
     layer: pad.layer as PcbSmtPad["layer"],
   }
+  const padstackDsnUnitParams: PadstackNameArgs = {
+    shape: isCircle ? "circle" : "rect",
+    outerDiameter: isCircle ? pad.radius * dsnUnitsPerMm * 2 : undefined,
+    holeDiameter: isCircle ? pad.radius * dsnUnitsPerMm * 2 : undefined,
+    width: isCircle
+      ? undefined
+      : (pad as { width: number }).width * dsnUnitsPerMm,
+    height: isCircle
+      ? undefined
+      : (pad as { height: number }).height * dsnUnitsPerMm,
+    layer: pad.layer as PcbSmtPad["layer"],
+  }
 
   const padstackName = getPadstackName(padstackParams)
 
@@ -28,13 +41,13 @@ export function createAndAddPadstackFromPcbSmtPad(
     const padstack: Padstack = isCircle
       ? createCircularPadstack(
           padstackName,
-          padstackParams.outerDiameter!,
-          padstackParams.holeDiameter!,
+          padstackDsnUnitParams.outerDiameter!,
+          padstackDsnUnitParams.holeDiameter!,
         )
       : createRectangularPadstack(
           padstackName,
-          padstackParams.width!,
-          padstackParams.height!,
+          padstackDsnUnitParams.width!,
+          padstackDsnUnitParams.height!,
           pad.layer,
         )
 

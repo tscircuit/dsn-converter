@@ -44,11 +44,11 @@ test("circuit json thickness converted to dsn file", () => {
 
   const trace_width_300um = network.find((c) => c.name === "trace_width_300um")
   expect(trace_width_300um).toBeDefined()
-  expect(trace_width_300um?.rule.width).toBe(300)
+  expect(trace_width_300um?.rule.width).toBe(3000)
 
   const kicad_default = network.find((c) => c.name === "kicad_default")
   expect(kicad_default).toBeDefined()
-  expect(kicad_default?.rule.width).toBe(150)
+  expect(kicad_default?.rule.width).toBe(1500)
 })
 
 test("thickness of trace in dsn file to circuit json", async () => {

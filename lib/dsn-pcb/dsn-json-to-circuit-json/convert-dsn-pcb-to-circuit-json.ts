@@ -3,6 +3,7 @@ import { applyToPoint, fromTriangles, scale } from "transformation-matrix"
 import { su } from "@tscircuit/soup-util"
 import type { AnyCircuitElement, PcbBoard } from "circuit-json"
 import { pairs } from "lib/utils/pairs"
+import { getMmPerDsnUnitForLibrary } from "../dsn-unit-conversion"
 import type { DsnPcb } from "../types"
 import { convertDsnPcbComponentsToSourceComponentsAndPorts } from "./dsn-component-converters/convert-dsn-pcb-components-to-source-components-and-ports"
 import { convertNetsToSourceNetsAndTraces } from "./dsn-component-converters/convert-nets-to-source-nets-and-traces"
@@ -15,8 +16,9 @@ export function convertDsnPcbToCircuitJson(
 ): AnyCircuitElement[] {
   const elements: AnyCircuitElement[] = []
 
-  // TODO use pcb.resolution.unit and pcb.resolution.value
-  const transformDsnUnitToMm = scale(1 / 1000)
+  const transformDsnUnitToMm = scale(
+    getMmPerDsnUnitForLibrary(dsnPcb.resolution, dsnPcb.library),
+  )
 
   // Add the board
   // You must use the dsnPcb.boundary to get the center, width and height

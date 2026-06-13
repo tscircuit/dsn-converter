@@ -29,13 +29,13 @@ test("circuit json (arduino nano) -> dsn file", async () => {
   expect(usbcImage.pins[0].padstack_name).toBe(
     "RoundRect[T]Pad_299.9994x1299.9974_um",
   )
-  expect(usbcImage.pins[0].x).toBe(-1750.060000000076)
-  expect(usbcImage.pins[0].y).toBe(2736.586449999919)
+  expect(usbcImage.pins[0].x).toBe(-17500.60000000076)
+  expect(usbcImage.pins[0].y).toBeCloseTo(27365.86449999919)
   expect(usbcImage.pins[19].padstack_name).toBe(
     "Oval[A]Pad_799.9983999999998x1399.9972_um",
   )
-  expect(usbcImage.pins[19].x).toBe(-4325)
-  expect(usbcImage.pins[19].y).toBe(-2486.500599999971)
+  expect(usbcImage.pins[19].x).toBe(-43250)
+  expect(usbcImage.pins[19].y).toBe(-24865.00599999971)
 
   // padstack length
   expect(dsnJson.library.padstacks.length).toBe(10)

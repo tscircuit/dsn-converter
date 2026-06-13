@@ -9,15 +9,16 @@ import { createPinForImage } from "lib/utils/create-pin-for-image"
 import { getComponentValue } from "lib/utils/get-component-value"
 import { getFootprintName } from "lib/utils/get-footprint-name"
 import { applyToPoint, scale } from "transformation-matrix"
+import { getDsnUnitsPerMm } from "../dsn-unit-conversion"
 import type { ComponentGroup, DsnPcb, Image, Pin } from "../types"
-
-const transformMmToUm = scale(1000)
 
 export function processComponentsAndPads(
   componentGroups: ComponentGroup[],
   circuitElements: AnyCircuitElement[],
   pcb: DsnPcb,
 ) {
+  const dsnUnitsPerMm = getDsnUnitsPerMm(pcb.resolution)
+  const transformMmToDsn = scale(dsnUnitsPerMm)
   const processedPadstacks = new Set<string>()
   const componentsByFootprint = new Map<
     string,
@@ -45,7 +46,7 @@ export function processComponentsAndPads(
     const footprintName = getFootprintName(sourceComponent!, pcbComponent!)
     const componentName = sourceComponent?.name || "Unknown"
     const circuitSpaceCoordinates = applyToPoint(
-      transformMmToUm,
+      transformMmToDsn,
       pcbComponent!.center,
     )
 
@@ -82,7 +83,12 @@ export function processComponentsAndPads(
 
     // Add padstacks for SMT pads
     for (const pad of componentGroup.pcb_smtpads) {
-      createAndAddPadstackFromPcbSmtPad(pcb, pad, processedPadstacks)
+      createAndAddPadstackFromPcbSmtPad(
+        pcb,
+        pad,
+        processedPadstacks,
+        dsnUnitsPerMm,
+      )
     }
 
     // Add image once per footprint
@@ -106,7 +112,7 @@ export function processComponentsAndPads(
             .source_port.list()
             .find((e) => e.source_port_id === pcbPort?.source_port_id)
 
-          return createPinForImage(pad, pcbComponent, sourcePort)
+          return createPinForImage(pad, pcbComponent, sourcePort, dsnUnitsPerMm)
         })
         .filter((pin): pin is Pin => pin !== undefined),
     }

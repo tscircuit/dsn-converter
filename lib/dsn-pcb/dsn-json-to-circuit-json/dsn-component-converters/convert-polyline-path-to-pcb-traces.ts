@@ -37,9 +37,7 @@ export const convertPolylinePathToPcbTraces = ({
       route_type: "wire" as const,
       x: Number(point.x.toFixed(4)),
       y: Number(point.y.toFixed(4)),
-      width: fromSessionSpace
-        ? wire.polyline_path!.width / 10000 // session space to circuit space
-        : wire.polyline_path!.width / 1000, // dsn space to circuit space
+      width: wire.polyline_path!.width * transformUmToMm.a,
       layer: wire.polyline_path?.layer.includes("B.") ? "bottom" : "top",
     })),
     trace_length: getTraceLength(pointsOnTraceMm),
