@@ -14,11 +14,17 @@ export function getPinNum(nodes: ASTNode[]): number | string | null {
 /**
  * Process pin identifier and return its value and the index where it was found
  */
-export function getPinNumAndIndex(nodes: ASTNode[]): { pinNumber: number | string; index: number } | null {
+export function getPinNumAndIndex(
+  nodes: ASTNode[],
+): { pinNumber: number | string; index: number } | null {
   let i = 2
   while (i < nodes.length) {
     const node = nodes[i]
-    if (node.type === "List" && node.children && node.children[0]?.type === "Atom") {
+    if (
+      node.type === "List" &&
+      node.children &&
+      node.children[0]?.type === "Atom"
+    ) {
       const headVal = node.children[0].value
       if (headVal === "rotate" || headVal === "clearance_class") {
         i++

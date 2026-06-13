@@ -1,12 +1,21 @@
 import fs from "fs"
 import path from "path"
-import { parseDsnToDsnJson, convertDsnPcbToCircuitJson, type DsnPcb } from "../lib"
+import {
+  parseDsnToDsnJson,
+  convertDsnPcbToCircuitJson,
+  type DsnPcb,
+} from "../lib"
 import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
 
 async function main() {
-  const dsnPath = path.join(__dirname, "assets", "repro", "smoothieboard-repro.dsn")
+  const dsnPath = path.join(
+    __dirname,
+    "assets",
+    "repro",
+    "smoothieboard-repro.dsn",
+  )
   const dsnContent = fs.readFileSync(dsnPath, "utf-8")
-  
+
   console.log("Parsing DSN to DsnJson...")
   const dsnJson = parseDsnToDsnJson(dsnContent) as DsnPcb
 
