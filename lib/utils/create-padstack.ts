@@ -23,6 +23,24 @@ export function createCircularPadstack(
   }
 }
 
+export function createCircularSmtPadstack(
+  name: string,
+  outerDiameter: number,
+  layer: PcbSmtPad["layer"],
+): Padstack {
+  return {
+    name,
+    shapes: [
+      {
+        shapeType: "circle" as const,
+        layer: layer === "bottom" ? "B.Cu" : "F.Cu",
+        diameter: outerDiameter,
+      },
+    ],
+    attach: "off",
+  }
+}
+
 export function createOvalPadstack(
   name: string,
   outerWidth: number,

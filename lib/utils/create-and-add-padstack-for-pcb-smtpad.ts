@@ -2,7 +2,7 @@ import type { PcbSmtPad } from "circuit-json"
 import type { Padstack } from "lib"
 import type { DsnPcb } from "lib"
 import {
-  createCircularPadstack,
+  createCircularSmtPadstack,
   createRectangularPadstack,
 } from "./create-padstack"
 import { type PadstackNameArgs, getPadstackName } from "./get-padstack-name"
@@ -26,10 +26,10 @@ export function createAndAddPadstackFromPcbSmtPad(
 
   if (!processedPadstacks.has(padstackName)) {
     const padstack: Padstack = isCircle
-      ? createCircularPadstack(
+      ? createCircularSmtPadstack(
           padstackName,
           padstackParams.outerDiameter!,
-          padstackParams.holeDiameter!,
+          pad.layer,
         )
       : createRectangularPadstack(
           padstackName,
