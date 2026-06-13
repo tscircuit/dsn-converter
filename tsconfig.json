@@ -23,6 +23,7 @@
     // Best practices
     "strict": true,
     "skipLibCheck": true,
+    "types": ["bun-types"],
     "noFallthroughCasesInSwitch": true,
 
     // Some stricter flags (disabled by default)
