@@ -23,7 +23,12 @@ test("check pill shape plated hole dimension", async () => {
 
   expect(
     pcbSmtpads.some(
-      (p) => p.shape === "rect" && p.width === 1.2 && p.height === 0.6,
+      (p) =>
+        p.shape === "rotated_pill" &&
+        p.width === 1.8 &&
+        p.height === 1.2 &&
+        p.radius === 0.6 &&
+        p.ccw_rotation === 90,
     ),
   ).toBe(true)
 })
