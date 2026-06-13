@@ -61,6 +61,8 @@ export function convertDsnPcbToCircuitJson(
         dsnPcb.network,
         transformDsnUnitToMm,
         fromSessionSpace,
+        dsnPcb.library,
+        dsnPcb.structure.via,
       ),
     )
   }
