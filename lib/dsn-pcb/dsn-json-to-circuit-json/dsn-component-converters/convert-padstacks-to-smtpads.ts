@@ -93,11 +93,14 @@ export function convertPadstacksToSmtPads(
           width = Math.abs(maxX - minX) / 1000
           height = Math.abs(maxY - minY) / 1000
         } else if (pathShape) {
-          // For path shapes (oval/pill pads), width is the path width
-          // and height is the distance between path endpoints
-          const [x1, y1, x2, y2] = pathShape.coordinates
-          width = pathShape.width / 1000 // Convert μm to mm
-          height = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) / 1000
+          const xs: number[] = []
+          const ys: number[] = []
+          for (let i = 0; i < pathShape.coordinates.length; i += 2) {
+            xs.push(pathShape.coordinates[i])
+            ys.push(pathShape.coordinates[i + 1])
+          }
+          width = (Math.max(...xs) - Math.min(...xs) + pathShape.width) / 1000
+          height = (Math.max(...ys) - Math.min(...ys) + pathShape.width) / 1000
         } else if (circleShape) {
           // Handle circle shape
           const radius = circleShape.diameter / 2 / 1000
