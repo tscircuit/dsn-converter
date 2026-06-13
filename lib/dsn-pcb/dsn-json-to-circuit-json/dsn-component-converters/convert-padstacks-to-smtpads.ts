@@ -2,6 +2,13 @@ import type { AnyCircuitElement, PcbSmtPad } from "circuit-json"
 import Debug from "debug"
 import type { DsnPcb } from "lib/dsn-pcb/types"
 import { applyToPoint } from "transformation-matrix"
+import {
+  getDsnPcbComponentId,
+  getDsnPcbPortId,
+  getDsnPcbSmtPadId,
+  normalizeRotation,
+  transformPinOffset,
+} from "./component-placement"
 
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
 
@@ -29,7 +36,7 @@ export function convertPadstacksToSmtPads(
       debug("processing place...", { place })
       const { x: compX, y: compY, side } = place
 
-      image.pins.forEach((pin) => {
+      image.pins.forEach((pin, pinIndex) => {
         // Find the corresponding padstack
         const padstack = padstacks.find((p) => p.name === pin.padstack_name)
         debug("found padstack", { padstack })
@@ -110,39 +117,58 @@ export function convertPadstacksToSmtPads(
 
         // Calculate position in circuit space using the transformation matrix
         // Convert component position and pin offset to circuit coordinates
+        const pinOffset = transformPinOffset(pin, place)
         const { x: circuitX, y: circuitY } = applyToPoint(transform, {
-          x: (compX || 0) + pin.x,
-          y: (compY || 0) + pin.y,
+          x: (compX || 0) + pinOffset.x,
+          y: (compY || 0) + pinOffset.y,
+        })
+        const pcbComponentId = getDsnPcbComponentId(componentId, place.refdes)
+        const pcbPortId = getDsnPcbPortId({
+          componentName: componentId,
+          refdes: place.refdes,
+          pin,
+          pinIndex,
+        })
+        const pcbSmtPadId = getDsnPcbSmtPadId({
+          componentName: componentId,
+          refdes: place.refdes,
+          pin,
+          pinIndex,
         })
 
         let pcbPad: PcbSmtPad
         if (rectShape || polygonShape || pathShape) {
-          const layer = padstack.shapes[0].layer.includes("B.")
-            ? "bottom"
-            : "top"
+          const layer =
+            side === "back" || padstack.shapes[0].layer.includes("B.")
+              ? "bottom"
+              : "top"
+          const padRotation = normalizeRotation(
+            (place.rotation ?? 0) + (pin.rotation ?? 0),
+          )
           debug("determining layer with padstack shapes", {
             shapes: padstack.shapes,
             layer,
           })
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
-            pcb_component_id: `${componentId}_${place.refdes}`,
-            pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
-            shape: "rect",
+            pcb_smtpad_id: pcbSmtPadId,
+            pcb_component_id: pcbComponentId,
+            pcb_port_id: pcbPortId,
+            shape: padRotation === 0 ? "rect" : "rotated_rect",
             x: circuitX,
             y: circuitY,
             width,
             height,
+            ...(padRotation === 0 ? {} : { ccw_rotation: padRotation }),
             layer,
             port_hints: [pin.pin_number.toString()],
-          }
+          } as PcbSmtPad
         } else {
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
-            pcb_component_id: `${componentId}_${place.refdes}`,
-            pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
+            pcb_smtpad_id: pcbSmtPadId,
+            pcb_component_id: pcbComponentId,
+            pcb_port_id: pcbPortId,
             shape: "circle",
             x: circuitX,
             y: circuitY,

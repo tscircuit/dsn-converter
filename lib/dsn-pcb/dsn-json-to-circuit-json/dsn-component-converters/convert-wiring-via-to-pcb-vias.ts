@@ -9,10 +9,12 @@ export const convertWiringViaToPcbVias = ({
   wire,
   transformUmToMm,
   netName,
+  wireIndex,
 }: {
   wire: Wiring["wires"][number]
   transformUmToMm: Matrix
   netName: string
+  wireIndex: number
 }): PcbVia[] => {
   if (!wire.path?.coordinates || wire.path.coordinates.length < 2) {
     debug("Couldn't create via")
@@ -25,7 +27,7 @@ export const convertWiringViaToPcbVias = ({
   const via: PcbVia = {
     type: "pcb_via",
     layers: ["top", "bottom"],
-    pcb_via_id: `pcb_via_${netName}`,
+    pcb_via_id: `pcb_via_${netName}_${wireIndex}_${Number(circuitPoint.x.toFixed(4))}_${Number(circuitPoint.y.toFixed(4))}`,
     x: Number(circuitPoint.x.toFixed(4)),
     y: Number(circuitPoint.y.toFixed(4)),
     // TODO look up via size

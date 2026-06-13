@@ -44,18 +44,22 @@ export function tokenizeDsn(input: string): Token[] {
       }
       i++ // Skip the closing quote
       tokens.push({ type: "String", value })
-    } else if (char === "-" || /\d/.test(char)) {
-      // Parse number (integer or float)
-      let numStr = ""
-      if (char === "-") {
-        numStr += "-"
+    } else if (
+      char === "-" ||
+      char === "+" ||
+      char === "." ||
+      /\d/.test(char)
+    ) {
+      const atomStart = i
+      while (i < length && !/\s|\(|\)/.test(input[i])) {
         i++
       }
-      while (i < length && /[\d.]/.test(input[i])) {
-        numStr += input[i]
-        i++
+      const atom = input.slice(atomStart, i)
+      if (/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(atom)) {
+        tokens.push({ type: "Number", value: Number(atom) })
+      } else {
+        tokens.push({ type: "Symbol", value: atom })
       }
-      tokens.push({ type: "Number", value: parseFloat(numStr) })
     } else {
       // Parse symbol
       let sym = ""

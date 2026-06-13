@@ -21,7 +21,7 @@ export function convertWiresToPcbTraces(
   const tracesAndVias: AnyCircuitElement[] = []
   const processedNets = new Set<string>()
 
-  wiring.wires?.forEach((wire) => {
+  wiring.wires?.forEach((wire, wireIndex) => {
     debug("WIRE\n----\n", wire)
     const netName = wire.net
     if (!netName) return
@@ -39,7 +39,12 @@ export function convertWiresToPcbTraces(
     if (wire.type === "via") {
       debug("wire is actually a via!")
       tracesAndVias.push(
-        ...convertWiringViaToPcbVias({ wire, transformUmToMm, netName }),
+        ...convertWiringViaToPcbVias({
+          wire,
+          transformUmToMm,
+          netName,
+          wireIndex,
+        }),
       )
       return
     }

@@ -1,6 +1,10 @@
 import type { SourceNet, SourcePort, SourceTrace } from "circuit-json"
 import type { DsnPcb } from "lib/dsn-pcb/types"
 
+function normalizeDsnPinReference(pinReference: string) {
+  return pinReference.replace(/"([^"]*)"/g, "$1")
+}
+
 export const convertNetsToSourceNetsAndTraces = ({
   dsnPcb,
   source_ports,
@@ -23,12 +27,16 @@ export const convertNetsToSourceNetsAndTraces = ({
 
     const connected_source_port_ids: string[] = []
     if (pins && pins.length > 0) {
+      const connectedSourcePortIds = new Set<string>()
       for (const pin of pins) {
-        const source_port = source_ports.find((sp) => sp.name === pin)
-        if (source_port) {
-          connected_source_port_ids.push(source_port.source_port_id)
+        const normalizedPin = normalizeDsnPinReference(pin)
+        for (const source_port of source_ports) {
+          if (source_port.name === pin || source_port.name === normalizedPin) {
+            connectedSourcePortIds.add(source_port.source_port_id)
+          }
         }
       }
+      connected_source_port_ids.push(...connectedSourcePortIds)
     }
 
     const source_trace: SourceTrace = {

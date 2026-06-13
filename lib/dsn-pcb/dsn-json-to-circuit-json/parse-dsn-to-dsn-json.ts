@@ -1,5 +1,5 @@
 import Debug from "debug"
-import { getPinNum } from "lib/utils/get-pin-number"
+import { getPinNum, getPinNumberNodeIndex } from "lib/utils/get-pin-number"
 import { getViaCoords } from "lib/utils/get-via-coordinates"
 import {
   type ASTNode,
@@ -583,12 +583,26 @@ function processPin(nodes: ASTNode[]): Pin | null {
     if (pinNumber === null) return null
 
     pin.pin_number = pinNumber
+    const rotateNode = nodes.find(
+      (node) =>
+        node.type === "List" &&
+        node.children?.[0]?.type === "Atom" &&
+        node.children[0].value === "rotate" &&
+        node.children[1]?.type === "Atom" &&
+        typeof node.children[1].value === "number",
+    )
+    if (rotateNode?.type === "List") {
+      pin.rotation = rotateNode.children![1].value as number
+    }
 
     // Parse coordinates
     let xValue: number | undefined
     let yValue: number | undefined
+    const pinNumberIndex = getPinNumberNodeIndex(nodes)
+    const coordinateStartIndex =
+      pinNumberIndex === null ? 3 : pinNumberIndex + 1
 
-    for (let i = 3; i < nodes.length; i++) {
+    for (let i = coordinateStartIndex; i < nodes.length; i++) {
       const node = nodes[i]
       const nextNode = nodes[i + 1]
 
