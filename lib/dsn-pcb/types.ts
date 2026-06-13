@@ -195,10 +195,18 @@ export interface Pin {
   y: number
 }
 
+export type PadViaSite =
+  | {
+      x: number
+      y: number
+    }
+  | "off"
+
 export interface Padstack {
   name: string
   shapes: Shape[]
   attach: string
+  via_sites?: PadViaSite[]
   hole?: {
     shape: "circle" | "square" | "oval"
     width?: number
