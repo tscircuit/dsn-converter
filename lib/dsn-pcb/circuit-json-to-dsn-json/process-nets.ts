@@ -1,5 +1,6 @@
 import { su } from "@tscircuit/soup-util"
 import type { AnyCircuitElement, SourceTrace } from "circuit-json"
+import { getSourcePortPinLabel } from "lib/utils/get-source-port-pin-label"
 import type { DsnPcb } from "../types"
 
 export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
@@ -30,13 +31,11 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
         if (sourcePort && "source_component_id" in sourcePort) {
           const componentName =
             componentNameMap.get(sourcePort.source_component_id ?? "") || ""
-          const pinNumber = sourcePort.port_hints?.find(
-            (hint) => !Number.isNaN(Number(hint)),
-          )
+          const pinNumber = getSourcePortPinLabel(sourcePort)
 
           padsBySourcePortId.set(sourcePort.source_port_id, {
             componentName: `${componentName}_${sourcePort.source_component_id}`,
-            pinNumber,
+            pinNumber: String(pinNumber),
             sourcePortId: sourcePort.source_port_id,
           })
         }

@@ -1,9 +1,5 @@
 import { su } from "@tscircuit/soup-util"
-import type {
-  AnyCircuitElement,
-  SourceComponentBase,
-  SourcePort,
-} from "circuit-json"
+import type { AnyCircuitElement, SourceComponentBase } from "circuit-json"
 import {
   createCircularHoleRectangularPadstack,
   createCircularPadstack,
@@ -12,6 +8,7 @@ import {
 import { getComponentValue } from "lib/utils/get-component-value"
 import { getFootprintName } from "lib/utils/get-footprint-name"
 import { getPadstackName } from "lib/utils/get-padstack-name"
+import { getSourcePortPinLabel } from "lib/utils/get-source-port-pin-label"
 import { applyToPoint, scale } from "transformation-matrix"
 import type { ComponentGroup, DsnPcb, Image, Pin } from "../types"
 
@@ -114,11 +111,6 @@ export function processPlatedHoles(
     return () => current++
   }
 
-  function findNumericHint(port?: SourcePort): number | undefined {
-    const hint = port?.port_hints?.find((h) => !Number.isNaN(Number(h)))
-    return hint !== undefined ? Number(hint) : undefined
-  }
-
   /**
    * MAIN
    */
@@ -167,7 +159,7 @@ export function processPlatedHoles(
             .find((e) => e.source_port_id === pcbPort.source_port_id)
         : undefined
 
-      const pinNumber = findNumericHint(sourcePort) ?? nextPinNumber()
+      const pinNumber = getSourcePortPinLabel(sourcePort) ?? nextPinNumber()
 
       const pin: Pin = {
         padstack_name: padstackName,

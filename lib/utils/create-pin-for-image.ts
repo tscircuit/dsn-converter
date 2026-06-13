@@ -3,6 +3,7 @@ import type { PcbSmtPad } from "circuit-json"
 import type { PcbComponent, SourcePort } from "circuit-json"
 import type { Pin } from "lib"
 import { type PadstackNameArgs, getPadstackName } from "./get-padstack-name"
+import { getSourcePortPinLabel } from "./get-source-port-pin-label"
 
 export function createPinForImage(
   pad: any,
@@ -23,8 +24,7 @@ export function createPinForImage(
 
   return {
     padstack_name: getPadstackName(padstackParams),
-    pin_number:
-      sourcePort.port_hints?.find((hint) => !Number.isNaN(Number(hint))) || 1,
+    pin_number: getSourcePortPinLabel(sourcePort) ?? 1,
     x: (pad.x - pcbComponent.center.x) * 1000,
     y: (pad.y - pcbComponent.center.y) * 1000,
   }
