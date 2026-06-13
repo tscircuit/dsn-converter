@@ -30,6 +30,12 @@ export function convertPadstacksToSmtPads(
       const { x: compX, y: compY, side } = place
 
       image.pins.forEach((pin) => {
+        const pinLabel = pin.pin_number.toString()
+        const numericPinNumber = Number(pin.pin_number)
+        const smtPadIdPinSuffix = Number.isFinite(numericPinNumber)
+          ? String(numericPinNumber - 1)
+          : pinLabel
+
         // Find the corresponding padstack
         const padstack = padstacks.find((p) => p.name === pin.padstack_name)
         debug("found padstack", { padstack })
@@ -126,7 +132,7 @@ export function convertPadstacksToSmtPads(
           })
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${smtPadIdPinSuffix}`,
             pcb_component_id: `${componentId}_${place.refdes}`,
             pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
             shape: "rect",
@@ -135,12 +141,12 @@ export function convertPadstacksToSmtPads(
             width,
             height,
             layer,
-            port_hints: [pin.pin_number.toString()],
+            port_hints: [pinLabel],
           }
         } else {
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${smtPadIdPinSuffix}`,
             pcb_component_id: `${componentId}_${place.refdes}`,
             pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
             shape: "circle",
@@ -148,7 +154,7 @@ export function convertPadstacksToSmtPads(
             y: circuitY,
             radius: circleShape!.diameter / 2 / 1000,
             layer: side === "front" ? "top" : "bottom",
-            port_hints: [pin.pin_number.toString()],
+            port_hints: [pinLabel],
           }
         }
 
