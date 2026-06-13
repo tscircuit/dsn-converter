@@ -101,7 +101,7 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
         result += `${indent}${indent}${indent}(shape (path ${shape.layer} ${shape.width} ${stringifyCoordinates(shape.coordinates)}))\n`
       }
     })
-    result += `${indent}${indent}${indent}(attach ${padstack.attach})\n`
+    result += `${indent}${indent}${indent}(attach ${padstack.attach}${padstack.attach_use_via ? ` (use_via ${padstack.attach_use_via})` : ""})\n`
     result += `${indent}${indent})\n`
   })
   result += `${indent})\n`

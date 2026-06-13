@@ -199,6 +199,7 @@ export interface Padstack {
   name: string
   shapes: Shape[]
   attach: string
+  attach_use_via?: string
   hole?: {
     shape: "circle" | "square" | "oval"
     width?: number
