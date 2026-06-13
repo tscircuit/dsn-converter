@@ -15,10 +15,10 @@ export function createAndAddPadstackFromPcbSmtPad(
   const isCircle = pad.shape === "circle"
   const padstackParams: PadstackNameArgs = {
     shape: isCircle ? "circle" : "rect",
-    outerDiameter: isCircle ? pad.radius * 1000 * 2 : undefined, // Radius to diameter
-    holeDiameter: isCircle ? pad.radius * 1000 * 2 : undefined, // Radius to diameter
-    width: isCircle ? undefined : (pad as { width: number }).width * 1000,
-    height: isCircle ? undefined : (pad as { height: number }).height * 1000,
+    outerDiameter: isCircle ? pad.radius * 10000 * 2 : undefined, // Radius to diameter
+    holeDiameter: isCircle ? pad.radius * 10000 * 2 : undefined, // Radius to diameter
+    width: isCircle ? undefined : (pad as { width: number }).width * 10000,
+    height: isCircle ? undefined : (pad as { height: number }).height * 10000,
     layer: pad.layer as PcbSmtPad["layer"],
   }
 

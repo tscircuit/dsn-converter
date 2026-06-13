@@ -49,7 +49,7 @@ test("repro-coordinates-10x-too-large-with-circuit", async () => {
   // Verify resolution is 10
   expect(dsnString).toContain("(resolution um 10)")
 
-  // Verify faulty coordinates (confirming the bug exists)
-  expect(dsnString).toContain("(place R1_source_component_0 -4000 0 front 0")
-  expect(dsnString).toContain("(place R2_source_component_1 4000 0 front 0")
+  // Verify correct coordinates (bug is fixed)
+  expect(dsnString).toContain("(place R1_source_component_0 -40000 0 front 0")
+  expect(dsnString).toContain("(place R2_source_component_1 40000 0 front 0")
 })

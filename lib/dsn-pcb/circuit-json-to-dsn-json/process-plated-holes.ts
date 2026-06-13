@@ -15,7 +15,7 @@ import { getPadstackName } from "lib/utils/get-padstack-name"
 import { applyToPoint, scale } from "transformation-matrix"
 import type { ComponentGroup, DsnPcb, Image, Pin } from "../types"
 
-const transformMmToUm = scale(1000)
+const transformMmToUm = scale(10000)
 
 export function processPlatedHoles(
   componentGroups: ComponentGroup[],
@@ -23,6 +23,7 @@ export function processPlatedHoles(
   pcb: DsnPcb,
   numLayers = 2,
 ) {
+  const CJ_TO_DSN_SCALE = 1000 * (pcb.resolution?.value || 1)
   /**
    * Helpers
    */
@@ -34,14 +35,15 @@ export function processPlatedHoles(
       case "circle": {
         const name = getPadstackName({
           shape: "circle",
-          holeDiameter: hole.hole_diameter * 1000,
-          outerDiameter: hole.outer_diameter * 1000,
+          holeDiameter: hole.hole_diameter * CJ_TO_DSN_SCALE,
+          outerDiameter: hole.outer_diameter * CJ_TO_DSN_SCALE,
           layer: "all",
         })
         if (!processedPadstacks.has(name)) {
-          const d = Math.round(hole.outer_diameter * 1000)
+          const d = Math.round(hole.outer_diameter * CJ_TO_DSN_SCALE)
+          const h = Math.round(hole.hole_diameter * CJ_TO_DSN_SCALE)
           pcb.library.padstacks.push(
-            createCircularPadstack(name, d, d, numLayers),
+            createCircularPadstack(name, d, h, numLayers),
           )
           processedPadstacks.add(name)
         }
@@ -51,15 +53,15 @@ export function processPlatedHoles(
       case "pill": {
         const name = getPadstackName({
           shape: hole.shape,
-          width: hole.hole_width * 1000,
-          height: hole.hole_height * 1000,
+          width: hole.hole_width * CJ_TO_DSN_SCALE,
+          height: hole.hole_height * CJ_TO_DSN_SCALE,
           layer: "all",
         })
         if (!processedPadstacks.has(name)) {
-          const iW = Math.round(hole.hole_width * 1000)
-          const iH = Math.round(hole.hole_height * 1000)
-          const oW = Math.round(hole.outer_width * 1000)
-          const oH = Math.round(hole.outer_height * 1000)
+          const iW = Math.round(hole.hole_width * CJ_TO_DSN_SCALE)
+          const iH = Math.round(hole.hole_height * CJ_TO_DSN_SCALE)
+          const oW = Math.round(hole.outer_width * CJ_TO_DSN_SCALE)
+          const oH = Math.round(hole.outer_height * CJ_TO_DSN_SCALE)
           pcb.library.padstacks.push(
             createOvalPadstack(name, oW, oH, iW, iH, numLayers),
           )
@@ -70,14 +72,14 @@ export function processPlatedHoles(
       case "circular_hole_with_rect_pad": {
         const name = getPadstackName({
           shape: "rect",
-          width: hole.rect_pad_width * 1000,
-          height: hole.rect_pad_height * 1000,
+          width: hole.rect_pad_width * CJ_TO_DSN_SCALE,
+          height: hole.rect_pad_height * CJ_TO_DSN_SCALE,
           layer: "all",
         })
         if (!processedPadstacks.has(name)) {
-          const oW = Math.round(hole.rect_pad_width * 1000)
-          const oH = Math.round(hole.rect_pad_height * 1000)
-          const hD = Math.round(hole.hole_diameter * 1000)
+          const oW = Math.round(hole.rect_pad_width * CJ_TO_DSN_SCALE)
+          const oH = Math.round(hole.rect_pad_height * CJ_TO_DSN_SCALE)
+          const hD = Math.round(hole.hole_diameter * CJ_TO_DSN_SCALE)
           pcb.library.padstacks.push(
             createCircularHoleRectangularPadstack(name, oW, oH, hD, numLayers),
           )
@@ -172,8 +174,10 @@ export function processPlatedHoles(
       const pin: Pin = {
         padstack_name: padstackName,
         pin_number: pinNumber,
-        x: (Number(hole.x.toFixed(3)) - pcbComponent.center.x) * 1000,
-        y: (Number(hole.y.toFixed(3)) - pcbComponent.center.y) * 1000,
+        x:
+          (Number(hole.x.toFixed(3)) - pcbComponent.center.x) * CJ_TO_DSN_SCALE,
+        y:
+          (Number(hole.y.toFixed(3)) - pcbComponent.center.y) * CJ_TO_DSN_SCALE,
       }
 
       // Avoid duplicates

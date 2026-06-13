@@ -42,9 +42,7 @@ export const convertWiringPathToPcbTraces = ({
       route_type: "wire" as const,
       x: Number(point.x.toFixed(4)),
       y: Number(point.y.toFixed(4)),
-      width: fromSessionSpace
-        ? wire.path!.width / 10000 // session space to circuit space
-        : wire.path!.width / 1000, // dsn space to circuit space
+      width: wire.path!.width * transformUmToMm.a,
       layer: wire.path!.layer.includes("F.") ? "top" : "bottom",
     }))
 

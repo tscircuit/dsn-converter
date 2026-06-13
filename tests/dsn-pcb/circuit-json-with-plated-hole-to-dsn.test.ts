@@ -28,7 +28,7 @@ test("circuit json (with plated hole) -> dsn file", async () => {
 
   // Test padstack for plated hole
   const padstack = dsnJson.library.padstacks.find(
-    (p) => p.name === "Round[A]Pad_700_1000_um",
+    (p) => p.name === "Round[A]Pad_7000_10000_um",
   )
   expect(padstack).toBeDefined()
   expect(padstack?.shapes).toHaveLength(4) // All 4 copper layers
@@ -37,7 +37,7 @@ test("circuit json (with plated hole) -> dsn file", async () => {
   expect(padstack?.shapes[1].layer).toBe("In1.Cu")
   expect(padstack?.shapes[2].layer).toBe("In2.Cu")
   expect(padstack?.shapes[3].layer).toBe("B.Cu")
-  expect((padstack?.shapes[0] as any).diameter).toBe(1000) // Outer diameter in μm
+  expect((padstack?.shapes[0] as any).diameter).toBe(10000) // Outer diameter in μm
 })
 
 test("different sized plated holes", async () => {
@@ -56,22 +56,22 @@ test("different sized plated holes", async () => {
   expect(image.pins).toHaveLength(2)
 
   const pin1 = image.pins[0]
-  expect(pin1.padstack_name).toBe("Round[A]Pad_1000_1200_um")
+  expect(pin1.padstack_name).toBe("Round[A]Pad_10000_12000_um")
 
   const pin2 = image.pins[1]
-  expect(pin2.padstack_name).toBe("Round[A]Pad_2000_2200_um")
+  expect(pin2.padstack_name).toBe("Round[A]Pad_20000_22000_um")
 
   const padstack1 = dsnJson.library.padstacks.find(
-    (p) => p.name === "Round[A]Pad_1000_1200_um",
+    (p) => p.name === "Round[A]Pad_10000_12000_um",
   )
   expect(padstack1).toBeDefined()
   expect(padstack1?.shapes).toHaveLength(4) // All 4 copper layers
-  expect((padstack1?.shapes[0] as any).diameter).toBe(1200)
+  expect((padstack1?.shapes[0] as any).diameter).toBe(12000)
 
   const padstack2 = dsnJson.library.padstacks.find(
-    (p) => p.name === "Round[A]Pad_2000_2200_um",
+    (p) => p.name === "Round[A]Pad_20000_22000_um",
   )
   expect(padstack2).toBeDefined()
   expect(padstack2?.shapes).toHaveLength(4) // All 4 copper layers
-  expect((padstack2?.shapes[0] as any).diameter).toBe(2200)
+  expect((padstack2?.shapes[0] as any).diameter).toBe(22000)
 })

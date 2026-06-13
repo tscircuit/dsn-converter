@@ -15,8 +15,21 @@ export function convertDsnPcbToCircuitJson(
 ): AnyCircuitElement[] {
   const elements: AnyCircuitElement[] = []
 
-  // TODO use pcb.resolution.unit and pcb.resolution.value
-  const transformDsnUnitToMm = scale(1 / 1000)
+  // Calculate scaling factor from DSN units to mm
+  let scalingFactor = 1 / 1000 // default to um -> mm
+  if (dsnPcb.resolution) {
+    const { unit, value } = dsnPcb.resolution
+    const unitToMm = {
+      inch: 25.4,
+      mil: 0.0254,
+      cm: 10,
+      mm: 1,
+      um: 0.001,
+    }
+    const baseMm = unitToMm[unit as keyof typeof unitToMm] || 0.001
+    scalingFactor = baseMm / value
+  }
+  const transformDsnUnitToMm = scale(scalingFactor)
 
   // Add the board
   // You must use the dsnPcb.boundary to get the center, width and height
