@@ -25,6 +25,7 @@ export function createPinForImage(
     padstack_name: getPadstackName(padstackParams),
     pin_number:
       sourcePort.port_hints?.find((hint) => !Number.isNaN(Number(hint))) || 1,
+    rotation: pad.shape === "rotated_rect" ? pad.ccw_rotation : undefined,
     x: (pad.x - pcbComponent.center.x) * 1000,
     y: (pad.y - pcbComponent.center.y) * 1000,
   }
