@@ -53,7 +53,7 @@ function createWire(opts: {
   }
 }
 
-function isCoordinateRoutePoint(
+function hasCoordinatePosition(
   point: PcbTraceRoutePoint,
 ): point is PcbTraceRoutePointWire | PcbTraceRoutePointVia {
   return point.route_type === "wire" || point.route_type === "via"
@@ -124,7 +124,16 @@ export function processPcbTraces(
 
           if (hasLayerChanged) {
             const prevPoint = pcbTrace.route[i - 1]
-            if (!prevPoint || !isCoordinateRoutePoint(prevPoint)) {
+            if (!prevPoint || !hasCoordinatePosition(prevPoint)) {
+              currentLayer = point.layer
+              currentWire = createWire({
+                layer: point.layer,
+                widthMm: point.width * CJ_TO_DSN_SCALE,
+                netName,
+              })
+              dsnWrapper.addWire(currentWire)
+              currentWire.path.coordinates.push(point.x * CJ_TO_DSN_SCALE)
+              currentWire.path.coordinates.push(point.y * CJ_TO_DSN_SCALE)
               continue
             }
             const viaPadstackName = findOrCreateViaPadstack(

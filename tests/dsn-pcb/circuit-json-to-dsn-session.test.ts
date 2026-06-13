@@ -1,7 +1,6 @@
 import { expect, test } from "bun:test"
 import { su } from "@tscircuit/soup-util"
 import type {
-  AnyCircuitElement,
   PcbTrace,
   PcbTraceRoutePoint,
   PcbTraceRoutePointVia,
@@ -12,7 +11,6 @@ import Debug from "debug"
 import {
   type DsnPcb,
   convertCircuitJsonToDsnSession,
-  convertDsnJsonToCircuitJson,
   convertDsnPcbToCircuitJson,
   convertDsnSessionToCircuitJson,
   parseDsnToDsnJson,

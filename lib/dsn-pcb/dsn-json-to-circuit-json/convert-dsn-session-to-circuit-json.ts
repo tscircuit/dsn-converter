@@ -15,7 +15,7 @@ import { convertWiringPathToPcbTraces } from "./dsn-component-converters/convert
 
 const debug = Debug("dsn-converter")
 
-function isCoordinateRoutePoint(
+function hasCoordinatePosition(
   point: PcbTraceRoutePoint,
 ): point is PcbTraceRoutePointWire | PcbTraceRoutePointVia {
   return point.route_type === "wire" || point.route_type === "via"
@@ -133,7 +133,7 @@ export function convertDsnSessionToCircuitJson(
           .flatMap((segment) =>
             segment.type === "pcb_trace"
               ? (segment as PcbTrace).route.flatMap((point) =>
-                  isCoordinateRoutePoint(point)
+                  point.route_type === "wire"
                     ? [
                         {
                           ...point,
@@ -165,7 +165,7 @@ export function convertDsnSessionToCircuitJson(
             // Check all points in the route, not just the last one
             for (let i = 0; i < trace.route.length; i++) {
               const point = trace.route[i]
-              if (!isCoordinateRoutePoint(point)) continue
+              if (!hasCoordinatePosition(point)) continue
               if (point.x === viaX && point.y === viaY) {
                 // Insert via point after the matching point
                 trace.route.splice(i + 1, 0, {
