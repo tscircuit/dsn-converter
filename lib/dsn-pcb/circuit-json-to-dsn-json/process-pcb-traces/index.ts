@@ -2,8 +2,9 @@ import { su } from "@tscircuit/soup-util"
 import type {
   AnyCircuitElement,
   LayerRef,
-  PcbTrace,
   PcbTraceRoutePoint,
+  PcbTraceRoutePointVia,
+  PcbTraceRoutePointWire,
 } from "circuit-json"
 import Debug from "debug"
 import { getCombinedSourcePortName } from "lib/utils/get-combined-source-port-name"
@@ -50,6 +51,12 @@ function createWire(opts: {
     net: opts.netName,
     type: "route",
   }
+}
+
+function hasCoordinatePosition(
+  point: PcbTraceRoutePoint,
+): point is PcbTraceRoutePointWire | PcbTraceRoutePointVia {
+  return point.route_type === "wire" || point.route_type === "via"
 }
 
 export function processPcbTraces(
@@ -117,6 +124,18 @@ export function processPcbTraces(
 
           if (hasLayerChanged) {
             const prevPoint = pcbTrace.route[i - 1]
+            if (!prevPoint || !hasCoordinatePosition(prevPoint)) {
+              currentLayer = point.layer
+              currentWire = createWire({
+                layer: point.layer,
+                widthMm: point.width * CJ_TO_DSN_SCALE,
+                netName,
+              })
+              dsnWrapper.addWire(currentWire)
+              currentWire.path.coordinates.push(point.x * CJ_TO_DSN_SCALE)
+              currentWire.path.coordinates.push(point.y * CJ_TO_DSN_SCALE)
+              continue
+            }
             const viaPadstackName = findOrCreateViaPadstack(
               dsnWrapper,
               DEFAULT_VIA_DIAMETER,
