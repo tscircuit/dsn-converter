@@ -20,11 +20,13 @@ export function createPinForImage(
     height: isCircle ? undefined : pad.height * 1000,
     layer: pad.layer as PcbSmtPad["layer"],
   }
+  const numericHint = sourcePort.port_hints?.find(
+    (hint) => !Number.isNaN(Number(hint)),
+  )
 
   return {
     padstack_name: getPadstackName(padstackParams),
-    pin_number:
-      sourcePort.port_hints?.find((hint) => !Number.isNaN(Number(hint))) || 1,
+    pin_number: numericHint ?? sourcePort.pin_number ?? 1,
     x: (pad.x - pcbComponent.center.x) * 1000,
     y: (pad.y - pcbComponent.center.y) * 1000,
   }
