@@ -12,8 +12,9 @@ export function createPinForImage(
   if (!sourcePort) return undefined
 
   const isCircle = pad.shape === "circle"
+  const isPill = pad.shape === "pill"
   const padstackParams: PadstackNameArgs = {
-    shape: isCircle ? "circle" : "rect",
+    shape: isCircle ? "circle" : isPill ? "pill" : "rect",
     outerDiameter: isCircle ? pad.radius * 1000 * 2 : undefined, // Radius to diameter
     holeDiameter: isCircle ? pad.radius * 1000 * 2 : undefined, // Radius to diameter
     width: isCircle ? undefined : pad.width * 1000,

@@ -55,6 +55,31 @@ export function createOvalPadstack(
   }
 }
 
+export function createOvalSmtPadstack(
+  name: string,
+  width: number,
+  height: number,
+  layer: PcbSmtPad["layer"],
+): Padstack {
+  const pathOffset = Math.abs(width - height) / 2
+  const isHorizontal = width > height
+
+  return {
+    name,
+    shapes: [
+      {
+        shapeType: "path",
+        layer: layer === "bottom" ? "B.Cu" : "F.Cu",
+        width: isHorizontal ? height : width,
+        coordinates: isHorizontal
+          ? [-pathOffset, 0, pathOffset, 0]
+          : [0, -pathOffset, 0, pathOffset],
+      },
+    ],
+    attach: "off",
+  }
+}
+
 export function createRectangularPadstack(
   name: string,
   width: number,
