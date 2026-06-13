@@ -136,7 +136,9 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   result += `${indent}(wiring\n`
   ;(dsnJson.wiring?.wires ?? []).forEach((wire) => {
     if (wire.type === "via") {
-      result += `${indent}${indent}(via ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)}))\n`
+      const [vx, vy] = wire.path.coordinates
+      const padstackId = (wire as any).padstack_name ?? wire.net
+      result += `${indent}${indent}(via ${stringifyValue(padstackId)} ${vx} ${vy} (net ${stringifyValue(wire.net)}))\n`
     } else {
       result += `${indent}${indent}(wire ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)})(type ${wire.type}))\n`
     }

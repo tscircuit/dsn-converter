@@ -79,6 +79,7 @@ export interface DsnPcb {
       }
       net: string
       type: string
+      padstack_name?: string
     }>
   }
 }
@@ -282,6 +283,7 @@ export interface Wire {
   net?: string
   clearance_class?: string
   type?: string
+  padstack_name?: string
 }
 
 export interface Via {
