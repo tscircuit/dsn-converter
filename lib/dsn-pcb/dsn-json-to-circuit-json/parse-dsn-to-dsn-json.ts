@@ -584,11 +584,18 @@ function processPin(nodes: ASTNode[]): Pin | null {
 
     pin.pin_number = pinNumber
 
+    // Determine where coordinates start — after the (rotate N) directive if present
+    const hasRotateDirective =
+      nodes[2]?.type === "List" &&
+      nodes[2].children?.[0]?.type === "Atom" &&
+      String(nodes[2].children[0].value) === "rotate"
+    const coordStartIndex = hasRotateDirective ? 4 : 3
+
     // Parse coordinates
     let xValue: number | undefined
     let yValue: number | undefined
 
-    for (let i = 3; i < nodes.length; i++) {
+    for (let i = coordStartIndex; i < nodes.length; i++) {
       const node = nodes[i]
       const nextNode = nodes[i + 1]
 
