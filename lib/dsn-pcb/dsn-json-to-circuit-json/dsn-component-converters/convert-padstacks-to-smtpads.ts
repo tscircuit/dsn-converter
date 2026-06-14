@@ -5,7 +5,9 @@ import { applyToPoint } from "transformation-matrix"
 
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
 
-function getLayerFromPadstack(padstack: DsnPcb["library"]["padstacks"][number]) {
+function getLayerFromPadstack(
+  padstack: DsnPcb["library"]["padstacks"][number],
+) {
   return padstack.shapes[0].layer.includes("B.") ? "bottom" : "top"
 }
 
@@ -34,6 +36,36 @@ function getPolygonPoints(
   }
 
   return points
+}
+
+function getRectangleDimensionsFromPolygon(coordinates: number[]) {
+  const uniquePoints = new Map<string, { x: number; y: number }>()
+
+  for (let i = 0; i < coordinates.length; i += 2) {
+    const x = coordinates[i]
+    const y = coordinates[i + 1]
+    uniquePoints.set(`${x},${y}`, { x, y })
+  }
+
+  if (uniquePoints.size !== 4) return null
+
+  const xs = [...new Set([...uniquePoints.values()].map((point) => point.x))]
+  const ys = [...new Set([...uniquePoints.values()].map((point) => point.y))]
+
+  if (xs.length !== 2 || ys.length !== 2) return null
+
+  const corners = new Set(
+    xs.flatMap((x) => ys.map((y) => `${x},${y}`)),
+  )
+
+  if ([...uniquePoints.keys()].some((point) => !corners.has(point))) {
+    return null
+  }
+
+  return {
+    width: Math.abs(xs[1] - xs[0]) / 1000,
+    height: Math.abs(ys[1] - ys[0]) / 1000,
+  }
 }
 
 export function convertPadstacksToSmtPads(
@@ -147,7 +179,11 @@ export function convertPadstacksToSmtPads(
         })
 
         let pcbPad: PcbSmtPad
-        if (polygonShape) {
+        const rectangleDimensionsFromPolygon = polygonShape
+          ? getRectangleDimensionsFromPolygon(polygonShape.coordinates)
+          : null
+
+        if (polygonShape && !rectangleDimensionsFromPolygon) {
           const layer = getLayerFromPadstack(padstack)
           debug("determining layer with padstack shapes", {
             shapes: padstack.shapes,
@@ -166,7 +202,7 @@ export function convertPadstacksToSmtPads(
             layer,
             port_hints: [pin.pin_number.toString()],
           }
-        } else if (rectShape || pathShape) {
+        } else if (rectShape || pathShape || rectangleDimensionsFromPolygon) {
           const layer = getLayerFromPadstack(padstack)
           debug("determining layer with padstack shapes", {
             shapes: padstack.shapes,
@@ -180,8 +216,8 @@ export function convertPadstacksToSmtPads(
             shape: "rect",
             x: circuitX,
             y: circuitY,
-            width,
-            height,
+            width: rectangleDimensionsFromPolygon?.width ?? width,
+            height: rectangleDimensionsFromPolygon?.height ?? height,
             layer,
             port_hints: [pin.pin_number.toString()],
           }

@@ -106,7 +106,7 @@ test("polygon smt pad round trip visual repro", () => {
   expect(roundTrippedPads).toHaveLength(1)
   expect(roundTrippedPads[0]?.shape).toBe("polygon")
 
-  expect(convertCircuitJsonToPcbSvg(roundTrippedCircuitJson)).toMatchSvgSnapshot(
-    import.meta.path,
-  )
+  expect(
+    convertCircuitJsonToPcbSvg(roundTrippedCircuitJson),
+  ).toMatchSvgSnapshot(import.meta.path)
 })
