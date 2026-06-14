@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test"
 import type { AnyCircuitElement } from "circuit-json"
+import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
 import { convertCircuitJsonToDsnJson, convertCircuitJsonToDsnString } from "lib"
 
 const polygonPadCircuitJson = [
@@ -31,7 +32,7 @@ const polygonPadCircuitJson = [
   {
     type: "pcb_component",
     pcb_component_id: "pcb_component_0",
-    center: { x: 3, y: 4 },
+    center: { x: 0, y: 0 },
     width: 2,
     height: 2,
     layer: "top",
@@ -44,8 +45,8 @@ const polygonPadCircuitJson = [
     pcb_port_id: "pcb_port_0",
     pcb_component_id: "pcb_component_0",
     layers: ["top"],
-    x: 3.4,
-    y: 4.2,
+    x: 0.4,
+    y: 0.2,
     source_port_id: "source_port_0",
   },
   {
@@ -56,10 +57,10 @@ const polygonPadCircuitJson = [
     layer: "top",
     shape: "polygon",
     points: [
-      { x: 3.1, y: 4.0 },
-      { x: 3.7, y: 4.0 },
-      { x: 3.6, y: 4.4 },
-      { x: 3.2, y: 4.5 },
+      { x: 0.1, y: 0.0 },
+      { x: 0.7, y: 0.0 },
+      { x: 0.6, y: 0.4 },
+      { x: 0.2, y: 0.5 },
     ],
     port_hints: ["1"],
   },
@@ -85,4 +86,10 @@ test("polygon smt pad export writes finite padstack and pin coordinates", () => 
   expect(exportedPin).toBeDefined()
   expect(Number.isFinite(exportedPin?.x)).toBe(true)
   expect(Number.isFinite(exportedPin?.y)).toBe(true)
+})
+
+test("polygon smt pad visual repro", () => {
+  expect(convertCircuitJsonToPcbSvg(polygonPadCircuitJson)).toMatchSvgSnapshot(
+    import.meta.path,
+  )
 })
