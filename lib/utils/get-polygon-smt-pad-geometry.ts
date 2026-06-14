@@ -1,4 +1,5 @@
 import type { PcbSmtPad } from "circuit-json"
+import { getBoundsFromPoints } from "@tscircuit/math-utils"
 
 type PolygonPcbSmtPad = Extract<PcbSmtPad, { shape: "polygon" }>
 
@@ -24,22 +25,6 @@ function getNormalizedPoints(points: PolygonPcbSmtPad["points"]) {
   }
 
   return points
-}
-
-function getBoundingBox(points: PolygonPcbSmtPad["points"]) {
-  let minX = Infinity
-  let maxX = -Infinity
-  let minY = Infinity
-  let maxY = -Infinity
-
-  for (const point of points) {
-    minX = Math.min(minX, point.x)
-    maxX = Math.max(maxX, point.x)
-    minY = Math.min(minY, point.y)
-    maxY = Math.max(maxY, point.y)
-  }
-
-  return { minX, maxX, minY, maxY }
 }
 
 function getPolygonCentroid(points: PolygonPcbSmtPad["points"]) {
@@ -72,7 +57,17 @@ export function getPolygonSmtPadGeometry(
   pad: PolygonPcbSmtPad,
 ): PolygonSmtPadGeometry {
   const points = getNormalizedPoints(pad.points)
-  const { minX, maxX, minY, maxY } = getBoundingBox(points)
+  const bounds = getBoundsFromPoints(points)
+  if (!bounds) {
+    return {
+      center: { x: 0, y: 0 },
+      widthUm: 0,
+      heightUm: 0,
+      relativePointsUm: [],
+    }
+  }
+
+  const { minX, maxX, minY, maxY } = bounds
   const polygonCentroid = getPolygonCentroid(points)
   const center = polygonCentroid ?? {
     x: (minX + maxX) / 2,
