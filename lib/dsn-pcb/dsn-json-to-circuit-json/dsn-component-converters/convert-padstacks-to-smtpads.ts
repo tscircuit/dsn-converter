@@ -69,7 +69,7 @@ function getRectangleDimensionsFromPolygon(coordinates: number[]) {
 
 export function convertPadstacksToSmtPads(
   pcb: DsnPcb,
-  transform: any,
+  dsnToCircuitJsonTransform: any,
 ): AnyCircuitElement[] {
   const elements: AnyCircuitElement[] = []
   const { padstacks, images } = pcb.library
@@ -172,10 +172,13 @@ export function convertPadstacksToSmtPads(
 
         // Calculate position in circuit space using the transformation matrix
         // Convert component position and pin offset to circuit coordinates
-        const { x: circuitX, y: circuitY } = applyToPoint(transform, {
-          x: (compX || 0) + pin.x,
-          y: (compY || 0) + pin.y,
-        })
+        const { x: circuitX, y: circuitY } = applyToPoint(
+          dsnToCircuitJsonTransform,
+          {
+            x: (compX || 0) + pin.x,
+            y: (compY || 0) + pin.y,
+          },
+        )
 
         let pcbPad: PcbSmtPad
         const rectangleDimensionsFromPolygon = polygonShape
