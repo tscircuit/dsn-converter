@@ -1,25 +1,32 @@
 import type { PcbSmtPad } from "circuit-json"
 
-type PcbSmtPadPolygon = Extract<PcbSmtPad, { shape: "polygon" }>
+type PolygonPcbSmtPad = Extract<PcbSmtPad, { shape: "polygon" }>
 
-function roundMicrons(value: number): number {
-  return Number(value.toFixed(3))
+export interface PolygonSmtPadGeometry {
+  center: { x: number; y: number }
+  widthUm: number
+  heightUm: number
+  relativePointsUm: number[]
 }
 
-function getNormalizedPoints(points: PcbSmtPadPolygon["points"]) {
+function roundMicrons(microns: number): number {
+  return Number(microns.toFixed(3))
+}
+
+function getNormalizedPoints(points: PolygonPcbSmtPad["points"]) {
   if (points.length < 2) return points
 
-  const first = points[0]
-  const last = points[points.length - 1]
+  const firstPoint = points[0]
+  const lastPoint = points[points.length - 1]
 
-  if (first.x === last.x && first.y === last.y) {
+  if (firstPoint.x === lastPoint.x && firstPoint.y === lastPoint.y) {
     return points.slice(0, -1)
   }
 
   return points
 }
 
-function getBoundingBox(points: PcbSmtPadPolygon["points"]) {
+function getBoundingBox(points: PolygonPcbSmtPad["points"]) {
   let minX = Infinity
   let maxX = -Infinity
   let minY = Infinity
@@ -35,19 +42,20 @@ function getBoundingBox(points: PcbSmtPadPolygon["points"]) {
   return { minX, maxX, minY, maxY }
 }
 
-function getPolygonCentroid(points: PcbSmtPadPolygon["points"]) {
+function getPolygonCentroid(points: PolygonPcbSmtPad["points"]) {
   let signedArea = 0
   let centroidX = 0
   let centroidY = 0
 
-  for (let i = 0; i < points.length; i++) {
-    const current = points[i]
-    const next = points[(i + 1) % points.length]
-    const cross = current.x * next.y - next.x * current.y
+  for (let index = 0; index < points.length; index++) {
+    const currentPoint = points[index]
+    const nextPoint = points[(index + 1) % points.length]
+    const crossProduct =
+      currentPoint.x * nextPoint.y - nextPoint.x * currentPoint.y
 
-    signedArea += cross
-    centroidX += (current.x + next.x) * cross
-    centroidY += (current.y + next.y) * cross
+    signedArea += crossProduct
+    centroidX += (currentPoint.x + nextPoint.x) * crossProduct
+    centroidY += (currentPoint.y + nextPoint.y) * crossProduct
   }
 
   if (signedArea === 0) return null
@@ -60,11 +68,13 @@ function getPolygonCentroid(points: PcbSmtPadPolygon["points"]) {
   }
 }
 
-export function getPolygonSmtPadData(pad: PcbSmtPadPolygon) {
+export function getPolygonSmtPadGeometry(
+  pad: PolygonPcbSmtPad,
+): PolygonSmtPadGeometry {
   const points = getNormalizedPoints(pad.points)
   const { minX, maxX, minY, maxY } = getBoundingBox(points)
-  const centroid = getPolygonCentroid(points)
-  const center = centroid ?? {
+  const polygonCentroid = getPolygonCentroid(points)
+  const center = polygonCentroid ?? {
     x: (minX + maxX) / 2,
     y: (minY + maxY) / 2,
   }

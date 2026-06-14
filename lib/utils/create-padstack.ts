@@ -89,11 +89,15 @@ export function createRectangularPadstack(
   }
 }
 
-export function createPolygonPadstack(
-  name: string,
-  coordinates: number[],
-  layer: PcbSmtPad["layer"],
-): Padstack {
+export function createPolygonPadstack({
+  name,
+  coordinates,
+  layer,
+}: {
+  name: string
+  coordinates: number[]
+  layer: PcbSmtPad["layer"]
+}): Padstack {
   return {
     name,
     shapes: [

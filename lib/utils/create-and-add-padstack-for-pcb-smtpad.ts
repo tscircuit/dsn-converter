@@ -7,16 +7,22 @@ import {
   createRectangularPadstack,
 } from "./create-padstack"
 import { type PadstackNameArgs, getPadstackName } from "./get-padstack-name"
-import { getPolygonSmtPadData } from "./get-polygon-smt-pad-data"
+import { getPolygonSmtPadGeometry } from "./get-polygon-smt-pad-geometry"
 
-export function createAndAddPadstackFromPcbSmtPad(
-  pcb: DsnPcb,
-  pad: PcbSmtPad,
-  processedPadstacks: Set<string>,
-): string {
+export function createAndAddPadstackFromPcbSmtPad({
+  pcb,
+  pad,
+  processedPadstacks,
+}: {
+  pcb: DsnPcb
+  pad: PcbSmtPad
+  processedPadstacks: Set<string>
+}): string {
   const isCircle = pad.shape === "circle"
   const isPolygon = pad.shape === "polygon"
-  const polygonData = isPolygon ? getPolygonSmtPadData(pad) : undefined
+  const polygonPadGeometry = isPolygon
+    ? getPolygonSmtPadGeometry(pad)
+    : undefined
 
   let shape: PadstackNameArgs["shape"] = "rect"
   let outerDiameter: number | undefined
@@ -31,9 +37,9 @@ export function createAndAddPadstackFromPcbSmtPad(
     holeDiameter = pad.radius * 1000 * 2 // Radius to diameter
   } else if (isPolygon) {
     shape = "polygon"
-    width = polygonData?.widthUm
-    height = polygonData?.heightUm
-    customDescriptor = `${polygonData?.widthUm}x${polygonData?.heightUm}_${polygonData?.relativePointsUm.join("_")}`
+    width = polygonPadGeometry?.widthUm
+    height = polygonPadGeometry?.heightUm
+    customDescriptor = `${polygonPadGeometry?.widthUm}x${polygonPadGeometry?.heightUm}_${polygonPadGeometry?.relativePointsUm.join("_")}`
   } else {
     width = (pad as { width: number }).width * 1000
     height = (pad as { height: number }).height * 1000
@@ -61,11 +67,11 @@ export function createAndAddPadstackFromPcbSmtPad(
         padstackParams.holeDiameter!,
       )
     } else if (isPolygon) {
-      padstack = createPolygonPadstack(
-        padstackName,
-        polygonData!.relativePointsUm,
-        pad.layer,
-      )
+      padstack = createPolygonPadstack({
+        name: padstackName,
+        coordinates: polygonPadGeometry!.relativePointsUm,
+        layer: pad.layer,
+      })
     } else {
       padstack = createRectangularPadstack(
         padstackName,
