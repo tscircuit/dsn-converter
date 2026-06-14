@@ -77,9 +77,13 @@ test("session file (motor driver breakout) -> circuit json", async () => {
   const pcbSmtpads = circuitJsonWithOutputTraces.filter(
     (element) => element.type === "pcb_smtpad",
   )
+  const pcbPlatedHoles = circuitJsonWithOutputTraces.filter(
+    (element) => element.type === "pcb_plated_hole",
+  )
 
   expect(pcbSmtpads).toBeDefined()
-  expect(pcbSmtpads?.length).toBe(46)
+  expect(pcbSmtpads?.length).toBe(30)
+  expect(pcbPlatedHoles?.length).toBe(16)
 
   //expect the pcbsmtpad to not have x and y values as null
   pcbSmtpads.forEach((pcbSmtpad: any) => {
