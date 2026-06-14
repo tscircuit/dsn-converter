@@ -5,6 +5,22 @@ import { applyToPoint } from "transformation-matrix"
 
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
 
+const getPcbSmtPadIdFragment = (pinNumber: number | string) => {
+  if (typeof pinNumber === "number") return String(pinNumber - 1)
+  return pinNumber.replace(
+    /[^a-zA-Z0-9_-]/g,
+    (char) => `_${char.charCodeAt(0).toString(16)}_`,
+  )
+}
+
+const getPortIdFragment = (pinNumber: number | string) => {
+  if (typeof pinNumber === "number") return String(pinNumber)
+  return pinNumber.replace(
+    /[^a-zA-Z0-9_-]/g,
+    (char) => `_${char.charCodeAt(0).toString(16)}_`,
+  )
+}
+
 export function convertPadstacksToSmtPads(
   pcb: DsnPcb,
   transform: any,
@@ -116,6 +132,9 @@ export function convertPadstacksToSmtPads(
         })
 
         let pcbPad: PcbSmtPad
+        const pinLabel = String(pin.pin_number)
+        const smtPadIdFragment = getPcbSmtPadIdFragment(pin.pin_number)
+        const portIdFragment = getPortIdFragment(pin.pin_number)
         if (rectShape || polygonShape || pathShape) {
           const layer = padstack.shapes[0].layer.includes("B.")
             ? "bottom"
@@ -126,29 +145,29 @@ export function convertPadstacksToSmtPads(
           })
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${smtPadIdFragment}`,
             pcb_component_id: `${componentId}_${place.refdes}`,
-            pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
+            pcb_port_id: `pcb_port_${componentId}-Pad${portIdFragment}_${place.refdes}`,
             shape: "rect",
             x: circuitX,
             y: circuitY,
             width,
             height,
             layer,
-            port_hints: [pin.pin_number.toString()],
+            port_hints: [pinLabel],
           }
         } else {
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${smtPadIdFragment}`,
             pcb_component_id: `${componentId}_${place.refdes}`,
-            pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
+            pcb_port_id: `pcb_port_${componentId}-Pad${portIdFragment}_${place.refdes}`,
             shape: "circle",
             x: circuitX,
             y: circuitY,
             radius: circleShape!.diameter / 2 / 1000,
             layer: side === "front" ? "top" : "bottom",
-            port_hints: [pin.pin_number.toString()],
+            port_hints: [pinLabel],
           }
         }
 

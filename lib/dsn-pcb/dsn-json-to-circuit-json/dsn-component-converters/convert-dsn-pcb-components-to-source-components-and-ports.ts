@@ -2,6 +2,19 @@ import type { AnySourceComponent, PcbPort, SourcePort } from "circuit-json"
 import type { DsnPcb, Image, Pin } from "lib/dsn-pcb/types"
 import { type Matrix, applyToPoint } from "transformation-matrix"
 
+const getPinIdFragment = (pinNumber: number | string) => {
+  if (typeof pinNumber === "number") return String(pinNumber)
+  return pinNumber.replace(
+    /[^a-zA-Z0-9_-]/g,
+    (char) => `_${char.charCodeAt(0).toString(16)}_`,
+  )
+}
+
+const getSourcePortPinNumber = (pinNumber: number | string) => {
+  if (typeof pinNumber === "number") return pinNumber
+  return undefined
+}
+
 export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
   dsnPcb,
   transformDsnUnitToMm,
@@ -33,13 +46,18 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
       // Create ports for each pin in the image
       if (image.pins) {
         for (const pin of image.pins) {
+          const pinLabel = String(pin.pin_number)
+          const pinIdFragment = getPinIdFragment(pin.pin_number)
           const port: SourcePort = {
             type: "source_port",
-            source_port_id: `source_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,
+            source_port_id: `source_port_${component.name}-Pad${pinIdFragment}_${place.refdes}`,
             source_component_id: sourceComponent.source_component_id,
-            name: `${place.refdes}-${pin.pin_number}`,
-            pin_number: Number(pin.pin_number),
-            port_hints: [],
+            name: `${place.refdes}-${pinLabel}`,
+            port_hints: [pinLabel],
+          }
+          const sourcePortPinNumber = getSourcePortPinNumber(pin.pin_number)
+          if (sourcePortPinNumber !== undefined) {
+            port.pin_number = sourcePortPinNumber
           }
           // Handle case where place coordinates might be null/undefined
           const placeX = place.x || 0
@@ -49,7 +67,7 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
             y: placeY + pin.y,
           })
           const pcb_port: PcbPort = {
-            pcb_port_id: `pcb_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,
+            pcb_port_id: `pcb_port_${component.name}-Pad${pinIdFragment}_${place.refdes}`,
             type: "pcb_port",
             source_port_id: port.source_port_id,
             pcb_component_id: component.name,
