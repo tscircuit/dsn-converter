@@ -54,9 +54,7 @@ function getRectangleDimensionsFromPolygon(coordinates: number[]) {
 
   if (xs.length !== 2 || ys.length !== 2) return null
 
-  const corners = new Set(
-    xs.flatMap((x) => ys.map((y) => `${x},${y}`)),
-  )
+  const corners = new Set(xs.flatMap((x) => ys.map((y) => `${x},${y}`)))
 
   if ([...uniquePoints.keys()].some((point) => !corners.has(point))) {
     return null
