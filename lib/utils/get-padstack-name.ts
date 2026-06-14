@@ -18,17 +18,6 @@ const padstackNamePrefixes = {
   polygon: "Cust[",
 } as const
 
-export function getPadstackShapeFromName(
-  padstackName: string,
-): PadstackNameArgs["shape"] | null {
-  if (padstackName.startsWith(padstackNamePrefixes.rect)) return "rect"
-  if (padstackName.startsWith(padstackNamePrefixes.polygon)) return "polygon"
-  if (padstackName.startsWith(padstackNamePrefixes.circle)) return "circle"
-  if (padstackName.startsWith(padstackNamePrefixes.oval)) return "oval"
-
-  return null
-}
-
 export function getPadstackName({
   shape,
   width,

@@ -1,7 +1,6 @@
 import type { AnyCircuitElement, PcbSmtPad } from "circuit-json"
 import Debug from "debug"
 import type { DsnPcb } from "lib/dsn-pcb/types"
-import { getPadstackShapeFromName } from "lib/utils/get-padstack-name"
 import { applyToPoint } from "transformation-matrix"
 
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
@@ -184,10 +183,8 @@ export function convertPadstacksToSmtPads(
         const rectangleDimensionsFromPolygon = polygonShape
           ? getRectangleDimensionsFromPolygon(polygonShape.coordinates)
           : null
-        const declaredPadstackShape = getPadstackShapeFromName(padstack.name)
         const shouldImportPolygonAsRect =
-          !!polygonShape &&
-          (declaredPadstackShape === "rect" || !!rectangleDimensionsFromPolygon)
+          !!polygonShape && !!rectangleDimensionsFromPolygon
 
         if (polygonShape && !shouldImportPolygonAsRect) {
           const layer = getLayerFromPadstack(padstack)
