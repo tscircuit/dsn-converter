@@ -82,7 +82,11 @@ export function processComponentsAndPads(
 
     // Add padstacks for SMT pads
     for (const pad of componentGroup.pcb_smtpads) {
-      createAndAddPadstackFromPcbSmtPad(pcb, pad, processedPadstacks)
+      createAndAddPadstackFromPcbSmtPad({
+        pcb,
+        pad,
+        processedPadstacks,
+      })
     }
 
     // Add image once per footprint
@@ -106,7 +110,11 @@ export function processComponentsAndPads(
             .source_port.list()
             .find((e) => e.source_port_id === pcbPort?.source_port_id)
 
-          return createPinForImage(pad, pcbComponent, sourcePort)
+          return createPinForImage({
+            pad,
+            pcbComponent,
+            sourcePort,
+          })
         })
         .filter((pin): pin is Pin => pin !== undefined),
     }
