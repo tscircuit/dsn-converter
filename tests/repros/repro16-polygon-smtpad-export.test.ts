@@ -1,7 +1,14 @@
 import { expect, test } from "bun:test"
 import type { AnyCircuitElement } from "circuit-json"
 import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
-import { convertCircuitJsonToDsnJson, convertCircuitJsonToDsnString } from "lib"
+import {
+  convertCircuitJsonToDsnJson,
+  convertCircuitJsonToDsnString,
+  convertDsnPcbToCircuitJson,
+  parseDsnToDsnJson,
+} from "lib"
+
+import type { DsnPcb } from "lib"
 
 const polygonPadCircuitJson = [
   {
@@ -88,8 +95,18 @@ test("polygon smt pad export writes finite padstack and pin coordinates", () => 
   expect(Number.isFinite(exportedPin?.y)).toBe(true)
 })
 
-test("polygon smt pad visual repro", () => {
-  expect(convertCircuitJsonToPcbSvg(polygonPadCircuitJson)).toMatchSvgSnapshot(
+test("polygon smt pad round trip visual repro", () => {
+  const dsnString = convertCircuitJsonToDsnString(polygonPadCircuitJson)
+  const dsnJson = parseDsnToDsnJson(dsnString) as DsnPcb
+  const roundTrippedCircuitJson = convertDsnPcbToCircuitJson(dsnJson)
+  const roundTrippedPads = roundTrippedCircuitJson.filter(
+    (element) => element.type === "pcb_smtpad",
+  )
+
+  expect(roundTrippedPads).toHaveLength(1)
+  expect(roundTrippedPads[0]?.shape).toBe("polygon")
+
+  expect(convertCircuitJsonToPcbSvg(roundTrippedCircuitJson)).toMatchSvgSnapshot(
     import.meta.path,
   )
 })

@@ -5,6 +5,37 @@ import { applyToPoint } from "transformation-matrix"
 
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
 
+function getLayerFromPadstack(padstack: DsnPcb["library"]["padstacks"][number]) {
+  return padstack.shapes[0].layer.includes("B.") ? "bottom" : "top"
+}
+
+function getPolygonPoints(
+  coordinates: number[],
+  center: { x: number; y: number },
+) {
+  const points: Array<{ x: number; y: number }> = []
+
+  for (let i = 0; i < coordinates.length; i += 2) {
+    const point = {
+      x: center.x + coordinates[i] / 1000,
+      y: center.y + coordinates[i + 1] / 1000,
+    }
+
+    const firstPoint = points[0]
+    const isClosingPoint =
+      firstPoint &&
+      point.x === firstPoint.x &&
+      point.y === firstPoint.y &&
+      i === coordinates.length - 2
+
+    if (!isClosingPoint) {
+      points.push(point)
+    }
+  }
+
+  return points
+}
+
 export function convertPadstacksToSmtPads(
   pcb: DsnPcb,
   transform: any,
@@ -116,10 +147,27 @@ export function convertPadstacksToSmtPads(
         })
 
         let pcbPad: PcbSmtPad
-        if (rectShape || polygonShape || pathShape) {
-          const layer = padstack.shapes[0].layer.includes("B.")
-            ? "bottom"
-            : "top"
+        if (polygonShape) {
+          const layer = getLayerFromPadstack(padstack)
+          debug("determining layer with padstack shapes", {
+            shapes: padstack.shapes,
+            layer,
+          })
+          pcbPad = {
+            type: "pcb_smtpad",
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_component_id: `${componentId}_${place.refdes}`,
+            pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
+            shape: "polygon",
+            points: getPolygonPoints(polygonShape.coordinates, {
+              x: circuitX,
+              y: circuitY,
+            }),
+            layer,
+            port_hints: [pin.pin_number.toString()],
+          }
+        } else if (rectShape || pathShape) {
+          const layer = getLayerFromPadstack(padstack)
           debug("determining layer with padstack shapes", {
             shapes: padstack.shapes,
             layer,
