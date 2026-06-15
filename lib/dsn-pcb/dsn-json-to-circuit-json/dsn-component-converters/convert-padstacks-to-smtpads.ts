@@ -5,9 +5,70 @@ import { applyToPoint } from "transformation-matrix"
 
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
 
+function getLayerFromPadstack(
+  padstack: DsnPcb["library"]["padstacks"][number],
+) {
+  return padstack.shapes[0].layer.includes("B.") ? "bottom" : "top"
+}
+
+function getPolygonPoints(
+  coordinates: number[],
+  center: { x: number; y: number },
+) {
+  const points: Array<{ x: number; y: number }> = []
+
+  for (let i = 0; i < coordinates.length; i += 2) {
+    const point = {
+      x: center.x + coordinates[i] / 1000,
+      y: center.y + coordinates[i + 1] / 1000,
+    }
+
+    const firstPoint = points[0]
+    const isClosingPoint =
+      firstPoint &&
+      point.x === firstPoint.x &&
+      point.y === firstPoint.y &&
+      i === coordinates.length - 2
+
+    if (!isClosingPoint) {
+      points.push(point)
+    }
+  }
+
+  return points
+}
+
+function getRectangleDimensionsFromPolygon(coordinates: number[]) {
+  const uniquePoints = new Map<string, { x: number; y: number }>()
+
+  for (let i = 0; i < coordinates.length; i += 2) {
+    const x = coordinates[i]
+    const y = coordinates[i + 1]
+    uniquePoints.set(`${x},${y}`, { x, y })
+  }
+
+  if (uniquePoints.size !== 4) return null
+
+  const xs = [...new Set([...uniquePoints.values()].map((point) => point.x))]
+  const ys = [...new Set([...uniquePoints.values()].map((point) => point.y))]
+
+  if (xs.length !== 2 || ys.length !== 2) return null
+
+  const corners = new Set(xs.flatMap((x) => ys.map((y) => `${x},${y}`)))
+
+  if ([...uniquePoints.keys()].some((point) => !corners.has(point))) {
+    return null
+  }
+
+  return {
+    width: Math.abs(xs[1] - xs[0]) / 1000,
+    height: Math.abs(ys[1] - ys[0]) / 1000,
+  }
+}
+
 export function convertPadstacksToSmtPads(
   pcb: DsnPcb,
-  transform: any,
+  dsnToCircuitJsonTransform: any,
 ): AnyCircuitElement[] {
   const elements: AnyCircuitElement[] = []
   const { padstacks, images } = pcb.library
@@ -110,16 +171,42 @@ export function convertPadstacksToSmtPads(
 
         // Calculate position in circuit space using the transformation matrix
         // Convert component position and pin offset to circuit coordinates
-        const { x: circuitX, y: circuitY } = applyToPoint(transform, {
-          x: (compX || 0) + pin.x,
-          y: (compY || 0) + pin.y,
-        })
+        const { x: circuitX, y: circuitY } = applyToPoint(
+          dsnToCircuitJsonTransform,
+          {
+            x: (compX || 0) + pin.x,
+            y: (compY || 0) + pin.y,
+          },
+        )
 
         let pcbPad: PcbSmtPad
-        if (rectShape || polygonShape || pathShape) {
-          const layer = padstack.shapes[0].layer.includes("B.")
-            ? "bottom"
-            : "top"
+        const rectangleDimensionsFromPolygon = polygonShape
+          ? getRectangleDimensionsFromPolygon(polygonShape.coordinates)
+          : null
+        const shouldImportPolygonAsRect =
+          !!polygonShape && !!rectangleDimensionsFromPolygon
+
+        if (polygonShape && !shouldImportPolygonAsRect) {
+          const layer = getLayerFromPadstack(padstack)
+          debug("determining layer with padstack shapes", {
+            shapes: padstack.shapes,
+            layer,
+          })
+          pcbPad = {
+            type: "pcb_smtpad",
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_component_id: `${componentId}_${place.refdes}`,
+            pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
+            shape: "polygon",
+            points: getPolygonPoints(polygonShape.coordinates, {
+              x: circuitX,
+              y: circuitY,
+            }),
+            layer,
+            port_hints: [pin.pin_number.toString()],
+          }
+        } else if (rectShape || pathShape || shouldImportPolygonAsRect) {
+          const layer = getLayerFromPadstack(padstack)
           debug("determining layer with padstack shapes", {
             shapes: padstack.shapes,
             layer,
@@ -132,8 +219,8 @@ export function convertPadstacksToSmtPads(
             shape: "rect",
             x: circuitX,
             y: circuitY,
-            width,
-            height,
+            width: rectangleDimensionsFromPolygon?.width ?? width,
+            height: rectangleDimensionsFromPolygon?.height ?? height,
             layer,
             port_hints: [pin.pin_number.toString()],
           }

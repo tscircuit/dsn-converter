@@ -10,6 +10,14 @@ export interface PadstackNameArgs {
   customDescriptor?: string
 }
 
+const padstackNamePrefixes = {
+  circle: "Round[",
+  oval: "Oval[",
+  pill: "Oval[",
+  rect: "RoundRect[",
+  polygon: "Cust[",
+} as const
+
 export function getPadstackName({
   shape,
   width,
@@ -27,15 +35,15 @@ export function getPadstackName({
     }[layer as string] ?? "T"
   switch (shape) {
     case "circle":
-      return `Round[${layerCode}]Pad_${holeDiameter}_${outerDiameter}_um`
+      return `${padstackNamePrefixes.circle}${layerCode}]Pad_${holeDiameter}_${outerDiameter}_um`
     case "oval":
-      return `Oval[${layerCode}]Pad_${width}x${height}_um`
+      return `${padstackNamePrefixes.oval}${layerCode}]Pad_${width}x${height}_um`
     case "pill":
-      return `Oval[${layerCode}]Pad_${width}x${height}_um`
+      return `${padstackNamePrefixes.pill}${layerCode}]Pad_${width}x${height}_um`
     case "rect":
-      return `RoundRect[${layerCode}]Pad_${width}x${height}_um`
+      return `${padstackNamePrefixes.rect}${layerCode}]Pad_${width}x${height}_um`
     case "polygon":
-      return `Cust[${layerCode}]Pad_${customDescriptor ?? `${width}x${height}`}_um`
+      return `${padstackNamePrefixes.polygon}${layerCode}]Pad_${customDescriptor ?? `${width}x${height}`}_um`
     default:
       return "default_pad"
   }
