@@ -58,11 +58,19 @@ export const stringifyDsnSession = (session: DsnSession): string => {
   session.routes.network_out.nets.forEach((net) => {
     result += `${indent}${indent}${indent}(net ${JSON.stringify(net.name)}\n`
     net.wires.forEach((wire) => {
-      if (wire.path) {
+      const path = wire.path ?? wire.polyline_path
+      if (path) {
+        const pathType = wire.path ? "path" : "polyline_path"
         result += `${indent}${indent}${indent}${indent}(wire\n`
-        result += `${indent}${indent}${indent}${indent}${indent}(path ${wire.path.layer} ${wire.path.width}\n`
-        result += `${indent}${indent}${indent}${indent}${indent}${indent}${wire.path.coordinates.join(" ")}\n`
+        result += `${indent}${indent}${indent}${indent}${indent}(${pathType} ${path.layer} ${path.width}\n`
+        result += `${indent}${indent}${indent}${indent}${indent}${indent}${path.coordinates.join(" ")}\n`
         result += `${indent}${indent}${indent}${indent}${indent})\n`
+        if (wire.clearance_class) {
+          result += `${indent}${indent}${indent}${indent}${indent}(clearance_class ${wire.clearance_class})\n`
+        }
+        if (wire.type) {
+          result += `${indent}${indent}${indent}${indent}${indent}(type ${wire.type})\n`
+        }
         result += `${indent}${indent}${indent}${indent})\n`
       }
     })
