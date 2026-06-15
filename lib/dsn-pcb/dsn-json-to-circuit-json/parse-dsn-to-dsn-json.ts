@@ -939,6 +939,10 @@ function processVia(nodes: ASTNode[]): Wire | null {
   }
 
   const wire: Partial<Wire> = {
+    via_name:
+      nodes[1]?.type === "Atom" && typeof nodes[1].value === "string"
+        ? nodes[1].value
+        : undefined,
     path: {
       layer: "all", // vias connect all layers
       width: 0, // width is defined by the padstack
