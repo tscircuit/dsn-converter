@@ -50,6 +50,6 @@ test("stringify session preserves parser options", () => {
 
   const stringified = stringifyDsnSession(session)
 
-  expect(stringified).toContain("(string_quote \"'\")")
+  expect(stringified).toContain('(string_quote "\'")')
   expect(stringified).toContain('(space_in_quoted_tokens "on")')
 })
