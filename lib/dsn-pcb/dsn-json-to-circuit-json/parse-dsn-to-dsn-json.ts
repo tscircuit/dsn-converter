@@ -584,11 +584,16 @@ function processPin(nodes: ASTNode[]): Pin | null {
 
     pin.pin_number = pinNumber
 
-    // Parse coordinates
+    // Parse coordinates — start after padstack_name + pin_number (+ optional rotate list)
     let xValue: number | undefined
     let yValue: number | undefined
 
-    for (let i = 3; i < nodes.length; i++) {
+    // If nodes[2] is a (rotate N) list, coordinates start at index 4; otherwise at 3
+    const hasRotateModifier =
+      nodes[2]?.type === "List" && nodes[2].children?.[0]?.value === "rotate"
+    const coordStart = hasRotateModifier ? 4 : 3
+
+    for (let i = coordStart; i < nodes.length; i++) {
       const node = nodes[i]
       const nextNode = nodes[i + 1]
 
