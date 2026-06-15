@@ -15,6 +15,7 @@ test("circuit json (with plated hole) -> dsn file", async () => {
     circuitJson as AnyCircuitElement[],
   )
   const dsnJson = parseDsnToDsnJson(dsnFile) as DsnPcb
+  const circuitJson2 = convertDsnJsonToCircuitJson(dsnJson)
 
   // expect the json placemet to have length 2
   expect(dsnJson.placement.components.length).toBe(2)
@@ -38,6 +39,16 @@ test("circuit json (with plated hole) -> dsn file", async () => {
   expect(padstack?.shapes[2].layer).toBe("In2.Cu")
   expect(padstack?.shapes[3].layer).toBe("B.Cu")
   expect((padstack?.shapes[0] as any).diameter).toBe(1000) // Outer diameter in μm
+
+  const platedHoles = circuitJson2.filter((e) => e.type === "pcb_plated_hole")
+  expect(platedHoles).toHaveLength(2)
+  expect(platedHoles[0]).toMatchObject({
+    type: "pcb_plated_hole",
+    shape: "circle",
+    outer_diameter: 1,
+    hole_diameter: 0.7,
+    layers: ["top", "bottom"],
+  })
 })
 
 test("different sized plated holes", async () => {

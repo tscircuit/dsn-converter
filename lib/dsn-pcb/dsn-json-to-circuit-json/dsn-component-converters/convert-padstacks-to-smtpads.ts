@@ -1,9 +1,94 @@
-import type { AnyCircuitElement, PcbSmtPad } from "circuit-json"
+import type { AnyCircuitElement, PcbPlatedHole, PcbSmtPad } from "circuit-json"
 import Debug from "debug"
-import type { DsnPcb } from "lib/dsn-pcb/types"
+import type { CircleShape, DsnPcb, PathShape } from "lib/dsn-pcb/types"
 import { applyToPoint } from "transformation-matrix"
 
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
+
+type PlatedHoleShape =
+  | {
+      shape: "circle"
+      outer_diameter: number
+      hole_diameter: number
+    }
+  | {
+      shape: "pill"
+      outer_width: number
+      outer_height: number
+      hole_width: number
+      hole_height: number
+    }
+
+function getSafeIdSegment(value: number | string): string {
+  return String(value).replace(/[^a-zA-Z0-9_-]/g, "_")
+}
+
+function getPathOuterDimensions(pathShape: PathShape): {
+  width: number
+  height: number
+} | null {
+  const [x1, y1, x2, y2] = pathShape.coordinates
+  if (
+    typeof x1 !== "number" ||
+    typeof y1 !== "number" ||
+    typeof x2 !== "number" ||
+    typeof y2 !== "number"
+  ) {
+    return null
+  }
+
+  return {
+    width: (Math.abs(x2 - x1) + pathShape.width) / 1000,
+    height: (Math.abs(y2 - y1) + pathShape.width) / 1000,
+  }
+}
+
+function getPlatedHoleShape(
+  padstackName: string,
+  circleShape?: CircleShape,
+  pathShape?: PathShape,
+): PlatedHoleShape | null {
+  const roundMatch = padstackName.match(
+    /^Round\[A\]Pad_(\d+(?:\.\d+)?)_(\d+(?:\.\d+)?)_um$/,
+  )
+  if (roundMatch && circleShape) {
+    const holeDiameter = Number(roundMatch[1]) / 1000
+    const outerDiameter = Number(roundMatch[2]) / 1000
+    if (holeDiameter > 0 && outerDiameter > holeDiameter) {
+      return {
+        shape: "circle",
+        outer_diameter: outerDiameter,
+        hole_diameter: holeDiameter,
+      }
+    }
+  }
+
+  const ovalMatch = padstackName.match(
+    /^Oval\[A\]Pad_(\d+(?:\.\d+)?)x(\d+(?:\.\d+)?)_um$/,
+  )
+  if (ovalMatch && pathShape) {
+    const holeWidth = Number(ovalMatch[1]) / 1000
+    const holeHeight = Number(ovalMatch[2]) / 1000
+    const outer = getPathOuterDimensions(pathShape)
+    if (
+      outer &&
+      holeWidth > 0 &&
+      holeHeight > 0 &&
+      outer.width > holeWidth &&
+      outer.height > holeHeight
+    ) {
+      return {
+        shape: "pill",
+        outer_width: outer.width,
+        outer_height: outer.height,
+        hole_width: holeWidth,
+        hole_height: holeHeight,
+      }
+    }
+  }
+
+  return null
+}
 
 export function convertPadstacksToSmtPads(
   pcb: DsnPcb,
@@ -115,6 +200,30 @@ export function convertPadstacksToSmtPads(
           y: (compY || 0) + pin.y,
         })
 
+        const pcbPortId = `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`
+        const pcbComponentId = `${componentId}_${place.refdes}`
+        const platedHoleShape = getPlatedHoleShape(
+          padstack.name,
+          circleShape as CircleShape | undefined,
+          pathShape as PathShape | undefined,
+        )
+
+        if (platedHoleShape) {
+          const pcbPlatedHole: PcbPlatedHole = {
+            type: "pcb_plated_hole",
+            pcb_plated_hole_id: `pcb_plated_hole_${componentId}_${place.refdes}_${getSafeIdSegment(pin.pin_number)}`,
+            pcb_component_id: pcbComponentId,
+            pcb_port_id: pcbPortId,
+            x: circuitX,
+            y: circuitY,
+            layers: ["top", "bottom"],
+            port_hints: [pin.pin_number.toString()],
+            ...platedHoleShape,
+          } as PcbPlatedHole
+          elements.push(pcbPlatedHole)
+          return
+        }
+
         let pcbPad: PcbSmtPad
         if (rectShape || polygonShape || pathShape) {
           const layer = padstack.shapes[0].layer.includes("B.")
@@ -127,8 +236,8 @@ export function convertPadstacksToSmtPads(
           pcbPad = {
             type: "pcb_smtpad",
             pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
-            pcb_component_id: `${componentId}_${place.refdes}`,
-            pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
+            pcb_component_id: pcbComponentId,
+            pcb_port_id: pcbPortId,
             shape: "rect",
             x: circuitX,
             y: circuitY,
@@ -141,8 +250,8 @@ export function convertPadstacksToSmtPads(
           pcbPad = {
             type: "pcb_smtpad",
             pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
-            pcb_component_id: `${componentId}_${place.refdes}`,
-            pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
+            pcb_component_id: pcbComponentId,
+            pcb_port_id: pcbPortId,
             shape: "circle",
             x: circuitX,
             y: circuitY,
