@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "@tscircuit/circuit-json-util": "^0.0.72",
     "@tscircuit/core": "^0.0.349",
     "@tscircuit/math-utils": "^0.0.36",
     "@types/bun": "latest",
@@ -21,7 +22,7 @@
     "@types/uuid": "^10.0.0",
     "bun-match-svg": "^0.0.3",
     "circuit-json": "^0.0.433",
-    "circuit-to-svg": "^0.0.175",
+    "circuit-to-svg": "^0.0.354",
     "react": "18",
     "tsup": "^8.3.5"
   },
