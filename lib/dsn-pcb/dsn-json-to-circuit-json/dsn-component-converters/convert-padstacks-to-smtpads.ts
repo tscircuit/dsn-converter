@@ -5,6 +5,33 @@ import { applyToPoint } from "transformation-matrix"
 
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
 
+/**
+ * Rotate a point (x, y) around the origin by the given angle in degrees.
+ */
+function rotatePoint(
+  x: number,
+  y: number,
+  angleDeg: number,
+): { x: number; y: number } {
+  if (!angleDeg) return { x, y }
+  const rad = (angleDeg * Math.PI) / 180
+  const cos = Math.cos(rad)
+  const sin = Math.sin(rad)
+  return {
+    x: x * cos - y * sin,
+    y: x * sin + y * cos,
+  }
+}
+
+/**
+ * Get a safe string index for a pin_number that may be non-numeric (e.g. "GND2", "A", "C").
+ */
+function getPinIndex(pinNumber: number | string, pinIdx: number): string {
+  const num = Number(pinNumber)
+  if (!Number.isNaN(num)) return String(num - 1)
+  return String(pinIdx)
+}
+
 export function convertPadstacksToSmtPads(
   pcb: DsnPcb,
   transform: any,
@@ -28,8 +55,9 @@ export function convertPadstacksToSmtPads(
     placementComponent.places.forEach((place) => {
       debug("processing place...", { place })
       const { x: compX, y: compY, side } = place
+      const placeRotation = place.rotation || 0
 
-      image.pins.forEach((pin) => {
+      image.pins.forEach((pin, pinIdx) => {
         // Find the corresponding padstack
         const padstack = padstacks.find((p) => p.name === pin.padstack_name)
         debug("found padstack", { padstack })
@@ -108,14 +136,18 @@ export function convertPadstacksToSmtPads(
           return
         }
 
+        // Apply component rotation to pin offset before adding to component position
+        const rotatedPin = rotatePoint(pin.x, pin.y, placeRotation)
+
         // Calculate position in circuit space using the transformation matrix
         // Convert component position and pin offset to circuit coordinates
         const { x: circuitX, y: circuitY } = applyToPoint(transform, {
-          x: (compX || 0) + pin.x,
-          y: (compY || 0) + pin.y,
+          x: (compX || 0) + rotatedPin.x,
+          y: (compY || 0) + rotatedPin.y,
         })
 
         let pcbPad: PcbSmtPad
+        const padIndex = getPinIndex(pin.pin_number, pinIdx)
         if (rectShape || polygonShape || pathShape) {
           const layer = padstack.shapes[0].layer.includes("B.")
             ? "bottom"
@@ -126,7 +158,7 @@ export function convertPadstacksToSmtPads(
           })
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${padIndex}`,
             pcb_component_id: `${componentId}_${place.refdes}`,
             pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
             shape: "rect",
@@ -140,7 +172,7 @@ export function convertPadstacksToSmtPads(
         } else {
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${padIndex}`,
             pcb_component_id: `${componentId}_${place.refdes}`,
             pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
             shape: "circle",

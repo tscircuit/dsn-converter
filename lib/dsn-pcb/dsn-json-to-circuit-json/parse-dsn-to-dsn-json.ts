@@ -1,5 +1,9 @@
 import Debug from "debug"
-import { getPinNum } from "lib/utils/get-pin-number"
+import {
+  getPinNum,
+  getPinIndexOffset,
+  getPinRotation,
+} from "lib/utils/get-pin-number"
 import { getViaCoords } from "lib/utils/get-via-coordinates"
 import {
   type ASTNode,
@@ -577,18 +581,30 @@ function processPin(nodes: ASTNode[]): Pin | null {
       return null
     }
     pin.padstack_name = String(nodes[1].value)
-    // check if pin number is in a List structure
+
+    // Handle optional (rotate <angle>) at index 2
+    // DSN format: (pin <padstack> [(rotate <angle>)] <pin_number> <x> <y>)
+    const pinRotation = getPinRotation(nodes)
+    const offset = getPinIndexOffset(nodes)
+
+    // Get pin number (getPinNum already handles the offset internally)
     const pinNumber = getPinNum(nodes)
 
     if (pinNumber === null) return null
 
     pin.pin_number = pinNumber
 
-    // Parse coordinates
+    // Store pin rotation if present
+    if (pinRotation !== null) {
+      ;(pin as any).rotation = pinRotation
+    }
+
+    // Parse coordinates - start after pin_number (index 2 + offset + 1 = 3 + offset)
     let xValue: number | undefined
     let yValue: number | undefined
+    const coordStartIndex = 3 + offset
 
-    for (let i = 3; i < nodes.length; i++) {
+    for (let i = coordStartIndex; i < nodes.length; i++) {
       const node = nodes[i]
       const nextNode = nodes[i + 1]
 
