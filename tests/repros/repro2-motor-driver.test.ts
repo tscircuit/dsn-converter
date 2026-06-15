@@ -79,13 +79,19 @@ test("session file (motor driver breakout) -> circuit json", async () => {
   )
 
   expect(pcbSmtpads).toBeDefined()
-  expect(pcbSmtpads?.length).toBe(46)
+  expect(pcbSmtpads?.length).toBe(30)
 
   //expect the pcbsmtpad to not have x and y values as null
   pcbSmtpads.forEach((pcbSmtpad: any) => {
     expect(pcbSmtpad.x).not.toBeNull()
     expect(pcbSmtpad.y).not.toBeNull()
   })
+
+  // through-hole pads are now correctly converted to pcb_plated_hole
+  const pcbPlatedHoles = circuitJsonWithOutputTraces.filter(
+    (element) => element.type === "pcb_plated_hole",
+  )
+  expect(pcbPlatedHoles.length).toBe(16)
 
   // expect the pcb_trace to not be null
   const pcbTraces = circuitJsonWithOutputTraces.filter(
