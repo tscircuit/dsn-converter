@@ -8,16 +8,23 @@ const debug = Debug("dsn-converter:getPinNum")
  * Handles both extraction from nodes and type conversion in one step
  */
 export function getPinNum(nodes: ASTNode[]): number | string | null {
-  // Extract pin number from AST nodes
-  let pinNumber
+  let pinNumber: string | number | undefined
 
-  if (nodes[2]?.type === "List" && nodes[2].children) {
-    // Pin number is in a List structure
-    pinNumber = nodes[2].children[0]?.value
-  } else if (nodes[2]?.type === "Atom") {
-    // Pin number is direct value
-    pinNumber = nodes[2].value
-  } else {
+  for (const node of nodes.slice(2)) {
+    if (node.type === "List") {
+      continue
+    }
+    if (typeof node.value === "string") {
+      pinNumber = node.value
+      break
+    }
+    if (typeof node.value === "number") {
+      pinNumber = node.value
+      break
+    }
+  }
+
+  if (pinNumber === undefined) {
     debug("Unsupported pin number format:", nodes)
     return null
   }
