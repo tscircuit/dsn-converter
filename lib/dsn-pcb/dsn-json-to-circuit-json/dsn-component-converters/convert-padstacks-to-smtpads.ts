@@ -5,6 +5,22 @@ import { applyToPoint } from "transformation-matrix"
 
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
 
+function getSmtPadLayer(shapeLayer: string, side: string): "top" | "bottom" {
+  const normalizedLayer = shapeLayer.toLowerCase()
+  const isTopShapeLayer =
+    normalizedLayer === "top" ||
+    normalizedLayer.includes("f.") ||
+    normalizedLayer.includes("front")
+  const isBottomShapeLayer =
+    normalizedLayer === "bottom" ||
+    normalizedLayer.includes("b.") ||
+    normalizedLayer.includes("back")
+
+  if (side === "back" && isTopShapeLayer) return "bottom"
+  if (isBottomShapeLayer) return "bottom"
+  return "top"
+}
+
 export function convertPadstacksToSmtPads(
   pcb: DsnPcb,
   transform: any,
@@ -117,9 +133,7 @@ export function convertPadstacksToSmtPads(
 
         let pcbPad: PcbSmtPad
         if (rectShape || polygonShape || pathShape) {
-          const layer = padstack.shapes[0].layer.includes("B.")
-            ? "bottom"
-            : "top"
+          const layer = getSmtPadLayer(padstack.shapes[0].layer, side)
           debug("determining layer with padstack shapes", {
             shapes: padstack.shapes,
             layer,
