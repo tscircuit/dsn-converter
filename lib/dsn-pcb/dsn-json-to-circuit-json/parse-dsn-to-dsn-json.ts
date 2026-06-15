@@ -775,6 +775,18 @@ function processCircleShape(nodes: ASTNode[]): CircleShape {
   ) {
     circle.layer = shapeNodes[1].value
     circle.diameter = shapeNodes[2].value
+    if (
+      shapeNodes[3]?.type === "Atom" &&
+      typeof shapeNodes[3].value === "number"
+    ) {
+      circle.x = shapeNodes[3].value
+    }
+    if (
+      shapeNodes[4]?.type === "Atom" &&
+      typeof shapeNodes[4].value === "number"
+    ) {
+      circle.y = shapeNodes[4].value
+    }
     return circle as CircleShape
   } else {
     // Try to extract coordinates if they exist

@@ -1,9 +1,68 @@
 import type { AnyCircuitElement, PcbSmtPad } from "circuit-json"
 import Debug from "debug"
-import type { DsnPcb } from "lib/dsn-pcb/types"
+import type { DsnPcb, Shape } from "lib/dsn-pcb/types"
 import { applyToPoint } from "transformation-matrix"
 
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
+
+function getShapeBounds(shape: Shape): {
+  width: number
+  height: number
+  centerX: number
+  centerY: number
+} {
+  if (shape.shapeType === "rect") {
+    const [x1, y1, x2, y2] = shape.coordinates
+    return {
+      width: Math.abs(x2 - x1) / 1000,
+      height: Math.abs(y2 - y1) / 1000,
+      centerX: (x1 + x2) / 2,
+      centerY: (y1 + y2) / 2,
+    }
+  }
+
+  if (shape.shapeType === "polygon") {
+    let minX = Infinity
+    let maxX = -Infinity
+    let minY = Infinity
+    let maxY = -Infinity
+
+    for (let i = 0; i < shape.coordinates.length; i += 2) {
+      const x = shape.coordinates[i]
+      const y = shape.coordinates[i + 1]
+
+      minX = Math.min(minX, x)
+      maxX = Math.max(maxX, x)
+      minY = Math.min(minY, y)
+      maxY = Math.max(maxY, y)
+    }
+
+    return {
+      width: Math.abs(maxX - minX) / 1000,
+      height: Math.abs(maxY - minY) / 1000,
+      centerX: (minX + maxX) / 2,
+      centerY: (minY + maxY) / 2,
+    }
+  }
+
+  if (shape.shapeType === "path") {
+    const [x1, y1, x2, y2] = shape.coordinates
+    return {
+      width: shape.width / 1000,
+      height: Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) / 1000,
+      centerX: (x1 + x2) / 2,
+      centerY: (y1 + y2) / 2,
+    }
+  }
+
+  const radius = shape.diameter / 2 / 1000
+  return {
+    width: radius,
+    height: radius,
+    centerX: shape.x ?? 0,
+    centerY: shape.y ?? 0,
+  }
+}
 
 export function convertPadstacksToSmtPads(
   pcb: DsnPcb,
@@ -63,56 +122,21 @@ export function convertPadstacksToSmtPads(
           pathShape,
         })
 
-        let width: number
-        let height: number
-
-        if (rectShape) {
-          // Handle rectangle shape
-          const [x1, y1, x2, y2] = rectShape.coordinates
-          width = Math.abs(x2 - x1) / 1000 // Convert μm to mm
-          height = Math.abs(y2 - y1) / 1000 // Convert μm to mm
-        } else if (polygonShape) {
-          // Handle polygon shape
-          const coordinates = polygonShape.coordinates
-          let minX = Infinity
-          let maxX = -Infinity
-          let minY = Infinity
-          let maxY = -Infinity
-
-          // Coordinates are in pairs (x,y), so iterate by 2
-          for (let i = 0; i < coordinates.length; i += 2) {
-            const x = coordinates[i]
-            const y = coordinates[i + 1]
-
-            minX = Math.min(minX, x)
-            maxX = Math.max(maxX, x)
-            minY = Math.min(minY, y)
-            maxY = Math.max(maxY, y)
-          }
-
-          width = Math.abs(maxX - minX) / 1000
-          height = Math.abs(maxY - minY) / 1000
-        } else if (pathShape) {
-          // For path shapes (oval/pill pads), width is the path width
-          // and height is the distance between path endpoints
-          const [x1, y1, x2, y2] = pathShape.coordinates
-          width = pathShape.width / 1000 // Convert μm to mm
-          height = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) / 1000
-        } else if (circleShape) {
-          // Handle circle shape
-          const radius = circleShape.diameter / 2 / 1000
-          width = radius
-          height = radius
-        } else {
+        const selectedShape =
+          rectShape ?? polygonShape ?? pathShape ?? circleShape
+        if (!selectedShape) {
           console.warn(`No valid shape found for padstack: ${padstack.name}`)
           return
         }
 
+        const { width, height, centerX, centerY } =
+          getShapeBounds(selectedShape)
+
         // Calculate position in circuit space using the transformation matrix
         // Convert component position and pin offset to circuit coordinates
         const { x: circuitX, y: circuitY } = applyToPoint(transform, {
-          x: (compX || 0) + pin.x,
-          y: (compY || 0) + pin.y,
+          x: (compX || 0) + pin.x + centerX,
+          y: (compY || 0) + pin.y + centerY,
         })
 
         let pcbPad: PcbSmtPad
