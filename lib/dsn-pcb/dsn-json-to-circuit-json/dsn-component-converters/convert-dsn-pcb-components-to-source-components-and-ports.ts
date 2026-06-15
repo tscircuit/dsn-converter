@@ -32,8 +32,9 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
   dsnPcb: DsnPcb
   transformDsnUnitToMm: Matrix
 }): Array<AnySourceComponent | SourcePort | PcbPort | PcbComponent> => {
-  const result: Array<AnySourceComponent | SourcePort | PcbPort | PcbComponent> =
-    []
+  const result: Array<
+    AnySourceComponent | SourcePort | PcbPort | PcbComponent
+  > = []
 
   // Map to store image definitions for component lookup
   const imageMap = new Map(dsnPcb.library.images.map((img) => [img.name, img]))
@@ -73,6 +74,7 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
         width: 0,
         height: 0,
         layer: place.side === "back" ? "bottom" : "top",
+        obstructs_within_bounds: false,
       }
       result.push(pcbComponent)
 

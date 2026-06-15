@@ -1,5 +1,9 @@
 import Debug from "debug"
-import { getPinNum, getPinIndexOffset, getPinRotation } from "lib/utils/get-pin-number"
+import {
+  getPinNum,
+  getPinIndexOffset,
+  getPinRotation,
+} from "lib/utils/get-pin-number"
 import { getViaCoords } from "lib/utils/get-via-coordinates"
 import {
   type ASTNode,
