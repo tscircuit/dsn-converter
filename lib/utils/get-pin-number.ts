@@ -7,16 +7,30 @@ const debug = Debug("dsn-converter:getPinNum")
  * Process pin identifier from AST nodes and convert to appropriate type
  * Handles both extraction from nodes and type conversion in one step
  */
+export function getPinNumberNodeIndex(nodes: ASTNode[]): number {
+  const candidate = nodes[2]
+  if (
+    candidate?.type === "List" &&
+    candidate.children?.[0]?.type === "Atom" &&
+    candidate.children[0].value === "rotate"
+  ) {
+    return 3
+  }
+  return 2
+}
+
 export function getPinNum(nodes: ASTNode[]): number | string | null {
   // Extract pin number from AST nodes
-  let pinNumber
+  let pinNumber: number | string | undefined
 
-  if (nodes[2]?.type === "List" && nodes[2].children) {
+  const pinNumberNode = nodes[getPinNumberNodeIndex(nodes)]
+
+  if (pinNumberNode?.type === "List" && pinNumberNode.children) {
     // Pin number is in a List structure
-    pinNumber = nodes[2].children[0]?.value
-  } else if (nodes[2]?.type === "Atom") {
+    pinNumber = pinNumberNode.children[0]?.value
+  } else if (pinNumberNode?.type === "Atom") {
     // Pin number is direct value
-    pinNumber = nodes[2].value
+    pinNumber = pinNumberNode.value
   } else {
     debug("Unsupported pin number format:", nodes)
     return null
