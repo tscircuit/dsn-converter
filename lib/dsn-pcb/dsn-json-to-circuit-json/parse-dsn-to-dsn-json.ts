@@ -1081,17 +1081,9 @@ function processSessionNode(ast: ASTNode): DsnSession {
         child.children[0].value === "library_out",
     )
     if (libraryNode) {
-      session.routes.library_out = {
-        images: [],
-        padstacks: libraryNode
-          .children!.filter(
-            (child) =>
-              child.type === "List" &&
-              child.children?.[0].type === "Atom" &&
-              child.children[0].value === "padstack",
-          )
-          .map((padstackNode) => processPadstack(padstackNode.children!)),
-      }
+      session.routes.library_out = processLibrary(
+        libraryNode.children!.slice(1),
+      )
     }
 
     // Extract network_out section

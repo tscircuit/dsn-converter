@@ -38,6 +38,18 @@ export const stringifyDsnSession = (session: DsnSession): string => {
   // Library_out subsection
   if (session.routes.library_out) {
     result += `${indent}${indent}(library_out \n`
+    session.routes.library_out.images.forEach((image) => {
+      result += `${indent}${indent}${indent}(image ${JSON.stringify(image.name)}\n`
+      image.outlines.forEach((outline) => {
+        result += `${indent}${indent}${indent}${indent}(outline\n`
+        result += `${indent}${indent}${indent}${indent}${indent}(path ${outline.path.layer} ${outline.path.width} ${outline.path.coordinates.join(" ")})\n`
+        result += `${indent}${indent}${indent}${indent})\n`
+      })
+      image.pins.forEach((pin) => {
+        result += `${indent}${indent}${indent}${indent}(pin ${pin.padstack_name} ${pin.pin_number} ${pin.x} ${pin.y})\n`
+      })
+      result += `${indent}${indent}${indent})\n`
+    })
     session.routes.library_out.padstacks.forEach((padstack) => {
       result += `${indent}${indent}${indent}(padstack ${JSON.stringify(padstack.name)}\n`
       padstack.shapes.forEach((shape) => {
