@@ -9,11 +9,20 @@ const debug = Debug("dsn-converter:getPinNum")
  */
 export function getPinNum(nodes: ASTNode[]): number | string | null {
   // Extract pin number from AST nodes
-  let pinNumber
+  let pinNumber: ASTNode["value"] | undefined
 
   if (nodes[2]?.type === "List" && nodes[2].children) {
-    // Pin number is in a List structure
-    pinNumber = nodes[2].children[0]?.value
+    const firstChild = nodes[2].children[0]
+    if (
+      firstChild?.type === "Atom" &&
+      String(firstChild.value).toLowerCase() === "rotate" &&
+      nodes[3]?.type === "Atom"
+    ) {
+      pinNumber = nodes[3].value
+    } else {
+      // Pin number is in a List structure
+      pinNumber = firstChild?.value
+    }
   } else if (nodes[2]?.type === "Atom") {
     // Pin number is direct value
     pinNumber = nodes[2].value

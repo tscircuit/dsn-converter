@@ -15,6 +15,13 @@ export function tokenizeDsn(input: string): Token[] {
 
   while (i < length) {
     const char = input[i]
+    const nextChar = input[i + 1]
+    const charAfterNext = input[i + 2]
+    const startsNumber =
+      /\d/.test(char) ||
+      (char === "-" &&
+        (/\d/.test(nextChar ?? "") ||
+          (nextChar === "." && /\d/.test(charAfterNext ?? ""))))
 
     if (char === "(") {
       tokens.push({ type: "LParen" })
@@ -44,7 +51,7 @@ export function tokenizeDsn(input: string): Token[] {
       }
       i++ // Skip the closing quote
       tokens.push({ type: "String", value })
-    } else if (char === "-" || /\d/.test(char)) {
+    } else if (startsNumber) {
       // Parse number (integer or float)
       let numStr = ""
       if (char === "-") {

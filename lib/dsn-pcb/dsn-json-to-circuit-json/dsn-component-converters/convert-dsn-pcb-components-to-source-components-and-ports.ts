@@ -32,14 +32,30 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
 
       // Create ports for each pin in the image
       if (image.pins) {
+        const pinNameCounts = new Map<string, number>()
+
         for (const pin of image.pins) {
+          const basePinName = String(pin.pin_number)
+          const pinNameCount = pinNameCounts.get(basePinName) ?? 0
+          pinNameCounts.set(basePinName, pinNameCount + 1)
+
+          const pinName =
+            pinNameCount === 0 ? basePinName : `${basePinName}@${pinNameCount}`
+          const sourcePortId = `source_port_${component.name}-Pad${pinName}_${place.refdes}`
+          const numericPinNumber =
+            typeof pin.pin_number === "number" &&
+            Number.isFinite(pin.pin_number)
+              ? pin.pin_number
+              : undefined
           const port: SourcePort = {
             type: "source_port",
-            source_port_id: `source_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,
+            source_port_id: sourcePortId,
             source_component_id: sourceComponent.source_component_id,
-            name: `${place.refdes}-${pin.pin_number}`,
-            pin_number: Number(pin.pin_number),
+            name: `${place.refdes}-${pinName}`,
             port_hints: [],
+          }
+          if (numericPinNumber !== undefined) {
+            port.pin_number = numericPinNumber
           }
           // Handle case where place coordinates might be null/undefined
           const placeX = place.x || 0
@@ -49,7 +65,7 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
             y: placeY + pin.y,
           })
           const pcb_port: PcbPort = {
-            pcb_port_id: `pcb_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,
+            pcb_port_id: `pcb_port_${component.name}-Pad${pinName}_${place.refdes}`,
             type: "pcb_port",
             source_port_id: port.source_port_id,
             pcb_component_id: component.name,
