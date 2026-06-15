@@ -72,6 +72,7 @@ export function processPlatedHoles(
           shape: "rect",
           width: hole.rect_pad_width * 1000,
           height: hole.rect_pad_height * 1000,
+          holeDiameter: hole.hole_diameter * 1000,
           layer: "all",
         })
         if (!processedPadstacks.has(name)) {

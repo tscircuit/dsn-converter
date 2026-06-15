@@ -33,6 +33,9 @@ export function getPadstackName({
     case "pill":
       return `Oval[${layerCode}]Pad_${width}x${height}_um`
     case "rect":
+      if (holeDiameter !== undefined) {
+        return `RoundRect[${layerCode}]Pad_${width}x${height}_${holeDiameter}_um`
+      }
       return `RoundRect[${layerCode}]Pad_${width}x${height}_um`
     case "polygon":
       return `Cust[${layerCode}]Pad_${customDescriptor ?? `${width}x${height}`}_um`
