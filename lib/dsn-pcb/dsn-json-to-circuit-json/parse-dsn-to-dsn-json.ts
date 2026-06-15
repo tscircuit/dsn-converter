@@ -655,6 +655,8 @@ function processPadstack(nodes: ASTNode[]): Padstack {
         const key = keyNode.value
         if (key === "shape") {
           padstack.shapes!.push(processShape(node.children!))
+        } else if (key === "hole") {
+          padstack.hole = processPadstackHole(node.children!)
         } else if (key === "attach") {
           if (rest[0].type === "Atom" && typeof rest[0].value === "string") {
             padstack.attach = rest[0].value
@@ -665,6 +667,46 @@ function processPadstack(nodes: ASTNode[]): Padstack {
   })
 
   return padstack as Padstack
+}
+
+function processPadstackHole(nodes: ASTNode[]): Padstack["hole"] {
+  const holeNode = nodes[1]
+  if (holeNode?.type !== "List") {
+    throw new Error("Invalid padstack hole format")
+  }
+
+  const [shapeNode, ...rest] = holeNode.children!
+  if (shapeNode.type !== "Atom" || typeof shapeNode.value !== "string") {
+    throw new Error("Invalid padstack hole shape")
+  }
+
+  switch (shapeNode.value) {
+    case "circle":
+      if (rest[0]?.type === "Atom" && typeof rest[0].value === "number") {
+        return {
+          shape: "circle",
+          diameter: rest[0].value,
+        }
+      }
+      break
+    case "oval":
+    case "square":
+      if (
+        rest[0]?.type === "Atom" &&
+        typeof rest[0].value === "number" &&
+        rest[1]?.type === "Atom" &&
+        typeof rest[1].value === "number"
+      ) {
+        return {
+          shape: shapeNode.value,
+          width: rest[0].value,
+          height: rest[1].value,
+        }
+      }
+      break
+  }
+
+  throw new Error("Invalid padstack hole dimensions")
 }
 
 function processShape(nodes: ASTNode[]): Shape {
