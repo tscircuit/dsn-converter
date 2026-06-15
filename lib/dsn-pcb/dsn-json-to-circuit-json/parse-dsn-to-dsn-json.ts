@@ -947,6 +947,10 @@ function processVia(nodes: ASTNode[]): Wire | null {
     type: "via",
   }
 
+  if (nodes[1]?.type === "Atom" && typeof nodes[1].value === "string") {
+    wire.padstack_name = nodes[1].value
+  }
+
   // Find net name if present
   const netNode = nodes.find(
     (node) =>
