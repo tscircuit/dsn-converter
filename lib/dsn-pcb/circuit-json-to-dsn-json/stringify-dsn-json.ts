@@ -31,10 +31,10 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
 
   // Parser section
   result += `${indent}(parser\n`
-  result += `${indent}${indent}(string_quote ")\n`
-  result += `${indent}${indent}(space_in_quoted_tokens on)\n`
-  result += `${indent}${indent}(host_cad "KiCad's Pcbnew")\n`
-  result += `${indent}${indent}(host_version "${dsnJson.parser.host_version}")\n`
+  result += `${indent}${indent}(string_quote ${dsnJson.parser.string_quote})\n`
+  result += `${indent}${indent}(space_in_quoted_tokens ${dsnJson.parser.space_in_quoted_tokens})\n`
+  result += `${indent}${indent}(host_cad ${stringifyValue(dsnJson.parser.host_cad)})\n`
+  result += `${indent}${indent}(host_version ${stringifyValue(dsnJson.parser.host_version)})\n`
   result += `${indent})\n`
 
   // Resolution and unit
@@ -63,6 +63,11 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     result += `${indent}${indent}${indent}(clearance ${clearance.value}${clearance.type ? ` (type ${clearance.type})` : ""})\n`
   })
   result += `${indent}${indent})\n`
+  if (dsnJson.structure.planes) {
+    dsnJson.structure.planes.forEach((plane) => {
+      result += `${indent}${indent}(plane ${plane.net} (polygon ${plane.polygon.layer} ${plane.polygon.width} ${stringifyCoordinates(plane.polygon.coordinates)}))\n`
+    })
+  }
   result += `${indent})\n`
 
   // Placement section
@@ -86,7 +91,7 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
       result += `${indent}${indent}${indent}(outline ${stringifyPath(outline.path, 4)})\n`
     })
     image.pins.forEach((pin) => {
-      result += `${indent}${indent}${indent}(pin ${pin.padstack_name} ${pin.pin_number} ${pin.x} ${pin.y})\n`
+      result += `${indent}${indent}${indent}(pin ${pin.padstack_name}${pin.rotation !== undefined ? ` (rotate ${pin.rotation})` : ""} ${pin.pin_number} ${pin.x} ${pin.y})\n`
     })
     result += `${indent}${indent})\n`
   })

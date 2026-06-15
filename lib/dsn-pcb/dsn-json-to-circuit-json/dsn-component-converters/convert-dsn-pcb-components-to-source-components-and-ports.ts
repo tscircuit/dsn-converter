@@ -1,6 +1,7 @@
 import type { AnySourceComponent, PcbPort, SourcePort } from "circuit-json"
 import type { DsnPcb, Image, Pin } from "lib/dsn-pcb/types"
 import { type Matrix, applyToPoint } from "transformation-matrix"
+import { rotatePoint } from "lib/utils/rotate-point"
 
 export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
   dsnPcb,
@@ -44,9 +45,11 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
           // Handle case where place coordinates might be null/undefined
           const placeX = place.x || 0
           const placeY = place.y || 0
+          // Handle rotation
+          const rotatedPin = rotatePoint(pin.x, pin.y, place.rotation || 0)
           const pcb_port_center = applyToPoint(transformDsnUnitToMm, {
-            x: placeX + pin.x,
-            y: placeY + pin.y,
+            x: placeX + rotatedPin.x,
+            y: placeY + rotatedPin.y,
           })
           const pcb_port: PcbPort = {
             pcb_port_id: `pcb_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,

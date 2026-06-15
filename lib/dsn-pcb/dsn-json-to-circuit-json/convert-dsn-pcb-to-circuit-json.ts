@@ -8,6 +8,7 @@ import { convertDsnPcbComponentsToSourceComponentsAndPorts } from "./dsn-compone
 import { convertNetsToSourceNetsAndTraces } from "./dsn-component-converters/convert-nets-to-source-nets-and-traces"
 import { convertPadstacksToSmtPads } from "./dsn-component-converters/convert-padstacks-to-smtpads"
 import { convertWiresToPcbTraces } from "./dsn-component-converters/convert-wires-to-traces"
+import { convertPlanesToCopperPours } from "./dsn-component-converters/convert-planes-to-copper-pours"
 
 export function convertDsnPcbToCircuitJson(
   dsnPcb: DsnPcb,
@@ -15,8 +16,9 @@ export function convertDsnPcbToCircuitJson(
 ): AnyCircuitElement[] {
   const elements: AnyCircuitElement[] = []
 
-  // TODO use pcb.resolution.unit and pcb.resolution.value
-  const transformDsnUnitToMm = scale(1 / 1000)
+  // Use pcb.resolution.unit and pcb.resolution.value to calculate scaling
+  const unitMultiplier = dsnPcb.resolution.unit === "um" ? 0.001 : 1 // TODO support more units if needed
+  const transformDsnUnitToMm = scale(unitMultiplier / dsnPcb.resolution.value)
 
   // Add the board
   // You must use the dsnPcb.boundary to get the center, width and height
@@ -52,6 +54,9 @@ export function convertDsnPcbToCircuitJson(
 
   // Convert padstacks to SMT pads using the transformation matrix
   elements.push(...convertPadstacksToSmtPads(dsnPcb, transformDsnUnitToMm))
+
+  // Convert planes to copper pours
+  elements.push(...convertPlanesToCopperPours(dsnPcb, transformDsnUnitToMm))
 
   // Convert wires to PCB traces using the transformation matrix
   if (dsnPcb.wiring && dsnPcb.network) {

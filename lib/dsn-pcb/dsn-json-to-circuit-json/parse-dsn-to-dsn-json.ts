@@ -236,6 +236,10 @@ export function processStructure(nodes: ASTNode[]): Structure {
           case "rule":
             structure.rule = processRule(node.children!.slice(1))
             break
+          case "plane":
+            if (!structure.planes) structure.planes = []
+            structure.planes.push(processPlane(node.children!.slice(1)))
+            break
         }
       }
     }
@@ -396,6 +400,28 @@ function processClearance(nodes: ASTNode[]): Clearance {
   }
 
   return clearance as Clearance
+}
+
+function processPlane(nodes: ASTNode[]): Plane {
+  const netNode = nodes[0]
+  const polyNode = nodes[1]
+
+  if (netNode.type !== "Atom" || typeof netNode.value !== "string") {
+    throw new Error("Expected net name in plane definition")
+  }
+
+  if (
+    polyNode.type !== "List" ||
+    polyNode.children![0].type !== "Atom" ||
+    polyNode.children![0].value !== "polygon"
+  ) {
+    throw new Error("Expected polygon in plane definition")
+  }
+
+  return {
+    net: netNode.value,
+    polygon: processPolygonShape(polyNode.children!),
+  }
 }
 
 export function processPlacement(nodes: ASTNode[]): Placement {
@@ -591,6 +617,18 @@ function processPin(nodes: ASTNode[]): Pin | null {
     for (let i = 3; i < nodes.length; i++) {
       const node = nodes[i]
       const nextNode = nodes[i + 1]
+
+      if (node.type === "List") {
+        const [keyNode, valueNode] = node.children!
+        if (
+          keyNode?.type === "Atom" &&
+          keyNode.value === "rotate" &&
+          valueNode?.type === "Atom" &&
+          typeof valueNode.value === "number"
+        ) {
+          pin.rotation = valueNode.value
+        }
+      }
 
       if (node.type === "Atom") {
         if (xValue === undefined) {

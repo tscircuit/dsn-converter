@@ -1,7 +1,8 @@
-import type { AnyCircuitElement, PcbSmtPad } from "circuit-json"
+import type { AnyCircuitElement, PcbPlatedHole, PcbSmtPad } from "circuit-json"
 import Debug from "debug"
 import type { DsnPcb } from "lib/dsn-pcb/types"
 import { applyToPoint } from "transformation-matrix"
+import { rotatePoint } from "lib/utils/rotate-point"
 
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
 
@@ -109,50 +110,76 @@ export function convertPadstacksToSmtPads(
         }
 
         // Calculate position in circuit space using the transformation matrix
-        // Convert component position and pin offset to circuit coordinates
+        // Apply component rotation to pin offset
+        const rotatedPin = rotatePoint(pin.x, pin.y, place.rotation || 0)
+
         const { x: circuitX, y: circuitY } = applyToPoint(transform, {
-          x: (compX || 0) + pin.x,
-          y: (compY || 0) + pin.y,
+          x: (compX || 0) + rotatedPin.x,
+          y: (compY || 0) + rotatedPin.y,
         })
 
-        let pcbPad: PcbSmtPad
-        if (rectShape || polygonShape || pathShape) {
-          const layer = padstack.shapes[0].layer.includes("B.")
-            ? "bottom"
-            : "top"
-          debug("determining layer with padstack shapes", {
-            shapes: padstack.shapes,
-            layer,
-          })
-          pcbPad = {
-            type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
-            pcb_component_id: `${componentId}_${place.refdes}`,
-            pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
-            shape: "rect",
-            x: circuitX,
-            y: circuitY,
-            width,
-            height,
-            layer,
-            port_hints: [pin.pin_number.toString()],
-          }
-        } else {
-          pcbPad = {
-            type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
-            pcb_component_id: `${componentId}_${place.refdes}`,
-            pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
-            shape: "circle",
-            x: circuitX,
-            y: circuitY,
-            radius: circleShape!.diameter / 2 / 1000,
-            layer: side === "front" ? "top" : "bottom",
-            port_hints: [pin.pin_number.toString()],
-          }
-        }
+        // Check if it's a through-hole (defined on multiple layers)
+        const uniqueLayers = new Set(padstack.shapes.map((s) => s.layer))
+        const isThroughHole =
+          uniqueLayers.has("Top") && uniqueLayers.has("Bottom")
 
-        elements.push(pcbPad)
+        if (isThroughHole) {
+          const platedHole: PcbPlatedHole = {
+            type: "pcb_plated_hole",
+            pcb_plated_hole_id: `pcb_plated_hole_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_component_id: `${componentId}_${place.refdes}`,
+            pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
+            x: circuitX,
+            y: circuitY,
+            hole_width: width, // Defaulting to pad width if hole info missing
+            hole_height: height,
+            outer_width: width,
+            outer_height: height,
+            shape: circleShape ? "circle" : "rect",
+            port_hints: [pin.pin_number.toString()],
+            layers: ["top", "bottom", "inner"],
+          }
+          elements.push(platedHole)
+        } else {
+          let pcbPad: PcbSmtPad
+          if (rectShape || polygonShape || pathShape) {
+            const layer = padstack.shapes[0].layer.includes("B.")
+              ? "bottom"
+              : "top"
+            debug("determining layer with padstack shapes", {
+              shapes: padstack.shapes,
+              layer,
+            })
+            pcbPad = {
+              type: "pcb_smtpad",
+              pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+              pcb_component_id: `${componentId}_${place.refdes}`,
+              pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
+              shape: "rect",
+              x: circuitX,
+              y: circuitY,
+              width,
+              height,
+              layer,
+              port_hints: [pin.pin_number.toString()],
+              rotation: (place.rotation || 0) + (pin.rotation || 0),
+            }
+          } else {
+            pcbPad = {
+              type: "pcb_smtpad",
+              pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+              pcb_component_id: `${componentId}_${place.refdes}`,
+              pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
+              shape: "circle",
+              x: circuitX,
+              y: circuitY,
+              radius: circleShape!.diameter / 2 / 1000,
+              layer: side === "front" ? "top" : "bottom",
+              port_hints: [pin.pin_number.toString()],
+            }
+          }
+          elements.push(pcbPad)
+        }
       })
     })
   })
