@@ -25,3 +25,27 @@ test("stringify session file", () => {
   expect(reparsedNet.name).toBe(originalNet.name)
   expect(reparsedNet.wires).toHaveLength(originalNet.wires.length)
 })
+
+test("stringify session preserves routes parser metadata", () => {
+  const session = parseDsnToDsnJson(`
+    (session test.ses
+      (placement
+        (resolution um 10)
+      )
+      (routes
+        (resolution um 10)
+        (parser
+          (host_cad "KiCad")
+          (host_version "9.0.2")
+        )
+        (network_out)
+      )
+    )
+  `) as DsnSession
+
+  const stringified = stringifyDsnSession(session)
+  const reparsed = parseDsnToDsnJson(stringified) as DsnSession
+
+  expect(reparsed.routes.parser.host_cad).toBe("KiCad")
+  expect(reparsed.routes.parser.host_version).toBe("9.0.2")
+})
