@@ -5,6 +5,16 @@ import { applyToPoint } from "transformation-matrix"
 
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
 
+const getSmtPadIdPinPart = (pinNumber: number | string) => {
+  const numericPinNumber = Number(pinNumber)
+
+  if (Number.isFinite(numericPinNumber)) {
+    return String(numericPinNumber - 1)
+  }
+
+  return String(pinNumber).replace(/[^a-zA-Z0-9_-]/g, "_")
+}
+
 export function convertPadstacksToSmtPads(
   pcb: DsnPcb,
   transform: any,
@@ -116,6 +126,7 @@ export function convertPadstacksToSmtPads(
         })
 
         let pcbPad: PcbSmtPad
+        const smtPadIdPinPart = getSmtPadIdPinPart(pin.pin_number)
         if (rectShape || polygonShape || pathShape) {
           const layer = padstack.shapes[0].layer.includes("B.")
             ? "bottom"
@@ -126,7 +137,7 @@ export function convertPadstacksToSmtPads(
           })
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${smtPadIdPinPart}`,
             pcb_component_id: `${componentId}_${place.refdes}`,
             pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
             shape: "rect",
@@ -140,7 +151,7 @@ export function convertPadstacksToSmtPads(
         } else {
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${smtPadIdPinPart}`,
             pcb_component_id: `${componentId}_${place.refdes}`,
             pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
             shape: "circle",
