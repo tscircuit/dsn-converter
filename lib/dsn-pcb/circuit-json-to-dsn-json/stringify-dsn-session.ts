@@ -45,6 +45,18 @@ export const stringifyDsnSession = (session: DsnSession): string => {
           result += `${indent}${indent}${indent}${indent}(shape\n`
           result += `${indent}${indent}${indent}${indent}${indent}(circle ${shape.layer} ${shape.diameter} 0 0)\n`
           result += `${indent}${indent}${indent}${indent})\n`
+        } else if (shape.shapeType === "polygon") {
+          result += `${indent}${indent}${indent}${indent}(shape\n`
+          result += `${indent}${indent}${indent}${indent}${indent}(polygon ${shape.layer} ${shape.width} ${shape.coordinates.join(" ")})\n`
+          result += `${indent}${indent}${indent}${indent})\n`
+        } else if (shape.shapeType === "rect") {
+          result += `${indent}${indent}${indent}${indent}(shape\n`
+          result += `${indent}${indent}${indent}${indent}${indent}(rect ${shape.layer} ${shape.coordinates.join(" ")})\n`
+          result += `${indent}${indent}${indent}${indent})\n`
+        } else if (shape.shapeType === "path") {
+          result += `${indent}${indent}${indent}${indent}(shape\n`
+          result += `${indent}${indent}${indent}${indent}${indent}(path ${shape.layer} ${shape.width} ${shape.coordinates.join(" ")})\n`
+          result += `${indent}${indent}${indent}${indent})\n`
         }
       })
       result += `${indent}${indent}${indent}${indent}(attach ${padstack.attach})\n`
