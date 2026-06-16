@@ -1,6 +1,7 @@
 import type { AnySourceComponent, PcbPort, SourcePort } from "circuit-json"
-import type { DsnPcb, Image, Pin } from "lib/dsn-pcb/types"
+import type { DsnPcb } from "lib/dsn-pcb/types"
 import { type Matrix, applyToPoint } from "transformation-matrix"
+import { createDsnPinNumberResolver } from "./get-dsn-pin-number"
 
 export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
   dsnPcb,
@@ -32,13 +33,15 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
 
       // Create ports for each pin in the image
       if (image.pins) {
+        const getPinNumber = createDsnPinNumberResolver(image.pins)
         for (const pin of image.pins) {
+          const pinNumber = getPinNumber(pin)
           const port: SourcePort = {
             type: "source_port",
             source_port_id: `source_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,
             source_component_id: sourceComponent.source_component_id,
             name: `${place.refdes}-${pin.pin_number}`,
-            pin_number: Number(pin.pin_number),
+            pin_number: pinNumber,
             port_hints: [],
           }
           // Handle case where place coordinates might be null/undefined

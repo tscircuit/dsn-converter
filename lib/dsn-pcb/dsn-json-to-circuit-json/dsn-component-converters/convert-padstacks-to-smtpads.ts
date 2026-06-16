@@ -2,6 +2,7 @@ import type { AnyCircuitElement, PcbSmtPad } from "circuit-json"
 import Debug from "debug"
 import type { DsnPcb } from "lib/dsn-pcb/types"
 import { applyToPoint } from "transformation-matrix"
+import { createDsnPinNumberResolver } from "./get-dsn-pin-number"
 
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
 
@@ -89,8 +90,10 @@ export function convertPadstacksToSmtPads(
     placementComponent.places.forEach((place) => {
       debug("processing place...", { place })
       const { x: compX, y: compY, side } = place
+      const getPinNumber = createDsnPinNumberResolver(image.pins)
 
       image.pins.forEach((pin) => {
+        const pinNumber = getPinNumber(pin)
         // Find the corresponding padstack
         const padstack = padstacks.find((p) => p.name === pin.padstack_name)
         debug("found padstack", { padstack })
@@ -194,7 +197,7 @@ export function convertPadstacksToSmtPads(
           })
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pinNumber - 1}`,
             pcb_component_id: `${componentId}_${place.refdes}`,
             pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
             shape: "polygon",
@@ -213,7 +216,7 @@ export function convertPadstacksToSmtPads(
           })
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pinNumber - 1}`,
             pcb_component_id: `${componentId}_${place.refdes}`,
             pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
             shape: "rect",
@@ -227,7 +230,7 @@ export function convertPadstacksToSmtPads(
         } else {
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pinNumber - 1}`,
             pcb_component_id: `${componentId}_${place.refdes}`,
             pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
             shape: "circle",
