@@ -477,8 +477,8 @@ function processPlace(nodes: ASTNode[]): Places {
     }
   }
 
-  // Process optional PN (part number) if present
-  for (let i = coordIndex + 4; i < nodes.length; i++) {
+  // Process optional placement descriptors if present
+  for (let i = 2; i < nodes.length; i++) {
     const node = nodes[i]
     if (
       node.type === "List" &&
@@ -489,7 +489,16 @@ function processPlace(nodes: ASTNode[]): Places {
       node.children[1].type === "Atom"
     ) {
       places.PN = String(node.children[1].value)
-      break
+    }
+    if (
+      node.type === "List" &&
+      node.children &&
+      node.children[0].type === "Atom" &&
+      node.children[0].value === "mirror" &&
+      node.children[1] &&
+      node.children[1].type === "Atom"
+    ) {
+      places.mirror = String(node.children[1].value)
     }
   }
 
