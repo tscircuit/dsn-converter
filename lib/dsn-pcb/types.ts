@@ -4,12 +4,7 @@ export interface DsnPcb {
   is_dsn_pcb: true
   is_dsn_session?: false
   filename: string
-  parser: {
-    string_quote: string
-    host_version: string
-    space_in_quoted_tokens: string
-    host_cad: string
-  }
+  parser: Parser
   resolution: {
     unit: string
     value: number
@@ -100,6 +95,8 @@ export interface Parser {
   space_in_quoted_tokens: string
   host_cad: string
   host_version: string
+  routes_include?: string[]
+  wires_include?: string[]
 }
 
 export interface Resolution {

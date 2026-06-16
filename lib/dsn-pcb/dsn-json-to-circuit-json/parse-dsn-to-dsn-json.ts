@@ -184,6 +184,24 @@ export function processParser(nodes: ASTNode[]): ParserType {
           case "host_version":
             if (typeof value === "string") parser.host_version = value
             break
+          case "routes_include":
+            parser.routes_include = node.children
+              .slice(1)
+              .filter(
+                (child) =>
+                  child.type === "Atom" && typeof child.value === "string",
+              )
+              .map((child) => String(child.value))
+            break
+          case "wires_include":
+            parser.wires_include = node.children
+              .slice(1)
+              .filter(
+                (child) =>
+                  child.type === "Atom" && typeof child.value === "string",
+              )
+              .map((child) => String(child.value))
+            break
         }
       }
     }
