@@ -182,7 +182,7 @@ export function processParser(nodes: ASTNode[]): ParserType {
             if (typeof value === "string") parser.host_cad = value
             break
           case "host_version":
-            if (typeof value === "string") parser.host_version = value
+            parser.host_version = String(value)
             break
         }
       }
