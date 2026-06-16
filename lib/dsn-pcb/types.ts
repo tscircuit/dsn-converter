@@ -23,6 +23,7 @@ export interface DsnPcb {
         index: number
       }
     }>
+    grids?: Grid[]
     boundary: {
       path: {
         layer: string
@@ -109,9 +110,15 @@ export interface Resolution {
 
 export interface Structure {
   layers: Layer[]
+  grids?: Grid[]
   boundary: Boundary
   via: string
   rule: Rule
+}
+
+export interface Grid {
+  kind: string
+  value: number
 }
 
 export interface Layer {
