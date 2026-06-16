@@ -17,3 +17,17 @@ test("stringify dsn json", () => {
   // Test that we can parse the generated string back to the same structure
   // expect(reparsedJson).toEqual(dsnJson)
 })
+
+test("preserves class circuit use_layer metadata when stringifying", () => {
+  const dsnJson = parseDsnToDsnJson(testDsnFile) as DsnPcb
+  dsnJson.network.classes[0].circuit.use_layer = ["F.Cu", "B.Cu"]
+
+  const dsnString = stringifyDsnJson(dsnJson)
+  const reparsedJson = parseDsnToDsnJson(dsnString) as DsnPcb
+
+  expect(dsnString).toContain('(use_layer "F.Cu" "B.Cu")')
+  expect(reparsedJson.network.classes[0].circuit.use_layer).toEqual([
+    "F.Cu",
+    "B.Cu",
+  ])
+})
