@@ -10,7 +10,8 @@ export const convertNetsToSourceNetsAndTraces = ({
 
   let source_trace_id = dsnPcb.wiring.wires.length
   for (const net of nets) {
-    const { name, pins = [] } = net
+    const { pins = [] } = net
+    const name = String(net.name)
 
     if (!name || name.startsWith("unconnected-")) continue
 

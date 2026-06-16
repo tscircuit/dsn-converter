@@ -10,7 +10,7 @@ test("convert circuit json to dsn pcb", async () => {
   expect(dsnJson.network.nets.length).toBe(6)
 
   const net1Count = dsnJson.network.nets.filter((net) =>
-    net.name.startsWith("NET1"),
+    String(net.name).startsWith("NET1"),
   ).length
   expect(net1Count).toBe(2)
 })
