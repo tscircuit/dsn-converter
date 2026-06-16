@@ -14,6 +14,7 @@ import type {
   Clearance,
   Component,
   ComponentPlacement,
+  Control,
   DsnJson,
   DsnPcb,
   DsnSession,
@@ -236,12 +237,45 @@ export function processStructure(nodes: ASTNode[]): Structure {
           case "rule":
             structure.rule = processRule(node.children!.slice(1))
             break
+          case "snap_angle":
+            structure.snap_angle = processSnapAngle(node.children!)
+            break
+          case "control":
+            structure.control = processControl(node.children!.slice(1))
+            break
         }
       }
     }
   })
 
   return structure as Structure
+}
+
+function processSnapAngle(nodes: ASTNode[]): string | undefined {
+  const valueNode = nodes[1]
+  if (valueNode?.type === "Atom" && typeof valueNode.value === "string") {
+    return valueNode.value
+  }
+}
+
+function processControl(nodes: ASTNode[]): Control {
+  const control: Control = {}
+
+  nodes.forEach((node) => {
+    if (node.type === "List") {
+      const [keyNode, valueNode] = node.children!
+      if (
+        keyNode.type === "Atom" &&
+        keyNode.value === "via_at_smd" &&
+        valueNode?.type === "Atom" &&
+        typeof valueNode.value === "string"
+      ) {
+        control.via_at_smd = valueNode.value
+      }
+    }
+  })
+
+  return control
 }
 
 function processLayer(nodes: ASTNode[]): Layer {

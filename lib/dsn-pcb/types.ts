@@ -38,6 +38,10 @@ export interface DsnPcb {
       }>
       width: number
     }
+    snap_angle?: string
+    control?: {
+      via_at_smd?: string
+    }
   }
   placement: {
     components: Array<ComponentPlacement>
@@ -112,6 +116,8 @@ export interface Structure {
   boundary: Boundary
   via: string
   rule: Rule
+  snap_angle?: string
+  control?: Control
 }
 
 export interface Layer {
@@ -148,6 +154,10 @@ export interface Path {
 export interface Rule {
   width: number
   clearances: Clearance[]
+}
+
+export interface Control {
+  via_at_smd?: string
 }
 
 export interface Clearance {
