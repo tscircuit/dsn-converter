@@ -30,6 +30,7 @@ import type {
   Pin,
   Placement,
   Places,
+  Plane,
   PolygonShape,
   RectShape,
   Resolution,
@@ -211,6 +212,7 @@ export function processResolution(nodes: ASTNode[]): Resolution {
 export function processStructure(nodes: ASTNode[]): Structure {
   const structure: Partial<Structure> = {
     layers: [],
+    planes: [],
   }
 
   nodes.forEach((node) => {
@@ -224,6 +226,9 @@ export function processStructure(nodes: ASTNode[]): Structure {
             break
           case "boundary":
             structure.boundary = processBoundary(node.children!.slice(1))
+            break
+          case "plane":
+            structure.planes!.push(processPlane(node.children!))
             break
           case "via":
             if (
@@ -242,6 +247,47 @@ export function processStructure(nodes: ASTNode[]): Structure {
   })
 
   return structure as Structure
+}
+
+function processPlane(nodes: ASTNode[]): Plane {
+  const plane: Partial<Plane> = {}
+  if (nodes[1].type === "Atom") {
+    plane.net = String(nodes[1].value)
+  }
+
+  const polygonNode = nodes.find(
+    (node) =>
+      node.type === "List" &&
+      node.children?.[0]?.type === "Atom" &&
+      node.children[0].value === "polygon",
+  )
+
+  if (polygonNode?.children) {
+    const polygonNodes = polygonNode.children
+    if (
+      polygonNodes[1]?.type === "Atom" &&
+      typeof polygonNodes[1].value === "string" &&
+      polygonNodes[2]?.type === "Atom" &&
+      typeof polygonNodes[2].value === "number"
+    ) {
+      plane.polygon = {
+        layer: polygonNodes[1].value,
+        width: polygonNodes[2].value,
+        coordinates: polygonNodes
+          .slice(3)
+          .filter(
+            (node) => node.type === "Atom" && typeof node.value === "number",
+          )
+          .map((node) => node.value as number),
+      }
+    }
+  }
+
+  if (!plane.net || !plane.polygon) {
+    throw new Error("Invalid plane format")
+  }
+
+  return plane as Plane
 }
 
 function processLayer(nodes: ASTNode[]): Layer {

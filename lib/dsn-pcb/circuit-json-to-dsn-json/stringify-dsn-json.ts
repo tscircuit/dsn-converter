@@ -56,6 +56,9 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     result += `${indent}${indent}${indent}${stringifyPath(dsnJson.structure.boundary.path, 0)}\n`
     result += `${indent}${indent})\n`
   }
+  dsnJson.structure.planes?.forEach((plane) => {
+    result += `${indent}${indent}(plane ${stringifyValue(plane.net)} (polygon ${plane.polygon.layer} ${plane.polygon.width} ${stringifyCoordinates(plane.polygon.coordinates)}))\n`
+  })
   result += `${indent}${indent}(via ${stringifyValue(dsnJson.structure.via)})\n`
   result += `${indent}${indent}(rule\n`
   result += `${indent}${indent}${indent}(width ${dsnJson.structure.rule.width})\n`
