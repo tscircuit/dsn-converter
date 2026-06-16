@@ -25,3 +25,14 @@ test("stringify session file", () => {
   expect(reparsedNet.name).toBe(originalNet.name)
   expect(reparsedNet.wires).toHaveLength(originalNet.wires.length)
 })
+
+test("preserves empty session parser host_version", () => {
+  const sessionJson = parseDsnToDsnJson(sessionFile) as DsnSession
+
+  expect(sessionJson.routes.parser.host_version).toBe("")
+
+  const stringified = stringifyDsnSession(sessionJson)
+
+  expect(stringified).toContain("(host_version \"\")")
+  expect(stringified).not.toContain("(host_version undefined)")
+})

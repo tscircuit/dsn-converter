@@ -160,29 +160,31 @@ export function processPCB(nodes: ASTNode[]): DsnPcb {
 export function processParser(nodes: ASTNode[]): ParserType {
   const parser: Partial<ParserType> = {}
   nodes.forEach((node) => {
-    if (node.type === "List" && node.children && node.children.length >= 2) {
+    if (node.type === "List" && node.children && node.children.length >= 1) {
       const [keyNode, valueNode] = node.children
       if (
         keyNode?.type === "Atom" &&
-        typeof keyNode.value === "string" &&
-        valueNode?.type === "Atom" &&
-        (typeof valueNode.value === "string" ||
-          typeof valueNode.value === "number")
+        typeof keyNode.value === "string"
       ) {
         const key = keyNode.value
-        const value = valueNode.value
+        const value =
+          valueNode?.type === "Atom" &&
+          (typeof valueNode.value === "string" ||
+            typeof valueNode.value === "number")
+            ? String(valueNode.value)
+            : ""
         switch (key) {
           case "string_quote":
-            if (typeof value === "string") parser.string_quote = value
+            parser.string_quote = value
             break
           case "space_in_quoted_tokens":
-            if (typeof value === "string") parser.space_in_quoted_tokens = value
+            parser.space_in_quoted_tokens = value
             break
           case "host_cad":
-            if (typeof value === "string") parser.host_cad = value
+            parser.host_cad = value
             break
           case "host_version":
-            if (typeof value === "string") parser.host_version = value
+            parser.host_version = value
             break
         }
       }
