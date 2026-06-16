@@ -182,6 +182,7 @@ export interface Image {
   name: string
   outlines: Outline[]
   pins: Pin[]
+  keepouts?: Keepout[]
 }
 
 export interface Outline {
@@ -191,6 +192,20 @@ export interface Outline {
 export interface Pin {
   padstack_name: string
   pin_number: number | string
+  x: number
+  y: number
+}
+
+export interface Keepout {
+  name: string
+  shape: KeepoutShape
+}
+
+export type KeepoutShape = KeepoutCircleShape
+
+export interface KeepoutCircleShape extends BaseShape {
+  shapeType: "circle"
+  diameter: number
   x: number
   y: number
 }

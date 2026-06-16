@@ -18,6 +18,8 @@ import type {
   DsnPcb,
   DsnSession,
   Image,
+  Keepout,
+  KeepoutCircleShape,
   Layer,
   Library,
   Net,
@@ -534,6 +536,7 @@ function processImage(nodes: ASTNode[]): Image {
   }
   image.outlines = []
   image.pins = []
+  image.keepouts = []
 
   nodes.slice(2).forEach((node) => {
     if (node.type === "List") {
@@ -545,6 +548,9 @@ function processImage(nodes: ASTNode[]): Image {
         } else if (key === "pin") {
           const pin = processPin(node.children!)
           if (pin) image.pins!.push(pin)
+        } else if (key === "keepout") {
+          const keepout = processKeepout(node.children!)
+          if (keepout) image.keepouts!.push(keepout)
         }
       }
     }
@@ -565,6 +571,55 @@ function processOutline(nodes: ASTNode[]): Outline {
     }
   })
   return outline as Outline
+}
+
+function processKeepout(nodes: ASTNode[]): Keepout | null {
+  const nameNode = nodes[1]
+  const shapeNode = nodes.find((node) => node.type === "List")
+
+  if (!shapeNode?.children || shapeNode.children[0]?.type !== "Atom") {
+    debug("Unsupported keepout format:", nodes)
+    return null
+  }
+
+  const shapeType = shapeNode.children[0].value
+  if (shapeType !== "circle") {
+    debug("Unsupported keepout shape:", shapeType)
+    return null
+  }
+
+  return {
+    name:
+      nameNode?.type === "Atom" && nameNode.value !== undefined
+        ? String(nameNode.value)
+        : "",
+    shape: processKeepoutCircleShape(shapeNode.children!),
+  }
+}
+
+function processKeepoutCircleShape(nodes: ASTNode[]): KeepoutCircleShape {
+  if (
+    nodes[1]?.type === "Atom" &&
+    typeof nodes[1].value === "string" &&
+    nodes[2]?.type === "Atom" &&
+    typeof nodes[2].value === "number"
+  ) {
+    return {
+      shapeType: "circle",
+      layer: nodes[1].value,
+      diameter: nodes[2].value,
+      x:
+        nodes[3]?.type === "Atom" && typeof nodes[3].value === "number"
+          ? nodes[3].value
+          : 0,
+      y:
+        nodes[4]?.type === "Atom" && typeof nodes[4].value === "number"
+          ? nodes[4].value
+          : 0,
+    }
+  }
+
+  throw new Error("Invalid keepout circle shape format")
 }
 
 function processPin(nodes: ASTNode[]): Pin | null {
