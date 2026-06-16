@@ -22,8 +22,11 @@ export const stringifyDsnSession = (session: DsnSession): string => {
   })
   result += `${indent})\n`
 
-  // Was_is section (if needed)
-  result += `${indent}(was_is\n${indent})\n`
+  result += `${indent}(was_is\n`
+  session.was_is?.forEach((entry) => {
+    result += `${indent}${indent}(${entry.type} ${entry.from} ${entry.to})\n`
+  })
+  result += `${indent})\n`
 
   // Routes section
   result += `${indent}(routes \n`

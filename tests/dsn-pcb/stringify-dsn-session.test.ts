@@ -25,3 +25,35 @@ test("stringify session file", () => {
   expect(reparsedNet.name).toBe(originalNet.name)
   expect(reparsedNet.wires).toHaveLength(originalNet.wires.length)
 })
+
+test("preserves session was_is pin mappings", () => {
+  const sessionJson = parseDsnToDsnJson(`(session routed-board
+    (base_design original-board)
+    (placement
+      (resolution um 10)
+    )
+    (was_is
+      (pins R1-1 R1-Pad1)
+      (pins U1-2 U1-Pad2)
+    )
+    (routes
+      (resolution um 10)
+      (parser
+        (host_cad "Freerouting")
+        (host_version "1.9.0")
+      )
+      (network_out)
+    )
+  )`) as DsnSession
+
+  expect(sessionJson.was_is).toEqual([
+    { type: "pins", from: "R1-1", to: "R1-Pad1" },
+    { type: "pins", from: "U1-2", to: "U1-Pad2" },
+  ])
+
+  const reparsed = parseDsnToDsnJson(
+    stringifyDsnSession(sessionJson),
+  ) as DsnSession
+
+  expect(reparsed.was_is).toEqual(sessionJson.was_is)
+})
