@@ -1,6 +1,21 @@
 import type { AnyCircuitElement } from "circuit-json"
-import type { DsnPcb, DsnSession } from "../types"
+import type { ComponentPlacement, DsnPcb, DsnSession } from "../types"
 import { processPcbTraces } from "./process-pcb-traces"
+
+const SESSION_COORDINATE_SCALE = 10
+
+function scalePlacementForSession(
+  components: ComponentPlacement[],
+): ComponentPlacement[] {
+  return components.map((component) => ({
+    ...component,
+    places: component.places.map((place) => ({
+      ...place,
+      x: place.x * SESSION_COORDINATE_SCALE,
+      y: place.y * SESSION_COORDINATE_SCALE,
+    })),
+  }))
+}
 
 export function convertCircuitJsonToDsnSession(
   dsnPcb: DsnPcb,
@@ -11,7 +26,7 @@ export function convertCircuitJsonToDsnSession(
     filename: dsnPcb.filename || "session",
     placement: {
       resolution: dsnPcb.resolution,
-      components: dsnPcb.placement.components,
+      components: scalePlacementForSession(dsnPcb.placement.components),
     },
     routes: {
       resolution: dsnPcb.resolution,

@@ -127,9 +127,21 @@ test("converts component placement", () => {
   const session = convertCircuitJsonToDsnSession(dsnPcb, circuitJson)
 
   expect(session.placement.components).toHaveLength(1)
-  expect(session.placement.components[0]).toEqual(
-    dsnPcb.placement.components[0],
-  )
+  expect(session.placement.components[0]).toEqual({
+    name: "R_0402",
+    places: [
+      {
+        refdes: "R1",
+        x: 10000,
+        y: 20000,
+        side: "front",
+        rotation: 0,
+        PN: "10k",
+      },
+    ],
+  })
+  expect(dsnPcb.placement.components[0].places[0].x).toBe(1000)
+  expect(dsnPcb.placement.components[0].places[0].y).toBe(2000)
 })
 
 test("4-layer session via padstack spans all layers", () => {
