@@ -35,6 +35,7 @@ export interface DsnPcb {
       clearances: Array<{
         value: number
         type?: string
+        layer_depth?: number
       }>
       width: number
     }
@@ -62,6 +63,7 @@ export interface DsnPcb {
         clearances: Array<{
           type?: any
           value: number
+          layer_depth?: number
         }>
         width: number
       }
@@ -153,6 +155,7 @@ export interface Rule {
 export interface Clearance {
   value: number
   type?: string
+  layer_depth?: number
 }
 
 export interface Placement {

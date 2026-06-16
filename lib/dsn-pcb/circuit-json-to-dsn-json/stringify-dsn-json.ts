@@ -26,6 +26,21 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     return `${padding}(path ${path.layer} ${path.width}  ${stringifyCoordinates(path.coordinates)})`
   }
 
+  const stringifyClearance = (clearance: {
+    value: number
+    type?: string
+    layer_depth?: number
+  }): string => {
+    if (!clearance.type) {
+      return `(clearance ${clearance.value})`
+    }
+    const layerDepth =
+      clearance.layer_depth !== undefined
+        ? ` (layer_depth ${clearance.layer_depth})`
+        : ""
+    return `(clearance ${clearance.value} (type ${clearance.type}${layerDepth}))`
+  }
+
   // Start with pcb
   result += `(pcb ${dsnJson.filename ? dsnJson.filename : "./converted_dsn.dsn"}\n`
 
@@ -60,7 +75,7 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   result += `${indent}${indent}(rule\n`
   result += `${indent}${indent}${indent}(width ${dsnJson.structure.rule.width})\n`
   dsnJson.structure.rule.clearances.forEach((clearance) => {
-    result += `${indent}${indent}${indent}(clearance ${clearance.value}${clearance.type ? ` (type ${clearance.type})` : ""})\n`
+    result += `${indent}${indent}${indent}${stringifyClearance(clearance)}\n`
   })
   result += `${indent}${indent})\n`
   result += `${indent})\n`
@@ -124,7 +139,7 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
       result += `${indent}${indent}${indent}(rule\n`
       result += `${indent}${indent}${indent}${indent}(width ${cls.rule.width})\n`
       cls.rule.clearances.forEach((clearance) => {
-        result += `${indent}${indent}${indent}${indent}(clearance ${clearance.value}${clearance.type ? ` (type ${clearance.type})` : ""})\n`
+        result += `${indent}${indent}${indent}${indent}${stringifyClearance(clearance)}\n`
       })
       result += `${indent}${indent}${indent})\n`
     }
