@@ -46,6 +46,28 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
 
   const netMap = new Map()
   const netTraceWidthMap = new Map<string, number>()
+  const sourceNetNameById = new Map<string, string>()
+  const sourceNetNameCounts = new Map<string, number>()
+
+  for (const element of circuitElements) {
+    if (element.type === "source_net") {
+      sourceNetNameCounts.set(
+        element.name,
+        (sourceNetNameCounts.get(element.name) ?? 0) + 1,
+      )
+    }
+  }
+
+  for (const element of circuitElements) {
+    if (element.type === "source_net") {
+      sourceNetNameById.set(
+        element.source_net_id,
+        sourceNetNameCounts.get(element.name) === 1
+          ? element.name
+          : `${element.name}_${element.source_net_id}`,
+      )
+    }
+  }
 
   for (const element of circuitElements) {
     if (element.type === "source_trace" && element.connected_source_port_ids) {
@@ -116,7 +138,8 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
             if ("min_trace_thickness" in trace && trace.min_trace_thickness) {
               const traceWidthMicrons = trace.min_trace_thickness * 1000
               netTraceWidthMap.set(
-                `${element.name}_${element.source_net_id}`,
+                sourceNetNameById.get(element.source_net_id) ??
+                  `${element.name}_${element.source_net_id}`,
                 traceWidthMicrons,
               )
               break
@@ -140,7 +163,9 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
   // Add source nets (GND, VCC, etc.)
   for (const element of circuitElements) {
     if (element.type === "source_net") {
-      const netName = `${element.name}_${element.source_net_id}`
+      const netName =
+        sourceNetNameById.get(element.source_net_id) ??
+        `${element.name}_${element.source_net_id}`
       if (!netMap.has(netName)) {
         netMap.set(netName, new Set())
       }
