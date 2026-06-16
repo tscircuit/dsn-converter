@@ -21,11 +21,17 @@ function isThruHolePadstack(padstack: Padstack): boolean {
 
 function getLayerFromPadstack(
   padstack: DsnPcb["library"]["padstacks"][number],
+  placeSide?: string,
 ) {
+  const normalizedSide = placeSide?.toLowerCase()
   return padstack.shapes[0].layer.includes("B.") ||
     padstack.shapes[0].layer === "Bottom"
     ? "bottom"
-    : "top"
+    : normalizedSide === "back" ||
+        normalizedSide === "bottom" ||
+        normalizedSide === "b.cu"
+      ? "bottom"
+      : "top"
 }
 
 function getPolygonPoints(
@@ -283,7 +289,7 @@ export function convertPadstacksToSmtPads(
           !!polygonShape && !!rectangleDimensionsFromPolygon
 
         if (polygonShape && !shouldImportPolygonAsRect) {
-          const layer = getLayerFromPadstack(padstack)
+          const layer = getLayerFromPadstack(padstack, side)
           pcbPad = {
             type: "pcb_smtpad",
             pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
@@ -296,7 +302,7 @@ export function convertPadstacksToSmtPads(
             layer,
           }
         } else if (rectShape || pathShape || shouldImportPolygonAsRect) {
-          const layer = getLayerFromPadstack(padstack)
+          const layer = getLayerFromPadstack(padstack, side)
           pcbPad = {
             type: "pcb_smtpad",
             pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
@@ -317,7 +323,7 @@ export function convertPadstacksToSmtPads(
             x: circuitX,
             y: circuitY,
             radius: circleShape!.diameter / 2 / 1000,
-            layer: side === "front" ? "top" : "bottom",
+            layer: getLayerFromPadstack(padstack, side),
           }
         }
 
