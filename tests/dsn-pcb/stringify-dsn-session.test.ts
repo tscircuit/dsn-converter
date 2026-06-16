@@ -25,3 +25,25 @@ test("stringify session file", () => {
   expect(reparsedNet.name).toBe(originalNet.name)
   expect(reparsedNet.wires).toHaveLength(originalNet.wires.length)
 })
+
+test("stringify session preserves placement PN descriptors", () => {
+  const session = parseDsnToDsnJson(`
+    (session test.ses
+      (placement
+        (resolution um 10)
+        (component R_0603
+          (place R1 100 200 front 90 (PN "RES 10K"))
+        )
+      )
+      (routes
+        (resolution um 10)
+        (network_out)
+      )
+    )
+  `) as DsnSession
+
+  const stringified = stringifyDsnSession(session)
+  const reparsed = parseDsnToDsnJson(stringified) as DsnSession
+
+  expect(reparsed.placement.components[0].places[0].PN).toBe("RES 10K")
+})
