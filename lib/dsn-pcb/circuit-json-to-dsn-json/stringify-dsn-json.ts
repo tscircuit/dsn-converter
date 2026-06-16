@@ -26,6 +26,11 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     return `${padding}(path ${path.layer} ${path.width}  ${stringifyCoordinates(path.coordinates)})`
   }
 
+  const stringifyPolylinePath = (path: any, level: number): string => {
+    const padding = indent.repeat(level)
+    return `${padding}(polyline_path ${path.layer} ${path.width} ${stringifyCoordinates(path.coordinates)})`
+  }
+
   // Start with pcb
   result += `(pcb ${dsnJson.filename ? dsnJson.filename : "./converted_dsn.dsn"}\n`
 
@@ -138,7 +143,10 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     if (wire.type === "via") {
       result += `${indent}${indent}(via ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)}))\n`
     } else {
-      result += `${indent}${indent}(wire ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)})(type ${wire.type}))\n`
+      const wirePath = wire.polyline_path
+        ? stringifyPolylinePath(wire.polyline_path, 3)
+        : stringifyPath(wire.path, 3)
+      result += `${indent}${indent}(wire ${wirePath}(net ${stringifyValue(wire.net)})${wire.clearance_class ? `(clearance_class ${wire.clearance_class})` : ""}(type ${wire.type}))\n`
     }
   })
   result += `${indent})\n`
