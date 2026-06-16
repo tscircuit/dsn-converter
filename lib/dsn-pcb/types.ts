@@ -40,6 +40,7 @@ export interface DsnPcb {
     }
   }
   placement: {
+    resolution?: Resolution
     components: Array<ComponentPlacement>
   }
   library: {
@@ -156,6 +157,7 @@ export interface Clearance {
 }
 
 export interface Placement {
+  resolution?: Resolution
   components: ComponentPlacement[]
 }
 
