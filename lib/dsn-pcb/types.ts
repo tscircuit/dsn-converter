@@ -182,6 +182,12 @@ export interface Image {
   name: string
   outlines: Outline[]
   pins: Pin[]
+  properties?: DsnProperty[]
+}
+
+export interface DsnProperty {
+  key: string
+  value: string | number
 }
 
 export interface Outline {

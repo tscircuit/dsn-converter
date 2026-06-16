@@ -16,6 +16,7 @@ import type {
   ComponentPlacement,
   DsnJson,
   DsnPcb,
+  DsnProperty,
   DsnSession,
   Image,
   Layer,
@@ -292,6 +293,28 @@ function processProperty(nodes: ASTNode[]): { index: number } {
   return property
 }
 
+function processGenericProperties(nodes: ASTNode[]): DsnProperty[] {
+  const properties: DsnProperty[] = []
+  nodes.forEach((node) => {
+    if (node.type !== "List") return
+
+    const [keyNode, valueNode] = node.children!
+    if (
+      keyNode?.type === "Atom" &&
+      typeof keyNode.value === "string" &&
+      valueNode?.type === "Atom" &&
+      (typeof valueNode.value === "string" ||
+        typeof valueNode.value === "number")
+    ) {
+      properties.push({
+        key: keyNode.value,
+        value: valueNode.value,
+      })
+    }
+  })
+  return properties
+}
+
 function processBoundary(nodes: ASTNode[]): Boundary {
   const boundary: Partial<Boundary> = {}
   nodes.forEach((node) => {
@@ -534,6 +557,7 @@ function processImage(nodes: ASTNode[]): Image {
   }
   image.outlines = []
   image.pins = []
+  image.properties = []
 
   nodes.slice(2).forEach((node) => {
     if (node.type === "List") {
@@ -545,6 +569,10 @@ function processImage(nodes: ASTNode[]): Image {
         } else if (key === "pin") {
           const pin = processPin(node.children!)
           if (pin) image.pins!.push(pin)
+        } else if (key === "property") {
+          image.properties!.push(
+            ...processGenericProperties(node.children!.slice(1)),
+          )
         }
       }
     }
