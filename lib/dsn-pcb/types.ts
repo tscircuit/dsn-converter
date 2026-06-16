@@ -51,6 +51,10 @@ export interface DsnPcb {
       name: string
       pins: string[]
     }>
+    via_rules?: Array<{
+      name: string
+      padstack: string
+    }>
     classes: Array<{
       name: string
       description: string
@@ -244,12 +248,18 @@ export interface PathShape extends BaseShape {
 
 export interface Network {
   nets: Net[]
+  via_rules?: ViaRule[]
   classes: Class[]
 }
 
 export interface Net {
   name: string
   pins: string[]
+}
+
+export interface ViaRule {
+  name: string
+  padstack: string
 }
 
 export interface Class {
