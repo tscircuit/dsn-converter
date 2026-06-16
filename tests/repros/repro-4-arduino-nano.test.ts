@@ -32,7 +32,7 @@ test("circuit json (arduino nano) -> dsn file", async () => {
   expect(usbcImage.pins[0].x).toBe(-1750.060000000076)
   expect(usbcImage.pins[0].y).toBe(2736.586449999919)
   expect(usbcImage.pins[19].padstack_name).toBe(
-    "Oval[A]Pad_799.9983999999998x1399.9972_um",
+    "Oval[A]Pad_1199.9976x1799.9964_um",
   )
   expect(usbcImage.pins[19].x).toBe(-4325)
   expect(usbcImage.pins[19].y).toBe(-2486.500599999971)
