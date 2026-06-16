@@ -15,6 +15,7 @@ export interface DsnPcb {
     value: number
   }
   unit: string
+  colors?: DsnColorRecord[]
   structure: {
     layers: Array<{
       name: string
@@ -105,6 +106,11 @@ export interface Parser {
 export interface Resolution {
   unit: string
   value: number
+}
+
+export interface DsnColorRecord {
+  kind: string
+  values: Array<string | number>
 }
 
 export interface Structure {
