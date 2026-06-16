@@ -404,12 +404,15 @@ export function processPlacement(nodes: ASTNode[]): Placement {
   }
 
   nodes.forEach((node) => {
-    if (
-      node.type === "List" &&
-      node.children![0].type === "Atom" &&
-      node.children![0].value === "component"
-    ) {
-      placement.components!.push(processComponent(node.children!))
+    if (node.type === "List" && node.children?.[0].type === "Atom") {
+      if (node.children[0].value === "component") {
+        placement.components!.push(processComponent(node.children))
+      } else if (
+        node.children[0].value === "unit" &&
+        node.children[1]?.type === "Atom"
+      ) {
+        placement.unit = String(node.children[1].value)
+      }
     }
   })
 
