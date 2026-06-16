@@ -7,6 +7,8 @@ import {
   tokenizeDsn,
 } from "../../common/parse-sexpr"
 import type {
+  AutorouteLayerRule,
+  AutorouteSettings,
   Boundary,
   CircleShape,
   Circuit,
@@ -236,12 +238,87 @@ export function processStructure(nodes: ASTNode[]): Structure {
           case "rule":
             structure.rule = processRule(node.children!.slice(1))
             break
+          case "autoroute_settings":
+            structure.autoroute_settings = processAutorouteSettings(
+              node.children!.slice(1),
+            )
+            break
         }
       }
     }
   })
 
   return structure as Structure
+}
+
+function processAutorouteSettings(nodes: ASTNode[]): AutorouteSettings {
+  const settings: AutorouteSettings = {}
+
+  nodes.forEach((node) => {
+    if (node.type !== "List") return
+
+    const [keyNode, ...rest] = node.children!
+    if (keyNode.type !== "Atom" || typeof keyNode.value !== "string") return
+
+    const key = keyNode.value
+    const first = rest[0]
+
+    switch (key) {
+      case "fanout":
+      case "autoroute":
+      case "postroute":
+      case "vias":
+        if (first?.type === "Atom" && typeof first.value === "string") {
+          settings[key] = first.value
+        }
+        break
+      case "start_ripup_costs":
+      case "start_pass_no":
+        if (first?.type === "Atom" && typeof first.value === "number") {
+          settings[key] = first.value
+        }
+        break
+      case "layer_rule":
+        settings.layer_rules ??= []
+        settings.layer_rules.push(processAutorouteLayerRule(rest))
+        break
+    }
+  })
+
+  return settings
+}
+
+function processAutorouteLayerRule(nodes: ASTNode[]): AutorouteLayerRule {
+  const layerRule: AutorouteLayerRule = {
+    layer:
+      nodes[0]?.type === "Atom" && typeof nodes[0].value === "string"
+        ? nodes[0].value
+        : "",
+  }
+
+  nodes.slice(1).forEach((node) => {
+    if (node.type !== "List") return
+
+    const [keyNode, valueNode] = node.children!
+    if (keyNode.type !== "Atom" || typeof keyNode.value !== "string") return
+
+    switch (keyNode.value) {
+      case "active":
+      case "preferred_direction":
+        if (valueNode?.type === "Atom" && typeof valueNode.value === "string") {
+          layerRule[keyNode.value] = valueNode.value
+        }
+        break
+      case "preferred_direction_trace_costs":
+      case "against_preferred_direction_trace_costs":
+        if (valueNode?.type === "Atom" && typeof valueNode.value === "number") {
+          layerRule[keyNode.value] = valueNode.value
+        }
+        break
+    }
+  })
+
+  return layerRule
 }
 
 function processLayer(nodes: ASTNode[]): Layer {
