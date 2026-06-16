@@ -132,6 +132,7 @@ export function convertPadstacksToSmtPads(
           pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
           port_hints: [pin.pin_number.toString()],
         }
+        const pcbPlatedHoleId = `pcb_plated_hole_${componentId}_${place.refdes}_${pin.pin_number}`
         const parsedPadstackName = parsePadstackName(padstack.name)
 
         // ── Through-hole detection ──────────────────────────────────────────
@@ -154,7 +155,7 @@ export function convertPadstacksToSmtPads(
 
             const platedHole: PcbPlatedHole = {
               type: "pcb_plated_hole",
-              pcb_plated_hole_id: `pcb_plated_hole_${componentId}_${place.refdes}_${pin.pin_number}`,
+              pcb_plated_hole_id: pcbPlatedHoleId,
               ...commonIds,
               shape: "circle",
               x: circuitX,
@@ -204,7 +205,7 @@ export function convertPadstacksToSmtPads(
 
             const platedHole: PcbPlatedHole = {
               type: "pcb_plated_hole",
-              pcb_plated_hole_id: `pcb_plated_hole_${componentId}_${place.refdes}_${pin.pin_number}`,
+              pcb_plated_hole_id: pcbPlatedHoleId,
               ...commonIds,
               shape: "oval",
               x: circuitX,
