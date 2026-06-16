@@ -57,6 +57,16 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     result += `${indent}${indent})\n`
   }
   result += `${indent}${indent}(via ${stringifyValue(dsnJson.structure.via)})\n`
+  if (dsnJson.structure.autoroute_settings) {
+    result += `${indent}${indent}(autoroute_settings\n`
+    if (dsnJson.structure.autoroute_settings.via_costs !== undefined) {
+      result += `${indent}${indent}${indent}(via_costs ${dsnJson.structure.autoroute_settings.via_costs})\n`
+    }
+    if (dsnJson.structure.autoroute_settings.plane_via_costs !== undefined) {
+      result += `${indent}${indent}${indent}(plane_via_costs ${dsnJson.structure.autoroute_settings.plane_via_costs})\n`
+    }
+    result += `${indent}${indent})\n`
+  }
   result += `${indent}${indent}(rule\n`
   result += `${indent}${indent}${indent}(width ${dsnJson.structure.rule.width})\n`
   dsnJson.structure.rule.clearances.forEach((clearance) => {

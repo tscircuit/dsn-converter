@@ -31,6 +31,7 @@ export interface DsnPcb {
       }
     }
     via: string
+    autoroute_settings?: AutorouteSettings
     rule: {
       clearances: Array<{
         value: number
@@ -111,7 +112,13 @@ export interface Structure {
   layers: Layer[]
   boundary: Boundary
   via: string
+  autoroute_settings?: AutorouteSettings
   rule: Rule
+}
+
+export interface AutorouteSettings {
+  via_costs?: number
+  plane_via_costs?: number
 }
 
 export interface Layer {
