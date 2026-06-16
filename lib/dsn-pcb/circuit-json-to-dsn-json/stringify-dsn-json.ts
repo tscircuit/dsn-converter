@@ -26,6 +26,22 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     return `${padding}(path ${path.layer} ${path.width}  ${stringifyCoordinates(path.coordinates)})`
   }
 
+  const stringifyBareShape = (shape: any): string => {
+    if (shape.shapeType === "polygon") {
+      return `(polygon ${shape.layer} ${shape.width} ${stringifyCoordinates(shape.coordinates)})`
+    }
+    if (shape.shapeType === "circle") {
+      return `(circle ${shape.layer} ${shape.diameter})`
+    }
+    if (shape.shapeType === "path") {
+      return `(path ${shape.layer} ${shape.width} ${stringifyCoordinates(shape.coordinates)})`
+    }
+    if (shape.shapeType === "rect") {
+      return `(rect ${shape.layer} ${stringifyCoordinates(shape.coordinates)})`
+    }
+    throw new Error(`Unsupported shape type: ${shape.shapeType}`)
+  }
+
   // Start with pcb
   result += `(pcb ${dsnJson.filename ? dsnJson.filename : "./converted_dsn.dsn"}\n`
 
@@ -57,6 +73,9 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     result += `${indent}${indent})\n`
   }
   result += `${indent}${indent}(via ${stringifyValue(dsnJson.structure.via)})\n`
+  dsnJson.structure.keepouts?.forEach((keepout) => {
+    result += `${indent}${indent}(${keepout.kind} ${stringifyBareShape(keepout.shape)})\n`
+  })
   result += `${indent}${indent}(rule\n`
   result += `${indent}${indent}${indent}(width ${dsnJson.structure.rule.width})\n`
   dsnJson.structure.rule.clearances.forEach((clearance) => {

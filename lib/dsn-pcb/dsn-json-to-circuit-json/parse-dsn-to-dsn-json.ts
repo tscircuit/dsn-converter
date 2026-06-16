@@ -36,6 +36,7 @@ import type {
   Rule,
   Shape,
   Structure,
+  StructureKeepout,
   Wire,
   Wiring,
 } from "../types"
@@ -211,6 +212,7 @@ export function processResolution(nodes: ASTNode[]): Resolution {
 export function processStructure(nodes: ASTNode[]): Structure {
   const structure: Partial<Structure> = {
     layers: [],
+    keepouts: [],
   }
 
   nodes.forEach((node) => {
@@ -224,6 +226,14 @@ export function processStructure(nodes: ASTNode[]): Structure {
             break
           case "boundary":
             structure.boundary = processBoundary(node.children!.slice(1))
+            break
+          case "keepout":
+          case "via_keepout":
+          case "wire_keepout":
+          case "place_keepout":
+            structure.keepouts!.push(
+              processStructureKeepout(key, node.children!),
+            )
             break
           case "via":
             if (
@@ -242,6 +252,44 @@ export function processStructure(nodes: ASTNode[]): Structure {
   })
 
   return structure as Structure
+}
+
+function processStructureKeepout(
+  kind: string,
+  nodes: ASTNode[],
+): StructureKeepout {
+  const shapeNode = nodes.slice(1).find((node) => node.type === "List")
+  if (!shapeNode?.children) {
+    throw new Error("Invalid structure keepout format")
+  }
+
+  return {
+    kind,
+    shape: processBareShape(shapeNode.children),
+  }
+}
+
+function processBareShape(nodes: ASTNode[]): Shape {
+  const shapeTypeNode = nodes[0]
+  if (
+    shapeTypeNode.type !== "Atom" ||
+    typeof shapeTypeNode.value !== "string"
+  ) {
+    throw new Error("Invalid shape format")
+  }
+
+  switch (shapeTypeNode.value) {
+    case "polygon":
+      return processPolygonShape(nodes)
+    case "circle":
+      return processCircleShape(nodes)
+    case "rect":
+      return processRectShape(nodes)
+    case "path":
+      return processPathShape(nodes)
+  }
+
+  throw new Error(`Unknown shape type: ${shapeTypeNode.value}`)
 }
 
 function processLayer(nodes: ASTNode[]): Layer {

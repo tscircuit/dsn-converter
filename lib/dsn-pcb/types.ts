@@ -23,6 +23,7 @@ export interface DsnPcb {
         index: number
       }
     }>
+    keepouts?: StructureKeepout[]
     boundary: {
       path: {
         layer: string
@@ -109,9 +110,15 @@ export interface Resolution {
 
 export interface Structure {
   layers: Layer[]
+  keepouts?: StructureKeepout[]
   boundary: Boundary
   via: string
   rule: Rule
+}
+
+export interface StructureKeepout {
+  kind: string
+  shape: Shape
 }
 
 export interface Layer {
