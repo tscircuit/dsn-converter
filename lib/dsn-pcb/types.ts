@@ -92,6 +92,7 @@ export interface ComponentPlacement {
     y: number
     side: "front" | "back"
     rotation: number
+    status?: string
   }>
 }
 
@@ -171,6 +172,7 @@ export interface Places {
   side: string
   rotation: number
   PN: string
+  status?: string
 }
 
 export interface Library {

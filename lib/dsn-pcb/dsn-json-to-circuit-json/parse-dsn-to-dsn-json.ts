@@ -493,6 +493,22 @@ function processPlace(nodes: ASTNode[]): Places {
     }
   }
 
+  // Process optional placement status descriptors used in session files.
+  for (let i = coordIndex + 4; i < nodes.length; i++) {
+    const node = nodes[i]
+    if (
+      node.type === "List" &&
+      node.children &&
+      node.children[0].type === "Atom" &&
+      node.children[0].value === "status" &&
+      node.children[1] &&
+      node.children[1].type === "Atom"
+    ) {
+      places.status = String(node.children[1].value)
+      break
+    }
+  }
+
   // Set default values if not present
   places.PN = places.PN || ""
   places.side = places.side || "front"
