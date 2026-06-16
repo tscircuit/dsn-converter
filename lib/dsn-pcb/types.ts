@@ -68,18 +68,7 @@ export interface DsnPcb {
     }>
   }
   wiring: {
-    wires: Array<{
-      path: {
-        layer: string
-        width: number
-        /**
-         * TODO UNIT?
-         */
-        coordinates: number[]
-      }
-      net: string
-      type: string
-    }>
+    wires: Wire[]
   }
 }
 
@@ -282,6 +271,7 @@ export interface Wire {
   net?: string
   clearance_class?: string
   type?: string
+  via_type?: string
 }
 
 export interface Via {

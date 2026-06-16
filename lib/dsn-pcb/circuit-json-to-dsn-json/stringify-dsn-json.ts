@@ -26,8 +26,16 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     return `${padding}(path ${path.layer} ${path.width}  ${stringifyCoordinates(path.coordinates)})`
   }
 
+  const stringifyFilename = (filename: string): string => {
+    if (/^[A-Za-z0-9._\/-]+$/.test(filename)) {
+      return filename
+    }
+
+    return `"${filename.replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`
+  }
+
   // Start with pcb
-  result += `(pcb ${dsnJson.filename ? dsnJson.filename : "./converted_dsn.dsn"}\n`
+  result += `(pcb ${stringifyFilename(dsnJson.filename ? dsnJson.filename : "./converted_dsn.dsn")}\n`
 
   // Parser section
   result += `${indent}(parser\n`
@@ -136,7 +144,8 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   result += `${indent}(wiring\n`
   ;(dsnJson.wiring?.wires ?? []).forEach((wire) => {
     if (wire.type === "via") {
-      result += `${indent}${indent}(via ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)}))\n`
+      const viaWire = wire as typeof wire & { via_type?: string }
+      result += `${indent}${indent}(via ${stringifyPath(viaWire.path, 3)}(net ${stringifyValue(viaWire.net)})${viaWire.via_type ? `(type ${viaWire.via_type})` : ""})\n`
     } else {
       result += `${indent}${indent}(wire ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)})(type ${wire.type}))\n`
     }
