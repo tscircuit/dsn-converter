@@ -69,6 +69,13 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   result += `${indent}(placement\n`
   dsnJson.placement.components.forEach((component) => {
     result += `${indent}${indent}(component ${stringifyValue(component.name)}\n`
+    if (component.properties?.length) {
+      result += `${indent}${indent}${indent}(property\n`
+      component.properties.forEach((property) => {
+        result += `${indent}${indent}${indent}${indent}(${property.name} ${stringifyValue(property.value)})\n`
+      })
+      result += `${indent}${indent}${indent})\n`
+    }
     if (component.places) {
       component.places.forEach((place) => {
         result += `${indent}${indent}${indent}(place ${place.refdes} ${place.x} ${place.y} ${place.side} ${place.rotation}${place.PN ? ` (PN ${stringifyValue(place.PN)})` : ""})\n`
