@@ -1,0 +1,37 @@
+(pcb "B:\depot\CAD\KiCad\test\Smoothieboard-master\smoothieboard-5driver\smoothieboard-5driver.dsn"
+  (parser
+    (string_quote ")
+    (space_in_quoted_tokens on)
+    (host_cad "KiCad's Pcbnew")
+    (host_version "(5.1.9)-1")
+  )
+  (resolution um 10)
+  (unit um)
+  (structure
+    (layer Top
+      (type signal)
+      (property
+        (index 0)
+      )
+    )
+    (layer Route2
+      (type power)
+      (property
+        (index 1)
+      )
+    )
+    (boundary
+      (rect pcb 82550 -159512 214376 -50673)
+      (polygon pcb 0 82550 -159512 214376 -159512 214376 -50673 82550 -50673)
+    )
+    (via "Via[0-3]_800:400_um")
+    (rule
+      (width 250)
+      (clearance 200.1)
+    )
+  )
+  (placement)
+  (library)
+  (network)
+  (wiring)
+)
