@@ -1,4 +1,5 @@
-import { mkdirSync } from "node:fs"
+import { mkdirSync, writeFileSync } from "node:fs"
+import { join } from "node:path"
 import Debug from "debug"
 
 /**
@@ -18,15 +19,17 @@ import Debug from "debug"
  * )
  */
 export const getTestDebugUtils = (testPath: string) => {
-  const testFileDir = testPath.split("/").pop()?.split(".")[0]
-  mkdirSync(`./debug-files/${testFileDir}`, { recursive: true })
+  const testFileName = testPath.split(/[\\/]/).pop() ?? "unknown-test"
+  const testFileDir = testFileName.split(".")[0] ?? "unknown-test"
+  const debugDir = join(".", "debug-files", testFileDir)
+  mkdirSync(debugDir, { recursive: true })
   return {
     debug: Debug(`dsn-converter:${testFileDir}`),
     writeDebugFile: (name: string, content: string) => {
-      Bun.write(`./debug-files/${testFileDir}/${name}`, content)
+      writeFileSync(join(debugDir, name), content)
     },
     getDebugFilePath: (name: string) => {
-      return `./debug-files/${testFileDir}/${name}`
+      return join(debugDir, name)
     },
   }
 }
