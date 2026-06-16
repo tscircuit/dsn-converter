@@ -2,6 +2,25 @@ import type { AnySourceComponent, PcbPort, SourcePort } from "circuit-json"
 import type { DsnPcb, Image, Pin } from "lib/dsn-pcb/types"
 import { type Matrix, applyToPoint } from "transformation-matrix"
 
+function getPcbPortLayersForPin({
+  dsnPcb,
+  pin,
+  side,
+}: {
+  dsnPcb: DsnPcb
+  pin: Pin
+  side: string
+}): Array<"top" | "bottom"> {
+  const padstack = dsnPcb.library.padstacks.find(
+    (p) => p.name === pin.padstack_name,
+  )
+  const layerName = padstack?.shapes[0]?.layer.toLowerCase() ?? ""
+  if (layerName.startsWith("b.") || layerName === "bottom") {
+    return ["bottom"]
+  }
+  return [side === "back" ? "bottom" : "top"]
+}
+
 export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
   dsnPcb,
   transformDsnUnitToMm,
@@ -55,7 +74,11 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
             pcb_component_id: component.name,
             x: pcb_port_center.x,
             y: pcb_port_center.y,
-            layers: [place.side === "back" ? "bottom" : "top"],
+            layers: getPcbPortLayersForPin({
+              dsnPcb,
+              pin,
+              side: place.side,
+            }),
           }
           result.push(port, pcb_port)
         }
