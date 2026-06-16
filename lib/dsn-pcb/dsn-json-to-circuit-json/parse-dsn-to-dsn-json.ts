@@ -513,6 +513,11 @@ export function processLibrary(nodes: ASTNode[]): Library {
       if (keyNode.type === "Atom" && typeof keyNode.value === "string") {
         const key = keyNode.value
         switch (key) {
+          case "extra_image_directory":
+            if (rest[0]?.type === "Atom") {
+              library.extra_image_directory = String(rest[0].value)
+            }
+            break
           case "image":
             library.images!.push(processImage(node.children!))
             break
