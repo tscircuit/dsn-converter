@@ -20,6 +20,8 @@ export function convertWiresToPcbTraces(
 ): AnyCircuitElement[] {
   const tracesAndVias: AnyCircuitElement[] = []
   const processedNets = new Set<string>()
+  const netTraceCounts = new Map<string, number>()
+  const netViaCounts = new Map<string, number>()
 
   wiring.wires?.forEach((wire) => {
     debug("WIRE\n----\n", wire)
@@ -37,19 +39,33 @@ export function convertWiresToPcbTraces(
     processedNets.add(netName)
 
     if (wire.type === "via") {
+      const netViaIndex = netViaCounts.get(netName) ?? 0
+      netViaCounts.set(netName, netViaIndex + 1)
+      const viaIdSuffix = netViaIndex === 0 ? "" : `_${netViaIndex}`
+
       debug("wire is actually a via!")
       tracesAndVias.push(
-        ...convertWiringViaToPcbVias({ wire, transformUmToMm, netName }),
+        ...convertWiringViaToPcbVias({
+          wire,
+          transformUmToMm,
+          netName,
+          pcbViaId: `pcb_via_${netName}${viaIdSuffix}`,
+        }),
       )
       return
     }
 
     if ("polyline_path" in wire) {
+      const netTraceIndex = netTraceCounts.get(netName) ?? 0
+      netTraceCounts.set(netName, netTraceIndex + 1)
+      const traceIdSuffix = netTraceIndex === 0 ? "" : `_${netTraceIndex}`
+
       tracesAndVias.push(
         ...convertPolylinePathToPcbTraces({
           wire,
           transformUmToMm,
           netName,
+          pcbTraceId: `pcb_trace_${netName}${traceIdSuffix}`,
           fromSessionSpace,
         }),
       )
@@ -57,11 +73,16 @@ export function convertWiresToPcbTraces(
     }
 
     if ("path" in wire) {
+      const netTraceIndex = netTraceCounts.get(netName) ?? 0
+      netTraceCounts.set(netName, netTraceIndex + 1)
+      const traceIdSuffix = netTraceIndex === 0 ? "" : `_${netTraceIndex}`
+
       tracesAndVias.push(
         ...convertWiringPathToPcbTraces({
           wire,
           transformUmToMm,
           netName,
+          pcbTraceId: `pcb_trace_${netName}${traceIdSuffix}`,
           fromSessionSpace,
         }),
       )
