@@ -311,3 +311,77 @@ test("converts nets and wires", () => {
     coordinates: [10000, 20000, 30000, 40000],
   })
 })
+
+test("implicit wire layer changes keep the destination-layer segment", () => {
+  const dsnPcb: DsnPcb = {
+    is_dsn_pcb: true,
+    filename: "test.dsn",
+    parser: {
+      string_quote: "",
+      host_version: "",
+      space_in_quoted_tokens: "",
+      host_cad: "",
+    },
+    resolution: { unit: "um", value: 10 },
+    unit: "um",
+    structure: {
+      layers: [
+        { name: "F.Cu", type: "signal", property: { index: 0 } },
+        { name: "B.Cu", type: "signal", property: { index: 1 } },
+      ],
+      boundary: { path: { layer: "pcb", width: 0, coordinates: [] } },
+      via: "Via[0-1]_600:300_um",
+      rule: { width: 0, clearances: [] },
+    },
+    placement: { components: [] },
+    library: { images: [], padstacks: [] },
+    network: { nets: [], classes: [] },
+    wiring: { wires: [] },
+  }
+
+  const circuitJson: AnyCircuitElement[] = [
+    {
+      type: "source_net",
+      source_net_id: "net1",
+      name: "GND",
+      member_source_group_ids: [],
+    },
+    {
+      type: "source_trace",
+      source_trace_id: "trace1",
+      connected_source_net_ids: ["net1"],
+      connected_source_port_ids: [],
+    },
+    {
+      type: "pcb_trace",
+      pcb_trace_id: "pcb_trace1",
+      source_trace_id: "trace1",
+      route: [
+        { route_type: "wire", x: 0, y: 0, width: 0.2, layer: "top" },
+        { route_type: "wire", x: 1, y: 0, width: 0.2, layer: "top" },
+        { route_type: "wire", x: 1, y: 1, width: 0.2, layer: "bottom" },
+        { route_type: "wire", x: 2, y: 1, width: 0.2, layer: "bottom" },
+      ],
+    },
+  ]
+
+  const session = convertCircuitJsonToDsnSession(dsnPcb, circuitJson)
+  const wires = session.routes.network_out.nets[0].wires
+
+  expect(wires.map((wire) => wire.type)).toEqual(["route", "via", "route"])
+  expect(wires[0].path).toEqual({
+    layer: "F.Cu",
+    width: 2000,
+    coordinates: [0, 0, 10000, 0],
+  })
+  expect(wires[1].path).toEqual({
+    layer: "F.Cu",
+    width: 600,
+    coordinates: [10000, 0],
+  })
+  expect(wires[2].path).toEqual({
+    layer: "B.Cu",
+    width: 2000,
+    coordinates: [10000, 0, 10000, 10000, 20000, 10000],
+  })
+})
