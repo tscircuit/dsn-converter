@@ -30,6 +30,7 @@ export function mergeDsnSessionIntoDsnPcb(
                 ...wire.path,
                 // DsnSession represents the coordinates in ses units, which are
                 // 10x larger than the um units used in the DsnPcb files
+                width: wire.path.width / 10,
                 coordinates: wire.path.coordinates.map((c) => c / 10),
               },
               net: sessionNet.name,
