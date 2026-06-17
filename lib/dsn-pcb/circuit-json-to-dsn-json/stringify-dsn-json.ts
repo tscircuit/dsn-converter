@@ -1,4 +1,4 @@
-import type { DsnPcb } from "../types"
+import type { DsnPcb, Shape } from "../types"
 
 export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   const indent = "  "
@@ -24,6 +24,26 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   const stringifyPath = (path: any, level: number): string => {
     const padding = indent.repeat(level)
     return `${padding}(path ${path.layer} ${path.width}  ${stringifyCoordinates(path.coordinates)})`
+  }
+
+  const stringifyShapeContent = (shape: Shape): string => {
+    if (shape.shapeType === "polygon") {
+      return `(polygon ${shape.layer} ${shape.width} ${stringifyCoordinates(shape.coordinates)})`
+    }
+    if (shape.shapeType === "circle") {
+      const coordinates =
+        shape.coordinates && shape.coordinates.length > 0
+          ? ` ${stringifyCoordinates(shape.coordinates)}`
+          : ""
+      return `(circle ${shape.layer} ${shape.diameter}${coordinates})`
+    }
+    if (shape.shapeType === "rect") {
+      return `(rect ${shape.layer} ${stringifyCoordinates(shape.coordinates)})`
+    }
+    if (shape.shapeType === "path") {
+      return `(path ${shape.layer} ${shape.width} ${stringifyCoordinates(shape.coordinates)})`
+    }
+    throw new Error("Unsupported DSN shape type")
   }
 
   // Start with pcb
@@ -83,7 +103,11 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   dsnJson.library.images.forEach((image) => {
     result += `${indent}${indent}(image ${stringifyValue(image.name)}\n`
     image.outlines.forEach((outline) => {
-      result += `${indent}${indent}${indent}(outline ${stringifyPath(outline.path, 4)})\n`
+      if (outline.path) {
+        result += `${indent}${indent}${indent}(outline ${stringifyPath(outline.path, 4)})\n`
+      } else if (outline.shape) {
+        result += `${indent}${indent}${indent}(outline ${stringifyShapeContent(outline.shape)})\n`
+      }
     })
     image.pins.forEach((pin) => {
       result += `${indent}${indent}${indent}(pin ${pin.padstack_name} ${pin.pin_number} ${pin.x} ${pin.y})\n`

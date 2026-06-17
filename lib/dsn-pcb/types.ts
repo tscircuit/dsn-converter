@@ -185,7 +185,8 @@ export interface Image {
 }
 
 export interface Outline {
-  path: Path
+  path?: Path
+  shape?: Shape
 }
 
 export interface Pin {
@@ -229,6 +230,7 @@ export interface PolygonShape extends BaseShape {
 export interface CircleShape extends BaseShape {
   shapeType: "circle"
   diameter: number
+  coordinates?: number[]
 }
 
 export interface RectShape extends BaseShape {
