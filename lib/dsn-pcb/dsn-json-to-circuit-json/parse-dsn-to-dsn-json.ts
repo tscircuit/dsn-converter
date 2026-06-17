@@ -545,6 +545,12 @@ function processImage(nodes: ASTNode[]): Image {
         } else if (key === "pin") {
           const pin = processPin(node.children!)
           if (pin) image.pins!.push(pin)
+        } else if (
+          key === "side" &&
+          rest[0]?.type === "Atom" &&
+          typeof rest[0].value === "string"
+        ) {
+          image.side = rest[0].value
         }
       }
     }
