@@ -92,7 +92,13 @@ export interface ComponentPlacement {
     y: number
     side: "front" | "back"
     rotation: number
+    pins?: Array<PlacementPin>
   }>
+}
+
+export interface PlacementPin {
+  pin_number: number | string
+  clearance_class?: string
 }
 
 export interface Parser {
@@ -171,6 +177,7 @@ export interface Places {
   side: string
   rotation: number
   PN: string
+  pins?: PlacementPin[]
 }
 
 export interface Library {
