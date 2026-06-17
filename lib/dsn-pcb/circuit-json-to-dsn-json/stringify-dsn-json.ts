@@ -63,6 +63,14 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     result += `${indent}${indent}${indent}(clearance ${clearance.value}${clearance.type ? ` (type ${clearance.type})` : ""})\n`
   })
   result += `${indent}${indent})\n`
+  if (dsnJson.structure.snap_angle) {
+    result += `${indent}${indent}(snap_angle ${stringifyValue(dsnJson.structure.snap_angle)})\n`
+  }
+  if (dsnJson.structure.control?.via_at_smd) {
+    result += `${indent}${indent}(control\n`
+    result += `${indent}${indent}${indent}(via_at_smd ${stringifyValue(dsnJson.structure.control.via_at_smd)})\n`
+    result += `${indent}${indent})\n`
+  }
   result += `${indent})\n`
 
   // Placement section

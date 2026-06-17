@@ -17,3 +17,61 @@ test("stringify dsn json", () => {
   // Test that we can parse the generated string back to the same structure
   // expect(reparsedJson).toEqual(dsnJson)
 })
+
+test("preserves structure snap angle and control metadata", () => {
+  const dsnJson = parseDsnToDsnJson(`(pcb structure-control.dsn
+  (parser
+    (string_quote ")
+    (space_in_quoted_tokens on)
+    (host_cad "KiCad's Pcbnew")
+    (host_version "9.0")
+  )
+  (resolution um 10)
+  (unit um)
+  (structure
+    (layer F.Cu
+      (type signal)
+      (property
+        (index 0)
+      )
+    )
+    (boundary
+      (path pcb 0 0 0 1000 0 1000 1000 0 1000 0 0)
+    )
+    (via Via[0-1]_600:300_um)
+    (rule
+      (width 100)
+      (clearance 50)
+    )
+    (snap_angle fortyfive_degree)
+    (control
+      (via_at_smd off)
+    )
+  )
+  (placement)
+  (library)
+  (network
+    (class kicad_default ""
+      (circuit
+        (use_via Via[0-1]_600:300_um)
+      )
+      (rule
+        (width 100)
+        (clearance 50)
+      )
+    )
+  )
+  (wiring)
+)`) as DsnPcb
+
+  expect(dsnJson.structure.snap_angle).toBe("fortyfive_degree")
+  expect(dsnJson.structure.control?.via_at_smd).toBe("off")
+
+  const dsnString = stringifyDsnJson(dsnJson)
+  expect(dsnString).toContain('(snap_angle "fortyfive_degree")')
+  expect(dsnString).toContain('(via_at_smd "off")')
+
+  const reparsedJson = parseDsnToDsnJson(dsnString) as DsnPcb
+  expect(reparsedJson.structure.snap_angle).toBe("fortyfive_degree")
+  expect(reparsedJson.structure.control?.via_at_smd).toBe("off")
+})
