@@ -457,23 +457,26 @@ function processPlace(nodes: ASTNode[]): Places {
     throw new Error("Invalid place format: invalid refdes")
   }
 
-  // Process coordinates and rotation
+  // Process coordinates, side, and optional rotation
   const coordIndex = 2
-  if (coordIndex + 3 < nodes.length) {
+  if (coordIndex + 2 < nodes.length) {
     if (
       nodes[coordIndex].type === "Atom" &&
       typeof nodes[coordIndex].value === "number" &&
       nodes[coordIndex + 1].type === "Atom" &&
       typeof nodes[coordIndex + 1].value === "number" &&
       nodes[coordIndex + 2].type === "Atom" &&
-      typeof nodes[coordIndex + 2].value === "string" &&
-      nodes[coordIndex + 3].type === "Atom" &&
-      typeof nodes[coordIndex + 3].value === "number"
+      typeof nodes[coordIndex + 2].value === "string"
     ) {
       places.x = nodes[coordIndex].value as number
       places.y = nodes[coordIndex + 1].value as number
       places.side = nodes[coordIndex + 2].value as string
-      places.rotation = nodes[coordIndex + 3].value as number
+      if (
+        nodes[coordIndex + 3]?.type === "Atom" &&
+        typeof nodes[coordIndex + 3].value === "number"
+      ) {
+        places.rotation = nodes[coordIndex + 3].value as number
+      }
     }
   }
 
