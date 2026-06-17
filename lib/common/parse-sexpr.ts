@@ -44,7 +44,12 @@ export function tokenizeDsn(input: string): Token[] {
       }
       i++ // Skip the closing quote
       tokens.push({ type: "String", value })
-    } else if (char === "-" || /\d/.test(char)) {
+    } else if (
+      /\d/.test(char) ||
+      (char === "-" &&
+        (/\d/.test(input[i + 1] ?? "") ||
+          (input[i + 1] === "." && /\d/.test(input[i + 2] ?? ""))))
+    ) {
       // Parse number (integer or float)
       let numStr = ""
       if (char === "-") {
