@@ -11,9 +11,9 @@ import smoothieDsn from "../assets/repro/smoothieboard-repro.dsn" with {
  * bottom copper layer.
  *
  * The Smoothie Board places the SJ1/SJ2/SJ3 solder jumpers on the DSN `back`
- * side, but getLayerFromPadstack derived the layer only from the padstack shape
- * name ("Top") and ignored the component's placement side, so every back-side
- * pad was emitted on layer "top".
+ * side, but getSmtPadLayer previously derived the layer only from the padstack
+ * shape name ("Top") and ignored the component's placement side, so every
+ * back-side pad was emitted on layer "top".
  */
 test("back-placed component pads are emitted on the bottom layer", () => {
   const circuitJson = convertDsnPcbToCircuitJson(
