@@ -85,6 +85,22 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     image.outlines.forEach((outline) => {
       result += `${indent}${indent}${indent}(outline ${stringifyPath(outline.path, 4)})\n`
     })
+    ;(image.keepouts ?? []).forEach((keepout) => {
+      const { shape } = keepout
+      if (shape.shapeType === "circle") {
+        const offset =
+          shape.x !== undefined && shape.y !== undefined
+            ? ` ${shape.x} ${shape.y}`
+            : ""
+        result += `${indent}${indent}${indent}(keepout ${stringifyValue(keepout.name)} (circle ${shape.layer} ${shape.diameter}${offset}))\n`
+      } else if (shape.shapeType === "polygon") {
+        result += `${indent}${indent}${indent}(keepout ${stringifyValue(keepout.name)} (polygon ${shape.layer} ${shape.width} ${stringifyCoordinates(shape.coordinates)}))\n`
+      } else if (shape.shapeType === "path") {
+        result += `${indent}${indent}${indent}(keepout ${stringifyValue(keepout.name)} (path ${shape.layer} ${shape.width} ${stringifyCoordinates(shape.coordinates)}))\n`
+      } else if (shape.shapeType === "rect") {
+        result += `${indent}${indent}${indent}(keepout ${stringifyValue(keepout.name)} (rect ${shape.layer} ${stringifyCoordinates(shape.coordinates)}))\n`
+      }
+    })
     image.pins.forEach((pin) => {
       result += `${indent}${indent}${indent}(pin ${pin.padstack_name} ${pin.pin_number} ${pin.x} ${pin.y})\n`
     })
