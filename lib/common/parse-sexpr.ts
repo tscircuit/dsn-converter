@@ -31,9 +31,11 @@ export function tokenizeDsn(input: string): Token[] {
       i++ // Skip the opening quote
       while (i < length && input[i] !== '"') {
         if (input[i] === "\\") {
-          // Handle escape sequences
-          i++
-          if (i < length) {
+          const nextChar = input[i + 1]
+          if (nextChar === '"' || nextChar === "\\") {
+            value += nextChar
+            i += 2
+          } else {
             value += input[i]
             i++
           }
