@@ -1,5 +1,4 @@
 import type {
-  AnyCircuitElement,
   PcbTrace,
   PcbTraceRoutePointWire,
   SourceTrace,
@@ -38,6 +37,7 @@ export const convertWiringPathToPcbTraces = ({
   }
 
   if (points.length >= 2) {
+    const sourceTraceId = netName.split("--")[0]
     const routePoints = points.map((point) => ({
       route_type: "wire" as const,
       x: Number(point.x.toFixed(4)),
@@ -51,14 +51,14 @@ export const convertWiringPathToPcbTraces = ({
     const pcbTrace: PcbTrace = {
       type: "pcb_trace",
       pcb_trace_id: `pcb_trace_${netName}`,
-      source_trace_id: netName.split("-")[0],
+      source_trace_id: sourceTraceId,
       route: routePoints as PcbTraceRoutePointWire[],
       trace_length: getTraceLength(routePoints),
     }
 
     const sourceTrace: SourceTrace = {
       type: "source_trace",
-      source_trace_id: netName.split("--")[0],
+      source_trace_id: sourceTraceId,
       connected_source_net_ids: [],
       connected_source_port_ids: netName.split("--").slice(1),
     }
