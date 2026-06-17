@@ -3,6 +3,8 @@ import type { DsnSession } from "../types"
 export const stringifyDsnSession = (session: DsnSession): string => {
   const indent = "  "
   let result = ""
+  const defaultViaPadstackName =
+    session.routes.library_out?.padstacks[0]?.name ?? "Via[0-1]_600:300_um"
 
   // Start with session
   result += `(session ${session.filename}\n`
@@ -58,6 +60,12 @@ export const stringifyDsnSession = (session: DsnSession): string => {
   session.routes.network_out.nets.forEach((net) => {
     result += `${indent}${indent}${indent}(net ${JSON.stringify(net.name)}\n`
     net.wires.forEach((wire) => {
+      if (wire.type === "via" && wire.path) {
+        const [x, y] = wire.path.coordinates
+        result += `${indent}${indent}${indent}${indent}(via ${JSON.stringify(defaultViaPadstackName)} ${x} ${y})\n`
+        return
+      }
+
       if (wire.path) {
         result += `${indent}${indent}${indent}${indent}(wire\n`
         result += `${indent}${indent}${indent}${indent}${indent}(path ${wire.path.layer} ${wire.path.width}\n`
@@ -65,6 +73,9 @@ export const stringifyDsnSession = (session: DsnSession): string => {
         result += `${indent}${indent}${indent}${indent}${indent})\n`
         result += `${indent}${indent}${indent}${indent})\n`
       }
+    })
+    net.vias?.forEach((via) => {
+      result += `${indent}${indent}${indent}${indent}(via ${JSON.stringify(defaultViaPadstackName)} ${via.x} ${via.y})\n`
     })
     result += `${indent}${indent}${indent})\n`
   })
