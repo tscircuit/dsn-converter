@@ -118,7 +118,13 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   dsnJson.network.classes.forEach((cls) => {
     result += `${indent}${indent}(class ${stringifyValue(cls.name)} ${stringifyValue(cls.description)}${cls.net_names.map((n) => ` ${stringifyValue(n)}`).join("")}\n`
     result += `${indent}${indent}${indent}(circuit\n`
+    if (cls.circuit.clearance_class) {
+      result += `${indent}${indent}${indent}${indent}(clearance_class ${stringifyValue(cls.circuit.clearance_class)})\n`
+    }
     result += `${indent}${indent}${indent}${indent}(use_via ${stringifyValue(cls.circuit.use_via)})\n`
+    if (cls.circuit.via_rule) {
+      result += `${indent}${indent}${indent}${indent}(via_rule ${stringifyValue(cls.circuit.via_rule)})\n`
+    }
     result += `${indent}${indent}${indent})\n`
     if (cls.rule) {
       result += `${indent}${indent}${indent}(rule\n`
@@ -135,10 +141,13 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   // Wiring section
   result += `${indent}(wiring\n`
   ;(dsnJson.wiring?.wires ?? []).forEach((wire) => {
+    const clearanceClass = wire.clearance_class
+      ? `(clearance_class ${stringifyValue(wire.clearance_class)})`
+      : ""
     if (wire.type === "via") {
-      result += `${indent}${indent}(via ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)}))\n`
+      result += `${indent}${indent}(via ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)})${clearanceClass})\n`
     } else {
-      result += `${indent}${indent}(wire ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)})(type ${wire.type}))\n`
+      result += `${indent}${indent}(wire ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)})${clearanceClass}(type ${wire.type}))\n`
     }
   })
   result += `${indent})\n`

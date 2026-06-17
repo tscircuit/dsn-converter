@@ -56,7 +56,9 @@ export interface DsnPcb {
       description: string
       net_names: string[]
       circuit: {
+        clearance_class?: string
         use_via: string
+        via_rule?: string
       }
       rule: {
         clearances: Array<{
@@ -77,6 +79,7 @@ export interface DsnPcb {
          */
         coordinates: number[]
       }
+      clearance_class?: string
       net: string
       type: string
     }>
@@ -261,7 +264,9 @@ export interface Class {
 }
 
 export interface Circuit {
+  clearance_class?: string
   use_via: string
+  via_rule?: string
 }
 
 export interface Wiring {
