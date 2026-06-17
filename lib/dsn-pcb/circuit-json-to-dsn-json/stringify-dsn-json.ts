@@ -20,6 +20,10 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     return coordinates.join(" ")
   }
 
+  const hasNumericWidth = (rule: { width?: unknown }): rule is {
+    width: number
+  } => typeof rule.width === "number" && Number.isFinite(rule.width)
+
   // Helper function to stringify a path
   const stringifyPath = (path: any, level: number): string => {
     const padding = indent.repeat(level)
@@ -58,7 +62,9 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   }
   result += `${indent}${indent}(via ${stringifyValue(dsnJson.structure.via)})\n`
   result += `${indent}${indent}(rule\n`
-  result += `${indent}${indent}${indent}(width ${dsnJson.structure.rule.width})\n`
+  if (hasNumericWidth(dsnJson.structure.rule)) {
+    result += `${indent}${indent}${indent}(width ${dsnJson.structure.rule.width})\n`
+  }
   dsnJson.structure.rule.clearances.forEach((clearance) => {
     result += `${indent}${indent}${indent}(clearance ${clearance.value}${clearance.type ? ` (type ${clearance.type})` : ""})\n`
   })
@@ -122,7 +128,9 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     result += `${indent}${indent}${indent})\n`
     if (cls.rule) {
       result += `${indent}${indent}${indent}(rule\n`
-      result += `${indent}${indent}${indent}${indent}(width ${cls.rule.width})\n`
+      if (hasNumericWidth(cls.rule)) {
+        result += `${indent}${indent}${indent}${indent}(width ${cls.rule.width})\n`
+      }
       cls.rule.clearances.forEach((clearance) => {
         result += `${indent}${indent}${indent}${indent}(clearance ${clearance.value}${clearance.type ? ` (type ${clearance.type})` : ""})\n`
       })
