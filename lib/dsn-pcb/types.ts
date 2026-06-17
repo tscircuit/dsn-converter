@@ -78,6 +78,7 @@ export interface DsnPcb {
         coordinates: number[]
       }
       net: string
+      clearance_class?: string
       type: string
     }>
   }
