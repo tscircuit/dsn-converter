@@ -9,6 +9,7 @@ export interface DsnPcb {
     host_version: string
     space_in_quoted_tokens: string
     host_cad: string
+    generated_by_freerouting?: boolean
   }
   resolution: {
     unit: string
@@ -100,6 +101,7 @@ export interface Parser {
   space_in_quoted_tokens: string
   host_cad: string
   host_version: string
+  generated_by_freerouting?: boolean
 }
 
 export interface Resolution {
