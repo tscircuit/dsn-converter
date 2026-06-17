@@ -1,7 +1,61 @@
 import Debug from "debug"
-import type { DsnPcb, DsnSession } from "../types"
+import type { ComponentPlacement, DsnPcb, DsnSession } from "../types"
 
 const debug = Debug("dsn-converter:mergeDsnSessionIntoDsnPcb")
+
+const coordinatesMatch = (a: number, b: number) => Math.abs(a - b) < 1e-6
+
+const shouldScaleSessionPlacement = (
+  dsnPcb: DsnPcb,
+  dsnSession: DsnSession,
+) => {
+  const existingPlaces = new Map<string, { x: number; y: number }>()
+
+  dsnPcb.placement.components.forEach((component) => {
+    component.places.forEach((place) => {
+      existingPlaces.set(`${component.name}:${place.refdes}`, {
+        x: place.x,
+        y: place.y,
+      })
+    })
+  })
+
+  let scaledMatches = 0
+  let unscaledMatches = 0
+
+  dsnSession.placement.components.forEach((component) => {
+    component.places.forEach((place) => {
+      const existingPlace = existingPlaces.get(
+        `${component.name}:${place.refdes}`,
+      )
+      if (!existingPlace) return
+
+      for (const axis of ["x", "y"] as const) {
+        if (coordinatesMatch(place[axis], existingPlace[axis])) {
+          unscaledMatches++
+        }
+        if (coordinatesMatch(place[axis] / 10, existingPlace[axis])) {
+          scaledMatches++
+        }
+      }
+    })
+  })
+
+  return scaledMatches > unscaledMatches
+}
+
+const scalePlacementComponents = (
+  components: ComponentPlacement[],
+  coordinateDivisor: number,
+): ComponentPlacement[] =>
+  components.map((component) => ({
+    ...component,
+    places: component.places.map((place) => ({
+      ...place,
+      x: place.x / coordinateDivisor,
+      y: place.y / coordinateDivisor,
+    })),
+  }))
 
 export function mergeDsnSessionIntoDsnPcb(
   dsnPcb: DsnPcb,
@@ -12,7 +66,14 @@ export function mergeDsnSessionIntoDsnPcb(
 
   // Update placement if session has different component positions
   if (dsnSession.placement?.components) {
-    mergedPcb.placement.components = dsnSession.placement.components
+    const coordinateDivisor = shouldScaleSessionPlacement(dsnPcb, dsnSession)
+      ? 10
+      : 1
+
+    mergedPcb.placement.components = scalePlacementComponents(
+      dsnSession.placement.components,
+      coordinateDivisor,
+    )
   }
 
   // Add wires from session's network_out to PCB's wiring
