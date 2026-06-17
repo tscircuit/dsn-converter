@@ -31,6 +31,12 @@ export const stringifyDsnSession = (session: DsnSession): string => {
 
   // Parser subsection
   result += `${indent}${indent}(parser\n`
+  if (session.routes.parser.string_quote) {
+    result += `${indent}${indent}${indent}(string_quote ${session.routes.parser.string_quote})\n`
+  }
+  if (session.routes.parser.space_in_quoted_tokens) {
+    result += `${indent}${indent}${indent}(space_in_quoted_tokens ${session.routes.parser.space_in_quoted_tokens})\n`
+  }
   result += `${indent}${indent}${indent}(host_cad ${JSON.stringify(session.routes.parser.host_cad)})\n`
   result += `${indent}${indent}${indent}(host_version ${JSON.stringify(session.routes.parser.host_version)})\n`
   result += `${indent}${indent})\n`
