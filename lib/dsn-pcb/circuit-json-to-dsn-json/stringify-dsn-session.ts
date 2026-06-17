@@ -4,6 +4,15 @@ export const stringifyDsnSession = (session: DsnSession): string => {
   const indent = "  "
   let result = ""
 
+  const stringifyCoordinates = (coordinates: number[]): string => {
+    return coordinates.join(" ")
+  }
+
+  const stringifyPath = (path: any, level: number): string => {
+    const padding = indent.repeat(level)
+    return `${padding}(path ${path.layer} ${path.width}  ${stringifyCoordinates(path.coordinates)})`
+  }
+
   // Start with session
   result += `(session ${session.filename}\n`
 
@@ -38,6 +47,16 @@ export const stringifyDsnSession = (session: DsnSession): string => {
   // Library_out subsection
   if (session.routes.library_out) {
     result += `${indent}${indent}(library_out \n`
+    session.routes.library_out.images.forEach((image) => {
+      result += `${indent}${indent}${indent}(image ${JSON.stringify(image.name)}\n`
+      image.outlines.forEach((outline) => {
+        result += `${indent}${indent}${indent}${indent}(outline ${stringifyPath(outline.path, 5)})\n`
+      })
+      image.pins.forEach((pin) => {
+        result += `${indent}${indent}${indent}${indent}(pin ${JSON.stringify(pin.padstack_name)} ${pin.pin_number} ${pin.x} ${pin.y})\n`
+      })
+      result += `${indent}${indent}${indent})\n`
+    })
     session.routes.library_out.padstacks.forEach((padstack) => {
       result += `${indent}${indent}${indent}(padstack ${JSON.stringify(padstack.name)}\n`
       padstack.shapes.forEach((shape) => {

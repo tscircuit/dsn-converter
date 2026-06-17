@@ -1098,7 +1098,14 @@ function processSessionNode(ast: ASTNode): DsnSession {
     )
     if (libraryNode) {
       session.routes.library_out = {
-        images: [],
+        images: libraryNode
+          .children!.filter(
+            (child) =>
+              child.type === "List" &&
+              child.children?.[0].type === "Atom" &&
+              child.children[0].value === "image",
+          )
+          .map((imageNode) => processImage(imageNode.children!)),
         padstacks: libraryNode
           .children!.filter(
             (child) =>

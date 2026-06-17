@@ -25,3 +25,34 @@ test("stringify session file", () => {
   expect(reparsedNet.name).toBe(originalNet.name)
   expect(reparsedNet.wires).toHaveLength(originalNet.wires.length)
 })
+
+test("stringify session preserves library_out images", () => {
+  const sessionJson = parseDsnToDsnJson(`(session board.ses
+    (base_design board.dsn)
+    (placement
+      (resolution um 10)
+    )
+    (was_is)
+    (routes
+      (resolution um 10)
+      (parser
+        (host_cad "freerouting")
+        (host_version "1.0")
+      )
+      (library_out
+        (image "LibImage"
+          (outline (path F.Cu 0 0 0 100 0))
+          (pin "RoundPad" 1 10 20)
+        )
+      )
+      (network_out)
+    )
+  )`) as DsnSession
+
+  const stringified = stringifyDsnSession(sessionJson)
+  const reparsed = parseDsnToDsnJson(stringified) as DsnSession
+
+  expect(reparsed.routes.library_out?.images).toEqual(
+    sessionJson.routes.library_out?.images,
+  )
+})
