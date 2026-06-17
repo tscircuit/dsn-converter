@@ -18,6 +18,7 @@ import type {
   DsnPcb,
   DsnSession,
   Image,
+  Keepout,
   Layer,
   Library,
   Net,
@@ -534,6 +535,7 @@ function processImage(nodes: ASTNode[]): Image {
   }
   image.outlines = []
   image.pins = []
+  image.keepouts = []
 
   nodes.slice(2).forEach((node) => {
     if (node.type === "List") {
@@ -545,12 +547,44 @@ function processImage(nodes: ASTNode[]): Image {
         } else if (key === "pin") {
           const pin = processPin(node.children!)
           if (pin) image.pins!.push(pin)
+        } else if (key === "keepout") {
+          const keepout = processKeepout(node.children!)
+          if (keepout) image.keepouts!.push(keepout)
         }
       }
     }
   })
 
   return image as Image
+}
+
+function processKeepout(nodes: ASTNode[]): Keepout | null {
+  // nodes: [Atom("keepout"), Atom(name?), List(<shape> ...)]
+  const shapeNode = nodes.find(
+    (n) => n.type === "List" && n.children?.[0]?.type === "Atom",
+  )
+  if (!shapeNode || shapeNode.type !== "List") return null
+  const c = shapeNode.children!
+  const shapeType = c[0].type === "Atom" ? String(c[0].value) : ""
+  if (shapeType !== "circle") {
+    debug("Unsupported keepout shape:", shapeType)
+    return null
+  }
+  // (circle <layer> <diameter> [<x> <y>])
+  const layer = c[1]?.type === "Atom" ? String(c[1].value) : ""
+  if (!layer) {
+    debug("Keepout missing layer")
+    return null
+  }
+  const num = (n: ASTNode | undefined) =>
+    n?.type === "Atom" && typeof n.value === "number" ? n.value : 0
+  return {
+    shape: "circle",
+    layer,
+    diameter: num(c[2]),
+    x: num(c[3]),
+    y: num(c[4]),
+  }
 }
 
 function processOutline(nodes: ASTNode[]): Outline {
