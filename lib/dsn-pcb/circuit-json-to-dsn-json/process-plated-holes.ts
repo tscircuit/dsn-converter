@@ -116,7 +116,7 @@ export function processPlatedHoles(
 
   function findNumericHint(port?: SourcePort): number | undefined {
     const hint = port?.port_hints?.find((h) => !Number.isNaN(Number(h)))
-    return hint !== undefined ? Number(hint) : undefined
+    return hint !== undefined ? Number(hint) : port?.pin_number
   }
 
   /**
