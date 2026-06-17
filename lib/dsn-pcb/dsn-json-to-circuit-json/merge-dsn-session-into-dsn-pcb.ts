@@ -38,6 +38,22 @@ export function mergeDsnSessionIntoDsnPcb(
           }
         })
       }
+
+      if (sessionNet.vias) {
+        sessionNet.vias.forEach((via) => {
+          mergedPcb.wiring.wires.push({
+            path: {
+              layer: "all",
+              width: 0,
+              // DsnSession represents the coordinates in ses units, which are
+              // 10x larger than the um units used in the DsnPcb files
+              coordinates: [via.x / 10, via.y / 10],
+            },
+            net: sessionNet.name,
+            type: "via",
+          })
+        })
+      }
     })
   }
 
