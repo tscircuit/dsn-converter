@@ -132,7 +132,7 @@ test("converts component placement", () => {
   )
 })
 
-test("4-layer session via padstack spans all layers", () => {
+test("4-layer session via padstack spans all layers and resumes route after via", () => {
   const dsnPcb: DsnPcb = {
     is_dsn_pcb: true,
     filename: "test.dsn",
@@ -199,6 +199,14 @@ test("4-layer session via padstack spans all layers", () => {
     "In2.Cu",
     "B.Cu",
   ])
+
+  const net = session.routes.network_out.nets[0]
+  expect(net.wires).toHaveLength(3)
+  expect(net.wires[2].path).toEqual({
+    layer: "B.Cu",
+    width: 2000,
+    coordinates: [10000, 10000, 20000, 20000],
+  })
 })
 
 // Test net and wire conversion
