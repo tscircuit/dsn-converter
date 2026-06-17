@@ -8,10 +8,14 @@ export function getComponentValue(sourceComponent: any): string {
   if ("capacitance" in sourceComponent) {
     const capacitanceUF = sourceComponent.capacitance * 1e6
     if (capacitanceUF >= 1) {
-      return `${capacitanceUF}uF`
+      return `${formatDecimal(capacitanceUF)}uF`
     } else {
       return `${(capacitanceUF).toFixed(3)}uF`
     }
   }
   return ""
+}
+
+function formatDecimal(value: number): string {
+  return Number(value.toFixed(3)).toString()
 }
