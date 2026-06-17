@@ -117,6 +117,12 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   })
   dsnJson.network.classes.forEach((cls) => {
     result += `${indent}${indent}(class ${stringifyValue(cls.name)} ${stringifyValue(cls.description)}${cls.net_names.map((n) => ` ${stringifyValue(n)}`).join("")}\n`
+    if (cls.clearance_class) {
+      result += `${indent}${indent}${indent}(clearance_class ${stringifyValue(cls.clearance_class)})\n`
+    }
+    if (cls.via_rule) {
+      result += `${indent}${indent}${indent}(via_rule ${stringifyValue(cls.via_rule)})\n`
+    }
     result += `${indent}${indent}${indent}(circuit\n`
     result += `${indent}${indent}${indent}${indent}(use_via ${stringifyValue(cls.circuit.use_via)})\n`
     result += `${indent}${indent}${indent})\n`
