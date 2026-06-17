@@ -56,7 +56,11 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     result += `${indent}${indent}${indent}${stringifyPath(dsnJson.structure.boundary.path, 0)}\n`
     result += `${indent}${indent})\n`
   }
-  result += `${indent}${indent}(via ${stringifyValue(dsnJson.structure.via)})\n`
+  const structureVias =
+    dsnJson.structure.vias && dsnJson.structure.vias.length > 0
+      ? dsnJson.structure.vias
+      : [dsnJson.structure.via]
+  result += `${indent}${indent}(via ${structureVias.map(stringifyValue).join(" ")})\n`
   result += `${indent}${indent}(rule\n`
   result += `${indent}${indent}${indent}(width ${dsnJson.structure.rule.width})\n`
   dsnJson.structure.rule.clearances.forEach((clearance) => {
