@@ -18,7 +18,7 @@ import Debug from "debug"
  * )
  */
 export const getTestDebugUtils = (testPath: string) => {
-  const testFileDir = testPath.split("/").pop()?.split(".")[0]
+  const testFileDir = testPath.split(/[\\/]/).pop()?.split(".")[0] || "test"
   mkdirSync(`./debug-files/${testFileDir}`, { recursive: true })
   return {
     debug: Debug(`dsn-converter:${testFileDir}`),
