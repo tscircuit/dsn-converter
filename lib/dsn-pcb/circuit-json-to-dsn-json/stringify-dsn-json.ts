@@ -26,6 +26,69 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     return `${padding}(path ${path.layer} ${path.width}  ${stringifyCoordinates(path.coordinates)})`
   }
 
+  const stringifyAutorouteSettings = (
+    settings: NonNullable<DsnPcb["structure"]["autoroute_settings"]>,
+    level: number,
+  ): string => {
+    const padding = indent.repeat(level)
+    const childPadding = indent.repeat(level + 1)
+    const lines = [`${padding}(autoroute_settings`]
+
+    if (settings.fanout !== undefined) {
+      lines.push(`${childPadding}(fanout ${settings.fanout})`)
+    }
+    if (settings.autoroute !== undefined) {
+      lines.push(`${childPadding}(autoroute ${settings.autoroute})`)
+    }
+    if (settings.postroute !== undefined) {
+      lines.push(`${childPadding}(postroute ${settings.postroute})`)
+    }
+    if (settings.vias !== undefined) {
+      lines.push(`${childPadding}(vias ${settings.vias})`)
+    }
+    if (settings.via_costs !== undefined) {
+      lines.push(`${childPadding}(via_costs ${settings.via_costs})`)
+    }
+    if (settings.plane_via_costs !== undefined) {
+      lines.push(`${childPadding}(plane_via_costs ${settings.plane_via_costs})`)
+    }
+    if (settings.start_ripup_costs !== undefined) {
+      lines.push(
+        `${childPadding}(start_ripup_costs ${settings.start_ripup_costs})`,
+      )
+    }
+    if (settings.start_pass_no !== undefined) {
+      lines.push(`${childPadding}(start_pass_no ${settings.start_pass_no})`)
+    }
+
+    settings.layer_rules.forEach((layerRule) => {
+      lines.push(`${childPadding}(layer_rule ${layerRule.layer}`)
+      const layerRulePadding = indent.repeat(level + 2)
+      if (layerRule.active !== undefined) {
+        lines.push(`${layerRulePadding}(active ${layerRule.active})`)
+      }
+      if (layerRule.preferred_direction !== undefined) {
+        lines.push(
+          `${layerRulePadding}(preferred_direction ${layerRule.preferred_direction})`,
+        )
+      }
+      if (layerRule.preferred_direction_trace_costs !== undefined) {
+        lines.push(
+          `${layerRulePadding}(preferred_direction_trace_costs ${layerRule.preferred_direction_trace_costs})`,
+        )
+      }
+      if (layerRule.against_preferred_direction_trace_costs !== undefined) {
+        lines.push(
+          `${layerRulePadding}(against_preferred_direction_trace_costs ${layerRule.against_preferred_direction_trace_costs})`,
+        )
+      }
+      lines.push(`${childPadding})`)
+    })
+
+    lines.push(`${padding})`)
+    return lines.join("\n")
+  }
+
   // Start with pcb
   result += `(pcb ${dsnJson.filename ? dsnJson.filename : "./converted_dsn.dsn"}\n`
 
@@ -63,6 +126,9 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     result += `${indent}${indent}${indent}(clearance ${clearance.value}${clearance.type ? ` (type ${clearance.type})` : ""})\n`
   })
   result += `${indent}${indent})\n`
+  if (dsnJson.structure.autoroute_settings) {
+    result += `${stringifyAutorouteSettings(dsnJson.structure.autoroute_settings, 2)}\n`
+  }
   result += `${indent})\n`
 
   // Placement section

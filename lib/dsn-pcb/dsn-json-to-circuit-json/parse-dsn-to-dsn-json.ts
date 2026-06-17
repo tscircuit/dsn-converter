@@ -7,6 +7,7 @@ import {
   tokenizeDsn,
 } from "../../common/parse-sexpr"
 import type {
+  AutorouteSettings,
   Boundary,
   CircleShape,
   Circuit,
@@ -19,6 +20,7 @@ import type {
   DsnSession,
   Image,
   Layer,
+  LayerRule,
   Library,
   Net,
   Network,
@@ -236,12 +238,87 @@ export function processStructure(nodes: ASTNode[]): Structure {
           case "rule":
             structure.rule = processRule(node.children!.slice(1))
             break
+          case "autoroute_settings":
+            structure.autoroute_settings = processAutorouteSettings(
+              node.children!.slice(1),
+            )
+            break
         }
       }
     }
   })
 
   return structure as Structure
+}
+
+function getAtomValue(node: ASTNode | undefined): string | number | undefined {
+  if (node?.type !== "Atom") return undefined
+  if (typeof node.value === "string" || typeof node.value === "number") {
+    return node.value
+  }
+  return undefined
+}
+
+function processAutorouteSettings(nodes: ASTNode[]): AutorouteSettings {
+  const settings: AutorouteSettings = {
+    layer_rules: [],
+  }
+
+  nodes.forEach((node) => {
+    if (node.type !== "List") return
+
+    const [keyNode, valueNode] = node.children!
+    if (keyNode.type !== "Atom" || typeof keyNode.value !== "string") return
+
+    const value = getAtomValue(valueNode)
+    switch (keyNode.value) {
+      case "fanout":
+      case "autoroute":
+      case "postroute":
+      case "vias":
+        if (value !== undefined) settings[keyNode.value] = String(value)
+        break
+      case "via_costs":
+      case "plane_via_costs":
+      case "start_ripup_costs":
+      case "start_pass_no":
+        if (typeof value === "number") settings[keyNode.value] = value
+        break
+      case "layer_rule":
+        settings.layer_rules.push(processLayerRule(node.children!))
+        break
+    }
+  })
+
+  return settings
+}
+
+function processLayerRule(nodes: ASTNode[]): LayerRule {
+  const layerRule: Partial<LayerRule> = {}
+
+  const layer = getAtomValue(nodes[1])
+  if (layer !== undefined) layerRule.layer = String(layer)
+
+  nodes.slice(2).forEach((node) => {
+    if (node.type !== "List") return
+
+    const [keyNode, valueNode] = node.children!
+    if (keyNode.type !== "Atom" || typeof keyNode.value !== "string") return
+
+    const value = getAtomValue(valueNode)
+    switch (keyNode.value) {
+      case "active":
+      case "preferred_direction":
+        if (value !== undefined) layerRule[keyNode.value] = String(value)
+        break
+      case "preferred_direction_trace_costs":
+      case "against_preferred_direction_trace_costs":
+        if (typeof value === "number") layerRule[keyNode.value] = value
+        break
+    }
+  })
+
+  return layerRule as LayerRule
 }
 
 function processLayer(nodes: ASTNode[]): Layer {
