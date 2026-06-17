@@ -46,6 +46,12 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   dsnJson.structure.layers.forEach((layer) => {
     result += `${indent}${indent}(layer ${layer.name}\n`
     result += `${indent}${indent}${indent}(type ${layer.type})\n`
+    if (layer.direction) {
+      result += `${indent}${indent}${indent}(direction ${layer.direction})\n`
+    }
+    if (layer.cost !== undefined) {
+      result += `${indent}${indent}${indent}(cost ${layer.cost})\n`
+    }
     result += `${indent}${indent}${indent}(property\n`
     result += `${indent}${indent}${indent}${indent}(index ${layer.property.index})\n`
     result += `${indent}${indent}${indent})\n`

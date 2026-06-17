@@ -19,6 +19,8 @@ export interface DsnPcb {
     layers: Array<{
       name: string
       type: string
+      direction?: string
+      cost?: number
       property: {
         index: number
       }
@@ -117,6 +119,8 @@ export interface Structure {
 export interface Layer {
   name: string
   type: string
+  direction?: string
+  cost?: number
   property: {
     index: number
   }
