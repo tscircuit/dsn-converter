@@ -23,10 +23,20 @@ export const convertPolylinePathToPcbTraces = ({
   )
 
   const pointsOnTraceMm: Array<{ x: number; y: number }> = []
-  for (let i = 0; i < segsUm.length - 1; i++) {
-    const intersection = computeSegIntersection(segsUm[i], segsUm[i + 1])
-    if (!intersection) continue
-    pointsOnTraceMm.push(applyToPoint(transformUmToMm, intersection))
+  if (segsUm.length === 1) {
+    const [seg] = segsUm
+    pointsOnTraceMm.push(
+      applyToPoint(transformUmToMm, { x: seg.x1, y: seg.y1 }),
+    )
+    pointsOnTraceMm.push(
+      applyToPoint(transformUmToMm, { x: seg.x2, y: seg.y2 }),
+    )
+  } else {
+    for (let i = 0; i < segsUm.length - 1; i++) {
+      const intersection = computeSegIntersection(segsUm[i], segsUm[i + 1])
+      if (!intersection) continue
+      pointsOnTraceMm.push(applyToPoint(transformUmToMm, intersection))
+    }
   }
 
   traces.push({
