@@ -129,6 +129,7 @@ export function processPlatedHoles(
       componentName: string
       coordinates: { x: number; y: number }
       rotation: number
+      side: "front" | "back"
       value: string
       sourceComponent: SourceComponentBase | undefined
     }>
@@ -195,6 +196,7 @@ export function processPlatedHoles(
         componentName: sourceComponent?.name || "Unknown",
         coordinates: applyToPoint(transformMmToUm, pcbComponent.center),
         rotation: pcbComponent.rotation || 0,
+        side: pcbComponent.layer === "bottom" ? "back" : "front",
         value: getComponentValue(sourceComponent),
         sourceComponent,
       })
@@ -209,7 +211,7 @@ export function processPlatedHoles(
         refdes: `${c.componentName}_${c.sourceComponent?.source_component_id}`,
         x: c.coordinates.x,
         y: c.coordinates.y,
-        side: "front" as const,
+        side: c.side,
         rotation: c.rotation % 90,
         PN: c.value,
       })),
