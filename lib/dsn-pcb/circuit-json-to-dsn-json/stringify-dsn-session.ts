@@ -14,9 +14,9 @@ export const stringifyDsnSession = (session: DsnSession): string => {
   result += `${indent}(placement\n`
   result += `${indent}${indent}(resolution ${session.placement.resolution.unit} ${session.placement.resolution.value})\n`
   session.placement.components.forEach((component) => {
-    result += `${indent}${indent}(component ${component.name}\n`
+    result += `${indent}${indent}(component ${JSON.stringify(component.name)}\n`
     component.places.forEach((place) => {
-      result += `${indent}${indent}${indent}(place ${place.refdes} ${place.x} ${place.y} ${place.side} ${place.rotation})\n`
+      result += `${indent}${indent}${indent}(place ${JSON.stringify(place.refdes)} ${place.x} ${place.y} ${place.side} ${place.rotation})\n`
     })
     result += `${indent}${indent})\n`
   })
