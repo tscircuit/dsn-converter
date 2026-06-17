@@ -7,6 +7,7 @@ import type {
 import Debug from "debug"
 import { type Matrix, applyToPoint } from "transformation-matrix"
 import { getTraceLength } from "../../../utils/get-trace-length"
+import { mapDsnLayerToCircuitLayer } from "../../../utils/map-dsn-layer-to-circuit-layer"
 import type { Wiring } from "../../types"
 
 const debug = Debug("dsn-converter:convertWiringPathToPcbTraces")
@@ -45,7 +46,7 @@ export const convertWiringPathToPcbTraces = ({
       width: fromSessionSpace
         ? wire.path!.width / 10000 // session space to circuit space
         : wire.path!.width / 1000, // dsn space to circuit space
-      layer: wire.path!.layer.includes("F.") ? "top" : "bottom",
+      layer: mapDsnLayerToCircuitLayer(wire.path!.layer),
     }))
 
     const pcbTrace: PcbTrace = {
