@@ -25,3 +25,26 @@ test("stringify session file", () => {
   expect(reparsedNet.name).toBe(originalNet.name)
   expect(reparsedNet.wires).toHaveLength(originalNet.wires.length)
 })
+
+test("stringify session preserves filenames with spaces", () => {
+  const sessionJson = parseDsnToDsnJson(`(session "routed output.ses"
+    (base_design board.dsn)
+    (placement
+      (resolution um 10)
+    )
+    (was_is)
+    (routes
+      (resolution um 10)
+      (parser
+        (host_cad "freerouting")
+        (host_version "1.0")
+      )
+      (network_out)
+    )
+  )`) as DsnSession
+
+  const stringified = stringifyDsnSession(sessionJson)
+  const reparsed = parseDsnToDsnJson(stringified) as DsnSession
+
+  expect(reparsed.filename).toBe("routed output.ses")
+})

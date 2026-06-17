@@ -5,7 +5,7 @@ export const stringifyDsnSession = (session: DsnSession): string => {
   let result = ""
 
   // Start with session
-  result += `(session ${session.filename}\n`
+  result += `(session ${JSON.stringify(session.filename)}\n`
 
   // Base design
   result += `${indent}(base_design ${session.filename})\n`
