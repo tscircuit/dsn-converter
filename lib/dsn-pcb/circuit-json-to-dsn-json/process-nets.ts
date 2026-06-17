@@ -2,7 +2,11 @@ import { su } from "@tscircuit/soup-util"
 import type { AnyCircuitElement, SourceTrace } from "circuit-json"
 import type { DsnPcb } from "../types"
 
-export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
+export function processNets(
+  circuitElements: AnyCircuitElement[],
+  pcb: DsnPcb,
+  defaultViaName = pcb.structure.via || "Via[0-1]_600:300_um",
+) {
   const componentNameMap = new Map<string, string>()
 
   for (const element of circuitElements) {
@@ -208,7 +212,7 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
         description: `Trace width ${traceWidth}μm`,
         net_names: [],
         circuit: {
-          use_via: "Via[0-1]_600:300_um",
+          use_via: defaultViaName,
         },
         rule: {
           clearances: [
