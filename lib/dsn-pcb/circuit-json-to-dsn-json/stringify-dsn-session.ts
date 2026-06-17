@@ -8,7 +8,7 @@ export const stringifyDsnSession = (session: DsnSession): string => {
   result += `(session ${session.filename}\n`
 
   // Base design
-  result += `${indent}(base_design ${session.filename})\n`
+  result += `${indent}(base_design ${JSON.stringify(session.base_design ?? session.filename)})\n`
 
   // Placement section
   result += `${indent}(placement\n`

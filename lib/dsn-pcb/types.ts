@@ -293,6 +293,7 @@ export interface DsnSession {
   is_dsn_session: true
   is_dsn_pcb?: false
   filename: string
+  base_design?: string
   placement: {
     resolution: Resolution
     components: Array<ComponentPlacement>
