@@ -1,4 +1,20 @@
-import type { DsnSession } from "../types"
+import type { DsnSession, Shape } from "../types"
+
+const stringifyCoordinates = (coordinates: number[]): string =>
+  coordinates.join(" ")
+
+const stringifyPadstackShape = (shape: Shape): string => {
+  switch (shape.shapeType) {
+    case "circle":
+      return `(shape (circle ${shape.layer} ${shape.diameter}))`
+    case "rect":
+      return `(shape (rect ${shape.layer} ${stringifyCoordinates(shape.coordinates)}))`
+    case "polygon":
+      return `(shape (polygon ${shape.layer} ${shape.width} ${stringifyCoordinates(shape.coordinates)}))`
+    case "path":
+      return `(shape (path ${shape.layer} ${shape.width} ${stringifyCoordinates(shape.coordinates)}))`
+  }
+}
 
 export const stringifyDsnSession = (session: DsnSession): string => {
   const indent = "  "
@@ -41,11 +57,7 @@ export const stringifyDsnSession = (session: DsnSession): string => {
     session.routes.library_out.padstacks.forEach((padstack) => {
       result += `${indent}${indent}${indent}(padstack ${JSON.stringify(padstack.name)}\n`
       padstack.shapes.forEach((shape) => {
-        if (shape.shapeType === "circle") {
-          result += `${indent}${indent}${indent}${indent}(shape\n`
-          result += `${indent}${indent}${indent}${indent}${indent}(circle ${shape.layer} ${shape.diameter} 0 0)\n`
-          result += `${indent}${indent}${indent}${indent})\n`
-        }
+        result += `${indent}${indent}${indent}${indent}${stringifyPadstackShape(shape)}\n`
       })
       result += `${indent}${indent}${indent}${indent}(attach ${padstack.attach})\n`
       result += `${indent}${indent}${indent})\n`

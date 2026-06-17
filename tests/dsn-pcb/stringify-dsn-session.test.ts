@@ -25,3 +25,37 @@ test("stringify session file", () => {
   expect(reparsedNet.name).toBe(originalNet.name)
   expect(reparsedNet.wires).toHaveLength(originalNet.wires.length)
 })
+
+test("stringify session preserves library_out padstack shapes", () => {
+  const sessionJson = parseDsnToDsnJson(`(session board.ses
+    (base_design board.dsn)
+    (placement
+      (resolution um 10)
+    )
+    (was_is)
+    (routes
+      (resolution um 10)
+      (parser
+        (host_cad "freerouting")
+        (host_version "1.0")
+      )
+      (library_out
+        (padstack "MixedPadstack"
+          (shape (circle F.Cu 200))
+          (shape (rect F.Cu -100 -50 100 50))
+          (shape (polygon B.Cu 0 -100 -100 100 -100 100 100 -100 100))
+          (shape (path F.Cu 50 0 0 100 0))
+          (attach off)
+        )
+      )
+      (network_out)
+    )
+  )`) as DsnSession
+
+  const stringified = stringifyDsnSession(sessionJson)
+  const reparsed = parseDsnToDsnJson(stringified) as DsnSession
+
+  expect(reparsed.routes.library_out?.padstacks[0].shapes).toEqual(
+    sessionJson.routes.library_out?.padstacks[0].shapes,
+  )
+})
