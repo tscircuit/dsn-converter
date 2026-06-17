@@ -96,7 +96,11 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
       if (shape.shapeType === "polygon") {
         result += `${indent}${indent}${indent}(shape (polygon ${shape.layer} ${shape.width} ${stringifyCoordinates(shape.coordinates)}))\n`
       } else if (shape.shapeType === "circle") {
-        result += `${indent}${indent}${indent}(shape (circle ${shape.layer} ${shape.diameter}))\n`
+        const circleOffset =
+          shape.x !== undefined && shape.y !== undefined
+            ? ` ${shape.x} ${shape.y}`
+            : ""
+        result += `${indent}${indent}${indent}(shape (circle ${shape.layer} ${shape.diameter}${circleOffset}))\n`
       } else if (shape.shapeType === "path") {
         result += `${indent}${indent}${indent}(shape (path ${shape.layer} ${shape.width} ${stringifyCoordinates(shape.coordinates)}))\n`
       }
