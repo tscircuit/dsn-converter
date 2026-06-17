@@ -13,5 +13,8 @@ export function getComponentValue(sourceComponent: any): string {
       return `${(capacitanceUF).toFixed(3)}uF`
     }
   }
+  if (sourceComponent.manufacturer_part_number !== undefined) {
+    return String(sourceComponent.manufacturer_part_number)
+  }
   return ""
 }
