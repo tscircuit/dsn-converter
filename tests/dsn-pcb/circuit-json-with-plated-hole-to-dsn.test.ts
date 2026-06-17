@@ -1,6 +1,10 @@
 import { expect, test } from "bun:test"
 import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
-import { convertCircuitJsonToDsnString, parseDsnToDsnJson } from "lib"
+import {
+  convertCircuitJsonToDsnJson,
+  convertCircuitJsonToDsnString,
+  parseDsnToDsnJson,
+} from "lib"
 import { convertDsnJsonToCircuitJson } from "../../lib/dsn-pcb/dsn-json-to-circuit-json/convert-dsn-json-to-circuit-json.ts"
 
 import differentSizedPlatedHolesCircuitJson from "../assets/repro/different-sized-plated-holes.json"
@@ -11,6 +15,9 @@ import type { DsnPcb } from "lib"
 
 test("circuit json (with plated hole) -> dsn file", async () => {
   // Getting the dsn file from the circuit json
+  const directDsnJson = convertCircuitJsonToDsnJson(
+    circuitJson as AnyCircuitElement[],
+  )
   const dsnFile = convertCircuitJsonToDsnString(
     circuitJson as AnyCircuitElement[],
   )
@@ -38,9 +45,17 @@ test("circuit json (with plated hole) -> dsn file", async () => {
   expect(padstack?.shapes[2].layer).toBe("In2.Cu")
   expect(padstack?.shapes[3].layer).toBe("B.Cu")
   expect((padstack?.shapes[0] as any).diameter).toBe(1000) // Outer diameter in μm
+  expect(
+    directDsnJson.library.padstacks.find(
+      (p) => p.name === "Round[A]Pad_700_1000_um",
+    )?.hole,
+  ).toEqual({ shape: "circle", diameter: 700 })
 })
 
 test("different sized plated holes", async () => {
+  const directDsnJson = convertCircuitJsonToDsnJson(
+    differentSizedPlatedHolesCircuitJson as AnyCircuitElement[],
+  )
   const dsnFile = convertCircuitJsonToDsnString(
     differentSizedPlatedHolesCircuitJson as AnyCircuitElement[],
   )
@@ -67,6 +82,11 @@ test("different sized plated holes", async () => {
   expect(padstack1).toBeDefined()
   expect(padstack1?.shapes).toHaveLength(4) // All 4 copper layers
   expect((padstack1?.shapes[0] as any).diameter).toBe(1200)
+  expect(
+    directDsnJson.library.padstacks.find(
+      (p) => p.name === "Round[A]Pad_1000_1200_um",
+    )?.hole,
+  ).toEqual({ shape: "circle", diameter: 1000 })
 
   const padstack2 = dsnJson.library.padstacks.find(
     (p) => p.name === "Round[A]Pad_2000_2200_um",
@@ -74,4 +94,9 @@ test("different sized plated holes", async () => {
   expect(padstack2).toBeDefined()
   expect(padstack2?.shapes).toHaveLength(4) // All 4 copper layers
   expect((padstack2?.shapes[0] as any).diameter).toBe(2200)
+  expect(
+    directDsnJson.library.padstacks.find(
+      (p) => p.name === "Round[A]Pad_2000_2200_um",
+    )?.hole,
+  ).toEqual({ shape: "circle", diameter: 2000 })
 })
