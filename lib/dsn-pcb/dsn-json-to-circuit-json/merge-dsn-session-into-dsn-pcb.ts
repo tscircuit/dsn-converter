@@ -50,6 +50,7 @@ export function mergeDsnSessionIntoDsnPcb(
     dsnSession.routes.library_out.padstacks.forEach((padstack) => {
       if (!existingPadstackNames.has(padstack.name)) {
         mergedPcb.library.padstacks.push(padstack)
+        existingPadstackNames.add(padstack.name)
       }
     })
   }
