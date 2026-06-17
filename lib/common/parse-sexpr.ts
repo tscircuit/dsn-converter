@@ -44,6 +44,17 @@ export function tokenizeDsn(input: string): Token[] {
       }
       i++ // Skip the closing quote
       tokens.push({ type: "String", value })
+    } else if (char === "+") {
+      let sym = ""
+      while (i < length && !/\s|\(|\)/.test(input[i])) {
+        sym += input[i]
+        i++
+      }
+      if (/^\+(?:\d+(?:\.\d*)?|\.\d+)$/.test(sym)) {
+        tokens.push({ type: "Number", value: parseFloat(sym) })
+      } else {
+        tokens.push({ type: "Symbol", value: sym })
+      }
     } else if (char === "-" || /\d/.test(char)) {
       // Parse number (integer or float)
       let numStr = ""
