@@ -507,7 +507,7 @@ export function processLibrary(nodes: ASTNode[]): Library {
     padstacks: [],
   }
 
-  nodes.forEach((node) => {
+  nodes.forEach((node, index) => {
     if (node.type === "List") {
       const [keyNode, ...rest] = node.children!
       if (keyNode.type === "Atom" && typeof keyNode.value === "string") {
@@ -520,6 +520,14 @@ export function processLibrary(nodes: ASTNode[]): Library {
             library.padstacks!.push(processPadstack(node.children!))
             break
         }
+      }
+    } else if (node.type === "Atom" && node.value === "default") {
+      const defaultViaNode = nodes[index + 1]
+      if (
+        defaultViaNode?.type === "Atom" &&
+        typeof defaultViaNode.value === "string"
+      ) {
+        library.default_via = defaultViaNode.value
       }
     }
   })

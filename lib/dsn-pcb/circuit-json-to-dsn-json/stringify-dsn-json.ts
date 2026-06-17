@@ -104,6 +104,9 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     result += `${indent}${indent}${indent}(attach ${padstack.attach})\n`
     result += `${indent}${indent})\n`
   })
+  if (dsnJson.library.default_via) {
+    result += `${indent}${indent}default ${stringifyValue(dsnJson.library.default_via)}\n`
+  }
   result += `${indent})\n`
 
   // Network section
