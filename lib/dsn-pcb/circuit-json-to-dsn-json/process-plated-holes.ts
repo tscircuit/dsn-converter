@@ -14,6 +14,7 @@ import { getFootprintName } from "lib/utils/get-footprint-name"
 import { getPadstackName } from "lib/utils/get-padstack-name"
 import { applyToPoint, scale } from "transformation-matrix"
 import type { ComponentGroup, DsnPcb, Image, Pin } from "../types"
+import { normalizeDsnRotation } from "./normalize-dsn-rotation"
 
 const transformMmToUm = scale(1000)
 
@@ -210,7 +211,7 @@ export function processPlatedHoles(
         x: c.coordinates.x,
         y: c.coordinates.y,
         side: "front" as const,
-        rotation: c.rotation % 90,
+        rotation: normalizeDsnRotation(c.rotation),
         PN: c.value,
       })),
     })
