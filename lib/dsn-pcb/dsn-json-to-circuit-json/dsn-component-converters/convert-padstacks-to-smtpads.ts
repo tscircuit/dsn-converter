@@ -87,6 +87,17 @@ function isApproximatelyEqual(a: number, b: number) {
   return Math.abs(a - b) < 1e-6
 }
 
+function getPinIdSuffix(pinNumber: string | number): string {
+  if (typeof pinNumber === "number") {
+    return String(pinNumber - 1)
+  }
+
+  if (pinNumber === "+") return "plus"
+  if (pinNumber === "-") return "minus"
+
+  return pinNumber.replace(/[^a-zA-Z0-9_-]/g, "_")
+}
+
 export function convertPadstacksToSmtPads(
   pcb: DsnPcb,
   dsnToCircuitJsonTransform: any,
@@ -286,7 +297,7 @@ export function convertPadstacksToSmtPads(
           const layer = getLayerFromPadstack(padstack)
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${getPinIdSuffix(pin.pin_number)}`,
             ...commonIds,
             shape: "polygon",
             points: getPolygonPoints(polygonShape.coordinates, {
@@ -299,7 +310,7 @@ export function convertPadstacksToSmtPads(
           const layer = getLayerFromPadstack(padstack)
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${getPinIdSuffix(pin.pin_number)}`,
             ...commonIds,
             shape: "rect",
             x: circuitX,
@@ -311,7 +322,7 @@ export function convertPadstacksToSmtPads(
         } else {
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${getPinIdSuffix(pin.pin_number)}`,
             ...commonIds,
             shape: "circle",
             x: circuitX,

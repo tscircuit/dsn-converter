@@ -2,6 +2,12 @@ import type { AnySourceComponent, PcbPort, SourcePort } from "circuit-json"
 import type { DsnPcb, Image, Pin } from "lib/dsn-pcb/types"
 import { type Matrix, applyToPoint } from "transformation-matrix"
 
+function getNumericPinNumber(pinNumber: Pin["pin_number"]): number | undefined {
+  const numericPinNumber = Number(pinNumber)
+
+  return Number.isFinite(numericPinNumber) ? numericPinNumber : undefined
+}
+
 export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
   dsnPcb,
   transformDsnUnitToMm,
@@ -33,13 +39,15 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
       // Create ports for each pin in the image
       if (image.pins) {
         for (const pin of image.pins) {
+          const numericPinNumber = getNumericPinNumber(pin.pin_number)
           const port: SourcePort = {
             type: "source_port",
             source_port_id: `source_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,
             source_component_id: sourceComponent.source_component_id,
             name: `${place.refdes}-${pin.pin_number}`,
-            pin_number: Number(pin.pin_number),
-            port_hints: [],
+            ...(numericPinNumber === undefined
+              ? { port_hints: [pin.pin_number.toString()] }
+              : { pin_number: numericPinNumber, port_hints: [] }),
           }
           // Handle case where place coordinates might be null/undefined
           const placeX = place.x || 0
