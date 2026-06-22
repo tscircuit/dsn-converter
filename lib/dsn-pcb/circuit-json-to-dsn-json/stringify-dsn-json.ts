@@ -102,6 +102,15 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
       }
     })
     result += `${indent}${indent}${indent}(attach ${padstack.attach})\n`
+    if (padstack.hole) {
+      if (padstack.hole.shape === "circle") {
+        result += `${indent}${indent}${indent}(hole (circle ${padstack.hole.diameter}))\n`
+      } else if (padstack.hole.shape === "oval") {
+        result += `${indent}${indent}${indent}(hole (oval ${padstack.hole.width} ${padstack.hole.height}))\n`
+      } else if (padstack.hole.shape === "square") {
+        result += `${indent}${indent}${indent}(hole (square ${padstack.hole.width}))\n`
+      }
+    }
     result += `${indent}${indent})\n`
   })
   result += `${indent})\n`
