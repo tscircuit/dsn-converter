@@ -14,9 +14,7 @@ test("tokenizer parses voltage-style net names as symbols, not number+symbol", (
   // Find the net name tokens (after the 'net' symbol in each group)
   const netNameTokens = tokens.filter(
     (t, i) =>
-      i > 0 &&
-      tokens[i - 1].type === "Symbol" &&
-      tokens[i - 1].value === "net",
+      i > 0 && tokens[i - 1].type === "Symbol" && tokens[i - 1].value === "net",
   )
 
   expect(netNameTokens).toHaveLength(4)

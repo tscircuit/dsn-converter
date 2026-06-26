@@ -42,7 +42,12 @@ export function convertWiresToPcbTraces(
       const viaIndex = viaCounters[netName] ?? 0
       viaCounters[netName] = viaIndex + 1
       tracesAndVias.push(
-        ...convertWiringViaToPcbVias({ wire, transformUmToMm, netName, viaIndex }),
+        ...convertWiringViaToPcbVias({
+          wire,
+          transformUmToMm,
+          netName,
+          viaIndex,
+        }),
       )
       return
     }
