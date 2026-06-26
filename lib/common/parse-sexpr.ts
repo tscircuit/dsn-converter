@@ -45,7 +45,8 @@ export function tokenizeDsn(input: string): Token[] {
       i++ // Skip the closing quote
       tokens.push({ type: "String", value })
     } else if (char === "-" || /\d/.test(char)) {
-      // Parse number (integer or float)
+      // Parse number (integer or float), but fall back to symbol if followed
+      // by non-delimiter characters (e.g. voltage net names like "3.3V", "12VREG")
       let numStr = ""
       if (char === "-") {
         numStr += "-"
@@ -55,7 +56,38 @@ export function tokenizeDsn(input: string): Token[] {
         numStr += input[i]
         i++
       }
-      tokens.push({ type: "Number", value: parseFloat(numStr) })
+      // Handle scientific notation (e.g. 2844.288e-03, 3594.9e+00)
+      if (i < length && /[eE]/.test(input[i])) {
+        const expStart = i
+        let expStr = input[i]
+        i++
+        if (i < length && /[+-]/.test(input[i])) {
+          expStr += input[i]
+          i++
+        }
+        if (i < length && /\d/.test(input[i])) {
+          while (i < length && /\d/.test(input[i])) {
+            expStr += input[i]
+            i++
+          }
+          numStr += expStr
+        } else {
+          i = expStart // backtrack — not valid scientific notation
+        }
+      }
+      // If the next character is not a delimiter (whitespace, parens, quote, EOF),
+      // the token is a symbol (e.g. "3.3V"), not a pure number
+      if (i < length && !/[\s()"\\]/.test(input[i])) {
+        // Continue reading as a symbol
+        let sym = numStr
+        while (i < length && !/[\s()"\\]/.test(input[i])) {
+          sym += input[i]
+          i++
+        }
+        tokens.push({ type: "Symbol", value: sym })
+      } else {
+        tokens.push({ type: "Number", value: parseFloat(numStr) })
+      }
     } else {
       // Parse symbol
       let sym = ""
