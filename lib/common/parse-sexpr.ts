@@ -56,6 +56,25 @@ export function tokenizeDsn(input: string): Token[] {
         numStr += input[i]
         i++
       }
+      // Handle scientific notation (e.g. 2844.288e-03, 3594.9e+00)
+      if (i < length && /[eE]/.test(input[i])) {
+        const expStart = i
+        let expStr = input[i]
+        i++
+        if (i < length && /[+-]/.test(input[i])) {
+          expStr += input[i]
+          i++
+        }
+        if (i < length && /\d/.test(input[i])) {
+          while (i < length && /\d/.test(input[i])) {
+            expStr += input[i]
+            i++
+          }
+          numStr += expStr
+        } else {
+          i = expStart // backtrack — not valid scientific notation
+        }
+      }
       // If the next character is not a delimiter (whitespace, parens, quote, EOF),
       // the token is a symbol (e.g. "3.3V"), not a pure number
       if (i < length && !/[\s()"\\]/.test(input[i])) {
