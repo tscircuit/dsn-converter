@@ -67,12 +67,12 @@ test("convert dsn file -> circuit json -> dsn session -> circuit json", () => {
   const routedCircuitJson = circuitJson.concat(pcbTracesFromAutorouting)
   const pcbTraceFirstPoint = su(routedCircuitJson as any).pcb_trace.list()[0]
     .route[0] as PcbTraceRoutePointWire
-  const smtPadFromRouteStarts = su(
+  const pcbPortFromRouteStarts = su(
     circuitJson as any,
-  ).pcb_smtpad.list()[0] as any
+  ).pcb_port.list()[0] as any
   // Checking the same scale
-  expect(pcbTraceFirstPoint.x).toEqual(smtPadFromRouteStarts.x)
-  expect(pcbTraceFirstPoint.y).toEqual(smtPadFromRouteStarts.y)
+  expect(pcbTraceFirstPoint.x).toEqual(pcbPortFromRouteStarts.x)
+  expect(pcbTraceFirstPoint.y).toEqual(pcbPortFromRouteStarts.y)
 
   const session = convertCircuitJsonToDsnSession(dsnPcb, routedCircuitJson)
 
@@ -103,15 +103,15 @@ test("convert dsn file -> circuit json -> dsn session -> circuit json", () => {
   const pcbTraceFirstPointFromSession = su(
     circuitJsonFromSession as any,
   ).pcb_trace.list()[0].route[0] as PcbTraceRoutePointWire
-  const smtPadFromRouteStartsFromSession = su(
+  const pcbPortFromRouteStartsFromSession = su(
     circuitJsonFromSession as any,
-  ).pcb_smtpad.list()[0] as any
+  ).pcb_port.list()[0] as any
   // Checking the same scale
   expect(pcbTraceFirstPointFromSession.x).toEqual(
-    smtPadFromRouteStartsFromSession.x,
+    pcbPortFromRouteStartsFromSession.x,
   )
   expect(pcbTraceFirstPointFromSession.y).toEqual(
-    smtPadFromRouteStartsFromSession.y,
+    pcbPortFromRouteStartsFromSession.y,
   )
 
   if (debug.enabled) {

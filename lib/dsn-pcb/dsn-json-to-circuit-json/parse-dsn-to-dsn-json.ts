@@ -658,6 +658,22 @@ function processPadstack(nodes: ASTNode[]): Padstack {
           if (rest[0].type === "Atom" && typeof rest[0].value === "string") {
             padstack.attach = rest[0].value
           }
+        } else if (key === "hole") {
+          if (rest[0]?.type === "Atom") {
+            if (typeof rest[0].value === "number") {
+              padstack.hole = { shape: "circle", diameter: rest[0].value }
+            } else if (
+              rest[0].value === "oval" &&
+              rest[1]?.type === "Atom" &&
+              rest[2]?.type === "Atom"
+            ) {
+              padstack.hole = {
+                shape: "oval",
+                width: rest[1].value as number,
+                height: rest[2].value as number,
+              }
+            }
+          }
         }
       }
     }
