@@ -135,10 +135,12 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   // Wiring section
   result += `${indent}(wiring\n`
   ;(dsnJson.wiring?.wires ?? []).forEach((wire) => {
+    const netClause =
+      wire.net === undefined ? "" : `(net ${stringifyValue(wire.net)})`
     if (wire.type === "via") {
-      result += `${indent}${indent}(via ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)}))\n`
+      result += `${indent}${indent}(via ${stringifyPath(wire.path, 3)}${netClause})\n`
     } else {
-      result += `${indent}${indent}(wire ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)})(type ${wire.type}))\n`
+      result += `${indent}${indent}(wire ${stringifyPath(wire.path, 3)}${netClause}(type ${wire.type}))\n`
     }
   })
   result += `${indent})\n`
