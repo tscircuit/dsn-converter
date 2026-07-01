@@ -14,7 +14,6 @@
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@tscircuit/core": "^0.0.349",
-    "@tscircuit/math-utils": "^0.0.36",
     "@types/bun": "latest",
     "@types/debug": "^4.1.12",
     "@types/react": "^19.0.1",
@@ -30,8 +29,10 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@tscircuit/math-utils": "^0.0.36",
     "@tscircuit/soup-util": "^0.0.41",
     "debug": "^4.3.7",
+    "transformation-matrix": "^2.16.1",
     "uuid": "^10.0.0",
     "zod": "^3.23.8"
   }
