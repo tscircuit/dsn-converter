@@ -42,7 +42,7 @@ export function convertCircuitJsonToDsnJson(
     },
     resolution: {
       unit: "um",
-      value: 10,
+      value: 1,
     },
     unit: "um",
     structure: {
