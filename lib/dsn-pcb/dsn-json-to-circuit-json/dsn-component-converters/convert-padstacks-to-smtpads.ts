@@ -31,13 +31,20 @@ function getLayerFromPadstack(
 function getPolygonPoints(
   coordinates: number[],
   center: { x: number; y: number },
+  rotation = 0,
+  mirrored = false,
 ) {
   const points: Array<{ x: number; y: number }> = []
 
   for (let i = 0; i < coordinates.length; i += 2) {
+    const offset = rotateOffset(
+      mirrored ? -coordinates[i] : coordinates[i],
+      coordinates[i + 1],
+      rotation,
+    )
     const point = {
-      x: center.x + coordinates[i] / 1000,
-      y: center.y + coordinates[i + 1] / 1000,
+      x: center.x + offset.x / 1000,
+      y: center.y + offset.y / 1000,
     }
 
     const firstPoint = points[0]
@@ -87,6 +94,25 @@ function isApproximatelyEqual(a: number, b: number) {
   return Math.abs(a - b) < 1e-6
 }
 
+/** Normalize a rotation in degrees to the [0, 360) range */
+function normalizeRotation(rotation: number | undefined): number {
+  return (((rotation ?? 0) % 360) + 360) % 360
+}
+
+/** Rotate a point offset (in um) counter-clockwise around the origin */
+function rotateOffset(x: number, y: number, rotationDeg: number) {
+  const rotation = normalizeRotation(rotationDeg)
+  // Exact results for right angles to avoid floating point drift
+  if (rotation === 0) return { x, y }
+  if (rotation === 90) return { x: -y, y: x }
+  if (rotation === 180) return { x: -x, y: -y }
+  if (rotation === 270) return { x: y, y: -x }
+  const rad = (rotation * Math.PI) / 180
+  const cos = Math.cos(rad)
+  const sin = Math.sin(rad)
+  return { x: x * cos - y * sin, y: x * sin + y * cos }
+}
+
 export function convertPadstacksToSmtPads(
   pcb: DsnPcb,
   dsnToCircuitJsonTransform: any,
@@ -110,6 +136,16 @@ export function convertPadstacksToSmtPads(
       debug("processing place...", { place })
       const { x: compX, y: compY, side } = place
 
+      // SPECCTRA `(place <refdes> <x> <y> <side> <rotation>)`: pin offsets are
+      // defined in the image's coordinate system. For a back-side placement
+      // the image is first mirrored about its Y axis, then the place rotation
+      // is applied counter-clockwise (SPECCTRA's default flip_style
+      // mirror_first, which is also freerouting's default behavior).
+      const placeRotation = normalizeRotation(place.rotation)
+      const isPlaceRotatedRightAngle =
+        placeRotation === 90 || placeRotation === 270
+      const isMirrored = side === "back"
+
       image.pins.forEach((pin) => {
         const padstack = padstacks.find((p) => p.name === pin.padstack_name)
         debug("found padstack", { padstack })
@@ -119,11 +155,16 @@ export function convertPadstacksToSmtPads(
           return
         }
 
+        const pinOffset = rotateOffset(
+          isMirrored ? -pin.x : pin.x,
+          pin.y,
+          placeRotation,
+        )
         const { x: circuitX, y: circuitY } = applyToPoint(
           dsnToCircuitJsonTransform,
           {
-            x: (compX || 0) + pin.x,
-            y: (compY || 0) + pin.y,
+            x: (compX || 0) + pinOffset.x,
+            y: (compY || 0) + pinOffset.y,
           },
         )
 
@@ -177,8 +218,8 @@ export function convertPadstacksToSmtPads(
 
             const major = endpointDist + strokeWidth
             const minor = strokeWidth
-            const outerWidth = isHorizontal ? major : minor
-            const outerHeight = isHorizontal ? minor : major
+            let outerWidth = isHorizontal ? major : minor
+            let outerHeight = isHorizontal ? minor : major
 
             let holeWidth: number
             let holeHeight: number
@@ -201,6 +242,11 @@ export function convertPadstacksToSmtPads(
                 holeWidth = outerWidth * 0.6
                 holeHeight = outerHeight * 0.6
               }
+            }
+
+            if (isPlaceRotatedRightAngle) {
+              ;[outerWidth, outerHeight] = [outerHeight, outerWidth]
+              ;[holeWidth, holeHeight] = [holeHeight, holeWidth]
             }
 
             const platedHole: PcbPlatedHole = {
@@ -289,14 +335,24 @@ export function convertPadstacksToSmtPads(
             pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
             ...commonIds,
             shape: "polygon",
-            points: getPolygonPoints(polygonShape.coordinates, {
-              x: circuitX,
-              y: circuitY,
-            }),
+            points: getPolygonPoints(
+              polygonShape.coordinates,
+              {
+                x: circuitX,
+                y: circuitY,
+              },
+              placeRotation,
+              isMirrored,
+            ),
             layer,
           }
         } else if (rectShape || pathShape || shouldImportPolygonAsRect) {
           const layer = getLayerFromPadstack(padstack)
+          let padWidth = rectangleDimensionsFromPolygon?.width ?? width
+          let padHeight = rectangleDimensionsFromPolygon?.height ?? height
+          if (isPlaceRotatedRightAngle) {
+            ;[padWidth, padHeight] = [padHeight, padWidth]
+          }
           pcbPad = {
             type: "pcb_smtpad",
             pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
@@ -304,8 +360,8 @@ export function convertPadstacksToSmtPads(
             shape: "rect",
             x: circuitX,
             y: circuitY,
-            width: rectangleDimensionsFromPolygon?.width ?? width,
-            height: rectangleDimensionsFromPolygon?.height ?? height,
+            width: padWidth,
+            height: padHeight,
             layer,
           }
         } else {
