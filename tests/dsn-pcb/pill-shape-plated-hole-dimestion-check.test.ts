@@ -1,5 +1,4 @@
 import { expect, test } from "bun:test"
-import { convertCircuitJsonToPcbSvg } from "circuit-to-svg"
 import { convertCircuitJsonToDsnString, parseDsnToDsnJson } from "lib"
 import { convertDsnJsonToCircuitJson } from "../../lib/dsn-pcb/dsn-json-to-circuit-json/convert-dsn-json-to-circuit-json.ts"
 
@@ -8,7 +7,6 @@ import type { DsnPcb } from "lib"
 import circuitJson from "../assets/repro/pill-shaped-plated-hole.json"
 
 test("check pill shape plated hole dimension", async () => {
-  // Getting the dsn file from the circuit json
   const dsnFile = convertCircuitJsonToDsnString(
     circuitJson as AnyCircuitElement[],
   )
@@ -16,14 +14,15 @@ test("check pill shape plated hole dimension", async () => {
   const dsnJson = parseDsnToDsnJson(dsnFile) as DsnPcb
   const circuitJson2 = convertDsnJsonToCircuitJson(dsnJson)
 
-  // TODO: udpate the test to convert this to plated_hole
-  // check if the smtpad has the correct dimensions
-  const pcbSmtpads = circuitJson2.filter((e) => e.type === "pcb_smtpad")
-  expect(pcbSmtpads.length).toBe(1)
+  const platedHoles = circuitJson2.filter(
+    (e) => e.type === "pcb_plated_hole",
+  ) as any[]
+  expect(platedHoles.length).toBe(1)
 
-  expect(
-    pcbSmtpads.some(
-      (p) => p.shape === "rect" && p.width === 1.2 && p.height === 0.6,
-    ),
-  ).toBe(true)
+  const hole = platedHoles[0]
+  expect(hole.shape).toBe("oval")
+  expect(hole.outer_width).toBeCloseTo(1.2, 2)
+  expect(hole.outer_height).toBeCloseTo(1.8, 2)
+  expect(hole.hole_width).toBeCloseTo(0.8, 2)
+  expect(hole.hole_height).toBeCloseTo(1.4, 2)
 })

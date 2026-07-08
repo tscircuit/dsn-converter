@@ -2,6 +2,8 @@ import { su } from "@tscircuit/soup-util"
 import type {
   AnyCircuitElement,
   PcbTrace,
+  PcbTraceRoutePoint,
+  PcbTraceRoutePointVia,
   PcbTraceRoutePointWire,
 } from "circuit-json"
 import Debug from "debug"
@@ -12,6 +14,12 @@ import { convertViaToPcbVia } from "./dsn-component-converters/convert-via-to-pc
 import { convertWiringPathToPcbTraces } from "./dsn-component-converters/convert-wiring-path-to-pcb-traces"
 
 const debug = Debug("dsn-converter")
+
+function hasCoordinatePosition(
+  point: PcbTraceRoutePoint,
+): point is PcbTraceRoutePointWire | PcbTraceRoutePointVia {
+  return point.route_type === "wire" || point.route_type === "via"
+}
 
 export function convertDsnSessionToCircuitJson(
   dsnInput: DsnPcb,
@@ -124,11 +132,17 @@ export function convertDsnSessionToCircuitJson(
         const connectingWires = sessionElements
           .flatMap((segment) =>
             segment.type === "pcb_trace"
-              ? (segment as PcbTrace).route.map((point) => ({
-                  ...point,
-                  x: Number(point.x.toFixed(4)),
-                  y: Number(point.y.toFixed(4)),
-                }))
+              ? (segment as PcbTrace).route.flatMap((point) =>
+                  point.route_type === "wire"
+                    ? [
+                        {
+                          ...point,
+                          x: Number(point.x.toFixed(4)),
+                          y: Number(point.y.toFixed(4)),
+                        },
+                      ]
+                    : [],
+                )
               : [],
           )
           .filter(
@@ -151,6 +165,7 @@ export function convertDsnSessionToCircuitJson(
             // Check all points in the route, not just the last one
             for (let i = 0; i < trace.route.length; i++) {
               const point = trace.route[i]
+              if (!hasCoordinatePosition(point)) continue
               if (point.x === viaX && point.y === viaY) {
                 // Insert via point after the matching point
                 trace.route.splice(i + 1, 0, {
