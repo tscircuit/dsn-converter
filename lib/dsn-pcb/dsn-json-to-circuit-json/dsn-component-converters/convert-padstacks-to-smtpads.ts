@@ -6,7 +6,6 @@ import { applyToPoint } from "transformation-matrix"
 
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
 
-
 function rotatePoint(
   point: { x: number; y: number },
   degrees = 0,
