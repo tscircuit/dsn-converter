@@ -283,7 +283,9 @@ export function convertPadstacksToSmtPads(
           !!polygonShape && !!rectangleDimensionsFromPolygon
 
         const parsedPinNumber = Number(pin.pin_number)
-        const padIdSuffix = !Number.isNaN(parsedPinNumber) ? parsedPinNumber - 1 : pin.pin_number
+        const padIdSuffix = !Number.isNaN(parsedPinNumber)
+          ? parsedPinNumber - 1
+          : pin.pin_number
 
         if (polygonShape && !shouldImportPolygonAsRect) {
           const layer = getLayerFromPadstack(padstack)
