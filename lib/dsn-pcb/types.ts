@@ -191,6 +191,10 @@ export interface Outline {
 export interface Pin {
   padstack_name: string
   pin_number: number | string
+  /**
+   * Optional per-pin padstack rotation in degrees (from `(rotate N)` clause)
+   */
+  rotation?: number
   x: number
   y: number
 }

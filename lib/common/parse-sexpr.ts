@@ -45,17 +45,19 @@ export function tokenizeDsn(input: string): Token[] {
       i++ // Skip the closing quote
       tokens.push({ type: "String", value })
     } else if (char === "-" || /\d/.test(char)) {
-      // Parse number (integer or float)
-      let numStr = ""
-      if (char === "-") {
-        numStr += "-"
+      // Read the whole token first, then classify: a token is only a number
+      // if it is fully numeric. Tokens like "-", "2@1" or "3.3V" are symbols
+      // (pin names / net names), not numbers.
+      let tokenStr = ""
+      while (i < length && !/\s|\(|\)/.test(input[i])) {
+        tokenStr += input[i]
         i++
       }
-      while (i < length && /[\d.]/.test(input[i])) {
-        numStr += input[i]
-        i++
+      if (/^-?(\d+(\.\d+)?|\.\d+)([eE][+-]?\d+)?$/.test(tokenStr)) {
+        tokens.push({ type: "Number", value: parseFloat(tokenStr) })
+      } else {
+        tokens.push({ type: "Symbol", value: tokenStr })
       }
-      tokens.push({ type: "Number", value: parseFloat(numStr) })
     } else {
       // Parse symbol
       let sym = ""
