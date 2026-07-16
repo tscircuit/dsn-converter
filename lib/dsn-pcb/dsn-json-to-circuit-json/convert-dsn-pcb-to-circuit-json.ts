@@ -8,6 +8,7 @@ import { convertDsnPcbComponentsToSourceComponentsAndPorts } from "./dsn-compone
 import { convertNetsToSourceNetsAndTraces } from "./dsn-component-converters/convert-nets-to-source-nets-and-traces"
 import { convertPadstacksToSmtPads } from "./dsn-component-converters/convert-padstacks-to-smtpads"
 import { convertWiresToPcbTraces } from "./dsn-component-converters/convert-wires-to-traces"
+import { convertKeepoutsToPcbKeepouts } from "./dsn-component-converters/convert-keepouts-to-pcb-keepouts"
 
 export function convertDsnPcbToCircuitJson(
   dsnPcb: DsnPcb,
@@ -52,6 +53,9 @@ export function convertDsnPcbToCircuitJson(
 
   // Convert padstacks to SMT pads using the transformation matrix
   elements.push(...convertPadstacksToSmtPads(dsnPcb, transformDsnUnitToMm))
+
+  // Convert image keepout zones to pcb_keepout elements
+elements.push(...convertKeepoutsToPcbKeepouts(dsnPcb, transformDsnUnitToMm))
 
   // Convert wires to PCB traces using the transformation matrix
   if (dsnPcb.wiring && dsnPcb.network) {
