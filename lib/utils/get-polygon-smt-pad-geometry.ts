@@ -1,5 +1,5 @@
-import type { PcbSmtPad } from "circuit-json"
 import { getBoundsFromPoints } from "@tscircuit/math-utils"
+import type { PcbSmtPad } from "circuit-json"
 
 type PolygonPcbSmtPad = Extract<PcbSmtPad, { shape: "polygon" }>
 

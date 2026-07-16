@@ -182,6 +182,15 @@ export interface Image {
   name: string
   outlines: Outline[]
   pins: Pin[]
+  keepouts?: Keepout[]
+}
+
+export interface Keepout {
+  shape: "circle"
+  layer: string
+  diameter: number
+  x: number
+  y: number
 }
 
 export interface Outline {

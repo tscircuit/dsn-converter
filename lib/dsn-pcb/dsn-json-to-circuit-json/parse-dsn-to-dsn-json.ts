@@ -535,7 +535,7 @@ function processImage(nodes: ASTNode[]): Image {
   }
   image.outlines = []
   image.pins = []
-  image.keepouts = [] 
+  image.keepouts = []
 
   nodes.slice(2).forEach((node) => {
     if (node.type === "List") {
@@ -547,7 +547,7 @@ function processImage(nodes: ASTNode[]): Image {
         } else if (key === "pin") {
           const pin = processPin(node.children!)
           if (pin) image.pins!.push(pin)
-        }else if (key === "keepout") {                  
+        } else if (key === "keepout") {
           const keepout = processKeepout(node.children!)
           if (keepout) image.keepouts!.push(keepout)
         }
@@ -559,7 +559,7 @@ function processImage(nodes: ASTNode[]): Image {
 }
 
 function processKeepout(nodes: ASTNode[]): Keepout | null {
-    for (const node of nodes.slice(2)) {
+  for (const node of nodes.slice(2)) {
     if (node.type !== "List" || !node.children) continue
     const [shapeNode, ...args] = node.children
     if (
@@ -575,12 +575,18 @@ function processKeepout(nodes: ASTNode[]): Keepout | null {
         shape: "circle",
         layer: args[0].value,
         diameter: args[1].value,
-        x: args[2]?.type === "Atom" && typeof args[2].value === "number" ? args[2].value : 0,
-        y: args[3]?.type === "Atom" && typeof args[3].value === "number" ? args[3].value : 0,
+        x:
+          args[2]?.type === "Atom" && typeof args[2].value === "number"
+            ? args[2].value
+            : 0,
+        y:
+          args[3]?.type === "Atom" && typeof args[3].value === "number"
+            ? args[3].value
+            : 0,
       }
     }
   }
-  return null 
+  return null
 }
 
 function processOutline(nodes: ASTNode[]): Outline {

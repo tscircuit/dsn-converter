@@ -5,10 +5,10 @@ import type { AnyCircuitElement, PcbBoard } from "circuit-json"
 import { pairs } from "lib/utils/pairs"
 import type { DsnPcb } from "../types"
 import { convertDsnPcbComponentsToSourceComponentsAndPorts } from "./dsn-component-converters/convert-dsn-pcb-components-to-source-components-and-ports"
+import { convertKeepoutsToPcbKeepouts } from "./dsn-component-converters/convert-keepouts-to-pcb-keepouts"
 import { convertNetsToSourceNetsAndTraces } from "./dsn-component-converters/convert-nets-to-source-nets-and-traces"
 import { convertPadstacksToSmtPads } from "./dsn-component-converters/convert-padstacks-to-smtpads"
 import { convertWiresToPcbTraces } from "./dsn-component-converters/convert-wires-to-traces"
-import { convertKeepoutsToPcbKeepouts } from "./dsn-component-converters/convert-keepouts-to-pcb-keepouts"
 
 export function convertDsnPcbToCircuitJson(
   dsnPcb: DsnPcb,
@@ -55,7 +55,7 @@ export function convertDsnPcbToCircuitJson(
   elements.push(...convertPadstacksToSmtPads(dsnPcb, transformDsnUnitToMm))
 
   // Convert image keepout zones to pcb_keepout elements
-elements.push(...convertKeepoutsToPcbKeepouts(dsnPcb, transformDsnUnitToMm))
+  elements.push(...convertKeepoutsToPcbKeepouts(dsnPcb, transformDsnUnitToMm))
 
   // Convert wires to PCB traces using the transformation matrix
   if (dsnPcb.wiring && dsnPcb.network) {
