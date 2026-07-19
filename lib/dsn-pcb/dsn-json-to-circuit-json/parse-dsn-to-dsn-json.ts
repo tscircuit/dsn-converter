@@ -584,11 +584,20 @@ function processPin(nodes: ASTNode[]): Pin | null {
 
     pin.pin_number = pinNumber
 
-    // Parse coordinates
+    // Parse coordinates — start after the pin number, accounting for
+    // optional (rotate N) modifier that shifts the pin number position
+    const coordStartIndex =
+      nodes[2]?.type === "List" &&
+      nodes[2].children?.[0]?.type === "Atom" &&
+      typeof nodes[2].children[0].value === "string" &&
+      nodes[2].children[0].value === "rotate"
+        ? 4
+        : 3
+
     let xValue: number | undefined
     let yValue: number | undefined
 
-    for (let i = 3; i < nodes.length; i++) {
+    for (let i = coordStartIndex; i < nodes.length; i++) {
       const node = nodes[i]
       const nextNode = nodes[i + 1]
 
