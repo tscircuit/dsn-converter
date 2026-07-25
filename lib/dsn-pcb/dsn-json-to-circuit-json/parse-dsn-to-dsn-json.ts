@@ -44,6 +44,11 @@ const debug = Debug("dsn-converter:parse-dsn-to-dsn-json")
 
 // **Process AST into TypeScript Interfaces**
 export function parseDsnToDsnJson(dsnString: string): DsnJson {
+  // Normalize CRLF/CR line endings to LF so parsing is stable regardless of
+  // the platform the DSN file was generated on (e.g. Windows KiCad exports use
+  // CRLF). Without this, parse -> stringify -> parse round-trips are not
+  // idempotent because stringify emits LF.
+  dsnString = dsnString.replace(/\r\n?/g, "\n")
   const tokens = tokenizeDsn(dsnString)
   const ast = parseSexprToAst(tokens)
 
