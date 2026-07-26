@@ -23,11 +23,12 @@ function getLayerFromPadstack(
   padstack: DsnPcb["library"]["padstacks"][number],
   isBackSide: boolean,
 ) {
-  const sourceLayer =
-    padstack.shapes[0].layer.includes("B.") ||
-    padstack.shapes[0].layer === "Bottom"
-      ? "bottom"
-      : "top"
+  // Use the same classification as isThruHolePadstack. A substring check for
+  // "B." plus an equality check for "Bottom" silently misses "B_Cu", which is
+  // then treated as a front-copper pad and mirrored the wrong way.
+  const sourceLayer = BACK_COPPER.has(padstack.shapes[0].layer)
+    ? "bottom"
+    : "top"
 
   if (!isBackSide) return sourceLayer
 
