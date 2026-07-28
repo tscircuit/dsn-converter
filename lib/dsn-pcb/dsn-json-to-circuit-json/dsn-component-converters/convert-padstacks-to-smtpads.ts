@@ -21,7 +21,7 @@ function isThruHolePadstack(padstack: Padstack): boolean {
 
 function getLayerFromPadstack(
   padstack: DsnPcb["library"]["padstacks"][number],
-) {
+): "top" | "bottom" {
   return padstack.shapes[0].layer.includes("B.") ||
     padstack.shapes[0].layer === "Bottom"
     ? "bottom"
@@ -85,6 +85,47 @@ function getRectangleDimensionsFromPolygon(coordinates: number[]) {
 
 function isApproximatelyEqual(a: number, b: number) {
   return Math.abs(a - b) < 1e-6
+}
+
+function getPathPadGeometry(coordinates: number[], pathWidth: number) {
+  const [x1, y1, x2, y2] = coordinates
+  const dx = x2 - x1
+  const dy = y2 - y1
+  const strokeWidth = pathWidth / 1000
+  const pathLength = Math.hypot(dx, dy) / 1000
+  const angle = ((Math.atan2(dy, dx) * 180) / Math.PI + 360) % 360
+  const centerOffset = {
+    x: (x1 + x2) / 2 / 1000,
+    y: (y1 + y2) / 2 / 1000,
+  }
+
+  if (isApproximatelyEqual(Math.abs(dx), 0)) {
+    return {
+      width: strokeWidth,
+      height: pathLength + strokeWidth,
+      radius: strokeWidth / 2,
+      rotation: 0,
+      centerOffset,
+    }
+  }
+
+  if (isApproximatelyEqual(Math.abs(dy), 0)) {
+    return {
+      width: pathLength + strokeWidth,
+      height: strokeWidth,
+      radius: strokeWidth / 2,
+      rotation: 0,
+      centerOffset,
+    }
+  }
+
+  return {
+    width: pathLength + strokeWidth,
+    height: strokeWidth,
+    radius: strokeWidth / 2,
+    rotation: angle,
+    centerOffset,
+  }
 }
 
 export function convertPadstacksToSmtPads(
@@ -241,6 +282,9 @@ export function convertPadstacksToSmtPads(
 
         let width: number
         let height: number
+        const pathPadGeometry = pathShape
+          ? getPathPadGeometry(pathShape.coordinates, pathShape.width)
+          : null
 
         if (rectShape) {
           const [x1, y1, x2, y2] = rectShape.coordinates
@@ -262,10 +306,9 @@ export function convertPadstacksToSmtPads(
           }
           width = Math.abs(maxX - minX) / 1000
           height = Math.abs(maxY - minY) / 1000
-        } else if (pathShape) {
-          const [x1, y1, x2, y2] = pathShape.coordinates
-          width = pathShape.width / 1000
-          height = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) / 1000
+        } else if (pathPadGeometry) {
+          width = pathPadGeometry.width
+          height = pathPadGeometry.height
         } else if (circleShape) {
           const radius = circleShape.diameter / 2 / 1000
           width = radius
@@ -295,7 +338,31 @@ export function convertPadstacksToSmtPads(
             }),
             layer,
           }
-        } else if (rectShape || pathShape || shouldImportPolygonAsRect) {
+        } else if (pathPadGeometry) {
+          const layer = getLayerFromPadstack(padstack)
+          const basePad = {
+            type: "pcb_smtpad" as const,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            ...commonIds,
+            x: circuitX + pathPadGeometry.centerOffset.x,
+            y: circuitY + pathPadGeometry.centerOffset.y,
+            width: pathPadGeometry.width,
+            height: pathPadGeometry.height,
+            radius: pathPadGeometry.radius,
+            layer,
+          }
+          pcbPad =
+            pathPadGeometry.rotation === 0
+              ? {
+                  ...basePad,
+                  shape: "pill",
+                }
+              : {
+                  ...basePad,
+                  shape: "rotated_pill",
+                  ccw_rotation: pathPadGeometry.rotation,
+                }
+        } else if (rectShape || shouldImportPolygonAsRect) {
           const layer = getLayerFromPadstack(padstack)
           pcbPad = {
             type: "pcb_smtpad",
