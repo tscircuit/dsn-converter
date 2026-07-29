@@ -38,7 +38,7 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
             source_port_id: `source_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,
             source_component_id: sourceComponent.source_component_id,
             name: `${place.refdes}-${pin.pin_number}`,
-            pin_number: Number(pin.pin_number),
+            pin_number: pin.pin_number,
             port_hints: [],
           }
           // Handle case where place coordinates might be null/undefined
