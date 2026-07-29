@@ -17,9 +17,7 @@ export function getPinNum(nodes: ASTNode[]): number | string | null {
       nodes[2].children[0].value === "rotate"
 
     // Rotated pins place the actual pin identifier after the rotation list.
-    pinNumber = isRotationList
-      ? nodes[3]?.value
-      : nodes[2].children[0]?.value
+    pinNumber = isRotationList ? nodes[3]?.value : nodes[2].children[0]?.value
   } else if (nodes[2]?.type === "Atom") {
     // Pin number is direct value
     pinNumber = nodes[2].value

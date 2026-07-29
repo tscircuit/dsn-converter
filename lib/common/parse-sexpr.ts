@@ -54,8 +54,7 @@ export function tokenizeDsn(input: string): Token[] {
         i++
       }
 
-      const numericPattern =
-        /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/
+      const numericPattern = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/
 
       if (numericPattern.test(value)) {
         tokens.push({ type: "Number", value: Number(value) })
