@@ -25,9 +25,7 @@ test("standalone signs remain symbolic DSN atoms", () => {
 })
 
 test("complete numeric syntax is classified without corrupting symbols", () => {
-  const ast = parse(
-    "(values 1 -1 +2 3.14 -0.5 .25 1e-6 -2.5E+4 1A G+ G- P$1)",
-  )
+  const ast = parse("(values 1 -1 +2 3.14 -0.5 .25 1e-6 -2.5E+4 1A G+ G- P$1)")
 
   expect(ast.children?.map((node) => node.value)).toEqual([
     "values",
