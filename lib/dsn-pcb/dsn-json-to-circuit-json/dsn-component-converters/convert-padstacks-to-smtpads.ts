@@ -1,6 +1,7 @@
 import type { AnyCircuitElement, PcbPlatedHole, PcbSmtPad } from "circuit-json"
 import Debug from "debug"
 import type { DsnPcb, Padstack } from "lib/dsn-pcb/types"
+import { applyPlaceRotation } from "lib/utils/apply-place-rotation"
 import { parsePadstackName } from "lib/utils/get-padstack-name"
 import { applyToPoint } from "transformation-matrix"
 
@@ -31,13 +32,18 @@ function getLayerFromPadstack(
 function getPolygonPoints(
   coordinates: number[],
   center: { x: number; y: number },
+  rotationDegrees = 0,
 ) {
   const points: Array<{ x: number; y: number }> = []
 
   for (let i = 0; i < coordinates.length; i += 2) {
+    const rotated = applyPlaceRotation(
+      { x: coordinates[i] / 1000, y: coordinates[i + 1] / 1000 },
+      rotationDegrees,
+    )
     const point = {
-      x: center.x + coordinates[i] / 1000,
-      y: center.y + coordinates[i + 1] / 1000,
+      x: center.x + rotated.x,
+      y: center.y + rotated.y,
     }
 
     const firstPoint = points[0]
@@ -108,7 +114,7 @@ export function convertPadstacksToSmtPads(
 
     placementComponent.places.forEach((place) => {
       debug("processing place...", { place })
-      const { x: compX, y: compY, side } = place
+      const { x: compX, y: compY, side, rotation } = place
 
       image.pins.forEach((pin) => {
         const padstack = padstacks.find((p) => p.name === pin.padstack_name)
@@ -119,16 +125,22 @@ export function convertPadstacksToSmtPads(
           return
         }
 
+        const rotatedPinOffset = applyPlaceRotation(
+          { x: pin.x, y: pin.y },
+          rotation,
+          side,
+        )
         const { x: circuitX, y: circuitY } = applyToPoint(
           dsnToCircuitJsonTransform,
           {
-            x: (compX || 0) + pin.x,
-            y: (compY || 0) + pin.y,
+            x: (compX || 0) + rotatedPinOffset.x,
+            y: (compY || 0) + rotatedPinOffset.y,
           },
         )
+        const ccwRotation = (((rotation ?? 0) % 360) + 360) % 360
 
         const commonIds = {
-          pcb_component_id: `${componentId}_${place.refdes}`,
+          pcb_component_id: `pcb_component_${componentId}_${place.refdes}`,
           pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
           port_hints: [pin.pin_number.toString()],
         }
@@ -214,7 +226,7 @@ export function convertPadstacksToSmtPads(
               outer_height: outerHeight,
               hole_width: holeWidth,
               hole_height: holeHeight,
-              ccw_rotation: 0,
+              ccw_rotation: ccwRotation,
               layers: ["top", "bottom"],
             }
             elements.push(platedHole)
@@ -289,25 +301,47 @@ export function convertPadstacksToSmtPads(
             pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
             ...commonIds,
             shape: "polygon",
-            points: getPolygonPoints(polygonShape.coordinates, {
-              x: circuitX,
-              y: circuitY,
-            }),
+            points: getPolygonPoints(
+              polygonShape.coordinates,
+              {
+                x: circuitX,
+                y: circuitY,
+              },
+              ccwRotation,
+            ),
             layer,
           }
         } else if (rectShape || pathShape || shouldImportPolygonAsRect) {
           const layer = getLayerFromPadstack(padstack)
-          pcbPad = {
-            type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
-            ...commonIds,
-            shape: "rect",
-            x: circuitX,
-            y: circuitY,
+          const rectDimensions = {
             width: rectangleDimensionsFromPolygon?.width ?? width,
             height: rectangleDimensionsFromPolygon?.height ?? height,
-            layer,
           }
+          // Rotated placements need the dedicated rotated_rect shape; plain
+          // rects stay as-is so unrotated output is untouched.
+          pcbPad =
+            ccwRotation === 0
+              ? {
+                  type: "pcb_smtpad",
+                  pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+                  ...commonIds,
+                  shape: "rect",
+                  x: circuitX,
+                  y: circuitY,
+                  ...rectDimensions,
+                  layer,
+                }
+              : {
+                  type: "pcb_smtpad",
+                  pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+                  ...commonIds,
+                  shape: "rotated_rect",
+                  x: circuitX,
+                  y: circuitY,
+                  ...rectDimensions,
+                  ccw_rotation: ccwRotation,
+                  layer,
+                }
         } else {
           pcbPad = {
             type: "pcb_smtpad",
