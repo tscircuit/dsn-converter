@@ -21,9 +21,7 @@ export function processUnplatedHoles(
   circuitElements: AnyCircuitElement[],
   pcb: DsnPcb,
 ): void {
-  const holes = circuitElements.filter(
-    (e) => e.type === "pcb_hole",
-  ) as Array<{
+  const holes = circuitElements.filter((e) => e.type === "pcb_hole") as Array<{
     type: "pcb_hole"
     pcb_hole_id: string
     hole_shape: string
@@ -71,9 +69,7 @@ export function processUnplatedHoles(
     const yUm = Math.round(hole.y * 1000)
 
     // Re-use an existing component group if one exists for this image
-    let component = pcb.placement.components.find(
-      (c) => c.name === imageName,
-    )
+    let component = pcb.placement.components.find((c) => c.name === imageName)
     if (!component) {
       component = { name: imageName, places: [] }
       pcb.placement.components.push(component)
