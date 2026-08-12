@@ -23,9 +23,7 @@ test("session network_out net vias survive a parse -> stringify -> reparse round
   // Sanity check the fixture actually exercises this case
   expect(netsWithVias.length).toBeGreaterThan(0)
 
-  const reparsed = parseDsnToDsnJson(
-    stringifyDsnSession(session),
-  ) as DsnSession
+  const reparsed = parseDsnToDsnJson(stringifyDsnSession(session)) as DsnSession
 
   for (const original of netsWithVias) {
     const roundtripped = reparsed.routes.network_out.nets.find(
