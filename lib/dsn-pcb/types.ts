@@ -69,7 +69,7 @@ export interface DsnPcb {
   }
   wiring: {
     wires: Array<{
-      path: {
+      path?: {
         layer: string
         width: number
         /**
@@ -77,8 +77,14 @@ export interface DsnPcb {
          */
         coordinates: number[]
       }
+      polyline_path?: {
+        layer: string
+        width: number
+        coordinates: number[]
+      }
       net: string
-      type: string
+      clearance_class?: string
+      type?: string
     }>
   }
 }

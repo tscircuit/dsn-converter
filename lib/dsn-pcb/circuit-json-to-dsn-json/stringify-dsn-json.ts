@@ -21,7 +21,11 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   }
 
   // Helper function to stringify a path
-  const stringifyPath = (path: any, level: number, keyword = "path"): string => {
+  const stringifyPath = (
+    path: any,
+    level: number,
+    keyword = "path",
+  ): string => {
     const padding = indent.repeat(level)
     return `${padding}(${keyword} ${path.layer} ${path.width}  ${stringifyCoordinates(path.coordinates)})`
   }
