@@ -38,6 +38,21 @@ export function mergeDsnSessionIntoDsnPcb(
           }
         })
       }
+      if (sessionNet.vias) {
+        sessionNet.vias.forEach((via) => {
+          debug("VIA\n----\n", via)
+          mergedPcb.wiring.wires.push({
+            path: {
+              layer: "all",
+              width: 0,
+              // Same ses-unit -> um-unit scaling as wire paths above
+              coordinates: [via.x / 10, via.y / 10],
+            },
+            net: sessionNet.name,
+            type: "via",
+          })
+        })
+      }
     })
   }
 
