@@ -99,6 +99,8 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
         result += `${indent}${indent}${indent}(shape (circle ${shape.layer} ${shape.diameter}))\n`
       } else if (shape.shapeType === "path") {
         result += `${indent}${indent}${indent}(shape (path ${shape.layer} ${shape.width} ${stringifyCoordinates(shape.coordinates)}))\n`
+      } else if (shape.shapeType === "rect") {
+        result += `${indent}${indent}${indent}(shape (rect ${shape.layer} ${stringifyCoordinates(shape.coordinates)}))\n`
       }
     })
     result += `${indent}${indent}${indent}(attach ${padstack.attach})\n`
