@@ -21,20 +21,24 @@ test("stringifyDsnJson doesn't crash on a layer with no property/index", () => {
   // Use a real, otherwise-valid DsnPcb and strip just the one field under
   // test, so we're not hand-rolling a synthetic object that might be
   // invalid in unrelated ways.
-  const withoutLayerProperty: DsnPcb = {
+  // The real DsnPcb type requires `property`, but parseDsnToDsnJson already
+  // produces layers without it for some real-world files (see below), so the
+  // type doesn't match actual runtime shapes here. Cast at the boundary
+  // rather than loosening the shared type for this one test.
+  const withoutLayerProperty = {
     ...dsnJson,
     structure: {
       ...dsnJson.structure,
       layers: dsnJson.structure.layers.map(({ property, ...rest }) => rest),
     },
-  }
+  } as unknown as DsnPcb
 
   expect(() => stringifyDsnJson(withoutLayerProperty)).not.toThrow()
 
   const reparsed = parseDsnToDsnJson(
     stringifyDsnJson(withoutLayerProperty),
   ) as DsnPcb
-  expect(reparsed.structure.layers.map((l) => l.property)).toEqual(
+  expect(reparsed.structure.layers.map((l: any) => l.property)).toEqual(
     withoutLayerProperty.structure.layers.map(() => undefined),
   )
 })
