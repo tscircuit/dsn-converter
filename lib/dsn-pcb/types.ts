@@ -23,13 +23,7 @@ export interface DsnPcb {
         index: number
       }
     }>
-    boundary: {
-      path: {
-        layer: string
-        width: number
-        coordinates: number[]
-      }
-    }
+    boundary: Boundary
     via: string
     rule: {
       clearances: Array<{
@@ -125,10 +119,12 @@ export interface Layer {
 export interface Boundary {
   rect?: {
     type: string
+    layer?: string
     coordinates: number[] // [x1, y1, x2, y2]
   }
   polygon?: {
     type: string
+    layer?: string
     width: number
     coordinates: number[]
   }
