@@ -44,26 +44,23 @@ export function tokenizeDsn(input: string): Token[] {
       }
       i++ // Skip the closing quote
       tokens.push({ type: "String", value })
-    } else if (char === "-" || /\d/.test(char)) {
-      // Parse number (integer or float)
-      let numStr = ""
-      if (char === "-") {
-        numStr += "-"
-        i++
-      }
-      while (i < length && /[\d.]/.test(input[i])) {
-        numStr += input[i]
-        i++
-      }
-      tokens.push({ type: "Number", value: parseFloat(numStr) })
     } else {
-      // Parse symbol
-      let sym = ""
+      // Parse an unquoted atom. DSN atom names can start with digits, e.g.
+      // voltage-like net names such as 3.3V, 5V, 12VREG, or -5V. Read the
+      // whole atom first, then classify it as a number only when the entire
+      // atom is numeric.
+      let atom = ""
       while (i < length && !/\s|\(|\)/.test(input[i])) {
-        sym += input[i]
+        atom += input[i]
         i++
       }
-      tokens.push({ type: "Symbol", value: sym })
+
+      const numberPattern = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/
+      if (numberPattern.test(atom)) {
+        tokens.push({ type: "Number", value: Number(atom) })
+      } else {
+        tokens.push({ type: "Symbol", value: atom })
+      }
     }
   }
 
