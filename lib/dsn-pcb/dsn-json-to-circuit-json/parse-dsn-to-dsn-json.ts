@@ -477,7 +477,7 @@ function processPlace(nodes: ASTNode[]): Places {
     }
   }
 
-  // Process optional PN (part number) if present
+  // Process optional placement metadata if present
   for (let i = coordIndex + 4; i < nodes.length; i++) {
     const node = nodes[i]
     if (
@@ -489,7 +489,15 @@ function processPlace(nodes: ASTNode[]): Places {
       node.children[1].type === "Atom"
     ) {
       places.PN = String(node.children[1].value)
-      break
+    } else if (
+      node.type === "List" &&
+      node.children &&
+      node.children[0].type === "Atom" &&
+      node.children[0].value === "lock_type" &&
+      node.children[1] &&
+      node.children[1].type === "Atom"
+    ) {
+      places.lock_type = String(node.children[1].value)
     }
   }
 
