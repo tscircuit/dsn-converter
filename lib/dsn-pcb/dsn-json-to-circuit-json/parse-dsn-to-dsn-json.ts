@@ -1,5 +1,5 @@
 import Debug from "debug"
-import { getPinNum } from "lib/utils/get-pin-number"
+import { getPinNum, getPinRotation } from "lib/utils/get-pin-number"
 import { getViaCoords } from "lib/utils/get-via-coordinates"
 import {
   type ASTNode,
@@ -577,8 +577,16 @@ function processPin(nodes: ASTNode[]): Pin | null {
       return null
     }
     pin.padstack_name = String(nodes[1].value)
+
+    // Optional per-pin rotation clause: (pin padstack (rotate N) name x y)
+    const pinRotation = getPinRotation(nodes)
+    if (pinRotation !== undefined) {
+      pin.rotation = pinRotation
+    }
+    const pinNameIndex = pinRotation !== undefined ? 3 : 2
+
     // check if pin number is in a List structure
-    const pinNumber = getPinNum(nodes)
+    const pinNumber = getPinNum(nodes, pinNameIndex)
 
     if (pinNumber === null) return null
 
@@ -588,7 +596,7 @@ function processPin(nodes: ASTNode[]): Pin | null {
     let xValue: number | undefined
     let yValue: number | undefined
 
-    for (let i = 3; i < nodes.length; i++) {
+    for (let i = pinNameIndex + 1; i < nodes.length; i++) {
       const node = nodes[i]
       const nextNode = nodes[i + 1]
 
@@ -848,7 +856,10 @@ function processNet(nodes: ASTNode[]): Net {
     ) {
       net.pins = node.children!.slice(1).map((pinNode) => {
         if (pinNode.type === "Atom" && typeof pinNode.value === "string") {
-          return pinNode.value
+          // Pin references may embed the string_quote char around named pins,
+          // e.g. X14-"D-" refers to the pin parsed as D-; strip quotes so the
+          // reference matches the port name
+          return pinNode.value.replaceAll('"', "")
         } else {
           throw new Error("Invalid pin in net")
         }
