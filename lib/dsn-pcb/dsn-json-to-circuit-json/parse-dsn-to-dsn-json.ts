@@ -584,11 +584,19 @@ function processPin(nodes: ASTNode[]): Pin | null {
 
     pin.pin_number = pinNumber
 
-    // Parse coordinates
+    // Rotated pin syntax inserts a rotation list before the pin identifier:
+    // (pin <padstack> (rotate <degrees>) <pin-id> <x> <y>)
+    const hasRotationList =
+      nodes[2]?.type === "List" &&
+      nodes[2].children?.[0]?.type === "Atom" &&
+      nodes[2].children[0].value === "rotate"
+
+    // Parse coordinates after the pin identifier.
     let xValue: number | undefined
     let yValue: number | undefined
+    const coordinateStartIndex = hasRotationList ? 4 : 3
 
-    for (let i = 3; i < nodes.length; i++) {
+    for (let i = coordinateStartIndex; i < nodes.length; i++) {
       const node = nodes[i]
       const nextNode = nodes[i + 1]
 

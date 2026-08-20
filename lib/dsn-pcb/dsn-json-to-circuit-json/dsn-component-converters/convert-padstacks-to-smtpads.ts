@@ -132,6 +132,13 @@ export function convertPadstacksToSmtPads(
           pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
           port_hints: [pin.pin_number.toString()],
         }
+
+        // Preserve named DSN pins instead of coercing them to NaN.
+        // Numeric pins retain the converter's historical zero-based suffix.
+        const pcbSmtPadIdSuffix =
+          typeof pin.pin_number === "number"
+            ? pin.pin_number - 1
+            : pin.pin_number
         const pcbPlatedHoleId = `pcb_plated_hole_${componentId}_${place.refdes}_${pin.pin_number}`
         const parsedPadstackName = parsePadstackName(padstack.name)
 
@@ -286,7 +293,7 @@ export function convertPadstacksToSmtPads(
           const layer = getLayerFromPadstack(padstack)
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pcbSmtPadIdSuffix}`,
             ...commonIds,
             shape: "polygon",
             points: getPolygonPoints(polygonShape.coordinates, {
@@ -299,7 +306,7 @@ export function convertPadstacksToSmtPads(
           const layer = getLayerFromPadstack(padstack)
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pcbSmtPadIdSuffix}`,
             ...commonIds,
             shape: "rect",
             x: circuitX,
@@ -311,7 +318,7 @@ export function convertPadstacksToSmtPads(
         } else {
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pcbSmtPadIdSuffix}`,
             ...commonIds,
             shape: "circle",
             x: circuitX,

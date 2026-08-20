@@ -44,26 +44,23 @@ export function tokenizeDsn(input: string): Token[] {
       }
       i++ // Skip the closing quote
       tokens.push({ type: "String", value })
-    } else if (char === "-" || /\d/.test(char)) {
-      // Parse number (integer or float)
-      let numStr = ""
-      if (char === "-") {
-        numStr += "-"
-        i++
-      }
-      while (i < length && /[\d.]/.test(input[i])) {
-        numStr += input[i]
-        i++
-      }
-      tokens.push({ type: "Number", value: parseFloat(numStr) })
     } else {
-      // Parse symbol
-      let sym = ""
+      // Read the complete unquoted token before deciding whether it is
+      // numeric. Standalone signs such as "+" and "-" are valid DSN
+      // identifiers and must remain symbols.
+      let value = ""
       while (i < length && !/\s|\(|\)/.test(input[i])) {
-        sym += input[i]
+        value += input[i]
         i++
       }
-      tokens.push({ type: "Symbol", value: sym })
+
+      const numericPattern = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/
+
+      if (numericPattern.test(value)) {
+        tokens.push({ type: "Number", value: Number(value) })
+      } else {
+        tokens.push({ type: "Symbol", value })
+      }
     }
   }
 

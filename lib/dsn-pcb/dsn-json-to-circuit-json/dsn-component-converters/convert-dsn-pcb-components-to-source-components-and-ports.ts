@@ -1,4 +1,4 @@
-import type { AnySourceComponent, PcbPort, SourcePort } from "circuit-json"
+﻿import type { AnySourceComponent, PcbPort, SourcePort } from "circuit-json"
 import type { DsnPcb, Image, Pin } from "lib/dsn-pcb/types"
 import { type Matrix, applyToPoint } from "transformation-matrix"
 
@@ -38,8 +38,10 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
             source_port_id: `source_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,
             source_component_id: sourceComponent.source_component_id,
             name: `${place.refdes}-${pin.pin_number}`,
-            pin_number: Number(pin.pin_number),
-            port_hints: [],
+            ...(typeof pin.pin_number === "number"
+              ? { pin_number: pin.pin_number }
+              : {}),
+            port_hints: [pin.pin_number.toString()],
           }
           // Handle case where place coordinates might be null/undefined
           const placeX = place.x || 0
