@@ -17,3 +17,20 @@ test("stringify dsn json", () => {
   // Test that we can parse the generated string back to the same structure
   // expect(reparsedJson).toEqual(dsnJson)
 })
+
+test("stringify parsed pcb without parser section", () => {
+  const dsnWithoutParser = testDsnFile.replace(
+    /\n {2}\(parser[\s\S]*?\n {2}\)\n(?= {2}\(resolution)/,
+    "\n",
+  )
+  const dsnJson = parseDsnToDsnJson(dsnWithoutParser) as DsnPcb
+  const dsnString = stringifyDsnJson(dsnJson)
+  const reparsedJson = parseDsnToDsnJson(dsnString) as DsnPcb
+
+  expect(dsnString).not.toContain("\n  (parser")
+  expect("parser" in reparsedJson).toBe(false)
+
+  for (const key of Object.keys(reparsedJson) as Array<keyof DsnPcb>) {
+    expect(reparsedJson[key]).toEqual(dsnJson[key] as any)
+  }
+})
