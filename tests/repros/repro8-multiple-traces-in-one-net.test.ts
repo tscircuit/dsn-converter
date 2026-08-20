@@ -9,10 +9,10 @@ test("circuit json -> dsn -> circuit json", async () => {
   )
   const circuitJson = parseDsnToCircuitJson(dsnFile)
 
-  const source_trace = su(circuitJson).source_trace.list()
+  const source_trace = su(circuitJson as any).source_trace.list()
   expect(source_trace.length).toBe(2)
 
-  const pcb_trace = su(circuitJson).pcb_trace.list()
+  const pcb_trace = su(circuitJson as any).pcb_trace.list()
   expect(pcb_trace.length).toBe(1)
   expect(pcb_trace[0].source_trace_id).toBe(source_trace[0].source_trace_id)
 

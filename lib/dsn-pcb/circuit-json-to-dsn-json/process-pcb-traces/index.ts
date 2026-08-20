@@ -65,17 +65,17 @@ export function processPcbTraces(
   numLayers = 2,
 ) {
   const dsnWrapper = getDsnTraceOperationsWrapper(pcb)
-  const CJ_TO_DSN_SCALE = pcb.is_dsn_pcb ? 1000 : 10000
+  const CJ_TO_DSN_SCALE = (pcb as any).is_dsn_pcb ? 1000 : 10000
 
   for (const element of circuitElements) {
     if (element.type === "pcb_trace") {
-      const pcbTrace = element
-      const source_trace = su(circuitElements).source_trace.getWhere({
-        source_trace_id: pcbTrace.source_trace_id,
-      })
+      const pcbTrace = element as any
+      const source_trace = su(circuitElements as any)
+        .source_trace.list()
+        .find((t) => t.source_trace_id === pcbTrace.source_trace_id)
       const source_net =
         source_trace &&
-        su(circuitElements)
+        su(circuitElements as any)
           .source_net.list()
           .find((n) =>
             source_trace.connected_source_net_ids.includes(n.source_net_id),

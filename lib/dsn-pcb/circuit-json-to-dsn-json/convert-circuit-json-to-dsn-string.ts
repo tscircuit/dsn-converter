@@ -6,6 +6,7 @@ export const convertCircuitJsonToDsnString = (
   circuitJson: AnyCircuitElement[],
   options: {
     traceClearance?: number
+    resolution?: number
   } = {},
 ) => {
   const dsnJson = convertCircuitJsonToDsnJson(circuitJson, options)

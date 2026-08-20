@@ -9,7 +9,7 @@ const debug = Debug("dsn-converter:getPinNum")
  */
 export function getPinNum(nodes: ASTNode[]): number | string | null {
   // Extract pin number from AST nodes
-  let pinNumber
+  let pinNumber: any
 
   if (nodes[2]?.type === "List" && nodes[2].children) {
     // Pin number is in a List structure

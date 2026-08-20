@@ -23,9 +23,9 @@ test("check smtpad dimension", async () => {
   expect(
     pcbSmtpads.some(
       (p) =>
-        p.shape === "rect" &&
-        Math.round(p.width * 1000) / 1000 === 0.308 &&
-        Math.round(p.height * 1000) / 1000 === 1.324,
+        (p as any).shape === "rect" &&
+        Math.round((p as any).width * 1000) / 1000 === 0.308 &&
+        Math.round((p as any).height * 1000) / 1000 === 1.324,
     ),
   ).toBe(true)
 

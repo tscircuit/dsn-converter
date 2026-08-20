@@ -47,19 +47,19 @@ export function convertDsnSessionToCircuitJson(
           portId.split("-").pop()?.split("_") ?? []
         const pin_number = parseInt(pad_number.replace("Pad", ""))
 
-        const source_port_component = su(circuitJson)
+        const source_port_component = su(circuitJson as any)
           .source_component.list()
           .find((elm) => elm.name === source_port_component_name)
-        const source_ports = su(circuitJson)
+        const source_ports = su(circuitJson as any)
           .source_port.list()
           .filter(
             (elm) =>
               elm.source_component_id ===
                 source_port_component?.source_component_id &&
-              elm.pin_number === pin_number,
+              (elm as any).pin_number === pin_number,
           )
         // Find the source_trace connecting the source_port
-        const source_trace = su(circuitJson)
+        const source_trace = su(circuitJson as any)
           .source_trace.list()
           .find((elm) =>
             elm.connected_source_port_ids.some((id) =>
@@ -67,13 +67,14 @@ export function convertDsnSessionToCircuitJson(
             ),
           )
         if (source_trace) {
-          st.source_trace_id = source_trace.source_trace_id
+          ;(st as any).source_trace_id = source_trace.source_trace_id
           break
         }
       }
       // If no source_trace was found, use the first port ID as fallback
-      if (!st.source_trace_id) {
-        st.source_trace_id = `source_trace_${st.connected_source_port_ids[0]}`
+      if (!(st as any).source_trace_id) {
+        ;(st as any).source_trace_id =
+          `source_trace_${st.connected_source_port_ids[0]}`
       }
     })
   }

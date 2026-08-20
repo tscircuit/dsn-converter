@@ -1,4 +1,9 @@
-import type { AnySourceComponent, PcbPort, SourcePort } from "circuit-json"
+import type {
+  AnySourceComponent,
+  PcbComponent,
+  PcbPort,
+  SourcePort,
+} from "circuit-json"
 import type { DsnPcb, Image, Pin } from "lib/dsn-pcb/types"
 import { type Matrix, applyToPoint } from "transformation-matrix"
 
@@ -8,8 +13,10 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
 }: {
   dsnPcb: DsnPcb
   transformDsnUnitToMm: Matrix
-}): Array<AnySourceComponent | SourcePort | PcbPort> => {
-  const result: Array<AnySourceComponent | SourcePort | PcbPort> = []
+}): Array<AnySourceComponent | SourcePort | PcbPort | PcbComponent> => {
+  const result: Array<
+    AnySourceComponent | SourcePort | PcbPort | PcbComponent
+  > = []
 
   // Map to store image definitions for component lookup
   const imageMap = new Map(dsnPcb.library.images.map((img) => [img.name, img]))
@@ -29,6 +36,22 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
         ftype: "simple_chip",
       }
       result.push(sourceComponent)
+
+      const pcbComponent: PcbComponent = {
+        type: "pcb_component",
+        pcb_component_id: `pcb_comp_${component.name}_${place.refdes}`,
+        source_component_id: sourceComponent.source_component_id,
+        center: applyToPoint(transformDsnUnitToMm, {
+          x: place.x || 0,
+          y: place.y || 0,
+        }),
+        rotation: place.rotation || 0,
+        layer: place.side === "back" ? "bottom" : "top",
+        width: 0,
+        height: 0,
+        obstructs_within_bounds: false,
+      }
+      result.push(pcbComponent)
 
       // Create ports for each pin in the image
       if (image.pins) {
@@ -52,7 +75,7 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
             pcb_port_id: `pcb_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,
             type: "pcb_port",
             source_port_id: port.source_port_id,
-            pcb_component_id: component.name,
+            pcb_component_id: pcbComponent.pcb_component_id,
             x: pcb_port_center.x,
             y: pcb_port_center.y,
             layers: [place.side === "back" ? "bottom" : "top"],

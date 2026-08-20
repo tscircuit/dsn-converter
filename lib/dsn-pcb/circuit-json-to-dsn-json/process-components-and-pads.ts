@@ -44,8 +44,10 @@ export function processComponentsAndPads(
 
     const footprintName = getFootprintName(sourceComponent!, pcbComponent!)
     const componentName = sourceComponent?.name || "Unknown"
+    const resolution = pcb.resolution.value || 1
+    const transformMmToDsnUnits = scale(1000 * resolution)
     const circuitSpaceCoordinates = applyToPoint(
-      transformMmToUm,
+      transformMmToDsnUnits,
       pcbComponent!.center,
     )
 
@@ -114,6 +116,7 @@ export function processComponentsAndPads(
             pad,
             pcbComponent,
             sourcePort,
+            resolution: pcb.resolution.value || 1,
           })
         })
         .filter((pin): pin is Pin => pin !== undefined),
@@ -128,7 +131,7 @@ export function processComponentsAndPads(
         x: component.coordinates.x,
         y: component.coordinates.y,
         side: "front" as const,
-        rotation: component.rotation % 90,
+        rotation: component.rotation,
         PN: component.value,
       })),
     }

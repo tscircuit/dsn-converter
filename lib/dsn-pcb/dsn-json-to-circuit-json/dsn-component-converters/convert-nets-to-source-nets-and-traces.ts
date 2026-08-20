@@ -27,6 +27,11 @@ export const convertNetsToSourceNetsAndTraces = ({
         const source_port = source_ports.find((sp) => sp.name === pin)
         if (source_port) {
           connected_source_port_ids.push(source_port.source_port_id)
+        } else {
+          console.log(`Could not find source port for pin: ${pin}`)
+          console.log(
+            `Available ports: ${source_ports.map((sp) => sp.name).join(", ")}`,
+          )
         }
       }
     }

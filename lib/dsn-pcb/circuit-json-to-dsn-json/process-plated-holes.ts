@@ -1,6 +1,7 @@
 import { su } from "@tscircuit/soup-util"
 import type {
   AnyCircuitElement,
+  PcbComponent,
   SourceComponentBase,
   SourcePort,
 } from "circuit-json"
@@ -15,14 +16,14 @@ import { getPadstackName } from "lib/utils/get-padstack-name"
 import { applyToPoint, scale } from "transformation-matrix"
 import type { ComponentGroup, DsnPcb, Image, Pin } from "../types"
 
-const transformMmToUm = scale(1000)
-
 export function processPlatedHoles(
   componentGroups: ComponentGroup[],
   circuitElements: AnyCircuitElement[],
   pcb: DsnPcb,
   numLayers = 2,
 ) {
+  const transformMmToUm = scale(1000 * (pcb.resolution.value || 1))
+
   /**
    * Helpers
    */
@@ -56,10 +57,10 @@ export function processPlatedHoles(
           layer: "all",
         })
         if (!processedPadstacks.has(name)) {
-          const iW = Math.round(hole.hole_width * 1000)
-          const iH = Math.round(hole.hole_height * 1000)
           const oW = Math.round(hole.outer_width * 1000)
           const oH = Math.round(hole.outer_height * 1000)
+          const iW = Math.round(hole.hole_width * 1000)
+          const iH = Math.round(hole.hole_height * 1000)
           pcb.library.padstacks.push(
             createOvalPadstack(name, oW, oH, iW, iH, numLayers),
           )
@@ -122,7 +123,6 @@ export function processPlatedHoles(
   /**
    * MAIN
    */
-
   const componentsByFootprint = new Map<
     string,
     Array<{
@@ -131,6 +131,7 @@ export function processPlatedHoles(
       rotation: number
       value: string
       sourceComponent: SourceComponentBase | undefined
+      pcbComponent: PcbComponent
     }>
   >()
 
@@ -138,16 +139,19 @@ export function processPlatedHoles(
     const { pcb_component_id, pcb_plated_holes, pcb_smtpads } = group
     if (pcb_plated_holes.length === 0) continue
 
-    const pcbComponent = su(circuitElements)
+    const pcbComponent = su(circuitElements as any)
       .pcb_component.list()
       .find((e) => e.pcb_component_id === pcb_component_id)
     if (!pcbComponent) continue
 
-    const sourceComponent = su(circuitElements)
+    const sourceComponent = su(circuitElements as any)
       .source_component.list()
       .find((e) => e.source_component_id === pcbComponent.source_component_id)
 
-    const footprintName = getFootprintName(sourceComponent!, pcbComponent!)
+    const footprintName = getFootprintName(
+      sourceComponent! as any,
+      pcbComponent! as any,
+    )
     const image = ensureImage(footprintName)
     const nextPinNumber = createNextPinNumberGenerator(image)
 
@@ -157,23 +161,34 @@ export function processPlatedHoles(
 
       // Resolve sourcePort (if any)
       const pcbPort = hole.pcb_port_id
-        ? su(circuitElements)
+        ? su(circuitElements as any)
             .pcb_port.list()
             .find((e) => e.pcb_port_id === hole.pcb_port_id)
         : undefined
       const sourcePort = pcbPort
-        ? su(circuitElements)
+        ? su(circuitElements as any)
             .source_port.list()
             .find((e) => e.source_port_id === pcbPort.source_port_id)
         : undefined
 
       const pinNumber = findNumericHint(sourcePort) ?? nextPinNumber()
 
+      // Apply rotation to the hole offset
+      const rotationRad = (pcbComponent.rotation * Math.PI) / 180
+      const cosR = Math.cos(rotationRad)
+      const sinR = Math.sin(rotationRad)
+
+      const dx = Number(hole.x.toFixed(3)) - pcbComponent.center.x
+      const dy = Number(hole.y.toFixed(3)) - pcbComponent.center.y
+
+      const rotatedX = dx * cosR + dy * sinR
+      const rotatedY = -dx * sinR + dy * cosR
+
       const pin: Pin = {
         padstack_name: padstackName,
         pin_number: pinNumber,
-        x: (Number(hole.x.toFixed(3)) - pcbComponent.center.x) * 1000,
-        y: (Number(hole.y.toFixed(3)) - pcbComponent.center.y) * 1000,
+        x: rotatedX * 1000 * (pcb.resolution.value || 1),
+        y: rotatedY * 1000 * (pcb.resolution.value || 1),
       }
 
       // Avoid duplicates
@@ -190,13 +205,13 @@ export function processPlatedHoles(
     if (pcb_smtpads.length === 0) {
       const key = footprintName
       if (!componentsByFootprint.has(key)) componentsByFootprint.set(key, [])
-
       componentsByFootprint.get(key)!.push({
         componentName: sourceComponent?.name || "Unknown",
         coordinates: applyToPoint(transformMmToUm, pcbComponent.center),
         rotation: pcbComponent.rotation || 0,
         value: getComponentValue(sourceComponent),
         sourceComponent,
+        pcbComponent: pcbComponent as any,
       })
     }
   }
@@ -206,13 +221,13 @@ export function processPlatedHoles(
     pcb.placement.components.push({
       name: footprint,
       places: comps.map((c) => ({
-        refdes: `${c.componentName}_${c.sourceComponent?.source_component_id}`,
+        refdes: c.componentName,
         x: c.coordinates.x,
         y: c.coordinates.y,
-        side: "front" as const,
-        rotation: c.rotation % 90,
+        side: c.pcbComponent.layer === "bottom" ? "back" : "front",
+        rotation: c.rotation,
         PN: c.value,
       })),
-    })
+    } as any)
   }
 }

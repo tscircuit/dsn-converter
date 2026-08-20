@@ -1,5 +1,4 @@
 import type { PcbSmtPad } from "circuit-json"
-
 import type { PcbComponent, SourcePort } from "circuit-json"
 import type { Pin } from "lib"
 import { type PadstackNameArgs, getPadstackName } from "./get-padstack-name"
@@ -9,10 +8,12 @@ export function createPinForImage({
   pad,
   pcbComponent,
   sourcePort,
+  resolution = 1,
 }: {
   pad: PcbSmtPad
   pcbComponent: PcbComponent
   sourcePort: SourcePort | undefined
+  resolution?: number
 }): Pin | undefined {
   if (!sourcePort) return undefined
 
@@ -52,15 +53,32 @@ export function createPinForImage({
     layer: pad.layer as PcbSmtPad["layer"],
     customDescriptor,
   }
+
   const padCenter = isPolygon
     ? polygonPadGeometry!.center
     : { x: pad.x, y: pad.y }
 
+  const multiplier = 1000 * resolution
+
+  // Apply rotation to the pad offset
+  const rotationRad = (pcbComponent.rotation * Math.PI) / 180
+  const cosR = Math.cos(rotationRad)
+  const sinR = Math.sin(rotationRad)
+
+  const dx = padCenter.x - pcbComponent.center.x
+  const dy = padCenter.y - pcbComponent.center.y
+
+  // Rotate the offset to match DSN's relative-to-component-center system
+  const rotatedX = dx * cosR + dy * sinR
+  const rotatedY = -dx * sinR + dy * cosR
+
   return {
     padstack_name: getPadstackName(padstackParams),
     pin_number:
-      sourcePort.port_hints?.find((hint) => !Number.isNaN(Number(hint))) || 1,
-    x: (padCenter.x - pcbComponent.center.x) * 1000,
-    y: (padCenter.y - pcbComponent.center.y) * 1000,
+      sourcePort.pin_number ||
+      sourcePort.port_hints?.find((hint) => !Number.isNaN(Number(hint))) ||
+      1,
+    x: rotatedX * multiplier,
+    y: rotatedY * multiplier,
   }
 }
