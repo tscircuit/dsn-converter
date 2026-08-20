@@ -256,8 +256,8 @@ export interface Class {
   name: string
   description: string
   net_names: string[]
-  circuit: Circuit
-  rule: Rule
+  circuit?: Circuit
+  rule?: Rule
 }
 
 export interface Circuit {
