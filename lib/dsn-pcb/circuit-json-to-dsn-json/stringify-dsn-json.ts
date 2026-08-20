@@ -26,6 +26,12 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     return `${padding}(path ${path.layer} ${path.width}  ${stringifyCoordinates(path.coordinates)})`
   }
 
+  const stringifyWireMetadata = (wire: any): string => {
+    return wire.clearance_class
+      ? `(clearance_class ${stringifyValue(wire.clearance_class)})`
+      : ""
+  }
+
   // Start with pcb
   result += `(pcb ${dsnJson.filename ? dsnJson.filename : "./converted_dsn.dsn"}\n`
 
@@ -138,7 +144,7 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     if (wire.type === "via") {
       result += `${indent}${indent}(via ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)}))\n`
     } else {
-      result += `${indent}${indent}(wire ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)})(type ${wire.type}))\n`
+      result += `${indent}${indent}(wire ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)})(type ${wire.type})${stringifyWireMetadata(wire)})\n`
     }
   })
   result += `${indent})\n`
