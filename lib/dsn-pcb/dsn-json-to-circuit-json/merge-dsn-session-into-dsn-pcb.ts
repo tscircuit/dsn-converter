@@ -1,7 +1,40 @@
 import Debug from "debug"
-import type { DsnPcb, DsnSession } from "../types"
+import type { ComponentPlacement, DsnPcb, DsnSession } from "../types"
 
 const debug = Debug("dsn-converter:mergeDsnSessionIntoDsnPcb")
+const SESSION_COORDINATE_SCALE = 10
+
+function scaleSessionPlacementForPcb(
+  dsnPcb: DsnPcb,
+  components: ComponentPlacement[],
+): ComponentPlacement[] {
+  return components.map((component) => {
+    const sourceComponent = dsnPcb.placement.components.find(
+      (candidate) => candidate.name === component.name,
+    )
+
+    return {
+      ...component,
+      places: component.places.map((place) => {
+        const sourcePlace = sourceComponent?.places.find(
+          (candidate) => candidate.refdes === place.refdes,
+        )
+        const isSessionScaled =
+          sourcePlace &&
+          place.x === sourcePlace.x * SESSION_COORDINATE_SCALE &&
+          place.y === sourcePlace.y * SESSION_COORDINATE_SCALE
+
+        return isSessionScaled
+          ? {
+              ...place,
+              x: place.x / SESSION_COORDINATE_SCALE,
+              y: place.y / SESSION_COORDINATE_SCALE,
+            }
+          : { ...place }
+      }),
+    }
+  })
+}
 
 export function mergeDsnSessionIntoDsnPcb(
   dsnPcb: DsnPcb,
@@ -12,7 +45,10 @@ export function mergeDsnSessionIntoDsnPcb(
 
   // Update placement if session has different component positions
   if (dsnSession.placement?.components) {
-    mergedPcb.placement.components = dsnSession.placement.components
+    mergedPcb.placement.components = scaleSessionPlacementForPcb(
+      dsnPcb,
+      dsnSession.placement.components,
+    )
   }
 
   // Add wires from session's network_out to PCB's wiring
