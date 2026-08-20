@@ -30,6 +30,7 @@ export interface DsnPcb {
         coordinates: number[]
       }
     }
+    planes?: Plane[]
     via: string
     rule: {
       clearances: Array<{
@@ -110,8 +111,14 @@ export interface Resolution {
 export interface Structure {
   layers: Layer[]
   boundary: Boundary
+  planes?: Plane[]
   via: string
   rule: Rule
+}
+
+export interface Plane {
+  net_name: string
+  polygon: PolygonShape
 }
 
 export interface Layer {
