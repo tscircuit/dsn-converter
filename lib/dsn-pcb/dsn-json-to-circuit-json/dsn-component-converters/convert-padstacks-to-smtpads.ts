@@ -109,8 +109,15 @@ export function convertPadstacksToSmtPads(
     placementComponent.places.forEach((place) => {
       debug("processing place...", { place })
       const { x: compX, y: compY, side } = place
+      const pinNameCounts = new Map<string, number>()
 
       image.pins.forEach((pin) => {
+        const basePinName = String(pin.pin_number)
+        const pinNameCount = pinNameCounts.get(basePinName) ?? 0
+        pinNameCounts.set(basePinName, pinNameCount + 1)
+        const pinName =
+          pinNameCount === 0 ? basePinName : `${basePinName}@${pinNameCount}`
+
         const padstack = padstacks.find((p) => p.name === pin.padstack_name)
         debug("found padstack", { padstack })
 
@@ -129,10 +136,10 @@ export function convertPadstacksToSmtPads(
 
         const commonIds = {
           pcb_component_id: `${componentId}_${place.refdes}`,
-          pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
-          port_hints: [pin.pin_number.toString()],
+          pcb_port_id: `pcb_port_${componentId}-Pad${pinName}_${place.refdes}`,
+          port_hints: [basePinName],
         }
-        const pcbPlatedHoleId = `pcb_plated_hole_${componentId}_${place.refdes}_${pin.pin_number}`
+        const pcbPlatedHoleId = `pcb_plated_hole_${componentId}_${place.refdes}_${pinName}`
         const parsedPadstackName = parsePadstackName(padstack.name)
 
         // ── Through-hole detection ──────────────────────────────────────────
@@ -286,7 +293,7 @@ export function convertPadstacksToSmtPads(
           const layer = getLayerFromPadstack(padstack)
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pinName}`,
             ...commonIds,
             shape: "polygon",
             points: getPolygonPoints(polygonShape.coordinates, {
@@ -299,7 +306,7 @@ export function convertPadstacksToSmtPads(
           const layer = getLayerFromPadstack(padstack)
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pinName}`,
             ...commonIds,
             shape: "rect",
             x: circuitX,
@@ -311,7 +318,7 @@ export function convertPadstacksToSmtPads(
         } else {
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pinName}`,
             ...commonIds,
             shape: "circle",
             x: circuitX,
