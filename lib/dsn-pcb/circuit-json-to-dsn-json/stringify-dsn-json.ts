@@ -60,7 +60,7 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   result += `${indent}${indent}(rule\n`
   result += `${indent}${indent}${indent}(width ${dsnJson.structure.rule.width})\n`
   dsnJson.structure.rule.clearances.forEach((clearance) => {
-    result += `${indent}${indent}${indent}(clearance ${clearance.value}${clearance.type ? ` (type ${clearance.type})` : ""})\n`
+    result += `${indent}${indent}${indent}(clearance ${clearance.value}${clearance.type ? ` (type ${stringifyValue(clearance.type)})` : ""})\n`
   })
   result += `${indent}${indent})\n`
   result += `${indent})\n`
@@ -124,7 +124,7 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
       result += `${indent}${indent}${indent}(rule\n`
       result += `${indent}${indent}${indent}${indent}(width ${cls.rule.width})\n`
       cls.rule.clearances.forEach((clearance) => {
-        result += `${indent}${indent}${indent}${indent}(clearance ${clearance.value}${clearance.type ? ` (type ${clearance.type})` : ""})\n`
+        result += `${indent}${indent}${indent}${indent}(clearance ${clearance.value}${clearance.type ? ` (type ${stringifyValue(clearance.type)})` : ""})\n`
       })
       result += `${indent}${indent}${indent})\n`
     }
