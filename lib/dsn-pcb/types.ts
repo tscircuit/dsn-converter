@@ -112,6 +112,35 @@ export interface Structure {
   boundary: Boundary
   via: string
   rule: Rule
+  autoroute_settings?: AutorouteSettings
+  planes?: Plane[]
+}
+
+export interface Plane {
+  name: string
+  polygon: {
+    layer: string
+    width: number
+    coordinates: number[]
+  }
+}
+
+export interface AutorouteSettings {
+  fanout?: string
+  autoroute?: string
+  postroute?: string
+  vias?: string
+  start_ripup_costs?: number
+  start_pass_no?: number
+  layer_rules?: AutorouteLayerRule[]
+}
+
+export interface AutorouteLayerRule {
+  layer: string
+  active?: string
+  preferred_direction?: string
+  preferred_direction_trace_costs?: number
+  against_preferred_direction_trace_costs?: number
 }
 
 export interface Layer {

@@ -7,6 +7,8 @@ import {
   tokenizeDsn,
 } from "../../common/parse-sexpr"
 import type {
+  AutorouteLayerRule,
+  AutorouteSettings,
   Boundary,
   CircleShape,
   Circuit,
@@ -30,6 +32,7 @@ import type {
   Pin,
   Placement,
   Places,
+  Plane,
   PolygonShape,
   RectShape,
   Resolution,
@@ -236,12 +239,129 @@ export function processStructure(nodes: ASTNode[]): Structure {
           case "rule":
             structure.rule = processRule(node.children!.slice(1))
             break
+          case "autoroute_settings":
+            structure.autoroute_settings = processAutorouteSettings(
+              node.children!.slice(1),
+            )
+            break
+          case "plane":
+            structure.planes ??= []
+            structure.planes.push(processPlane(node.children!))
+            break
         }
       }
     }
   })
 
   return structure as Structure
+}
+
+function processAutorouteSettings(nodes: ASTNode[]): AutorouteSettings {
+  const settings: AutorouteSettings = {}
+
+  nodes.forEach((node) => {
+    if (node.type !== "List") return
+
+    const [keyNode, ...rest] = node.children!
+    if (keyNode.type !== "Atom" || typeof keyNode.value !== "string") return
+
+    const key = keyNode.value
+    const first = rest[0]
+
+    switch (key) {
+      case "fanout":
+      case "autoroute":
+      case "postroute":
+      case "vias":
+        if (first?.type === "Atom" && typeof first.value === "string") {
+          settings[key] = first.value
+        }
+        break
+      case "start_ripup_costs":
+      case "start_pass_no":
+        if (first?.type === "Atom" && typeof first.value === "number") {
+          settings[key] = first.value
+        }
+        break
+      case "layer_rule":
+        settings.layer_rules ??= []
+        settings.layer_rules.push(processAutorouteLayerRule(rest))
+        break
+    }
+  })
+
+  return settings
+}
+
+function processAutorouteLayerRule(nodes: ASTNode[]): AutorouteLayerRule {
+  const layerRule: AutorouteLayerRule = {
+    layer:
+      nodes[0]?.type === "Atom" && typeof nodes[0].value === "string"
+        ? nodes[0].value
+        : "",
+  }
+
+  nodes.slice(1).forEach((node) => {
+    if (node.type !== "List") return
+
+    const [keyNode, valueNode] = node.children!
+    if (keyNode.type !== "Atom" || typeof keyNode.value !== "string") return
+
+    switch (keyNode.value) {
+      case "active":
+      case "preferred_direction":
+        if (valueNode?.type === "Atom" && typeof valueNode.value === "string") {
+          layerRule[keyNode.value] = valueNode.value
+        }
+        break
+      case "preferred_direction_trace_costs":
+      case "against_preferred_direction_trace_costs":
+        if (valueNode?.type === "Atom" && typeof valueNode.value === "number") {
+          layerRule[keyNode.value] = valueNode.value
+        }
+        break
+    }
+  })
+
+  return layerRule
+}
+
+function processPlane(nodes: ASTNode[]): Plane {
+  const plane: Partial<Plane> = {
+    name:
+      nodes[1]?.type === "Atom" && typeof nodes[1].value === "string"
+        ? nodes[1].value
+        : "",
+  }
+
+  // Find the polygon definition
+  for (let i = 2; i < nodes.length; i++) {
+    const node = nodes[i]
+    if (node.type === "List" && node.children?.[0]?.type === "Atom") {
+      const firstVal = node.children[0].value
+      if (firstVal === "polygon" && node.children.length >= 4) {
+        const layerNode = node.children[1]
+        const widthNode = node.children[2]
+        plane.polygon = {
+          layer:
+            layerNode.type === "Atom" && typeof layerNode.value === "string"
+              ? layerNode.value
+              : "",
+          width:
+            widthNode.type === "Atom" && typeof widthNode.value === "number"
+              ? widthNode.value
+              : 0,
+          coordinates: node.children
+            .slice(3)
+            .filter((n) => n.type === "Atom" && typeof n.value === "number")
+            .map((n) => n.value as number),
+        }
+        break
+      }
+    }
+  }
+
+  return plane as Plane
 }
 
 function processLayer(nodes: ASTNode[]): Layer {
