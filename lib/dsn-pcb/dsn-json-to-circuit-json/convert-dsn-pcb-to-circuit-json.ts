@@ -65,6 +65,30 @@ export function convertDsnPcbToCircuitJson(
     )
   }
 
+  if (dsnPcb.structure.planes) {
+    for (const plane of dsnPcb.structure.planes) {
+      if (!plane.polygon) continue
+      const coords = plane.polygon.coordinates
+      const points = []
+      for (let i = 0; i < coords.length; i += 2) {
+        const pt = applyToPoint(transformDsnUnitToMm, {
+          x: coords[i],
+          y: coords[i + 1],
+        })
+        points.push(pt)
+      }
+      elements.push({
+        type: "pcb_copper_pour",
+        pcb_copper_pour_id: `pcb_copper_pour_${plane.net}`,
+        layer: plane.polygon.layer === "Route2" ? "top" : "bottom", // TODO: proper layer mapping
+        shape: "polygon",
+        points,
+        // Optional net assignment:
+        // pcb_net_id: `pcb_net_${plane.net}`
+      } as any)
+    }
+  }
+
   elements.push(
     ...convertDsnPcbComponentsToSourceComponentsAndPorts({
       dsnPcb,

@@ -112,6 +112,7 @@ export interface Structure {
   boundary: Boundary
   via: string
   rule: Rule
+  planes?: Plane[]
 }
 
 export interface Layer {
@@ -133,6 +134,15 @@ export interface Boundary {
     coordinates: number[]
   }
   path?: {
+    layer: string
+    width: number
+    coordinates: number[]
+  }
+}
+
+export interface Plane {
+  net: string
+  polygon?: {
     layer: string
     width: number
     coordinates: number[]

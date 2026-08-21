@@ -211,6 +211,7 @@ export function processResolution(nodes: ASTNode[]): Resolution {
 export function processStructure(nodes: ASTNode[]): Structure {
   const structure: Partial<Structure> = {
     layers: [],
+    planes: [],
   }
 
   nodes.forEach((node) => {
@@ -224,6 +225,9 @@ export function processStructure(nodes: ASTNode[]): Structure {
             break
           case "boundary":
             structure.boundary = processBoundary(node.children!.slice(1))
+            break
+          case "plane":
+            structure.planes!.push(processPlane(node.children!.slice(1)))
             break
           case "via":
             if (
@@ -304,6 +308,35 @@ function processBoundary(nodes: ASTNode[]): Boundary {
     boundary.path = { layer: "", width: 0, coordinates: [] }
   }
   return boundary as Boundary
+}
+
+function processPlane(nodes: ASTNode[]): Plane {
+  const plane: Partial<Plane> = {}
+  
+  if (nodes[0]?.type === "Atom" && typeof nodes[0].value === "string") {
+    plane.net = nodes[0].value
+  }
+
+  const polygonNode = nodes.find(
+    (node) =>
+      node.type === "List" &&
+      node.children?.[0]?.type === "Atom" &&
+      node.children[0].value === "polygon",
+  )
+
+  if (polygonNode) {
+    const polyChildren = polygonNode.children!
+    plane.polygon = {
+      layer: polyChildren[1]?.type === "Atom" ? (polyChildren[1].value as string) : "",
+      width: polyChildren[2]?.type === "Atom" ? (polyChildren[2].value as number) : 0,
+      coordinates: polyChildren
+        .slice(3)
+        .filter((node) => node.type === "Atom" && typeof node.value === "number")
+        .map((node) => node.value as number),
+    }
+  }
+
+  return plane as Plane
 }
 
 function processPath(nodes: ASTNode[]): Path {
