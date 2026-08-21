@@ -33,12 +33,20 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
       // Create ports for each pin in the image
       if (image.pins) {
         for (const pin of image.pins) {
+          const numericPinNumber =
+            typeof pin.pin_number === "number"
+              ? pin.pin_number
+              : Number.parseInt(String(pin.pin_number), 10)
+          const hasValidPinNumber =
+            typeof pin.pin_number === "number" ||
+            !Number.isNaN(numericPinNumber)
+
           const port: SourcePort = {
             type: "source_port",
             source_port_id: `source_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,
             source_component_id: sourceComponent.source_component_id,
             name: `${place.refdes}-${pin.pin_number}`,
-            pin_number: Number(pin.pin_number),
+            pin_number: hasValidPinNumber ? numericPinNumber : undefined,
             port_hints: [],
           }
           // Handle case where place coordinates might be null/undefined
