@@ -6,6 +6,27 @@ import { applyToPoint } from "transformation-matrix"
 
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
 
+function rotatePoint(
+  point: { x: number; y: number },
+  degrees = 0,
+): { x: number; y: number } {
+  const radians = (degrees * Math.PI) / 180
+  const cos = Math.cos(radians)
+  const sin = Math.sin(radians)
+  return {
+    x: point.x * cos - point.y * sin,
+    y: point.x * sin + point.y * cos,
+  }
+}
+
+function isRightAngleRotation(degrees = 0): boolean {
+  const normalizedDegrees = ((degrees % 360) + 360) % 360
+  return (
+    Math.abs(normalizedDegrees - 90) < 0.001 ||
+    Math.abs(normalizedDegrees - 270) < 0.001
+  )
+}
+
 // Layer name sets for front and back copper — covers KiCad (F.Cu/B.Cu) and
 // Freerouting/other tools (Top/Bottom)
 const FRONT_COPPER = new Set(["F.Cu", "Top", "F_Cu"])
@@ -119,11 +140,15 @@ export function convertPadstacksToSmtPads(
           return
         }
 
+        const rotatedPin = rotatePoint(
+          { x: pin.x, y: pin.y },
+          place.rotation ?? 0,
+        )
         const { x: circuitX, y: circuitY } = applyToPoint(
           dsnToCircuitJsonTransform,
           {
-            x: (compX || 0) + pin.x,
-            y: (compY || 0) + pin.y,
+            x: (compX || 0) + rotatedPin.x,
+            y: (compY || 0) + rotatedPin.y,
           },
         )
 
@@ -273,6 +298,10 @@ export function convertPadstacksToSmtPads(
         } else {
           console.warn(`No valid shape found for padstack: ${padstack.name}`)
           return
+        }
+
+        if (isRightAngleRotation((place.rotation ?? 0) + (pin.rotation ?? 0))) {
+          ;[width, height] = [height, width]
         }
 
         let pcbPad: PcbSmtPad
