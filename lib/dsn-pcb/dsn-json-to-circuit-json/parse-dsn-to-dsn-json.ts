@@ -1,5 +1,5 @@
 import Debug from "debug"
-import { getPinNum } from "lib/utils/get-pin-number"
+import { getPinNum, getPinNumberNodeIndex } from "lib/utils/get-pin-number"
 import { getViaCoords } from "lib/utils/get-via-coordinates"
 import {
   type ASTNode,
@@ -588,7 +588,7 @@ function processPin(nodes: ASTNode[]): Pin | null {
     let xValue: number | undefined
     let yValue: number | undefined
 
-    for (let i = 3; i < nodes.length; i++) {
+    for (let i = getPinNumberNodeIndex(nodes) + 1; i < nodes.length; i++) {
       const node = nodes[i]
       const nextNode = nodes[i + 1]
 

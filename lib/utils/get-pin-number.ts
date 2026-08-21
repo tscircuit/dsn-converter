@@ -7,16 +7,39 @@ const debug = Debug("dsn-converter:getPinNum")
  * Process pin identifier from AST nodes and convert to appropriate type
  * Handles both extraction from nodes and type conversion in one step
  */
+export function getPinNumberNodeIndex(nodes: ASTNode[]): number {
+  let pinNumberIndex = 2
+
+  while (true) {
+    const maybeRotateNode = nodes[pinNumberIndex]
+    if (
+      maybeRotateNode?.type !== "List" ||
+      maybeRotateNode.children?.[0]?.type !== "Atom" ||
+      maybeRotateNode.children[0].value !== "rotate"
+    ) {
+      break
+    }
+
+    pinNumberIndex++
+  }
+
+  return pinNumberIndex
+}
+
 export function getPinNum(nodes: ASTNode[]): number | string | null {
   // Extract pin number from AST nodes
   let pinNumber
+  const pinNumberIndex = getPinNumberNodeIndex(nodes)
 
-  if (nodes[2]?.type === "List" && nodes[2].children) {
+  if (
+    nodes[pinNumberIndex]?.type === "List" &&
+    nodes[pinNumberIndex].children
+  ) {
     // Pin number is in a List structure
-    pinNumber = nodes[2].children[0]?.value
-  } else if (nodes[2]?.type === "Atom") {
+    pinNumber = nodes[pinNumberIndex].children[0]?.value
+  } else if (nodes[pinNumberIndex]?.type === "Atom") {
     // Pin number is direct value
-    pinNumber = nodes[2].value
+    pinNumber = nodes[pinNumberIndex].value
   } else {
     debug("Unsupported pin number format:", nodes)
     return null
@@ -27,6 +50,10 @@ export function getPinNum(nodes: ASTNode[]): number | string | null {
     return pinNumber
   }
   // Try parsing as number first
-  const parsed = parseInt(String(pinNumber), 10)
-  return Number.isNaN(parsed) ? String(pinNumber) : parsed
+  const pinNumberText = String(pinNumber)
+  if (/^-?\d+$/.test(pinNumberText)) {
+    return parseInt(pinNumberText, 10)
+  }
+
+  return pinNumberText
 }

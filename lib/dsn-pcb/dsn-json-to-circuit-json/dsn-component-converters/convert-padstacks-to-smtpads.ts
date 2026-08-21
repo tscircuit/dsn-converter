@@ -87,6 +87,17 @@ function isApproximatelyEqual(a: number, b: number) {
   return Math.abs(a - b) < 1e-6
 }
 
+function getPinIdSuffix(pinNumber: number | string) {
+  const numericPinNumber = Number(pinNumber)
+  if (Number.isFinite(numericPinNumber)) {
+    return String(numericPinNumber - 1)
+  }
+
+  return `pin_${String(pinNumber).replace(/[^a-zA-Z0-9_-]/g, (char) => {
+    return `_${char.charCodeAt(0).toString(16)}_`
+  })}`
+}
+
 export function convertPadstacksToSmtPads(
   pcb: DsnPcb,
   dsnToCircuitJsonTransform: any,
@@ -132,6 +143,7 @@ export function convertPadstacksToSmtPads(
           pcb_port_id: `pcb_port_${componentId}-Pad${pin.pin_number}_${place.refdes}`,
           port_hints: [pin.pin_number.toString()],
         }
+        const pinIdSuffix = getPinIdSuffix(pin.pin_number)
         const pcbPlatedHoleId = `pcb_plated_hole_${componentId}_${place.refdes}_${pin.pin_number}`
         const parsedPadstackName = parsePadstackName(padstack.name)
 
@@ -286,7 +298,7 @@ export function convertPadstacksToSmtPads(
           const layer = getLayerFromPadstack(padstack)
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pinIdSuffix}`,
             ...commonIds,
             shape: "polygon",
             points: getPolygonPoints(polygonShape.coordinates, {
@@ -299,7 +311,7 @@ export function convertPadstacksToSmtPads(
           const layer = getLayerFromPadstack(padstack)
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pinIdSuffix}`,
             ...commonIds,
             shape: "rect",
             x: circuitX,
@@ -311,7 +323,7 @@ export function convertPadstacksToSmtPads(
         } else {
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pinIdSuffix}`,
             ...commonIds,
             shape: "circle",
             x: circuitX,

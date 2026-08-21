@@ -13,6 +13,16 @@ export function tokenizeDsn(input: string): Token[] {
   let i = 0
   const length = input.length
 
+  const isNumberStart = (index: number) => {
+    const char = input[index]
+    if (/\d/.test(char)) return true
+    if (char !== "-") return false
+
+    const nextChar = input[index + 1]
+    if (/\d/.test(nextChar)) return true
+    return nextChar === "." && /\d/.test(input[index + 2])
+  }
+
   while (i < length) {
     const char = input[i]
 
@@ -44,7 +54,7 @@ export function tokenizeDsn(input: string): Token[] {
       }
       i++ // Skip the closing quote
       tokens.push({ type: "String", value })
-    } else if (char === "-" || /\d/.test(char)) {
+    } else if (isNumberStart(i)) {
       // Parse number (integer or float)
       let numStr = ""
       if (char === "-") {
