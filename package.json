@@ -21,13 +21,16 @@
     "@tscircuit/math-utils": "^0.0.36",
     "@types/bun": "latest",
     "@types/debug": "^4.1.12",
+    "@types/looks-same": "^4.0.1",
+    "@types/node": "^26.1.1",
     "@types/react": "^19.0.1",
     "@types/uuid": "^10.0.0",
     "bun-match-svg": "^0.0.3",
     "circuit-json": "^0.0.433",
     "circuit-to-svg": "^0.0.175",
     "react": "18",
-    "tsup": "^8.3.5"
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.3"
   },
   "peerDependencies": {
     "circuit-json": "*",
