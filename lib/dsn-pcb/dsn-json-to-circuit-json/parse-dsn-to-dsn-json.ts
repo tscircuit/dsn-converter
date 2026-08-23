@@ -860,13 +860,10 @@ function processNet(nodes: ASTNode[]): Net {
 
 function processClass(nodes: ASTNode[]): Class {
   const classObj: Partial<Class> = {}
-  if (
-    nodes[1].type === "Atom" &&
-    typeof nodes[1].value === "string" &&
-    nodes[2].type === "Atom" &&
-    typeof nodes[2].value === "string"
-  ) {
+  if (nodes[1].type === "Atom" && typeof nodes[1].value === "string") {
     classObj.name = nodes[1].value
+  }
+  if (nodes[2]?.type === "Atom" && typeof nodes[2].value === "string") {
     classObj.description = nodes[2].value
   }
 
