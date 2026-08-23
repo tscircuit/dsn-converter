@@ -21,9 +21,13 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   }
 
   // Helper function to stringify a path
-  const stringifyPath = (path: any, level: number): string => {
+  const stringifyPath = (
+    path: any,
+    level: number,
+    keyword = "path",
+  ): string => {
     const padding = indent.repeat(level)
-    return `${padding}(path ${path.layer} ${path.width}  ${stringifyCoordinates(path.coordinates)})`
+    return `${padding}(${keyword} ${path.layer} ${path.width}  ${stringifyCoordinates(path.coordinates)})`
   }
 
   // Start with pcb
@@ -135,10 +139,17 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   // Wiring section
   result += `${indent}(wiring\n`
   ;(dsnJson.wiring?.wires ?? []).forEach((wire) => {
+    const path = wire.path ?? wire.polyline_path
+    const keyword = wire.path ? "path" : "polyline_path"
+    if (!path) return
+    const clearanceClass = wire.clearance_class
+      ? `(clearance_class ${stringifyValue(wire.clearance_class)})`
+      : ""
+    const typeSuffix = wire.type ? `(type ${wire.type})` : ""
     if (wire.type === "via") {
-      result += `${indent}${indent}(via ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)}))\n`
+      result += `${indent}${indent}(via ${stringifyPath(path, 3, keyword)}(net ${stringifyValue(wire.net)})${clearanceClass})\n`
     } else {
-      result += `${indent}${indent}(wire ${stringifyPath(wire.path, 3)}(net ${stringifyValue(wire.net)})(type ${wire.type}))\n`
+      result += `${indent}${indent}(wire ${stringifyPath(path, 3, keyword)}(net ${stringifyValue(wire.net)})${clearanceClass}${typeSuffix})\n`
     }
   })
   result += `${indent})\n`
