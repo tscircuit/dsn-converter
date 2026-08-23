@@ -285,6 +285,7 @@ export interface Wire {
 }
 
 export interface Via {
+  padstack_name?: string
   x: number
   y: number
 }
