@@ -117,7 +117,7 @@ export interface Structure {
 export interface Layer {
   name: string
   type: string
-  property: {
+  property?: {
     index: number
   }
 }
