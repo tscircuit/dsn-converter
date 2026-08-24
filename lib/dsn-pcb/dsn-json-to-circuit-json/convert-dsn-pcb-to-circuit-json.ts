@@ -1,13 +1,67 @@
 import { applyToPoint, fromTriangles, scale } from "transformation-matrix"
 
 import { su } from "@tscircuit/soup-util"
-import type { AnyCircuitElement, PcbBoard } from "circuit-json"
+import type {
+  AnyCircuitElement,
+  LayerRef,
+  PcbBoard,
+  PcbCopperPour,
+} from "circuit-json"
 import { pairs } from "lib/utils/pairs"
 import type { DsnPcb } from "../types"
 import { convertDsnPcbComponentsToSourceComponentsAndPorts } from "./dsn-component-converters/convert-dsn-pcb-components-to-source-components-and-ports"
 import { convertNetsToSourceNetsAndTraces } from "./dsn-component-converters/convert-nets-to-source-nets-and-traces"
 import { convertPadstacksToSmtPads } from "./dsn-component-converters/convert-padstacks-to-smtpads"
 import { convertWiresToPcbTraces } from "./dsn-component-converters/convert-wires-to-traces"
+
+function getLayerRefFromDsnLayer(dsnPcb: DsnPcb, dsnLayer: string): LayerRef {
+  if (dsnLayer === "Top" || dsnLayer === "F.Cu" || dsnLayer === "F_Cu") {
+    return "top"
+  }
+  if (dsnLayer === "Bottom" || dsnLayer === "B.Cu" || dsnLayer === "B_Cu") {
+    return "bottom"
+  }
+
+  const layersByIndex = [...dsnPcb.structure.layers].sort(
+    (a, b) => a.property.index - b.property.index,
+  )
+  const layerIndex = layersByIndex.findIndex((layer) => layer.name === dsnLayer)
+
+  if (layerIndex <= 0) return "top"
+  if (layerIndex === layersByIndex.length - 1) return "bottom"
+
+  return `inner${layerIndex}` as LayerRef
+}
+
+function convertPlanesToCopperPours(
+  dsnPcb: DsnPcb,
+  transformDsnUnitToMm: any,
+): PcbCopperPour[] {
+  return (dsnPcb.structure.planes ?? []).map((plane, planeIndex) => {
+    const points = pairs(plane.polygon.coordinates).map(([x, y]) =>
+      applyToPoint(transformDsnUnitToMm, { x, y }),
+    )
+    const firstPoint = points[0]
+    const lastPoint = points[points.length - 1]
+    const normalizedPoints =
+      firstPoint &&
+      lastPoint &&
+      firstPoint.x === lastPoint.x &&
+      firstPoint.y === lastPoint.y
+        ? points.slice(0, -1)
+        : points
+
+    return {
+      type: "pcb_copper_pour",
+      pcb_copper_pour_id: `pcb_copper_pour_plane_${plane.net}_${planeIndex}`,
+      source_net_id: `source_net_${plane.net}`,
+      layer: getLayerRefFromDsnLayer(dsnPcb, plane.polygon.layer),
+      shape: "polygon",
+      points: normalizedPoints,
+      covered_with_solder_mask: true,
+    }
+  })
+}
 
 export function convertDsnPcbToCircuitJson(
   dsnPcb: DsnPcb,
@@ -49,6 +103,7 @@ export function convertDsnPcbToCircuitJson(
   }
 
   elements.push(board)
+  elements.push(...convertPlanesToCopperPours(dsnPcb, transformDsnUnitToMm))
 
   // Convert padstacks to SMT pads using the transformation matrix
   elements.push(...convertPadstacksToSmtPads(dsnPcb, transformDsnUnitToMm))

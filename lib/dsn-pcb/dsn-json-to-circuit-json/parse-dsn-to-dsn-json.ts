@@ -30,6 +30,7 @@ import type {
   Pin,
   Placement,
   Places,
+  Plane,
   PolygonShape,
   RectShape,
   Resolution,
@@ -211,6 +212,7 @@ export function processResolution(nodes: ASTNode[]): Resolution {
 export function processStructure(nodes: ASTNode[]): Structure {
   const structure: Partial<Structure> = {
     layers: [],
+    planes: [],
   }
 
   nodes.forEach((node) => {
@@ -224,6 +226,9 @@ export function processStructure(nodes: ASTNode[]): Structure {
             break
           case "boundary":
             structure.boundary = processBoundary(node.children!.slice(1))
+            break
+          case "plane":
+            structure.planes!.push(processPlane(node.children!))
             break
           case "via":
             if (
@@ -242,6 +247,29 @@ export function processStructure(nodes: ASTNode[]): Structure {
   })
 
   return structure as Structure
+}
+
+function processPlane(nodes: ASTNode[]): Plane {
+  const netNode = nodes[1]
+  const polygonNode = nodes.find(
+    (node) =>
+      node.type === "List" &&
+      node.children?.[0]?.type === "Atom" &&
+      node.children[0].value === "polygon",
+  )
+
+  if (netNode?.type !== "Atom" || typeof netNode.value !== "string") {
+    throw new Error("Invalid plane format: missing net name")
+  }
+
+  if (!polygonNode) {
+    throw new Error("Invalid plane format: missing polygon")
+  }
+
+  return {
+    net: netNode.value,
+    polygon: processPolygonShape(polygonNode.children!),
+  }
 }
 
 function processLayer(nodes: ASTNode[]): Layer {
