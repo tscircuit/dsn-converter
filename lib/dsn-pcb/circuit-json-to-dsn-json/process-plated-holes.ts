@@ -94,7 +94,7 @@ export function processPlatedHoles(
   function ensureImage(name: string): Image {
     let image = pcb.library.images.find((img) => img.name === name)
     if (!image) {
-      image = { name, outlines: [], pins: [] }
+      image = { name, outlines: [], keepouts: [], pins: [] }
       pcb.library.images.push(image)
     }
     return image

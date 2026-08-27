@@ -181,11 +181,17 @@ export interface Library {
 export interface Image {
   name: string
   outlines: Outline[]
+  keepouts: Keepout[]
   pins: Pin[]
 }
 
 export interface Outline {
   path: Path
+}
+
+export interface Keepout {
+  name: string
+  shape: Shape
 }
 
 export interface Pin {
@@ -229,6 +235,8 @@ export interface PolygonShape extends BaseShape {
 export interface CircleShape extends BaseShape {
   shapeType: "circle"
   diameter: number
+  x?: number
+  y?: number
 }
 
 export interface RectShape extends BaseShape {

@@ -93,6 +93,7 @@ export function processComponentsAndPads(
     const image: Image = {
       name: footprintName,
       outlines: [],
+      keepouts: [],
       pins: componentGroup.pcb_smtpads
         .map((pad) => {
           const pcbComponent = circuitElements.find(
