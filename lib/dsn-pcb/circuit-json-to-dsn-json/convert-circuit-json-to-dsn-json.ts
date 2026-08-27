@@ -9,6 +9,7 @@ import { processComponentsAndPads } from "./process-components-and-pads"
 import { processNets } from "./process-nets"
 import { processPcbTraces } from "./process-pcb-traces"
 import { processPlatedHoles } from "./process-plated-holes"
+import { processUnplatedHoles } from "./process-unplated-holes"
 
 export function convertCircuitJsonToDsnJson(
   circuitElements: AnyCircuitElement[],
@@ -116,6 +117,7 @@ export function convertCircuitJsonToDsnJson(
   const componentGroups = groupComponents(circuitElements)
   processComponentsAndPads(componentGroups, circuitElements, pcb)
   processPlatedHoles(componentGroups, circuitElements, pcb, numLayers)
+  processUnplatedHoles(circuitElements, pcb)
   processNets(circuitElements, pcb)
   processPcbTraces(circuitElements, pcb, numLayers)
   return pcb
