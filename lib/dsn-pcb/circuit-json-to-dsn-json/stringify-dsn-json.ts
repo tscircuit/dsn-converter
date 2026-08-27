@@ -4,13 +4,16 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   const indent = "  "
   let result = ""
 
+  const escapeDsnString = (value: string): string =>
+    value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')
+
   // Helper function to stringify a value with proper formatting
   const stringifyValue = (value: any): string => {
     if (value === null || value === undefined) {
       return '""'
     }
     if (typeof value === "string") {
-      return `"${value}"`
+      return `"${escapeDsnString(value)}"`
     }
     return value.toString()
   }
