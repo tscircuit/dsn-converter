@@ -46,9 +46,11 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   dsnJson.structure.layers.forEach((layer) => {
     result += `${indent}${indent}(layer ${layer.name}\n`
     result += `${indent}${indent}${indent}(type ${layer.type})\n`
-    result += `${indent}${indent}${indent}(property\n`
-    result += `${indent}${indent}${indent}${indent}(index ${layer.property.index})\n`
-    result += `${indent}${indent}${indent})\n`
+    if (typeof layer.property?.index === "number") {
+      result += `${indent}${indent}${indent}(property\n`
+      result += `${indent}${indent}${indent}${indent}(index ${layer.property.index})\n`
+      result += `${indent}${indent}${indent})\n`
+    }
     result += `${indent}${indent})\n`
   })
   if (dsnJson.structure.boundary) {
