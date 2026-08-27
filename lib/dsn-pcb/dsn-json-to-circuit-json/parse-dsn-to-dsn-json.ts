@@ -577,8 +577,27 @@ function processPin(nodes: ASTNode[]): Pin | null {
       return null
     }
     pin.padstack_name = String(nodes[1].value)
+
+    // Handle the optional rotation clause that may appear before the pin id:
+    //   (pin <padstack_id> [(rotate <angle>)] <pin_id> <x> <y>)
+    // e.g. KiCad exports: (pin Oval[A]Pad_4267.2x2133.6_um (rotate 90) 4 5250 0)
+    let pinNodes = nodes
+    const maybeRotateNode = nodes[2]
+    if (
+      maybeRotateNode?.type === "List" &&
+      maybeRotateNode.children?.[0]?.type === "Atom" &&
+      maybeRotateNode.children[0].value === "rotate"
+    ) {
+      const angleNode = maybeRotateNode.children[1]
+      if (angleNode?.type === "Atom" && typeof angleNode.value === "number") {
+        pin.rotation = angleNode.value
+      }
+      // Remove the rotate clause so the pin id and coordinates line up
+      pinNodes = [...nodes.slice(0, 2), ...nodes.slice(3)]
+    }
+
     // check if pin number is in a List structure
-    const pinNumber = getPinNum(nodes)
+    const pinNumber = getPinNum(pinNodes)
 
     if (pinNumber === null) return null
 
@@ -588,9 +607,9 @@ function processPin(nodes: ASTNode[]): Pin | null {
     let xValue: number | undefined
     let yValue: number | undefined
 
-    for (let i = 3; i < nodes.length; i++) {
-      const node = nodes[i]
-      const nextNode = nodes[i + 1]
+    for (let i = 3; i < pinNodes.length; i++) {
+      const node = pinNodes[i]
+      const nextNode = pinNodes[i + 1]
 
       if (node.type === "Atom") {
         if (xValue === undefined) {

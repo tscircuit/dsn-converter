@@ -31,13 +31,15 @@ function getLayerFromPadstack(
 function getPolygonPoints(
   coordinates: number[],
   center: { x: number; y: number },
+  rotation = 0,
 ) {
   const points: Array<{ x: number; y: number }> = []
 
   for (let i = 0; i < coordinates.length; i += 2) {
+    const offset = rotateOffset(coordinates[i], coordinates[i + 1], rotation)
     const point = {
-      x: center.x + coordinates[i] / 1000,
-      y: center.y + coordinates[i + 1] / 1000,
+      x: center.x + offset.x / 1000,
+      y: center.y + offset.y / 1000,
     }
 
     const firstPoint = points[0]
@@ -85,6 +87,25 @@ function getRectangleDimensionsFromPolygon(coordinates: number[]) {
 
 function isApproximatelyEqual(a: number, b: number) {
   return Math.abs(a - b) < 1e-6
+}
+
+/** Normalize a rotation in degrees to the [0, 360) range */
+function normalizeRotation(rotation: number | undefined): number {
+  return (((rotation ?? 0) % 360) + 360) % 360
+}
+
+/** Rotate a point offset (in um) counter-clockwise around the origin */
+function rotateOffset(x: number, y: number, rotationDeg: number) {
+  const rotation = normalizeRotation(rotationDeg)
+  // Exact results for right angles to avoid floating point drift
+  if (rotation === 0) return { x, y }
+  if (rotation === 90) return { x: -y, y: x }
+  if (rotation === 180) return { x: -x, y: -y }
+  if (rotation === 270) return { x: y, y: -x }
+  const rad = (rotation * Math.PI) / 180
+  const cos = Math.cos(rad)
+  const sin = Math.sin(rad)
+  return { x: x * cos - y * sin, y: x * sin + y * cos }
 }
 
 export function convertPadstacksToSmtPads(
@@ -135,6 +156,11 @@ export function convertPadstacksToSmtPads(
         const pcbPlatedHoleId = `pcb_plated_hole_${componentId}_${place.refdes}_${pin.pin_number}`
         const parsedPadstackName = parsePadstackName(padstack.name)
 
+        // Padstack rotation from the pin's `(rotate <angle>)` clause. For
+        // 90°/270° rotations the padstack's width/height are swapped.
+        const pinRotation = normalizeRotation(pin.rotation)
+        const isRotatedRightAngle = pinRotation === 90 || pinRotation === 270
+
         // ── Through-hole detection ──────────────────────────────────────────
         if (isThruHolePadstack(padstack)) {
           const circleShape = padstack.shapes.find(
@@ -177,8 +203,8 @@ export function convertPadstacksToSmtPads(
 
             const major = endpointDist + strokeWidth
             const minor = strokeWidth
-            const outerWidth = isHorizontal ? major : minor
-            const outerHeight = isHorizontal ? minor : major
+            let outerWidth = isHorizontal ? major : minor
+            let outerHeight = isHorizontal ? minor : major
 
             let holeWidth: number
             let holeHeight: number
@@ -201,6 +227,11 @@ export function convertPadstacksToSmtPads(
                 holeWidth = outerWidth * 0.6
                 holeHeight = outerHeight * 0.6
               }
+            }
+
+            if (isRotatedRightAngle) {
+              ;[outerWidth, outerHeight] = [outerHeight, outerWidth]
+              ;[holeWidth, holeHeight] = [holeHeight, holeWidth]
             }
 
             const platedHole: PcbPlatedHole = {
@@ -289,14 +320,23 @@ export function convertPadstacksToSmtPads(
             pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
             ...commonIds,
             shape: "polygon",
-            points: getPolygonPoints(polygonShape.coordinates, {
-              x: circuitX,
-              y: circuitY,
-            }),
+            points: getPolygonPoints(
+              polygonShape.coordinates,
+              {
+                x: circuitX,
+                y: circuitY,
+              },
+              pinRotation,
+            ),
             layer,
           }
         } else if (rectShape || pathShape || shouldImportPolygonAsRect) {
           const layer = getLayerFromPadstack(padstack)
+          let padWidth = rectangleDimensionsFromPolygon?.width ?? width
+          let padHeight = rectangleDimensionsFromPolygon?.height ?? height
+          if (isRotatedRightAngle) {
+            ;[padWidth, padHeight] = [padHeight, padWidth]
+          }
           pcbPad = {
             type: "pcb_smtpad",
             pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
@@ -304,8 +344,8 @@ export function convertPadstacksToSmtPads(
             shape: "rect",
             x: circuitX,
             y: circuitY,
-            width: rectangleDimensionsFromPolygon?.width ?? width,
-            height: rectangleDimensionsFromPolygon?.height ?? height,
+            width: padWidth,
+            height: padHeight,
             layer,
           }
         } else {
