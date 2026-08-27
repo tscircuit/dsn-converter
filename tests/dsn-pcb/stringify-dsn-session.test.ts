@@ -25,3 +25,47 @@ test("stringify session file", () => {
   expect(reparsedNet.name).toBe(originalNet.name)
   expect(reparsedNet.wires).toHaveLength(originalNet.wires.length)
 })
+
+test("stringify session file preserves library_out padstack holes", () => {
+  const sessionJson: DsnSession = {
+    is_dsn_session: true,
+    filename: "hole-test.ses",
+    placement: {
+      resolution: { unit: "um", value: 10 },
+      components: [],
+    },
+    routes: {
+      resolution: { unit: "um", value: 10 },
+      parser: {
+        string_quote: '"',
+        space_in_quoted_tokens: "on",
+        host_cad: "test",
+        host_version: "test",
+      },
+      library_out: {
+        images: [],
+        padstacks: [
+          {
+            name: "Via[0-1]_600:300_um",
+            shapes: [
+              { shapeType: "circle", layer: "F.Cu", diameter: 600 },
+              { shapeType: "circle", layer: "B.Cu", diameter: 600 },
+            ],
+            hole: { shape: "circle", diameter: 300 },
+            attach: "off",
+          },
+        ],
+      },
+      network_out: { nets: [] },
+    },
+  }
+
+  const stringified = stringifyDsnSession(sessionJson)
+  expect(stringified).toContain("(hole (circle 300))")
+
+  const reparsed = parseDsnToDsnJson(stringified) as DsnSession
+  expect(reparsed.routes.library_out?.padstacks[0].hole).toEqual({
+    shape: "circle",
+    diameter: 300,
+  })
+})

@@ -26,6 +26,17 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     return `${padding}(path ${path.layer} ${path.width}  ${stringifyCoordinates(path.coordinates)})`
   }
 
+  const stringifyPadstackHole = (hole: any): string => {
+    if (!hole) return ""
+    if (hole.shape === "circle") {
+      return `(hole (circle ${hole.diameter}))`
+    }
+    if (hole.shape === "square" || hole.shape === "oval") {
+      return `(hole (${hole.shape} ${hole.width} ${hole.height}))`
+    }
+    return ""
+  }
+
   // Start with pcb
   result += `(pcb ${dsnJson.filename ? dsnJson.filename : "./converted_dsn.dsn"}\n`
 
@@ -101,6 +112,10 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
         result += `${indent}${indent}${indent}(shape (path ${shape.layer} ${shape.width} ${stringifyCoordinates(shape.coordinates)}))\n`
       }
     })
+    const hole = stringifyPadstackHole(padstack.hole)
+    if (hole) {
+      result += `${indent}${indent}${indent}${hole}\n`
+    }
     result += `${indent}${indent}${indent}(attach ${padstack.attach})\n`
     result += `${indent}${indent})\n`
   })
