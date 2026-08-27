@@ -85,6 +85,10 @@ export interface DsnPcb {
 
 export interface ComponentPlacement {
   name: string
+  properties?: Array<{
+    name: string
+    value: string | number
+  }>
   places: Array<{
     refdes: string
     PN?: string

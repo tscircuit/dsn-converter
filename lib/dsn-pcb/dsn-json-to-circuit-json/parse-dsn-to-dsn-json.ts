@@ -417,25 +417,58 @@ export function processPlacement(nodes: ASTNode[]): Placement {
 }
 
 function processComponent(nodes: ASTNode[]): ComponentPlacement {
-  const component: Partial<Component> = {
+  const component: Partial<Component> & {
+    properties?: ComponentPlacement["properties"]
+  } = {
     name:
       nodes[1].type === "Atom" && typeof nodes[1].value === "string"
         ? nodes[1].value
         : "",
     places: [],
   }
+  const properties: ComponentPlacement["properties"] = []
 
   nodes.slice(2).forEach((node) => {
-    if (
-      node.type === "List" &&
-      node.children![0].type === "Atom" &&
-      node.children![0].value === "place"
-    ) {
-      component.places!.push(processPlace(node.children!))
+    if (node.type === "List" && node.children![0].type === "Atom") {
+      if (node.children![0].value === "place") {
+        component.places!.push(processPlace(node.children!))
+      } else if (node.children![0].value === "property") {
+        properties.push(...processComponentProperties(node.children!.slice(1)))
+      }
     }
   })
 
+  if (properties.length > 0) {
+    component.properties = properties
+  }
+
   return component as ComponentPlacement
+}
+
+function processComponentProperties(
+  nodes: ASTNode[],
+): NonNullable<ComponentPlacement["properties"]> {
+  return nodes.flatMap((node) => {
+    if (
+      node.type !== "List" ||
+      !node.children ||
+      node.children.length < 2 ||
+      node.children[0].type !== "Atom" ||
+      typeof node.children[0].value !== "string" ||
+      node.children[1].type !== "Atom" ||
+      (typeof node.children[1].value !== "string" &&
+        typeof node.children[1].value !== "number")
+    ) {
+      return []
+    }
+
+    return [
+      {
+        name: node.children[0].value,
+        value: node.children[1].value,
+      },
+    ]
+  })
 }
 
 function processPlace(nodes: ASTNode[]): Places {
