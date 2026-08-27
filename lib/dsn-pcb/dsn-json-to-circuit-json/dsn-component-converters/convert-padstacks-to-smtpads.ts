@@ -282,11 +282,16 @@ export function convertPadstacksToSmtPads(
         const shouldImportPolygonAsRect =
           !!polygonShape && !!rectangleDimensionsFromPolygon
 
+        const parsedPinNumber = Number(pin.pin_number)
+        const padIdSuffix = !Number.isNaN(parsedPinNumber)
+          ? parsedPinNumber - 1
+          : pin.pin_number
+
         if (polygonShape && !shouldImportPolygonAsRect) {
           const layer = getLayerFromPadstack(padstack)
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${padIdSuffix}`,
             ...commonIds,
             shape: "polygon",
             points: getPolygonPoints(polygonShape.coordinates, {
@@ -299,7 +304,7 @@ export function convertPadstacksToSmtPads(
           const layer = getLayerFromPadstack(padstack)
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${padIdSuffix}`,
             ...commonIds,
             shape: "rect",
             x: circuitX,
@@ -311,7 +316,7 @@ export function convertPadstacksToSmtPads(
         } else {
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${padIdSuffix}`,
             ...commonIds,
             shape: "circle",
             x: circuitX,
