@@ -55,6 +55,8 @@ export interface DsnPcb {
       name: string
       description: string
       net_names: string[]
+      clearance_class?: string
+      via_rule?: string
       circuit: {
         use_via: string
       }
@@ -256,6 +258,8 @@ export interface Class {
   name: string
   description: string
   net_names: string[]
+  clearance_class?: string
+  via_rule?: string
   circuit: Circuit
   rule: Rule
 }
