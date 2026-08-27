@@ -7,6 +7,13 @@ import testDsnFile from "../assets/testkicadproject/testkicadproject.dsn" with {
 
 test("stringify dsn json", () => {
   const dsnJson = parseDsnToDsnJson(testDsnFile) as DsnPcb
+  expect(dsnJson.parser).toEqual({
+    string_quote: '"',
+    space_in_quoted_tokens: "on",
+    host_cad: "KiCad's Pcbnew",
+    host_version: "8.0.3",
+  })
+
   const dsnString = stringifyDsnJson(dsnJson)
   const reparsedJson = parseDsnToDsnJson(dsnString) as DsnPcb
 
