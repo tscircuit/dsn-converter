@@ -22,6 +22,7 @@ import type {
   Library,
   Net,
   Network,
+  NetworkVia,
   Outline,
   Padstack,
   Parser as ParserType,
@@ -812,6 +813,7 @@ function processCircleShape(nodes: ASTNode[]): CircleShape {
 export function processNetwork(nodes: ASTNode[]): Network {
   const network: Partial<Network> = {
     nets: [],
+    vias: [],
     classes: [],
   }
 
@@ -822,6 +824,8 @@ export function processNetwork(nodes: ASTNode[]): Network {
         const key = keyNode.value
         if (key === "net") {
           network.nets!.push(processNet(node.children!))
+        } else if (key === "via") {
+          network.vias!.push(processNetworkVia(node.children!))
         } else if (key === "class") {
           network.classes!.push(processClass(node.children!))
         }
@@ -829,6 +833,24 @@ export function processNetwork(nodes: ASTNode[]): Network {
     }
   })
   return network as Network
+}
+
+function processNetworkVia(nodes: ASTNode[]): NetworkVia {
+  const networkVia: Partial<NetworkVia> = {}
+
+  if (nodes[1]?.type === "Atom") {
+    networkVia.name = String(nodes[1].value)
+  }
+
+  if (nodes[2]?.type === "Atom") {
+    networkVia.padstack = String(nodes[2].value)
+  }
+
+  if (nodes[3]?.type === "Atom") {
+    networkVia.clearance_class = String(nodes[3].value)
+  }
+
+  return networkVia as NetworkVia
 }
 
 function processNet(nodes: ASTNode[]): Net {

@@ -51,6 +51,7 @@ export interface DsnPcb {
       name: string
       pins: string[]
     }>
+    vias?: NetworkVia[]
     classes: Array<{
       name: string
       description: string
@@ -244,12 +245,19 @@ export interface PathShape extends BaseShape {
 
 export interface Network {
   nets: Net[]
+  vias?: NetworkVia[]
   classes: Class[]
 }
 
 export interface Net {
   name: string
   pins: string[]
+}
+
+export interface NetworkVia {
+  name: string
+  padstack: string
+  clearance_class?: string
 }
 
 export interface Class {
