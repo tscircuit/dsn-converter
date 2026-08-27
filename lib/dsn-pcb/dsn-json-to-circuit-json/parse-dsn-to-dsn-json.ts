@@ -261,6 +261,16 @@ function processLayer(nodes: ASTNode[]): Layer {
               layer.type = rest[0].value
             }
             break
+          case "direction":
+            if (rest[0].type === "Atom" && typeof rest[0].value === "string") {
+              layer.direction = rest[0].value
+            }
+            break
+          case "cost":
+            if (rest[0].type === "Atom" && typeof rest[0].value === "number") {
+              layer.cost = rest[0].value
+            }
+            break
           case "property":
             layer.property = processProperty(rest)
             break
