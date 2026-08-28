@@ -26,6 +26,13 @@ export function tokenizeDsn(input: string): Token[] {
       // Ignore whitespace
       i++
     } else if (char === '"') {
+      // Special case: (string_quote ") — the quote char is " itself.
+      // When " is immediately followed by ), it's a raw symbol atom, not a string opener.
+      if (i + 1 < length && input[i + 1] === ")") {
+        tokens.push({ type: "Symbol", value: '"' })
+        i++
+        continue
+      }
       // Parse quoted string
       let value = ""
       i++ // Skip the opening quote
@@ -44,8 +51,11 @@ export function tokenizeDsn(input: string): Token[] {
       }
       i++ // Skip the closing quote
       tokens.push({ type: "String", value })
-    } else if (char === "-" || /\d/.test(char)) {
-      // Parse number (integer or float)
+    } else if (
+      /\d/.test(char) ||
+      (char === "-" && i + 1 < length && /\d/.test(input[i + 1]))
+    ) {
+      // Parse number (integer or float); lone "-" is a symbol (e.g. pin name)
       let numStr = ""
       if (char === "-") {
         numStr += "-"
