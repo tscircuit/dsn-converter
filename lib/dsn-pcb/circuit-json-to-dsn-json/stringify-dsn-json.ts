@@ -26,6 +26,23 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     return `${padding}(path ${path.layer} ${path.width}  ${stringifyCoordinates(path.coordinates)})`
   }
 
+  const stringifyPlace = (place: any, level: number): string => {
+    const padding = indent.repeat(level)
+    const pn = place.PN ? ` (PN ${stringifyValue(place.PN)})` : ""
+    const pinMetadata = place.pins ?? []
+
+    if (pinMetadata.length === 0) {
+      return `${padding}(place ${place.refdes} ${place.x} ${place.y} ${place.side} ${place.rotation}${pn})`
+    }
+
+    let placeString = `${padding}(place ${place.refdes} ${place.x} ${place.y} ${place.side} ${place.rotation}${pn}\n`
+    pinMetadata.forEach((pin: any) => {
+      placeString += `${padding}${indent}(pin ${pin.pin_number}${pin.clearance_class ? ` (clearance_class ${stringifyValue(pin.clearance_class)})` : ""})\n`
+    })
+    placeString += `${padding})`
+    return placeString
+  }
+
   // Start with pcb
   result += `(pcb ${dsnJson.filename ? dsnJson.filename : "./converted_dsn.dsn"}\n`
 
@@ -71,7 +88,7 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     result += `${indent}${indent}(component ${stringifyValue(component.name)}\n`
     if (component.places) {
       component.places.forEach((place) => {
-        result += `${indent}${indent}${indent}(place ${place.refdes} ${place.x} ${place.y} ${place.side} ${place.rotation}${place.PN ? ` (PN ${stringifyValue(place.PN)})` : ""})\n`
+        result += `${stringifyPlace(place, 3)}\n`
       })
     }
     result += `${indent}${indent})\n`
