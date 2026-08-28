@@ -22,6 +22,10 @@ export function tokenizeDsn(input: string): Token[] {
     } else if (char === ")") {
       tokens.push({ type: "RParen" })
       i++
+    } else if (char === ";") {
+      while (i < length && input[i] !== "\n") {
+        i++
+      }
     } else if (/\s/.test(char)) {
       // Ignore whitespace
       i++
