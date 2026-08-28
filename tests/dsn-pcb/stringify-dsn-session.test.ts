@@ -25,3 +25,40 @@ test("stringify session file", () => {
   expect(reparsedNet.name).toBe(originalNet.name)
   expect(reparsedNet.wires).toHaveLength(originalNet.wires.length)
 })
+
+test("preserves session library_out image descriptors", () => {
+  const sessionJson = parseDsnToDsnJson(`(session image-test
+  (base_design image-test)
+  (placement
+    (resolution um 10)
+  )
+  (was_is)
+  (routes
+    (resolution um 10)
+    (parser
+      (host_cad "KiCad's Pcbnew")
+      (host_version "9.0")
+    )
+    (library_out
+      (image "Connector"
+        (outline (path F.Cu 0 0 0 100 0 100 100))
+        (pin ViaPad 1 10 20)
+        (pin ViaPad 2 30 40)
+      )
+      (padstack "ViaPad"
+        (shape (circle F.Cu 600))
+        (attach off)
+      )
+    )
+    (network_out)
+  )
+)`) as DsnSession
+
+  const reparsed = parseDsnToDsnJson(
+    stringifyDsnSession(sessionJson),
+  ) as DsnSession
+
+  expect(reparsed.routes.library_out?.images).toEqual(
+    sessionJson.routes.library_out?.images,
+  )
+})
