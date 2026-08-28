@@ -25,3 +25,37 @@ test("stringify session file", () => {
   expect(reparsedNet.name).toBe(originalNet.name)
   expect(reparsedNet.wires).toHaveLength(originalNet.wires.length)
 })
+
+test("preserves non-circle session library_out padstack shapes", () => {
+  const sessionJson = parseDsnToDsnJson(`(session shape-test
+  (base_design shape-test)
+  (placement
+    (resolution um 10)
+  )
+  (was_is)
+  (routes
+    (resolution um 10)
+    (parser
+      (host_cad "KiCad's Pcbnew")
+      (host_version "9.0")
+    )
+    (library_out
+      (padstack "MixedPad"
+        (shape (polygon F.Cu 0 0 0 100 0 100 100 0 100))
+        (shape (rect B.Cu -50 -25 50 25))
+        (shape (path Inner1.Cu 20 0 0 100 0))
+        (attach off)
+      )
+    )
+    (network_out)
+  )
+)`) as DsnSession
+
+  const reparsed = parseDsnToDsnJson(
+    stringifyDsnSession(sessionJson),
+  ) as DsnSession
+
+  expect(reparsed.routes.library_out?.padstacks[0].shapes).toEqual(
+    sessionJson.routes.library_out?.padstacks[0].shapes,
+  )
+})
