@@ -198,7 +198,7 @@ export interface Pin {
 export interface Padstack {
   name: string
   shapes: Shape[]
-  attach: string
+  attach?: string
   hole?: {
     shape: "circle" | "square" | "oval"
     width?: number
