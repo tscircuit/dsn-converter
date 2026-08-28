@@ -4,6 +4,17 @@ export const stringifyDsnSession = (session: DsnSession): string => {
   const indent = "  "
   let result = ""
 
+  const stringifyPadstackHole = (hole: any): string | null => {
+    if (!hole) return null
+    if (hole.shape === "circle") {
+      return `(hole (circle ${hole.diameter}))`
+    }
+    if (hole.shape === "oval" || hole.shape === "square") {
+      return `(hole (${hole.shape} ${hole.width} ${hole.height}))`
+    }
+    return null
+  }
+
   // Start with session
   result += `(session ${session.filename}\n`
 
@@ -47,6 +58,10 @@ export const stringifyDsnSession = (session: DsnSession): string => {
           result += `${indent}${indent}${indent}${indent})\n`
         }
       })
+      const hole = stringifyPadstackHole(padstack.hole)
+      if (hole) {
+        result += `${indent}${indent}${indent}${indent}${hole}\n`
+      }
       result += `${indent}${indent}${indent}${indent}(attach ${padstack.attach})\n`
       result += `${indent}${indent}${indent})\n`
     })
