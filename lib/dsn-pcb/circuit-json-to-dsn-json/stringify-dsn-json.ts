@@ -10,7 +10,7 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
       return '""'
     }
     if (typeof value === "string") {
-      return `"${value}"`
+      return `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`
     }
     return value.toString()
   }
@@ -31,10 +31,10 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
 
   // Parser section
   result += `${indent}(parser\n`
-  result += `${indent}${indent}(string_quote ")\n`
-  result += `${indent}${indent}(space_in_quoted_tokens on)\n`
-  result += `${indent}${indent}(host_cad "KiCad's Pcbnew")\n`
-  result += `${indent}${indent}(host_version "${dsnJson.parser.host_version}")\n`
+  result += `${indent}${indent}(string_quote ${stringifyValue(dsnJson.parser.string_quote)})\n`
+  result += `${indent}${indent}(space_in_quoted_tokens ${dsnJson.parser.space_in_quoted_tokens})\n`
+  result += `${indent}${indent}(host_cad ${stringifyValue(dsnJson.parser.host_cad)})\n`
+  result += `${indent}${indent}(host_version ${stringifyValue(dsnJson.parser.host_version)})\n`
   result += `${indent})\n`
 
   // Resolution and unit
