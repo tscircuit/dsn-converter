@@ -182,6 +182,15 @@ export interface Image {
   name: string
   outlines: Outline[]
   pins: Pin[]
+  keepouts?: Keepout[]
+}
+
+export interface Keepout {
+  shape: "circle"
+  layer: string // raw DSN layer name (Top / Route2 / Route15 / Bottom)
+  diameter: number // raw DSN units
+  x: number // image-local, raw DSN units (default 0)
+  y: number // image-local, raw DSN units (default 0)
 }
 
 export interface Outline {
