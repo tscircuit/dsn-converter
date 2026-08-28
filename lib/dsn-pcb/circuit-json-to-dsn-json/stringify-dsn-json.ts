@@ -63,6 +63,50 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     result += `${indent}${indent}${indent}(clearance ${clearance.value}${clearance.type ? ` (type ${clearance.type})` : ""})\n`
   })
   result += `${indent}${indent})\n`
+  if (dsnJson.structure.autoroute_settings) {
+    const settings = dsnJson.structure.autoroute_settings
+    result += `${indent}${indent}(autoroute_settings\n`
+
+    const emitStringSetting = (
+      key: "fanout" | "autoroute" | "postroute" | "vias",
+    ) => {
+      if (settings[key] !== undefined) {
+        result += `${indent}${indent}${indent}(${key} ${settings[key]})\n`
+      }
+    }
+
+    const emitNumberSetting = (key: "start_ripup_costs" | "start_pass_no") => {
+      if (settings[key] !== undefined) {
+        result += `${indent}${indent}${indent}(${key} ${settings[key]})\n`
+      }
+    }
+
+    emitStringSetting("fanout")
+    emitStringSetting("autoroute")
+    emitStringSetting("postroute")
+    emitStringSetting("vias")
+    emitNumberSetting("start_ripup_costs")
+    emitNumberSetting("start_pass_no")
+
+    settings.layer_rules?.forEach((layerRule) => {
+      result += `${indent}${indent}${indent}(layer_rule ${layerRule.layer}\n`
+      if (layerRule.active !== undefined) {
+        result += `${indent}${indent}${indent}${indent}(active ${layerRule.active})\n`
+      }
+      if (layerRule.preferred_direction !== undefined) {
+        result += `${indent}${indent}${indent}${indent}(preferred_direction ${layerRule.preferred_direction})\n`
+      }
+      if (layerRule.preferred_direction_trace_costs !== undefined) {
+        result += `${indent}${indent}${indent}${indent}(preferred_direction_trace_costs ${layerRule.preferred_direction_trace_costs})\n`
+      }
+      if (layerRule.against_preferred_direction_trace_costs !== undefined) {
+        result += `${indent}${indent}${indent}${indent}(against_preferred_direction_trace_costs ${layerRule.against_preferred_direction_trace_costs})\n`
+      }
+      result += `${indent}${indent}${indent})\n`
+    })
+
+    result += `${indent}${indent})\n`
+  }
   result += `${indent})\n`
 
   // Placement section
