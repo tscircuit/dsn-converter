@@ -25,6 +25,9 @@ export function tokenizeDsn(input: string): Token[] {
     } else if (/\s/.test(char)) {
       // Ignore whitespace
       i++
+    } else if (char === '"' && input[i + 1] === ")") {
+      tokens.push({ type: "Symbol", value: '"' })
+      i++
     } else if (char === '"') {
       // Parse quoted string
       let value = ""

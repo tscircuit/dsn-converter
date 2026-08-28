@@ -15,6 +15,12 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     return value.toString()
   }
 
+  const stringifyParserAtom = (value: string | undefined, fallback: string) =>
+    value && value.length > 0 ? value : fallback
+
+  const stringifyParserString = (value: string | undefined, fallback: string) =>
+    stringifyValue(value ?? fallback)
+
   // Helper function to stringify an array of coordinates
   const stringifyCoordinates = (coordinates: number[]): string => {
     return coordinates.join(" ")
@@ -31,10 +37,10 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
 
   // Parser section
   result += `${indent}(parser\n`
-  result += `${indent}${indent}(string_quote ")\n`
-  result += `${indent}${indent}(space_in_quoted_tokens on)\n`
-  result += `${indent}${indent}(host_cad "KiCad's Pcbnew")\n`
-  result += `${indent}${indent}(host_version "${dsnJson.parser.host_version}")\n`
+  result += `${indent}${indent}(string_quote ${stringifyParserAtom(dsnJson.parser.string_quote, '"')})\n`
+  result += `${indent}${indent}(space_in_quoted_tokens ${stringifyParserAtom(dsnJson.parser.space_in_quoted_tokens, "on")})\n`
+  result += `${indent}${indent}(host_cad ${stringifyParserString(dsnJson.parser.host_cad, "KiCad's Pcbnew")})\n`
+  result += `${indent}${indent}(host_version ${stringifyParserString(dsnJson.parser.host_version, "")})\n`
   result += `${indent})\n`
 
   // Resolution and unit
