@@ -47,10 +47,7 @@ export interface DsnPcb {
     padstacks: Padstack[]
   }
   network: {
-    nets: Array<{
-      name: string
-      pins: string[]
-    }>
+    nets: Net[]
     classes: Array<{
       name: string
       description: string
@@ -250,6 +247,17 @@ export interface Network {
 export interface Net {
   name: string
   pins: string[]
+  fromtos?: NetFromTo[]
+}
+
+export type NetFromToEndpoint = string | { virtual_pin: string }
+
+export interface NetFromTo {
+  from: NetFromToEndpoint
+  to: NetFromToEndpoint
+  circuit?: {
+    length?: number[]
+  }
 }
 
 export interface Class {

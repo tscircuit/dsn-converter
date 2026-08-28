@@ -1,4 +1,4 @@
-import type { DsnPcb } from "../types"
+import type { DsnPcb, NetFromToEndpoint } from "../types"
 
 export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   const indent = "  "
@@ -18,6 +18,13 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   // Helper function to stringify an array of coordinates
   const stringifyCoordinates = (coordinates: number[]): string => {
     return coordinates.join(" ")
+  }
+
+  const stringifyNetFromToEndpoint = (endpoint: NetFromToEndpoint): string => {
+    if (typeof endpoint === "string") {
+      return endpoint
+    }
+    return `(virtual_pin ${endpoint.virtual_pin})`
   }
 
   // Helper function to stringify a path
@@ -113,6 +120,14 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     if (net.pins.length > 0) {
       result += `${indent}${indent}${indent}(pins ${net.pins.join(" ")})\n`
     }
+    net.fromtos?.forEach((fromto) => {
+      const circuitLength = fromto.circuit?.length
+      const circuit =
+        circuitLength && circuitLength.length > 0
+          ? ` (circuit (length ${circuitLength.join(" ")}))`
+          : ""
+      result += `${indent}${indent}${indent}(fromto ${stringifyNetFromToEndpoint(fromto.from)} ${stringifyNetFromToEndpoint(fromto.to)}${circuit})\n`
+    })
     result += `${indent}${indent})\n`
   })
   dsnJson.network.classes.forEach((cls) => {
