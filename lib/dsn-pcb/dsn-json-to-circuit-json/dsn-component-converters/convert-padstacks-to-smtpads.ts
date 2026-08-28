@@ -19,13 +19,26 @@ function isThruHolePadstack(padstack: Padstack): boolean {
   )
 }
 
-function getLayerFromPadstack(
+/**
+ * Resolve the copper layer ("top" | "bottom") an SMT pad lands on.
+ *
+ * A padstack whose own shape layer is explicitly bottom copper (KiCad B.Cu /
+ * Bottom) always lands on the bottom; otherwise the pad inherits the
+ * component's placement side, so a back-placed component's pads go bottom.
+ */
+function getSmtPadLayer(
   padstack: DsnPcb["library"]["padstacks"][number],
-) {
+  placementSide?: string,
+): "top" | "bottom" {
+  const normalizedSide = placementSide?.toLowerCase()
   return padstack.shapes[0].layer.includes("B.") ||
     padstack.shapes[0].layer === "Bottom"
     ? "bottom"
-    : "top"
+    : normalizedSide === "back" ||
+        normalizedSide === "bottom" ||
+        normalizedSide === "b.cu"
+      ? "bottom"
+      : "top"
 }
 
 function getPolygonPoints(
@@ -283,7 +296,7 @@ export function convertPadstacksToSmtPads(
           !!polygonShape && !!rectangleDimensionsFromPolygon
 
         if (polygonShape && !shouldImportPolygonAsRect) {
-          const layer = getLayerFromPadstack(padstack)
+          const layer = getSmtPadLayer(padstack, side)
           pcbPad = {
             type: "pcb_smtpad",
             pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
@@ -296,7 +309,7 @@ export function convertPadstacksToSmtPads(
             layer,
           }
         } else if (rectShape || pathShape || shouldImportPolygonAsRect) {
-          const layer = getLayerFromPadstack(padstack)
+          const layer = getSmtPadLayer(padstack, side)
           pcbPad = {
             type: "pcb_smtpad",
             pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
@@ -317,7 +330,7 @@ export function convertPadstacksToSmtPads(
             x: circuitX,
             y: circuitY,
             radius: circleShape!.diameter / 2 / 1000,
-            layer: side === "front" ? "top" : "bottom",
+            layer: getSmtPadLayer(padstack, side),
           }
         }
 

@@ -42,6 +42,10 @@ export function convertDsnPcbToCircuitJson(
     })
     board.width = (maxX - minX) * transformDsnUnitToMm.a
     board.height = (maxY - minY) * transformDsnUnitToMm.a
+    board.outline = boundaryPath.map(([x, y]) =>
+      applyToPoint(transformDsnUnitToMm, { x, y }),
+    )
+    board.shape = "polygon"
   } else {
     throw new Error(
       `Couldn't read DSN boundary, add support for dsnPcb.structure.boundary["${Object.keys(dsnPcb.structure.boundary).join(",")}"]`,
