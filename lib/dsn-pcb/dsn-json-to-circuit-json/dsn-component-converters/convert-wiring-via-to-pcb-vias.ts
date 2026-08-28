@@ -22,12 +22,16 @@ export const convertWiringViaToPcbVias = ({
   const [x, y] = wire.path.coordinates
   const circuitPoint = applyToPoint(transformUmToMm, { x, y })
 
+  const xMm = Number(circuitPoint.x.toFixed(4))
+  const yMm = Number(circuitPoint.y.toFixed(4))
+
   const via: PcbVia = {
     type: "pcb_via",
     layers: ["top", "bottom"],
-    pcb_via_id: `pcb_via_${netName}`,
-    x: Number(circuitPoint.x.toFixed(4)),
-    y: Number(circuitPoint.y.toFixed(4)),
+    pcb_via_id: `pcb_via_${netName}_${xMm}_${yMm}`,
+    pcb_trace_id: `pcb_trace_${netName}`,
+    x: xMm,
+    y: yMm,
     // TODO look up via size
     outer_diameter: 0.6, // Standard via diameter in mm
     hole_diameter: 0.3, // Standard drill diameter in mm
