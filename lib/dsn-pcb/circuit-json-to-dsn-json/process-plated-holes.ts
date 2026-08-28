@@ -40,8 +40,9 @@ export function processPlatedHoles(
         })
         if (!processedPadstacks.has(name)) {
           const d = Math.round(hole.outer_diameter * 1000)
+          const h = Math.round(hole.hole_diameter * 1000)
           pcb.library.padstacks.push(
-            createCircularPadstack(name, d, d, numLayers),
+            createCircularPadstack(name, d, h, numLayers),
           )
           processedPadstacks.add(name)
         }

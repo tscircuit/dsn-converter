@@ -38,16 +38,47 @@ export const stringifyDsnSession = (session: DsnSession): string => {
   // Library_out subsection
   if (session.routes.library_out) {
     result += `${indent}${indent}(library_out \n`
-    session.routes.library_out.padstacks.forEach((padstack) => {
+    session.routes.library_out.images?.forEach((image) => {
+      result += `${indent}${indent}${indent}(image ${JSON.stringify(image.name)}\n`
+      image.outlines.forEach((outline) => {
+        result += `${indent}${indent}${indent}${indent}(outline (path ${outline.path.layer} ${outline.path.width} ${outline.path.coordinates.join(" ")}))\n`
+      })
+      image.pins.forEach((pin) => {
+        result += `${indent}${indent}${indent}${indent}(pin ${pin.padstack_name} ${pin.pin_number} ${pin.x} ${pin.y})\n`
+      })
+      result += `${indent}${indent}${indent})\n`
+    })
+    session.routes.library_out.padstacks?.forEach((padstack) => {
       result += `${indent}${indent}${indent}(padstack ${JSON.stringify(padstack.name)}\n`
       padstack.shapes.forEach((shape) => {
-        if (shape.shapeType === "circle") {
+        if (shape.shapeType === "polygon") {
+          result += `${indent}${indent}${indent}${indent}(shape\n`
+          result += `${indent}${indent}${indent}${indent}${indent}(polygon ${shape.layer} ${shape.width} ${shape.coordinates.join(" ")})\n`
+          result += `${indent}${indent}${indent}${indent})\n`
+        } else if (shape.shapeType === "circle") {
           result += `${indent}${indent}${indent}${indent}(shape\n`
           result += `${indent}${indent}${indent}${indent}${indent}(circle ${shape.layer} ${shape.diameter} 0 0)\n`
+          result += `${indent}${indent}${indent}${indent})\n`
+        } else if (shape.shapeType === "path") {
+          result += `${indent}${indent}${indent}${indent}(shape\n`
+          result += `${indent}${indent}${indent}${indent}${indent}(path ${shape.layer} ${shape.width} ${shape.coordinates.join(" ")})\n`
+          result += `${indent}${indent}${indent}${indent})\n`
+        } else if (shape.shapeType === "rect") {
+          result += `${indent}${indent}${indent}${indent}(shape\n`
+          result += `${indent}${indent}${indent}${indent}${indent}(rect ${shape.layer} ${shape.coordinates.join(" ")})\n`
           result += `${indent}${indent}${indent}${indent})\n`
         }
       })
       result += `${indent}${indent}${indent}${indent}(attach ${padstack.attach})\n`
+      if (padstack.hole) {
+        if (padstack.hole.shape === "circle") {
+          result += `${indent}${indent}${indent}${indent}(hole (circle ${padstack.hole.diameter}))\n`
+        } else if (padstack.hole.shape === "oval") {
+          result += `${indent}${indent}${indent}${indent}(hole (oval ${padstack.hole.width} ${padstack.hole.height}))\n`
+        } else if (padstack.hole.shape === "square") {
+          result += `${indent}${indent}${indent}${indent}(hole (square ${padstack.hole.width}))\n`
+        }
+      }
       result += `${indent}${indent}${indent})\n`
     })
     result += `${indent}${indent})\n`

@@ -674,6 +674,27 @@ function processPadstack(nodes: ASTNode[]): Padstack {
                 height: rest[2].value as number,
               }
             }
+          } else if (rest[0]?.type === "List") {
+            const shapeNode = rest[0].children?.[0]
+            if (shapeNode?.type === "Atom") {
+              if (shapeNode.value === "circle") {
+                padstack.hole = {
+                  shape: "circle",
+                  diameter: rest[0].children?.[1]?.value as number,
+                }
+              } else if (shapeNode.value === "oval") {
+                padstack.hole = {
+                  shape: "oval",
+                  width: rest[0].children?.[1]?.value as number,
+                  height: rest[0].children?.[2]?.value as number,
+                }
+              } else if (shapeNode.value === "square") {
+                padstack.hole = {
+                  shape: "square",
+                  width: rest[0].children?.[1]?.value as number,
+                }
+              }
+            }
           }
         }
       }
@@ -1097,17 +1118,9 @@ function processSessionNode(ast: ASTNode): DsnSession {
         child.children[0].value === "library_out",
     )
     if (libraryNode) {
-      session.routes.library_out = {
-        images: [],
-        padstacks: libraryNode
-          .children!.filter(
-            (child) =>
-              child.type === "List" &&
-              child.children?.[0].type === "Atom" &&
-              child.children[0].value === "padstack",
-          )
-          .map((padstackNode) => processPadstack(padstackNode.children!)),
-      }
+      session.routes.library_out = processLibrary(
+        libraryNode.children!.slice(1),
+      )
     }
 
     // Extract network_out section
