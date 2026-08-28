@@ -25,3 +25,31 @@ test("stringify session file", () => {
   expect(reparsedNet.name).toBe(originalNet.name)
   expect(reparsedNet.wires).toHaveLength(originalNet.wires.length)
 })
+
+test("stringify session preserves parser options", () => {
+  const session = {
+    is_dsn_session: true,
+    filename: "test.ses",
+    placement: {
+      resolution: { unit: "um", value: 10 },
+      components: [],
+    },
+    routes: {
+      resolution: { unit: "um", value: 10 },
+      parser: {
+        string_quote: "'",
+        space_in_quoted_tokens: "on",
+        host_cad: "KiCad",
+        host_version: "9.0.2",
+      },
+      network_out: {
+        nets: [],
+      },
+    },
+  } as DsnSession
+
+  const stringified = stringifyDsnSession(session)
+
+  expect(stringified).toContain('(string_quote "\'")')
+  expect(stringified).toContain('(space_in_quoted_tokens "on")')
+})
