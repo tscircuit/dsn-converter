@@ -30,8 +30,9 @@ export function convertDsnPcbToCircuitJson(
     material: "fr4",
     num_layers: 4,
   }
-  if (dsnPcb.structure.boundary.path) {
-    const boundaryPath = pairs(dsnPcb.structure.boundary.path.coordinates)
+  const boundaryCoordinates = getBoundaryCoordinates(dsnPcb.structure.boundary)
+  if (boundaryCoordinates.length >= 4) {
+    const boundaryPath = pairs(boundaryCoordinates)
     const maxX = Math.max(...boundaryPath.map(([x]) => x))
     const minX = Math.min(...boundaryPath.map(([x]) => x))
     const maxY = Math.max(...boundaryPath.map(([, y]) => y))
@@ -79,4 +80,23 @@ export function convertDsnPcbToCircuitJson(
   )
 
   return elements
+}
+
+function getBoundaryCoordinates(
+  boundary: DsnPcb["structure"]["boundary"],
+): number[] {
+  if (boundary.path) {
+    return boundary.path.coordinates
+  }
+  if (boundary.polygon) {
+    return boundary.polygon.coordinates
+  }
+  if (boundary.rect) {
+    if (boundary.rect.coordinates.length < 4) {
+      return []
+    }
+    const [x1, y1, x2, y2] = boundary.rect.coordinates
+    return [x1, y1, x2, y1, x2, y2, x1, y2]
+  }
+  return []
 }

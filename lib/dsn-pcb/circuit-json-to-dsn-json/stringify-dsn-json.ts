@@ -26,6 +26,30 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
     return `${padding}(path ${path.layer} ${path.width}  ${stringifyCoordinates(path.coordinates)})`
   }
 
+  const stringifyBoundary = (
+    boundary: DsnPcb["structure"]["boundary"],
+    level: number,
+  ): string[] => {
+    const padding = indent.repeat(level)
+    const entries: string[] = []
+
+    if (boundary.path) {
+      entries.push(stringifyPath(boundary.path, level))
+    }
+    if (boundary.rect) {
+      entries.push(
+        `${padding}(rect ${boundary.rect.type} ${stringifyCoordinates(boundary.rect.coordinates)})`,
+      )
+    }
+    if (boundary.polygon) {
+      entries.push(
+        `${padding}(polygon ${boundary.polygon.type} ${boundary.polygon.width} ${stringifyCoordinates(boundary.polygon.coordinates)})`,
+      )
+    }
+
+    return entries
+  }
+
   // Start with pcb
   result += `(pcb ${dsnJson.filename ? dsnJson.filename : "./converted_dsn.dsn"}\n`
 
@@ -53,7 +77,9 @@ export const stringifyDsnJson = (dsnJson: DsnPcb): string => {
   })
   if (dsnJson.structure.boundary) {
     result += `${indent}${indent}(boundary\n`
-    result += `${indent}${indent}${indent}${stringifyPath(dsnJson.structure.boundary.path, 0)}\n`
+    stringifyBoundary(dsnJson.structure.boundary, 3).forEach((entry) => {
+      result += `${entry}\n`
+    })
     result += `${indent}${indent})\n`
   }
   result += `${indent}${indent}(via ${stringifyValue(dsnJson.structure.via)})\n`
