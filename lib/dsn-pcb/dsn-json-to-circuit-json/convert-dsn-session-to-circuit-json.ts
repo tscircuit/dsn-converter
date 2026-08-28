@@ -27,7 +27,8 @@ export function convertDsnSessionToCircuitJson(
   circuitJson?: AnyCircuitElement[],
 ): AnyCircuitElement[] {
   // From sesssion space to circuit space
-  const transformUmToMm = scale(1 / 10000)
+  const resolutionValue = dsnSession.placement?.resolution?.value ?? 10
+  const transformUmToMm = scale(1 / (1000 * resolutionValue))
   const inputPcbElms = convertDsnPcbToCircuitJson(
     dsnInput as DsnPcb,
     true, // from session space to circuit space

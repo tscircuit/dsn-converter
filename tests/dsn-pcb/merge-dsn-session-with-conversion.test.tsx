@@ -93,14 +93,14 @@ test("merge-dsn-session-with-conversion", async () => {
 
   // Verify wiring was restored
   // TODO must fix dsn session conversion before this works
-  // expect(mergedPcb.wiring.wires).toHaveLength(
-  //   originalDsnPcb.wiring.wires.length,
-  // )
+  expect(mergedPcb.wiring.wires).toHaveLength(
+    originalDsnPcb.wiring.wires.length,
+  )
 
   // Compare the resulting circuit JSONs
   const originalTraces = su(circuitJsonFromOriginal).pcb_trace.list()
   const mergedTraces = su(circuitJsonFromMerged).pcb_trace.list()
-  // expect(mergedTraces).toHaveLength(originalTraces.length)
+  expect(mergedTraces).toHaveLength(originalTraces.length)
 
   // Compare trace coordinates
   for (let i = 0; i < originalTraces.length; i++) {
@@ -116,7 +116,5 @@ test("merge-dsn-session-with-conversion", async () => {
     getDebugFilePath("circuit.original.svg"),
     getDebugFilePath("circuit.merged.svg"),
   )
-  // TODO requires fix inside convertCircuitJsonToDsnSession, currently the vias
-  // aren't converted properly- reference or adapt the code in processPcbTraces
   expect(looksSameResult.equal).toBe(true) // Should be identical after merge
 })

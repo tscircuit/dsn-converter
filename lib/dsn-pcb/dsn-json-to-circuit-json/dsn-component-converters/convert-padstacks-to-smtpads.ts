@@ -2,6 +2,7 @@ import type { AnyCircuitElement, PcbPlatedHole, PcbSmtPad } from "circuit-json"
 import Debug from "debug"
 import type { DsnPcb, Padstack } from "lib/dsn-pcb/types"
 import { parsePadstackName } from "lib/utils/get-padstack-name"
+import { isQuarterTurn, rotatePoint } from "lib/utils/rotate-point"
 import { applyToPoint } from "transformation-matrix"
 
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
@@ -119,11 +120,16 @@ export function convertPadstacksToSmtPads(
           return
         }
 
+        const rotatedPinOffset = rotatePoint(
+          { x: pin.x, y: pin.y },
+          place.rotation,
+        )
+
         const { x: circuitX, y: circuitY } = applyToPoint(
           dsnToCircuitJsonTransform,
           {
-            x: (compX || 0) + pin.x,
-            y: (compY || 0) + pin.y,
+            x: (compX || 0) + rotatedPinOffset.x,
+            y: (compY || 0) + rotatedPinOffset.y,
           },
         )
 
@@ -274,7 +280,9 @@ export function convertPadstacksToSmtPads(
           console.warn(`No valid shape found for padstack: ${padstack.name}`)
           return
         }
-
+        if (isQuarterTurn(place.rotation)) {
+          ;[width, height] = [height, width]
+        }
         let pcbPad: PcbSmtPad
         const rectangleDimensionsFromPolygon = polygonShape
           ? getRectangleDimensionsFromPolygon(polygonShape.coordinates)
