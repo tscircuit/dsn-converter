@@ -16,7 +16,8 @@ export const stringifyDsnSession = (session: DsnSession): string => {
   session.placement.components.forEach((component) => {
     result += `${indent}${indent}(component ${component.name}\n`
     component.places.forEach((place) => {
-      result += `${indent}${indent}${indent}(place ${place.refdes} ${place.x} ${place.y} ${place.side} ${place.rotation})\n`
+      const pn = place.PN ? ` (PN ${JSON.stringify(place.PN)})` : ""
+      result += `${indent}${indent}${indent}(place ${place.refdes} ${place.x} ${place.y} ${place.side} ${place.rotation}${pn})\n`
     })
     result += `${indent}${indent})\n`
   })
