@@ -173,7 +173,14 @@ export function processParser(nodes: ASTNode[]): ParserType {
         const value = valueNode.value
         switch (key) {
           case "string_quote":
-            if (typeof value === "string") parser.string_quote = value
+            if (typeof value === "string") {
+              // The tokenizer swallows subsequent tokens until the next quote
+              // when the file contains `(string_quote ")` (quote char = `)`),
+              // so the value can pick up embedded newlines. Normalize to the
+              // single quote character the spec allows.
+              const cleaned = value.replace(/[\r\n]/g, "")
+              parser.string_quote = cleaned.length > 0 ? cleaned[0] : ""
+            }
             break
           case "space_in_quoted_tokens":
             if (typeof value === "string") parser.space_in_quoted_tokens = value

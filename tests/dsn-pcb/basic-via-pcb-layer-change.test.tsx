@@ -9,11 +9,10 @@ import {
   convertDsnPcbToCircuitJson,
   parseDsnToDsnJson,
 } from "lib"
-import looksSame from "looks-same"
 import { getTestDebugUtils } from "tests/fixtures/get-test-debug-utils"
 
 test("basic-via-pcb-layer-change", async () => {
-  const { writeDebugFile, getDebugFilePath } = getTestDebugUtils(
+  const { writeDebugFile, getDebugFilePath, looksSameSvg } = getTestDebugUtils(
     import.meta.path,
   )
 
@@ -54,7 +53,7 @@ test("basic-via-pcb-layer-change", async () => {
   writeDebugFile("circuit.after.svg", svgAfter)
   writeDebugFile("circuit.after.json", JSON.stringify(circuitJsonAfter))
 
-  const looksSameResult = await looksSame(
+  const looksSameResult = await looksSameSvg(
     getDebugFilePath("circuit.before.svg"),
     getDebugFilePath("circuit.after.svg"),
   )
