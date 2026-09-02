@@ -14,11 +14,10 @@ import {
   parseDsnToDsnJson,
   stringifyDsnJson,
 } from "lib"
-import looksSame from "looks-same"
 import { getTestDebugUtils } from "tests/fixtures/get-test-debug-utils"
 
 test("merge-dsn-session-with-conversion", async () => {
-  const { writeDebugFile, getDebugFilePath, debug } = getTestDebugUtils(
+  const { writeDebugFile, getDebugFilePath, looksSameSvg, debug } = getTestDebugUtils(
     import.meta.path,
   )
 
@@ -112,7 +111,7 @@ test("merge-dsn-session-with-conversion", async () => {
   }
 
   // Compare SVGs
-  const looksSameResult = await looksSame(
+  const looksSameResult = await looksSameSvg(
     getDebugFilePath("circuit.original.svg"),
     getDebugFilePath("circuit.merged.svg"),
   )
