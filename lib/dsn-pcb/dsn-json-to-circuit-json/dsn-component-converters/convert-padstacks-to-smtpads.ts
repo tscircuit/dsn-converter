@@ -119,11 +119,19 @@ export function convertPadstacksToSmtPads(
           return
         }
 
+        // Apply the component placement rotation to the pin offset before
+        // transforming (DSN rotations are CCW degrees in placement space)
+        const rotationDeg = (place as any).rotation ?? 0
+        const rotationRad = (rotationDeg * Math.PI) / 180
+        const cosR = Math.cos(rotationRad)
+        const sinR = Math.sin(rotationRad)
+        const rotatedPinX = pin.x * cosR - pin.y * sinR
+        const rotatedPinY = pin.x * sinR + pin.y * cosR
         const { x: circuitX, y: circuitY } = applyToPoint(
           dsnToCircuitJsonTransform,
           {
-            x: (compX || 0) + pin.x,
-            y: (compY || 0) + pin.y,
+            x: (compX || 0) + rotatedPinX,
+            y: (compY || 0) + rotatedPinY,
           },
         )
 
