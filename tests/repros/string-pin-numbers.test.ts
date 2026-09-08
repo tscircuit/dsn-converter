@@ -1,7 +1,6 @@
 import { expect, test } from "bun:test"
-import { convertDsnPcbToCircuitJson } from "lib"
-import { parseDsnToDsnJson } from "lib"
-import type { DsnPcb } from "lib"
+import { convertDsnPcbToCircuitJson, parseDsnToDsnJson, type DsnPcb } from "lib"
+// @ts-ignore
 import dsn from "../assets/repro/smoothieboard-repro.dsn" with { type: "text" }
 
 test("string pin numbers do not produce NaN source_port.pin_number", () => {
