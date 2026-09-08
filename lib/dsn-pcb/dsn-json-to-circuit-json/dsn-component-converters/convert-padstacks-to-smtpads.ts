@@ -87,6 +87,18 @@ function isApproximatelyEqual(a: number, b: number) {
   return Math.abs(a - b) < 1e-6
 }
 
+/** Rotate a point counterclockwise by the given angle in radians */
+function rotateOffset(
+  x: number,
+  y: number,
+  rad: number,
+): { x: number; y: number } {
+  if (rad === 0) return { x, y }
+  const cos = Math.cos(rad)
+  const sin = Math.sin(rad)
+  return { x: x * cos - y * sin, y: x * sin + y * cos }
+}
+
 export function convertPadstacksToSmtPads(
   pcb: DsnPcb,
   dsnToCircuitJsonTransform: any,
@@ -110,6 +122,9 @@ export function convertPadstacksToSmtPads(
       debug("processing place...", { place })
       const { x: compX, y: compY, side } = place
 
+      // place.rotation is CCW in DSN space (y-up); convert to radians.
+      const rotationRad = ((place.rotation || 0) * Math.PI) / 180
+
       image.pins.forEach((pin) => {
         const padstack = padstacks.find((p) => p.name === pin.padstack_name)
         debug("found padstack", { padstack })
@@ -119,11 +134,12 @@ export function convertPadstacksToSmtPads(
           return
         }
 
+        const rotatedOffset = rotateOffset(pin.x, pin.y, rotationRad)
         const { x: circuitX, y: circuitY } = applyToPoint(
           dsnToCircuitJsonTransform,
           {
-            x: (compX || 0) + pin.x,
-            y: (compY || 0) + pin.y,
+            x: (compX || 0) + rotatedOffset.x,
+            y: (compY || 0) + rotatedOffset.y,
           },
         )
 
@@ -133,6 +149,12 @@ export function convertPadstacksToSmtPads(
           port_hints: [pin.pin_number.toString()],
         }
         const pcbPlatedHoleId = `pcb_plated_hole_${componentId}_${place.refdes}_${pin.pin_number}`
+        // Numeric pins keep the historical 0-based index in the id; string
+        // pin names (EPAD, GND, A…) are sanitized into the id instead of
+        // producing "NaN".
+        const pinIdSuffix = Number.isNaN(Number(pin.pin_number))
+          ? String(pin.pin_number).replace(/[^a-zA-Z0-9_-]/g, "_")
+          : String(Number(pin.pin_number) - 1)
         const parsedPadstackName = parsePadstackName(padstack.name)
 
         // ── Through-hole detection ──────────────────────────────────────────
@@ -286,7 +308,7 @@ export function convertPadstacksToSmtPads(
           const layer = getLayerFromPadstack(padstack)
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pinIdSuffix}`,
             ...commonIds,
             shape: "polygon",
             points: getPolygonPoints(polygonShape.coordinates, {
@@ -299,7 +321,7 @@ export function convertPadstacksToSmtPads(
           const layer = getLayerFromPadstack(padstack)
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pinIdSuffix}`,
             ...commonIds,
             shape: "rect",
             x: circuitX,
@@ -311,7 +333,7 @@ export function convertPadstacksToSmtPads(
         } else {
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pinIdSuffix}`,
             ...commonIds,
             shape: "circle",
             x: circuitX,

@@ -33,20 +33,34 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
       // Create ports for each pin in the image
       if (image.pins) {
         for (const pin of image.pins) {
+          // Non-numeric pin names (EPAD, GND, A…) must not become NaN;
+          // keep the raw token in name/port_hints instead.
+          const numericPinNumber = Number(pin.pin_number)
           const port: SourcePort = {
             type: "source_port",
             source_port_id: `source_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,
             source_component_id: sourceComponent.source_component_id,
             name: `${place.refdes}-${pin.pin_number}`,
-            pin_number: Number(pin.pin_number),
-            port_hints: [],
+            ...(Number.isNaN(numericPinNumber)
+              ? {}
+              : { pin_number: numericPinNumber }),
+            port_hints: [String(pin.pin_number)],
           }
           // Handle case where place coordinates might be null/undefined
           const placeX = place.x || 0
           const placeY = place.y || 0
+
+          // place.rotation is CCW in DSN space (y-up); rotate the pin offset
+          // around the component center to match pad placement.
+          const rotationRad = ((place.rotation || 0) * Math.PI) / 180
+          const cos = Math.cos(rotationRad)
+          const sin = Math.sin(rotationRad)
+          const rotatedOffsetX = pin.x * cos - pin.y * sin
+          const rotatedOffsetY = pin.x * sin + pin.y * cos
+
           const pcb_port_center = applyToPoint(transformDsnUnitToMm, {
-            x: placeX + pin.x,
-            y: placeY + pin.y,
+            x: placeX + rotatedOffsetX,
+            y: placeY + rotatedOffsetY,
           })
           const pcb_port: PcbPort = {
             pcb_port_id: `pcb_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,
