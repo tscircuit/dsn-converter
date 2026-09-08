@@ -577,18 +577,59 @@ function processPin(nodes: ASTNode[]): Pin | null {
       return null
     }
     pin.padstack_name = String(nodes[1].value)
-    // check if pin number is in a List structure
-    const pinNumber = getPinNum(nodes)
+
+    // Optional rotation: (pin <padstack> (rotate <deg>) <pin_number> <x> <y>)
+    let rotation: number | undefined
+    let pinNumNodeIndex = 2
+    if (
+      nodes[2]?.type === "List" &&
+      nodes[2].children?.[0]?.type === "Atom" &&
+      nodes[2].children[0].value === "rotate"
+    ) {
+      const angle = nodes[2].children[1]?.value
+      if (typeof angle === "number") {
+        rotation = angle
+      }
+      pinNumNodeIndex = 3
+    }
+
+    // Pin number: direct Atom or single-child List, after any rotate sublist
+    const pinNumNode = nodes[pinNumNodeIndex]
+    let pinNumber: number | string | null
+    if (pinNumNode?.type === "Atom") {
+      if (typeof pinNumNode.value === "number") {
+        pinNumber = pinNumNode.value
+      } else {
+        const parsed = parseInt(String(pinNumNode.value), 10)
+        pinNumber = Number.isNaN(parsed) ? String(pinNumNode.value) : parsed
+      }
+    } else if (
+      pinNumNode?.type === "List" &&
+      pinNumNode.children?.length === 1
+    ) {
+      const parsed = parseInt(String(pinNumNode.children[0].value), 10)
+      pinNumber = Number.isNaN(parsed) ? null : parsed
+    } else {
+      debug("Unsupported pin number format:", nodes)
+      pinNumber = null
+    }
 
     if (pinNumber === null) return null
 
     pin.pin_number = pinNumber
+    if (rotation !== undefined) {
+      ;(pin as any).rotation = rotation
+    }
 
     // Parse coordinates
     let xValue: number | undefined
     let yValue: number | undefined
 
-    for (let i = 3; i < nodes.length; i++) {
+    // With a rotate sublist, pin number is at index 3 and coords start at 4;
+    // otherwise pin number is at 2 and coords start at 3.
+    const coordStart = rotation !== undefined ? 4 : 3
+
+    for (let i = coordStart; i < nodes.length; i++) {
       const node = nodes[i]
       const nextNode = nodes[i + 1]
 
