@@ -149,6 +149,12 @@ export function convertPadstacksToSmtPads(
           port_hints: [pin.pin_number.toString()],
         }
         const pcbPlatedHoleId = `pcb_plated_hole_${componentId}_${place.refdes}_${pin.pin_number}`
+        // Numeric pins keep the historical 0-based index in the id; string
+        // pin names (EPAD, GND, A…) are sanitized into the id instead of
+        // producing "NaN".
+        const pinIdSuffix = Number.isNaN(Number(pin.pin_number))
+          ? String(pin.pin_number).replace(/[^a-zA-Z0-9_-]/g, "_")
+          : String(Number(pin.pin_number) - 1)
         const parsedPadstackName = parsePadstackName(padstack.name)
 
         // ── Through-hole detection ──────────────────────────────────────────
@@ -302,7 +308,7 @@ export function convertPadstacksToSmtPads(
           const layer = getLayerFromPadstack(padstack)
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pinIdSuffix}`,
             ...commonIds,
             shape: "polygon",
             points: getPolygonPoints(polygonShape.coordinates, {
@@ -315,7 +321,7 @@ export function convertPadstacksToSmtPads(
           const layer = getLayerFromPadstack(padstack)
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pinIdSuffix}`,
             ...commonIds,
             shape: "rect",
             x: circuitX,
@@ -327,7 +333,7 @@ export function convertPadstacksToSmtPads(
         } else {
           pcbPad = {
             type: "pcb_smtpad",
-            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${pinIdSuffix}`,
             ...commonIds,
             shape: "circle",
             x: circuitX,
