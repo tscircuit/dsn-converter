@@ -44,9 +44,18 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
           // Handle case where place coordinates might be null/undefined
           const placeX = place.x || 0
           const placeY = place.y || 0
+
+          // place.rotation is CCW in DSN space (y-up); rotate the pin offset
+          // around the component center to match pad placement.
+          const rotationRad = ((place.rotation || 0) * Math.PI) / 180
+          const cos = Math.cos(rotationRad)
+          const sin = Math.sin(rotationRad)
+          const rotatedOffsetX = pin.x * cos - pin.y * sin
+          const rotatedOffsetY = pin.x * sin + pin.y * cos
+
           const pcb_port_center = applyToPoint(transformDsnUnitToMm, {
-            x: placeX + pin.x,
-            y: placeY + pin.y,
+            x: placeX + rotatedOffsetX,
+            y: placeY + rotatedOffsetY,
           })
           const pcb_port: PcbPort = {
             pcb_port_id: `pcb_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,
