@@ -87,6 +87,18 @@ function isApproximatelyEqual(a: number, b: number) {
   return Math.abs(a - b) < 1e-6
 }
 
+/** Rotate a point counterclockwise by the given angle in radians */
+function rotateOffset(
+  x: number,
+  y: number,
+  rad: number,
+): { x: number; y: number } {
+  if (rad === 0) return { x, y }
+  const cos = Math.cos(rad)
+  const sin = Math.sin(rad)
+  return { x: x * cos - y * sin, y: x * sin + y * cos }
+}
+
 export function convertPadstacksToSmtPads(
   pcb: DsnPcb,
   dsnToCircuitJsonTransform: any,
@@ -110,6 +122,9 @@ export function convertPadstacksToSmtPads(
       debug("processing place...", { place })
       const { x: compX, y: compY, side } = place
 
+      // place.rotation is CCW in DSN space (y-up); convert to radians.
+      const rotationRad = ((place.rotation || 0) * Math.PI) / 180
+
       image.pins.forEach((pin) => {
         const padstack = padstacks.find((p) => p.name === pin.padstack_name)
         debug("found padstack", { padstack })
@@ -119,11 +134,12 @@ export function convertPadstacksToSmtPads(
           return
         }
 
+        const rotatedOffset = rotateOffset(pin.x, pin.y, rotationRad)
         const { x: circuitX, y: circuitY } = applyToPoint(
           dsnToCircuitJsonTransform,
           {
-            x: (compX || 0) + pin.x,
-            y: (compY || 0) + pin.y,
+            x: (compX || 0) + rotatedOffset.x,
+            y: (compY || 0) + rotatedOffset.y,
           },
         )
 
