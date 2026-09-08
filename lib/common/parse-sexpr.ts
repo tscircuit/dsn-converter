@@ -55,6 +55,23 @@ export function tokenizeDsn(input: string): Token[] {
         numStr += input[i]
         i++
       }
+      // Parse an optional exponent suffix (e.g. "1.5e-3", "2E+3")
+      if (i < length && (input[i] === "e" || input[i] === "E")) {
+        let j = i + 1
+        let exp = input[i]
+        if (j < length && (input[j] === "+" || input[j] === "-")) {
+          exp += input[j]
+          j++
+        }
+        if (j < length && /\d/.test(input[j])) {
+          while (j < length && /\d/.test(input[j])) {
+            exp += input[j]
+            j++
+          }
+          numStr += exp
+          i = j
+        }
+      }
       tokens.push({ type: "Number", value: parseFloat(numStr) })
     } else {
       // Parse symbol
