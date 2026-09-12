@@ -45,7 +45,7 @@ export function tokenizeDsn(input: string): Token[] {
       i++ // Skip the closing quote
       tokens.push({ type: "String", value })
     } else if (char === "-" || /\d/.test(char)) {
-      // Parse number (integer or float)
+      // Parse number (integer, float, or scientific notation)
       let numStr = ""
       if (char === "-") {
         numStr += "-"
@@ -54,6 +54,19 @@ export function tokenizeDsn(input: string): Token[] {
       while (i < length && /[\d.]/.test(input[i])) {
         numStr += input[i]
         i++
+      }
+      // Check for scientific notation exponent part (e.g., e5, e-5, E+10)
+      if (i < length && (input[i] === "e" || input[i] === "E")) {
+        numStr += input[i]
+        i++
+        if (i < length && (input[i] === "+" || input[i] === "-")) {
+          numStr += input[i]
+          i++
+        }
+        while (i < length && /\d/.test(input[i])) {
+          numStr += input[i]
+          i++
+        }
       }
       tokens.push({ type: "Number", value: parseFloat(numStr) })
     } else {
