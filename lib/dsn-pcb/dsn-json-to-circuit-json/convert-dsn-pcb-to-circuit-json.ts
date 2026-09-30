@@ -42,6 +42,25 @@ export function convertDsnPcbToCircuitJson(
     })
     board.width = (maxX - minX) * transformDsnUnitToMm.a
     board.height = (maxY - minY) * transformDsnUnitToMm.a
+
+    // The DSN boundary path describes the real board outline (rounded corners,
+    // notches, non-rectangular edges). Reducing it to its bounding box discards
+    // that geometry, so boards like the Smoothieboard render as a plain
+    // rectangle. Keep the polygon when the path is more than a closed rect.
+    const isClosed =
+      boundaryPath.length > 1 &&
+      boundaryPath[0][0] === boundaryPath[boundaryPath.length - 1][0] &&
+      boundaryPath[0][1] === boundaryPath[boundaryPath.length - 1][1]
+    const distinctPoints = isClosed
+      ? boundaryPath.slice(0, -1)
+      : boundaryPath.slice()
+
+    if (distinctPoints.length > 4) {
+      board.outline = distinctPoints.map(([x, y]) =>
+        applyToPoint(transformDsnUnitToMm, { x, y }),
+      )
+      board.shape = "polygon"
+    }
   } else {
     throw new Error(
       `Couldn't read DSN boundary, add support for dsnPcb.structure.boundary["${Object.keys(dsnPcb.structure.boundary).join(",")}"]`,
