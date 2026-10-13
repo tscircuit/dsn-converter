@@ -97,6 +97,7 @@ export function convertDsnSessionToCircuitJson(
     // Process wires and vias together in routes
     net.wires?.forEach((wire, wireIdx) => {
       if ("path" in wire) {
+      if (wire.type === 'java_error_token') continue;
         const traces = convertWiringPathToPcbTraces({
           wire,
           transformUmToMm,
