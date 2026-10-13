@@ -1,4 +1,9 @@
-import type { AnySourceComponent, PcbPort, SourcePort } from "circuit-json"
+import type {
+  AnySourceComponent,
+  PcbComponent,
+  PcbPort,
+  SourcePort,
+} from "circuit-json"
 import type { DsnPcb, Image, Pin } from "lib/dsn-pcb/types"
 import { type Matrix, applyToPoint } from "transformation-matrix"
 
@@ -8,8 +13,10 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
 }: {
   dsnPcb: DsnPcb
   transformDsnUnitToMm: Matrix
-}): Array<AnySourceComponent | SourcePort | PcbPort> => {
-  const result: Array<AnySourceComponent | SourcePort | PcbPort> = []
+}): Array<AnySourceComponent | PcbComponent | SourcePort | PcbPort> => {
+  const result: Array<
+    AnySourceComponent | PcbComponent | SourcePort | PcbPort
+  > = []
 
   // Map to store image definitions for component lookup
   const imageMap = new Map(dsnPcb.library.images.map((img) => [img.name, img]))
@@ -17,6 +24,24 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
   for (const component of dsnPcb.placement.components) {
     const image = imageMap.get(component.name)
     if (!image) continue
+
+    const pinBounding =
+      image.pins && image.pins.length > 0
+        ? image.pins.reduce(
+            (acc, pin) => ({
+              minX: Math.min(acc.minX, pin.x),
+              maxX: Math.max(acc.maxX, pin.x),
+              minY: Math.min(acc.minY, pin.y),
+              maxY: Math.max(acc.maxY, pin.y),
+            }),
+            {
+              minX: Number.POSITIVE_INFINITY,
+              maxX: Number.NEGATIVE_INFINITY,
+              minY: Number.POSITIVE_INFINITY,
+              maxY: Number.NEGATIVE_INFINITY,
+            },
+          )
+        : undefined
 
     // Create source component for each place
     component.places.forEach((place) => {
@@ -30,6 +55,33 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
       }
       result.push(sourceComponent)
 
+      // Handle case where place coordinates might be null/undefined
+      const placeX = place.x || 0
+      const placeY = place.y || 0
+      const placeCenter = applyToPoint(transformDsnUnitToMm, {
+        x: placeX,
+        y: placeY,
+      })
+
+      // Emit pcb_component so consumers (and the reverse
+      // convertCircuitJsonToDsnJson) don't crash on missing pcb components
+      const pcbComponent: PcbComponent = {
+        type: "pcb_component",
+        pcb_component_id: `${component.name}_${place.refdes}`,
+        source_component_id: sourceComponent.source_component_id,
+        center: placeCenter,
+        rotation: place.rotation || 0,
+        layer: place.side === "back" ? "bottom" : "top",
+        obstructs_within_bounds: false,
+        width: pinBounding
+          ? (pinBounding.maxX - pinBounding.minX) * transformDsnUnitToMm.a
+          : 0,
+        height: pinBounding
+          ? (pinBounding.maxY - pinBounding.minY) * transformDsnUnitToMm.a
+          : 0,
+      }
+      result.push(pcbComponent)
+
       // Create ports for each pin in the image
       if (image.pins) {
         for (const pin of image.pins) {
@@ -39,11 +91,10 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
             source_component_id: sourceComponent.source_component_id,
             name: `${place.refdes}-${pin.pin_number}`,
             pin_number: Number(pin.pin_number),
-            port_hints: [],
+            // Expose the pad number as a port hint so consumers (and the
+            // reverse convertCircuitJsonToDsnJson) can resolve pad numbering
+            port_hints: [String(pin.pin_number)],
           }
-          // Handle case where place coordinates might be null/undefined
-          const placeX = place.x || 0
-          const placeY = place.y || 0
           const pcb_port_center = applyToPoint(transformDsnUnitToMm, {
             x: placeX + pin.x,
             y: placeY + pin.y,

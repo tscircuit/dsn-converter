@@ -83,8 +83,9 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
 
   // Only add unconnected nets for pads that aren't part of any existing net
   for (const [sourcePortId, padInfo] of padsBySourcePortId) {
+    if (!padInfo.pinNumber) continue
     let isConnected = false
-    const padIdentifier = `${padInfo.componentName}-${padInfo.pinNumber.replace("pin", "")}`
+    const padIdentifier = `${padInfo.componentName}-${String(padInfo.pinNumber).replace("pin", "")}`
     for (const [_, connectedPads] of netMap.entries()) {
       if (
         Array.from(connectedPads).some(
