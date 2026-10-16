@@ -8,15 +8,30 @@ const debug = Debug("dsn-converter:getPinNum")
  * Handles both extraction from nodes and type conversion in one step
  */
 export function getPinNum(nodes: ASTNode[]): number | string | null {
+  // DSN pin grammar: (pin <padstack_name> [(rotate <angle>)] <pin_name> <x> <y>)
+  // When the optional (rotate ...) group is present it sits at nodes[2] and
+  // the pin name shifts to nodes[3]. Reading nodes[2] unconditionally used to
+  // return the string "rotate" as the pin name for every rotated pin.
+  let nameNodeIndex = 2
+  const maybeRotateNode = nodes[2]
+  if (
+    maybeRotateNode?.type === "List" &&
+    maybeRotateNode.children?.[0]?.type === "Atom" &&
+    maybeRotateNode.children[0].value === "rotate"
+  ) {
+    nameNodeIndex = 3
+  }
+
   // Extract pin number from AST nodes
   let pinNumber
+  const nameNode = nodes[nameNodeIndex]
 
-  if (nodes[2]?.type === "List" && nodes[2].children) {
+  if (nameNode?.type === "List" && nameNode.children) {
     // Pin number is in a List structure
-    pinNumber = nodes[2].children[0]?.value
-  } else if (nodes[2]?.type === "Atom") {
+    pinNumber = nameNode.children[0]?.value
+  } else if (nameNode?.type === "Atom") {
     // Pin number is direct value
-    pinNumber = nodes[2].value
+    pinNumber = nameNode.value
   } else {
     debug("Unsupported pin number format:", nodes)
     return null

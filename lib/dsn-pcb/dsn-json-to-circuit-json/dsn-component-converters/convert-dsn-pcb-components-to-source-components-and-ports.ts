@@ -1,5 +1,7 @@
 import type { AnySourceComponent, PcbPort, SourcePort } from "circuit-json"
 import type { DsnPcb, Image, Pin } from "lib/dsn-pcb/types"
+import { transformLocalPointToBoard } from "lib/utils/apply-placement-transform"
+import { getPinOccurrenceSuffix } from "lib/utils/get-pin-occurrence-suffix"
 import { type Matrix, applyToPoint } from "transformation-matrix"
 
 export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
@@ -32,24 +34,29 @@ export const convertDsnPcbComponentsToSourceComponentsAndPorts = ({
 
       // Create ports for each pin in the image
       if (image.pins) {
-        for (const pin of image.pins) {
+        for (const [pinIndex, pin] of image.pins.entries()) {
+          // Footprints may reuse a pin number (e.g. SOT-89 tab = pin 2);
+          // disambiguate later occurrences so ids stay unique
+          const occurrenceSuffix = getPinOccurrenceSuffix(image.pins, pinIndex)
           const port: SourcePort = {
             type: "source_port",
-            source_port_id: `source_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,
+            source_port_id: `source_port_${component.name}-Pad${pin.pin_number}${occurrenceSuffix}_${place.refdes}`,
             source_component_id: sourceComponent.source_component_id,
             name: `${place.refdes}-${pin.pin_number}`,
-            pin_number: Number(pin.pin_number),
+            // pin_number is only meaningful for numeric pin names; coercing a
+            // non-numeric name ("A", "GND1", ...) with Number() produced NaN
+            pin_number:
+              typeof pin.pin_number === "number" ? pin.pin_number : undefined,
             port_hints: [],
           }
-          // Handle case where place coordinates might be null/undefined
-          const placeX = place.x || 0
-          const placeY = place.y || 0
-          const pcb_port_center = applyToPoint(transformDsnUnitToMm, {
-            x: placeX + pin.x,
-            y: placeY + pin.y,
-          })
+          // Pin offsets are footprint-local: apply the placement transform
+          // (back-side mirroring + placement rotation) before translating
+          const pcb_port_center = applyToPoint(
+            transformDsnUnitToMm,
+            transformLocalPointToBoard(place, pin),
+          )
           const pcb_port: PcbPort = {
-            pcb_port_id: `pcb_port_${component.name}-Pad${pin.pin_number}_${place.refdes}`,
+            pcb_port_id: `pcb_port_${component.name}-Pad${pin.pin_number}${occurrenceSuffix}_${place.refdes}`,
             type: "pcb_port",
             source_port_id: port.source_port_id,
             pcb_component_id: component.name,

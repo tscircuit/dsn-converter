@@ -44,8 +44,13 @@ export function tokenizeDsn(input: string): Token[] {
       }
       i++ // Skip the closing quote
       tokens.push({ type: "String", value })
-    } else if (char === "-" || /\d/.test(char)) {
-      // Parse number (integer or float)
+    } else if (
+      (char === "-" && /[\d.]/.test(input[i + 1] ?? "")) ||
+      /\d/.test(char)
+    ) {
+      // Parse number (integer or float). A "-" that is not followed by a
+      // digit is a symbol (e.g. the "-" pin name of a polarized capacitor);
+      // treating it as a number used to produce NaN and lose the token.
       let numStr = ""
       if (char === "-") {
         numStr += "-"

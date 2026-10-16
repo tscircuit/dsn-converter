@@ -16,8 +16,10 @@ import type {
   ComponentPlacement,
   DsnJson,
   DsnPcb,
+  DsnPlane,
   DsnSession,
   Image,
+  ImageKeepout,
   Layer,
   Library,
   Net,
@@ -236,12 +238,46 @@ export function processStructure(nodes: ASTNode[]): Structure {
           case "rule":
             structure.rule = processRule(node.children!.slice(1))
             break
+          case "plane": {
+            structure.planes = structure.planes ?? []
+            structure.planes.push(processPlane(node.children!))
+            break
+          }
         }
       }
     }
   })
 
   return structure as Structure
+}
+
+function processPlane(nodes: ASTNode[]): DsnPlane {
+  // Grammar: (plane <net_name> (polygon <layer> <aperture_width> <coords...>)
+  //          [(window ...) ...])
+  // Window sub-shapes (clearance cutouts) are not modelled yet.
+  const plane: DsnPlane = {
+    net_name: nodes[1]?.type === "Atom" ? String(nodes[1].value) : "",
+    polygons: [],
+  }
+  for (const child of nodes.slice(2)) {
+    if (child.type !== "List" || !child.children) continue
+    const [keyNode, layerNode, apertureNode, ...coordNodes] = child.children
+    if (
+      keyNode?.type === "Atom" &&
+      keyNode.value === "polygon" &&
+      layerNode?.type === "Atom" &&
+      typeof apertureNode?.value === "number"
+    ) {
+      plane.polygons.push({
+        layer: String(layerNode.value),
+        aperture_width: apertureNode.value,
+        coordinates: coordNodes
+          .filter((n) => n.type === "Atom" && typeof n.value === "number")
+          .map((n) => n.value as number),
+      })
+    }
+  }
+  return plane
 }
 
 function processLayer(nodes: ASTNode[]): Layer {
@@ -534,6 +570,7 @@ function processImage(nodes: ASTNode[]): Image {
   }
   image.outlines = []
   image.pins = []
+  image.keepouts = []
 
   nodes.slice(2).forEach((node) => {
     if (node.type === "List") {
@@ -545,12 +582,38 @@ function processImage(nodes: ASTNode[]): Image {
         } else if (key === "pin") {
           const pin = processPin(node.children!)
           if (pin) image.pins!.push(pin)
+        } else if (key === "keepout") {
+          image.keepouts!.push(...processImageKeepout(node.children!))
         }
       }
     }
   })
 
   return image as Image
+}
+
+function processImageKeepout(nodes: ASTNode[]): ImageKeepout[] {
+  // Grammar: (keepout <id> (circle <layer> <diameter> [<x> <y>]) ...)
+  const keepouts: ImageKeepout[] = []
+  for (const shapeNode of nodes.slice(2)) {
+    if (shapeNode.type !== "List" || !shapeNode.children) continue
+    const [shapeKey, layerNode, diameterNode, xNode, yNode] = shapeNode.children
+    if (
+      shapeKey?.type === "Atom" &&
+      shapeKey.value === "circle" &&
+      layerNode?.type === "Atom" &&
+      typeof diameterNode?.value === "number"
+    ) {
+      keepouts.push({
+        shape: "circle",
+        layer: String(layerNode.value),
+        diameter: diameterNode.value,
+        x: typeof xNode?.value === "number" ? xNode.value : 0,
+        y: typeof yNode?.value === "number" ? yNode.value : 0,
+      })
+    }
+  }
+  return keepouts
 }
 
 function processOutline(nodes: ASTNode[]): Outline {
@@ -583,6 +646,18 @@ function processPin(nodes: ASTNode[]): Pin | null {
     if (pinNumber === null) return null
 
     pin.pin_number = pinNumber
+
+    // Capture the optional (rotate <angle>) group: it rotates the padstack
+    // shape for this pin within the footprint
+    const maybeRotateNode = nodes[2]
+    if (
+      maybeRotateNode?.type === "List" &&
+      maybeRotateNode.children?.[0]?.type === "Atom" &&
+      maybeRotateNode.children[0].value === "rotate" &&
+      typeof maybeRotateNode.children[1]?.value === "number"
+    ) {
+      pin.rotation = maybeRotateNode.children[1].value
+    }
 
     // Parse coordinates
     let xValue: number | undefined
