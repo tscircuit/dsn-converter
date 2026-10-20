@@ -3,21 +3,12 @@ import Debug from "debug"
 import type { DsnPcb, Padstack } from "lib/dsn-pcb/types"
 import { parsePadstackName } from "lib/utils/get-padstack-name"
 import { applyToPoint } from "transformation-matrix"
+import {
+  convertThroughHolePadstackToPlatedHole,
+  isThruHolePadstack,
+} from "./convert-dsn-json-holes-to-plated-holes"
 
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
-
-// Layer name sets for front and back copper — covers KiCad (F.Cu/B.Cu) and
-// Freerouting/other tools (Top/Bottom)
-const FRONT_COPPER = new Set(["F.Cu", "Top", "F_Cu"])
-const BACK_COPPER = new Set(["B.Cu", "Bottom", "B_Cu"])
-
-function isThruHolePadstack(padstack: Padstack): boolean {
-  const layers = padstack.shapes.map((s) => s.layer)
-  return (
-    layers.some((l) => FRONT_COPPER.has(l)) &&
-    layers.some((l) => BACK_COPPER.has(l))
-  )
-}
 
 function getLayerFromPadstack(
   padstack: DsnPcb["library"]["padstacks"][number],
@@ -83,10 +74,6 @@ function getRectangleDimensionsFromPolygon(coordinates: number[]) {
   }
 }
 
-function isApproximatelyEqual(a: number, b: number) {
-  return Math.abs(a - b) < 1e-6
-}
-
 export function convertPadstacksToSmtPads(
   pcb: DsnPcb,
   dsnToCircuitJsonTransform: any,
@@ -133,90 +120,17 @@ export function convertPadstacksToSmtPads(
           port_hints: [pin.pin_number.toString()],
         }
         const pcbPlatedHoleId = `pcb_plated_hole_${componentId}_${place.refdes}_${pin.pin_number}`
-        const parsedPadstackName = parsePadstackName(padstack.name)
 
         // ── Through-hole detection ──────────────────────────────────────────
         if (isThruHolePadstack(padstack)) {
-          const circleShape = padstack.shapes.find(
-            (s) => s.shapeType === "circle",
-          )
-          const pathShape = padstack.shapes.find((s) => s.shapeType === "path")
-
-          if (circleShape && circleShape.shapeType === "circle") {
-            const outerDiameter = circleShape.diameter / 1000
-
-            // Prefer explicit hole from parser, then name convention, then 60% estimate
-            const holeDiameter =
-              padstack.hole?.diameter !== undefined
-                ? padstack.hole.diameter / 1000
-                : parsedPadstackName?.shape === "circle"
-                  ? parsedPadstackName.holeDiameter
-                  : outerDiameter * 0.6
-
-            const platedHole: PcbPlatedHole = {
-              type: "pcb_plated_hole",
-              pcb_plated_hole_id: pcbPlatedHoleId,
-              ...commonIds,
-              shape: "circle",
-              x: circuitX,
-              y: circuitY,
-              outer_diameter: outerDiameter,
-              hole_diameter: holeDiameter,
-              layers: ["top", "bottom"],
-            }
-            elements.push(platedHole)
-            return
-          }
-
-          if (pathShape && pathShape.shapeType === "path") {
-            const [x1, y1, x2, y2] = pathShape.coordinates
-            const strokeWidth = pathShape.width / 1000
-            const endpointDist =
-              Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) / 1000
-            const isHorizontal = Math.abs(x2 - x1) >= Math.abs(y2 - y1)
-
-            const major = endpointDist + strokeWidth
-            const minor = strokeWidth
-            const outerWidth = isHorizontal ? major : minor
-            const outerHeight = isHorizontal ? minor : major
-
-            let holeWidth: number
-            let holeHeight: number
-            if (padstack.hole?.width !== undefined) {
-              holeWidth = padstack.hole.width / 1000
-              holeHeight = (padstack.hole.height ?? padstack.hole.width) / 1000
-            } else {
-              const parsedNameMatchesOuterDimensions =
-                parsedPadstackName?.shape === "oval" &&
-                isApproximatelyEqual(parsedPadstackName.width, outerWidth) &&
-                isApproximatelyEqual(parsedPadstackName.height, outerHeight)
-
-              if (
-                parsedPadstackName?.shape === "oval" &&
-                !parsedNameMatchesOuterDimensions
-              ) {
-                holeWidth = parsedPadstackName.width
-                holeHeight = parsedPadstackName.height
-              } else {
-                holeWidth = outerWidth * 0.6
-                holeHeight = outerHeight * 0.6
-              }
-            }
-
-            const platedHole: PcbPlatedHole = {
-              type: "pcb_plated_hole",
-              pcb_plated_hole_id: pcbPlatedHoleId,
-              ...commonIds,
-              shape: "oval",
-              x: circuitX,
-              y: circuitY,
-              outer_width: outerWidth,
-              outer_height: outerHeight,
-              hole_width: holeWidth,
-              hole_height: holeHeight,
-              ccw_rotation: 0,
-              layers: ["top", "bottom"],
-            }
+          const platedHole = convertThroughHolePadstackToPlatedHole({
+            padstack,
+            x: circuitX,
+            y: circuitY,
+            pcbPlatedHoleId,
+            commonIds,
+          })
+          if (platedHole) {
             elements.push(platedHole)
             return
           }

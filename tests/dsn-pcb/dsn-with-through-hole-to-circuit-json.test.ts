@@ -1,5 +1,9 @@
 import { expect, test } from "bun:test"
-import { convertCircuitJsonToDsnString, parseDsnToDsnJson } from "lib"
+import {
+  convertCircuitJsonToDsnString,
+  convertDsnJsonHolesToPlatedHoles,
+  parseDsnToDsnJson,
+} from "lib"
 import { convertDsnJsonToCircuitJson } from "../../lib/dsn-pcb/dsn-json-to-circuit-json/convert-dsn-json-to-circuit-json.ts"
 
 import type { AnyCircuitElement } from "circuit-json"
@@ -92,4 +96,74 @@ test("dsn import: padstacks with shapes on both F.Cu and B.Cu are through-hole",
   // No SMT pads should be generated for through-hole component
   const smtPads = elements.filter((e) => e.type === "pcb_smtpad")
   expect(smtPads.length).toBe(0)
+})
+
+test("convertDsnJsonHolesToPlatedHoles converts circular, oval, and rectangular through-hole padstacks", () => {
+  const dsnText = `(pcb test.dsn
+  (parser
+    (string_quote ")
+    (host_version "0.0.1")
+    (space_in_quoted_tokens on)
+    (host_cad "test")
+  )
+  (resolution um 10)
+  (unit um)
+  (structure
+    (layer F.Cu (type signal) (property (index 0)))
+    (layer B.Cu (type signal) (property (index 1)))
+    (boundary (path pcb 0 -50000 -50000 50000 -50000 50000 50000 -50000 50000 -50000 -50000))
+    (via "Via[0-1]_600:300_um")
+    (rule (width 200) (clearance 200))
+  )
+  (placement
+    (component "TH_HEADER"
+      (place J1 0 0 front 0)
+    )
+  )
+  (library
+    (image "TH_HEADER"
+      (pin "RoundRect[A]Pad_1600x2000_um" 1 -2540 0)
+      (pin "Round[A]Pad_800_1600_um" 2 2540 0)
+    )
+    (padstack "RoundRect[A]Pad_1600x2000_um"
+      (shape (polygon F.Cu 0 -800 1000 800 1000 800 -1000 -800 -1000 -800 1000))
+      (shape (polygon B.Cu 0 -800 1000 800 1000 800 -1000 -800 -1000 -800 1000))
+      (attach off)
+    )
+    (padstack "Round[A]Pad_800_1600_um"
+      (shape (circle F.Cu 1600))
+      (shape (circle B.Cu 1600))
+      (attach off)
+    )
+  )
+  (network
+    (net "N1" (pins J1-1))
+    (net "N2" (pins J1-2))
+  )
+  (wiring)
+)`
+
+  const dsnJson = parseDsnToDsnJson(dsnText) as DsnPcb
+  const directHoles = convertDsnJsonHolesToPlatedHoles(dsnJson) as any[]
+  expect(directHoles).toHaveLength(2)
+  expect(directHoles[0].shape).toBe("circular_hole_with_rect_pad")
+  expect(directHoles[0].rect_pad_width).toBeCloseTo(1.6, 3)
+  expect(directHoles[0].rect_pad_height).toBeCloseTo(2.0, 3)
+  expect(directHoles[1].shape).toBe("circle")
+
+  dsnJson.library.padstacks[0].hole = {
+    shape: "circle",
+    diameter: 800,
+  }
+  const elements = convertDsnJsonToCircuitJson(dsnJson)
+  const platedHoles = elements.filter(
+    (e) => e.type === "pcb_plated_hole",
+  ) as any[]
+
+  expect(platedHoles).toHaveLength(2)
+  expect(platedHoles[0].shape).toBe("circular_hole_with_rect_pad")
+  expect(platedHoles[0].rect_pad_width).toBeCloseTo(1.6, 3)
+  expect(platedHoles[0].rect_pad_height).toBeCloseTo(2.0, 3)
+  expect(platedHoles[0].hole_diameter).toBeCloseTo(0.8, 3)
+  expect(platedHoles[1].shape).toBe("circle")
 })

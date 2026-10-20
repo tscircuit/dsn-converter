@@ -34,6 +34,8 @@ test("basic-via-pcb-layer-change", async () => {
     </board>,
   )
 
+  await circuit.renderUntilSettled()
+
   const circuitJsonBefore =
     (await circuit.getCircuitJson()) as AnyCircuitElement[]
 
@@ -41,11 +43,11 @@ test("basic-via-pcb-layer-change", async () => {
 
   const dsnJson = parseDsnToDsnJson(dsnFile) as DsnPcb
 
-  // console.log("DSN JSON\n--------\n", dsnJson)
-
   const circuitJsonAfter = convertDsnPcbToCircuitJson(dsnJson)
 
-  const svgBefore = convertCircuitJsonToPcbSvg(circuitJsonBefore)
+  const svgBefore = convertCircuitJsonToPcbSvg(
+    circuitJsonBefore.filter((el) => !el.type.startsWith("pcb_silkscreen")),
+  )
   const svgAfter = convertCircuitJsonToPcbSvg(circuitJsonAfter)
 
   writeDebugFile("circuit.before.svg", svgBefore)
@@ -61,16 +63,16 @@ test("basic-via-pcb-layer-change", async () => {
 
   const beforeSmtPads = su(circuitJsonBefore).pcb_smtpad.list()
   const afterSmtPads = su(circuitJsonAfter).pcb_smtpad.list()
-
-  // console.log("BEFORE\n-------\n", beforeSmtPads)
-  // console.log("AFTER\n-------\n", afterSmtPads)
+  const beforeVias = su(circuitJsonBefore).pcb_via.list()
+  const afterVias = su(circuitJsonAfter).pcb_via.list()
 
   expect(
     afterSmtPads.map((p) => p.layer).filter((l) => l === "bottom"),
   ).toHaveLength(
     beforeSmtPads.map((p) => p.layer).filter((l) => l === "bottom").length,
   )
+  expect(afterVias).toHaveLength(beforeVias.length)
+  expect(afterVias.length).toBeGreaterThan(0)
 
-  //
-  // expect(looksSameResult.equal).toBe(true)
+  expect(looksSameResult.equal).toBe(true)
 })
