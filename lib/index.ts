@@ -9,4 +9,5 @@ export * from "./dsn-pcb/dsn-json-to-circuit-json/convert-dsn-json-to-circuit-js
 export * from "./dsn-pcb/dsn-json-to-circuit-json/parse-dsn-to-circuit-json.ts"
 export * from "./dsn-pcb/dsn-json-to-circuit-json/parse-dsn-to-dsn-json.ts"
 export * from "./dsn-pcb/dsn-json-to-circuit-json/convert-dsn-session-to-circuit-json.ts"
+export * from "./dsn-pcb/dsn-json-to-circuit-json/dsn-component-converters/convert-dsn-json-holes-to-plated-holes.ts"
 export * from "./dsn-pcb/types.ts"
