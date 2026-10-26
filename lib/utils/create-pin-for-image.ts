@@ -18,6 +18,7 @@ export function createPinForImage({
 
   const isCircle = pad.shape === "circle"
   const isPolygon = pad.shape === "polygon"
+  const isRotatedRect = pad.shape === "rotated_rect"
   const polygonPadGeometry = isPolygon
     ? getPolygonSmtPadGeometry(pad)
     : undefined
@@ -27,6 +28,7 @@ export function createPinForImage({
   let holeDiameter: number | undefined
   let width: number | undefined
   let height: number | undefined
+  let ccwRotation: number | undefined
   let customDescriptor: string | undefined
 
   if (isCircle) {
@@ -38,9 +40,14 @@ export function createPinForImage({
     width = polygonPadGeometry?.widthUm
     height = polygonPadGeometry?.heightUm
     customDescriptor = `${polygonPadGeometry?.widthUm}x${polygonPadGeometry?.heightUm}_${polygonPadGeometry?.relativePointsUm.join("_")}`
-  } else {
+  } else if (isRotatedRect) {
+    shape = "rotated_rect"
     width = pad.width * 1000
     height = pad.height * 1000
+    ccwRotation = pad.ccw_rotation
+  } else {
+    width = (pad as { width: number }).width * 1000
+    height = (pad as { height: number }).height * 1000
   }
 
   const padstackParams: PadstackNameArgs = {
@@ -49,6 +56,7 @@ export function createPinForImage({
     holeDiameter,
     width,
     height,
+    ccwRotation,
     layer: pad.layer as PcbSmtPad["layer"],
     customDescriptor,
   }

@@ -28,6 +28,14 @@ test("parse generated rectangular and polygon padstack names", () => {
     height: 1.5,
   })
 
+  expect(parsePadstackName("RoundRect[T]Pad_2000x1000_45deg_um")).toEqual({
+    shape: "rotated_rect",
+    layer: "top",
+    width: 2,
+    height: 1,
+    ccwRotation: 45,
+  })
+
   expect(parsePadstackName("Cust[B]Pad_poly_10x20_um")).toEqual({
     shape: "polygon",
     layer: "bottom",

@@ -83,6 +83,60 @@ function getRectangleDimensionsFromPolygon(coordinates: number[]) {
   }
 }
 
+function getRotatedRectangleFromPolygon(coordinates: number[]) {
+  const points: Array<{ x: number; y: number }> = []
+
+  for (let i = 0; i < coordinates.length; i += 2) {
+    const point = { x: coordinates[i], y: coordinates[i + 1] }
+    const first = points[0]
+    const isClosing =
+      first &&
+      Math.abs(point.x - first.x) < 1e-3 &&
+      Math.abs(point.y - first.y) < 1e-3 &&
+      i === coordinates.length - 2
+    if (!isClosing) {
+      points.push(point)
+    }
+  }
+
+  if (points.length !== 4) return null
+
+  const edges = points.map((p, idx) => {
+    const next = points[(idx + 1) % 4]
+    const dx = next.x - p.x
+    const dy = next.y - p.y
+    return { dx, dy, len: Math.hypot(dx, dy) }
+  })
+
+  if (edges.some((e) => e.len < 1e-3)) return null
+
+  const oppositeEqual =
+    Math.abs(edges[0].len - edges[2].len) < 1e-2 &&
+    Math.abs(edges[1].len - edges[3].len) < 1e-2
+  if (!oppositeEqual) return null
+
+  const dot01 =
+    (edges[0].dx * edges[1].dx + edges[0].dy * edges[1].dy) /
+    (edges[0].len * edges[1].len)
+  const dot12 =
+    (edges[1].dx * edges[2].dx + edges[1].dy * edges[2].dy) /
+    (edges[1].len * edges[2].len)
+
+  if (Math.abs(dot01) > 1e-2 || Math.abs(dot12) > 1e-2) return null
+
+  const rawAngle = (Math.atan2(edges[0].dy, edges[0].dx) * 180) / Math.PI
+  const normalizedAngle = Number((((rawAngle % 360) + 360) % 360).toFixed(3))
+
+  // Axis-aligned rectangles without explicit rotated_rect padstack name are handled by getRectangleDimensionsFromPolygon
+  if (normalizedAngle % 90 === 0) return null
+
+  return {
+    width: Number((edges[0].len / 1000).toFixed(4)),
+    height: Number((edges[1].len / 1000).toFixed(4)),
+    ccwRotation: normalizedAngle,
+  }
+}
+
 function isApproximatelyEqual(a: number, b: number) {
   return Math.abs(a - b) < 1e-6
 }
@@ -276,13 +330,38 @@ export function convertPadstacksToSmtPads(
         }
 
         let pcbPad: PcbSmtPad
-        const rectangleDimensionsFromPolygon = polygonShape
-          ? getRectangleDimensionsFromPolygon(polygonShape.coordinates)
-          : null
+        const rotatedRectFromName =
+          parsedPadstackName?.shape === "rotated_rect"
+            ? parsedPadstackName
+            : null
+        const rotatedRectFromPolygon =
+          !rotatedRectFromName && polygonShape
+            ? getRotatedRectangleFromPolygon(polygonShape.coordinates)
+            : null
+        const rotatedRectInfo = rotatedRectFromName ?? rotatedRectFromPolygon
+
+        const rectangleDimensionsFromPolygon =
+          !rotatedRectInfo && polygonShape
+            ? getRectangleDimensionsFromPolygon(polygonShape.coordinates)
+            : null
         const shouldImportPolygonAsRect =
           !!polygonShape && !!rectangleDimensionsFromPolygon
 
-        if (polygonShape && !shouldImportPolygonAsRect) {
+        if (rotatedRectInfo) {
+          const layer = getLayerFromPadstack(padstack)
+          pcbPad = {
+            type: "pcb_smtpad",
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            ...commonIds,
+            shape: "rotated_rect",
+            x: circuitX,
+            y: circuitY,
+            width: rotatedRectInfo.width,
+            height: rotatedRectInfo.height,
+            ccw_rotation: rotatedRectInfo.ccwRotation,
+            layer,
+          }
+        } else if (polygonShape && !shouldImportPolygonAsRect) {
           const layer = getLayerFromPadstack(padstack)
           pcbPad = {
             type: "pcb_smtpad",

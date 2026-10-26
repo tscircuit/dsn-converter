@@ -60,9 +60,31 @@ export function createRectangularPadstack(
   width: number,
   height: number,
   layer: PcbSmtPad["layer"],
+  ccwRotation = 0,
 ): Padstack {
   const halfWidth = width / 2
   const halfHeight = height / 2
+  const normalizedRotation = ((ccwRotation % 360) + 360) % 360
+
+  const corners: Array<[number, number]> = [
+    [-halfWidth, halfHeight], // Top left
+    [halfWidth, halfHeight], // Top right
+    [halfWidth, -halfHeight], // Bottom right
+    [-halfWidth, -halfHeight], // Bottom left
+  ]
+
+  const rotatedCorners =
+    normalizedRotation === 0
+      ? corners
+      : corners.map(([x, y]) => {
+          const rad = (normalizedRotation * Math.PI) / 180
+          const cos = Math.cos(rad)
+          const sin = Math.sin(rad)
+          return [
+            Number((x * cos - y * sin).toFixed(3)),
+            Number((x * sin + y * cos).toFixed(3)),
+          ] as [number, number]
+        })
 
   return {
     name,
@@ -72,16 +94,9 @@ export function createRectangularPadstack(
         layer: layer === "bottom" ? "B.Cu" : "F.Cu",
         width: 0,
         coordinates: [
-          -halfWidth,
-          halfHeight, // Top left
-          halfWidth,
-          halfHeight, // Top right
-          halfWidth,
-          -halfHeight, // Bottom right
-          -halfWidth,
-          -halfHeight, // Bottom left
-          -halfWidth,
-          halfHeight, // Back to top left to close the polygon
+          ...rotatedCorners.flatMap(([x, y]) => [x, y]),
+          rotatedCorners[0][0],
+          rotatedCorners[0][1], // Back to first corner to close the polygon
         ],
       },
     ],
