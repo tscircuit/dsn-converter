@@ -220,7 +220,9 @@ export function processStructure(nodes: ASTNode[]): Structure {
         const key = keyNode.value
         switch (key) {
           case "layer":
-            structure.layers!.push(processLayer(node.children!))
+            structure.layers!.push(
+              processLayer(node.children!, structure.layers!.length),
+            )
             break
           case "boundary":
             structure.boundary = processBoundary(node.children!.slice(1))
@@ -244,9 +246,12 @@ export function processStructure(nodes: ASTNode[]): Structure {
   return structure as Structure
 }
 
-function processLayer(nodes: ASTNode[]): Layer {
-  const layer: Partial<Layer> = {}
-  if (nodes[1].type === "Atom" && typeof nodes[1].value === "string") {
+function processLayer(nodes: ASTNode[], defaultIndex = 0): Layer {
+  const layer: Partial<Layer> = {
+    type: "signal",
+    property: { index: defaultIndex },
+  }
+  if (nodes[1]?.type === "Atom" && typeof nodes[1].value === "string") {
     layer.name = nodes[1].value
   }
 
@@ -257,13 +262,21 @@ function processLayer(nodes: ASTNode[]): Layer {
         const key = keyNode.value
         switch (key) {
           case "type":
-            if (rest[0].type === "Atom" && typeof rest[0].value === "string") {
+            if (
+              rest[0]?.type === "Atom" &&
+              typeof rest[0].value === "string" &&
+              rest[0].value !== "java_error_token"
+            ) {
               layer.type = rest[0].value
             }
             break
-          case "property":
-            layer.property = processProperty(rest)
+          case "property": {
+            const parsedProp = processProperty(rest)
+            if (typeof parsedProp.index === "number") {
+              layer.property = parsedProp
+            }
             break
+          }
         }
       }
     }
@@ -388,7 +401,8 @@ function processClearance(nodes: ASTNode[]): Clearance {
         keyNode.type === "Atom" &&
         keyNode.value === "type" &&
         valueNode.type === "Atom" &&
-        typeof valueNode.value === "string"
+        typeof valueNode.value === "string" &&
+        valueNode.value !== "java_error_token"
       ) {
         clearance.type = valueNode.value
       }
@@ -979,7 +993,9 @@ function processVia(nodes: ASTNode[]): Wire | null {
 }
 
 function processWire(nodes: ASTNode[]): Wire {
-  const wire: Partial<Wire> = {}
+  const wire: Partial<Wire> = {
+    type: "route",
+  }
 
   nodes.forEach((node) => {
     if (node.type === "List") {
@@ -1023,7 +1039,8 @@ function processWire(nodes: ASTNode[]): Wire {
             break
           case "type":
             if (rest[0].type === "Atom" && typeof rest[0].value === "string") {
-              wire.type = rest[0].value
+              wire.type =
+                rest[0].value === "java_error_token" ? "route" : rest[0].value
             }
             break
         }
