@@ -210,7 +210,7 @@ export function processPlatedHoles(
         x: c.coordinates.x,
         y: c.coordinates.y,
         side: "front" as const,
-        rotation: c.rotation % 90,
+        rotation: 0,
         PN: c.value,
       })),
     })

@@ -55,6 +55,22 @@ export function tokenizeDsn(input: string): Token[] {
         numStr += input[i]
         i++
       }
+      if (
+        i < length &&
+        (input[i] === "e" || input[i] === "E") &&
+        /[\d+-]/.test(input[i + 1] ?? "")
+      ) {
+        numStr += input[i]
+        i++
+        if (input[i] === "+" || input[i] === "-") {
+          numStr += input[i]
+          i++
+        }
+        while (i < length && /\d/.test(input[i])) {
+          numStr += input[i]
+          i++
+        }
+      }
       tokens.push({ type: "Number", value: parseFloat(numStr) })
     } else {
       // Parse symbol

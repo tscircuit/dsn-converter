@@ -56,11 +56,14 @@ export function createPinForImage({
     ? polygonPadGeometry!.center
     : { x: pad.x, y: pad.y }
 
+  const rawX = (padCenter.x - pcbComponent.center.x) * 1000
+  const rawY = (padCenter.y - pcbComponent.center.y) * 1000
+
   return {
     padstack_name: getPadstackName(padstackParams),
     pin_number:
       sourcePort.port_hints?.find((hint) => !Number.isNaN(Number(hint))) || 1,
-    x: (padCenter.x - pcbComponent.center.x) * 1000,
-    y: (padCenter.y - pcbComponent.center.y) * 1000,
+    x: Math.abs(rawX) < 1e-9 ? 0 : rawX,
+    y: Math.abs(rawY) < 1e-9 ? 0 : rawY,
   }
 }
