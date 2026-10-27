@@ -45,6 +45,7 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
   }
 
   const netMap = new Map()
+  const netSubcircuitKeysMap = new Map<string, Set<string>>()
   const netTraceWidthMap = new Map<string, number>()
 
   for (const element of circuitElements) {
@@ -55,18 +56,68 @@ export function processNets(circuitElements: AnyCircuitElement[], pcb: DsnPcb) {
         const firstPad = padsBySourcePortId.get(connectedPorts[0])
 
         if (firstPad) {
-          const netName = `Net-(${firstPad.componentName}-Pad${firstPad.pinNumber})`
+          const defaultNetName = `Net-(${firstPad.componentName}-Pad${firstPad.pinNumber})`
+          const pinIds = connectedPorts
+            .map((portId) => padsBySourcePortId.get(portId))
+            .filter((padInfo): padInfo is NonNullable<typeof padInfo> =>
+              Boolean(padInfo),
+            )
+            .map((padInfo) => `${padInfo.componentName}-${padInfo.pinNumber}`)
+
+          const traceSubcircuitKey = element.subcircuit_connectivity_map_key
+          const matchingNetNames = traceSubcircuitKey
+            ? Array.from(netMap.entries())
+                .filter(
+                  ([existingNetName, pinsSet]) =>
+                    pinIds.some((pinId) => pinsSet.has(pinId)) &&
+                    !netSubcircuitKeysMap
+                      .get(existingNetName)
+                      ?.has(traceSubcircuitKey),
+                )
+                .map(([existingNetName]) => existingNetName)
+            : []
+
+          const netName = matchingNetNames[0] ?? defaultNetName
 
           if (!netMap.has(netName)) {
             netMap.set(netName, new Set())
           }
+          if (!netSubcircuitKeysMap.has(netName)) {
+            netSubcircuitKeysMap.set(netName, new Set())
+          }
+          if (traceSubcircuitKey) {
+            netSubcircuitKeysMap.get(netName)!.add(traceSubcircuitKey)
+          }
 
-          for (const portId of connectedPorts) {
-            const padInfo = padsBySourcePortId.get(portId)
-            if (padInfo) {
-              netMap
-                .get(netName)
-                ?.add(`${padInfo.componentName}-${padInfo.pinNumber}`)
+          const targetSet = netMap.get(netName)!
+          for (const pinId of pinIds) {
+            targetSet.add(pinId)
+          }
+
+          for (const otherNetName of matchingNetNames.slice(1)) {
+            if (otherNetName === netName) continue
+            const otherSet = netMap.get(otherNetName)
+            if (otherSet) {
+              for (const pinId of otherSet) {
+                targetSet.add(pinId)
+              }
+              netMap.delete(otherNetName)
+            }
+            const otherKeys = netSubcircuitKeysMap.get(otherNetName)
+            if (otherKeys) {
+              for (const key of otherKeys) {
+                netSubcircuitKeysMap.get(netName)!.add(key)
+              }
+              netSubcircuitKeysMap.delete(otherNetName)
+            }
+            if (netTraceWidthMap.has(otherNetName)) {
+              if (!netTraceWidthMap.has(netName)) {
+                netTraceWidthMap.set(
+                  netName,
+                  netTraceWidthMap.get(otherNetName)!,
+                )
+              }
+              netTraceWidthMap.delete(otherNetName)
             }
           }
 
