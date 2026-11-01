@@ -55,6 +55,30 @@ export function tokenizeDsn(input: string): Token[] {
         numStr += input[i]
         i++
       }
+      if (
+        /\d/.test(numStr) &&
+        i < length &&
+        (input[i] === "e" || input[i] === "E")
+      ) {
+        let expEnd = i + 1
+        if (
+          expEnd < length &&
+          (input[expEnd] === "+" || input[expEnd] === "-")
+        ) {
+          expEnd++
+        }
+        const expDigitsStart = expEnd
+        while (expEnd < length && /\d/.test(input[expEnd])) {
+          expEnd++
+        }
+        if (
+          expEnd > expDigitsStart &&
+          (expEnd === length || /\s|\(|\)|"/.test(input[expEnd]))
+        ) {
+          numStr += input.slice(i, expEnd)
+          i = expEnd
+        }
+      }
       tokens.push({ type: "Number", value: parseFloat(numStr) })
     } else {
       // Parse symbol
