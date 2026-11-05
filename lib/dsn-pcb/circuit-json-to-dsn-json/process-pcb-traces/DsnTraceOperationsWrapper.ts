@@ -43,6 +43,15 @@ export const getDsnTraceOperationsWrapper = (
           }
           dsnObj.routes.network_out.nets.push(net)
         }
+        if (wire.type === "via" && wire.path) {
+          net.vias ??= []
+          net.vias.push({
+            x: wire.path.coordinates[0],
+            y: wire.path.coordinates[1],
+            padstack_name: dsnObj.routes.library_out?.padstacks[0]?.name,
+          })
+          return
+        }
         net.wires.push(wire)
       },
     }
