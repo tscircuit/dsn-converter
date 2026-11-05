@@ -38,7 +38,7 @@ export function getCombinedSourcePortName(
       sourcePort.name || sourcePort.pin_number?.toString() || portId
 
     portInfos.push({
-      displayName: `Pad${portName.replace("pin", "")}_${componentName}_${sourcePort.source_component_id}`,
+      displayName: `Pad${portName.replace(/^pin_?/i, "")}_${componentName}_${sourcePort.source_component_id}`,
     })
   }
 
