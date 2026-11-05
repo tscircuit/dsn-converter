@@ -1,3 +1,19 @@
+import type { LayerRef } from "circuit-json"
+
+/**
+ * Maps a DSN layer name (e.g. "F.Cu", "In1.Cu", "B.Cu") to a Circuit JSON LayerRef.
+ */
+export function dsnLayerToLayerRef(dsnLayer: string): LayerRef {
+  if (dsnLayer === "top" || dsnLayer.includes("F.")) return "top"
+  if (dsnLayer === "bottom" || dsnLayer.includes("B.")) return "bottom"
+  const innerMatch =
+    dsnLayer.match(/^In(\d+)\./i) || dsnLayer.match(/^inner(\d+)$/i)
+  if (innerMatch) {
+    return `inner${innerMatch[1]}` as LayerRef
+  }
+  return "top"
+}
+
 /**
  * Returns just the layer name strings for a given layer count.
  * e.g. 4 → ["F.Cu", "In1.Cu", "In2.Cu", "B.Cu"]
