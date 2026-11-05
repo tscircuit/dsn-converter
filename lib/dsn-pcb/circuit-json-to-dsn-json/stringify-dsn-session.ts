@@ -66,6 +66,13 @@ export const stringifyDsnSession = (session: DsnSession): string => {
         result += `${indent}${indent}${indent}${indent})\n`
       }
     })
+    net.vias?.forEach((via) => {
+      const viaPadstackName =
+        via.padstack_name ||
+        session.routes.library_out?.padstacks[0]?.name ||
+        "Via[0-1]_600:300_um"
+      result += `${indent}${indent}${indent}${indent}(via ${JSON.stringify(viaPadstackName)} ${via.x} ${via.y})\n`
+    })
     result += `${indent}${indent}${indent})\n`
   })
   result += `${indent}${indent})\n`

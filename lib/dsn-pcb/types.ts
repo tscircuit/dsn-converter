@@ -287,6 +287,7 @@ export interface Wire {
 export interface Via {
   x: number
   y: number
+  padstack_name?: string
 }
 
 export interface DsnSession {

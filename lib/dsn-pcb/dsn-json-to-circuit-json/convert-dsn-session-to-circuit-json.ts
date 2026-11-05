@@ -114,13 +114,36 @@ export function convertDsnSessionToCircuitJson(
       }
     })
 
-    // Get via padstack info if available
-    const viaPadstackExists = dsnSession.routes.library_out?.padstacks?.find(
-      (p) => p.name === "Via[0-1]_600:300_um",
-    )
+    // Get via padstack info if available (supports 2-layer, multi-layer Via[0-N], or custom via padstacks)
+    const viaPadstackExists =
+      dsnSession.routes.library_out?.padstacks?.find(
+        (p) =>
+          p.name === "Via[0-1]_600:300_um" ||
+          p.name.startsWith("Via[") ||
+          net.vias?.some((v) => v.padstack_name === p.name),
+      ) ??
+      dsnInput.library?.padstacks?.find(
+        (p) =>
+          p.name.startsWith("Via[") ||
+          net.vias?.some((v) => v.padstack_name === p.name),
+      )
     // Add associated vias if they exist at wire endpoints
-    if (viaPadstackExists && net.vias && net.vias.length > 0) {
+    if (
+      (viaPadstackExists || net.vias?.some((v) => Boolean(v.padstack_name))) &&
+      net.vias &&
+      net.vias.length > 0
+    ) {
       net.vias.forEach((via) => {
+        const padstackName = via.padstack_name || viaPadstackExists?.name || ""
+        const dimensionMatch = padstackName.match(
+          /_(\d+(?:\.\d+)?):(\d+(?:\.\d+)?)_um$/,
+        )
+        const outerDiameter = dimensionMatch
+          ? Number(dimensionMatch[1]) / 1000
+          : 0.6
+        const holeDiameter = dimensionMatch
+          ? Number(dimensionMatch[2]) / 1000
+          : 0.3
         const viaPoint = applyToPoint(transformUmToMm, {
           x: via.x,
           y: via.y,
@@ -152,9 +175,12 @@ export function convertDsnSessionToCircuitJson(
               point.y === viaY,
           ) as PcbTraceRoutePointWire[]
 
-        // Get the layers from the connecting wires
-        const fromLayer = connectingWires[0]?.layer || "top"
-        const toLayer = connectingWires[1]?.layer || "bottom"
+        // Get distinct layers from the connecting wires
+        const distinctLayers = Array.from(
+          new Set(connectingWires.map((w) => w.layer)),
+        )
+        const fromLayer = distinctLayers[0] || "top"
+        const toLayer = distinctLayers[1] || "bottom"
 
         // Add via point to the first trace that connects to it (not all traces)
         let viaAdded = false
@@ -189,6 +215,8 @@ export function convertDsnSessionToCircuitJson(
             netName: net.name,
             fromLayer,
             toLayer,
+            outerDiameter,
+            holeDiameter,
           }),
         })
       })
