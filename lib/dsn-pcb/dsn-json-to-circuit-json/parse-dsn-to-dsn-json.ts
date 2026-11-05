@@ -1089,6 +1089,31 @@ function processSessionNode(ast: ASTNode): DsnSession {
       child.children[0].value === "routes",
   )
   if (routesNode) {
+    const routesResolutionNode = routesNode.children!.find(
+      (child) =>
+        child.type === "List" &&
+        child.children?.[0].type === "Atom" &&
+        child.children[0].value === "resolution",
+    )
+    if (routesResolutionNode) {
+      session.routes.resolution = processResolution(
+        routesResolutionNode.children!,
+      )
+    }
+
+    const routesParserNode = routesNode.children!.find(
+      (child) =>
+        child.type === "List" &&
+        child.children?.[0].type === "Atom" &&
+        child.children[0].value === "parser",
+    )
+    if (routesParserNode) {
+      session.routes.parser = {
+        ...session.routes.parser,
+        ...processParser(routesParserNode.children!.slice(1)),
+      }
+    }
+
     // Extract library_out section
     const libraryNode = routesNode.children!.find(
       (child) =>
@@ -1142,12 +1167,28 @@ function processSessionNode(ast: ASTNode): DsnSession {
         )
 
         const net = {
-          name: netName,
-          wires: wireNodes.map((wireNode) => ({
-            path: processPath(wireNode.children!.slice(1)),
-            net: netName,
-            type: "route",
-          })),
+          name: String(netName),
+          wires: wireNodes.map((wireNode) => {
+            const parsedWire = processWire(wireNode.children!)
+            if (parsedWire.polyline_path) {
+              return {
+                polyline_path: parsedWire.polyline_path,
+                net: String(netName),
+                type: parsedWire.type || "route",
+                ...(parsedWire.clearance_class
+                  ? { clearance_class: parsedWire.clearance_class }
+                  : {}),
+              }
+            }
+            return {
+              path: parsedWire.path ?? processPath(wireNode.children!.slice(1)),
+              net: String(netName),
+              type: parsedWire.type || "route",
+              ...(parsedWire.clearance_class
+                ? { clearance_class: parsedWire.clearance_class }
+                : {}),
+            }
+          }),
           vias: viaNodes.map((viaNode) => ({
             x: viaNode.children![2].value as number,
             y: viaNode.children![3].value as number,
