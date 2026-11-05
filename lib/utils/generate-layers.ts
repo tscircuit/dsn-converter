@@ -1,3 +1,5 @@
+import type { LayerRef } from "circuit-json"
+
 /**
  * Returns just the layer name strings for a given layer count.
  * e.g. 4 → ["F.Cu", "In1.Cu", "In2.Cu", "B.Cu"]
@@ -9,6 +11,22 @@ export function generateLayerNames(numLayers: number): string[] {
   }
   names.push("B.Cu")
   return names
+}
+
+export function dsnLayerToLayerRef(
+  layer?: string,
+  fallback: LayerRef = "top",
+): LayerRef {
+  if (!layer) return fallback
+  if (layer.includes("F.")) return "top"
+  if (layer.includes("B.")) return "bottom"
+  const innerMatch = layer.match(/^In(\d+)\./i)
+  if (innerMatch) return `inner${innerMatch[1]}` as LayerRef
+  return fallback
+}
+
+export function isViaPadstackName(name?: string): boolean {
+  return Boolean(name && /^Via\[0-\d+\]_\d+:\d+_um$/.test(name))
 }
 
 /**

@@ -7,6 +7,7 @@ import type {
   PcbTraceRoutePointWire,
 } from "circuit-json"
 import Debug from "debug"
+import { isViaPadstackName } from "lib/utils/generate-layers"
 import { applyToPoint, scale } from "transformation-matrix"
 import type { DsnPcb, DsnSession } from "../types"
 import { convertDsnPcbToCircuitJson } from "./convert-dsn-pcb-to-circuit-json"
@@ -116,7 +117,7 @@ export function convertDsnSessionToCircuitJson(
 
     // Get via padstack info if available
     const viaPadstackExists = dsnSession.routes.library_out?.padstacks?.find(
-      (p) => p.name === "Via[0-1]_600:300_um",
+      (p) => isViaPadstackName(p.name),
     )
     // Add associated vias if they exist at wire endpoints
     if (viaPadstackExists && net.vias && net.vias.length > 0) {

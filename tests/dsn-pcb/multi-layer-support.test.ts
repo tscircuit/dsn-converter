@@ -1,6 +1,8 @@
 import { expect, test } from "bun:test"
-import type { AnyCircuitElement } from "circuit-json"
+import type { AnyCircuitElement, PcbTrace, PcbVia } from "circuit-json"
 import { convertCircuitJsonToDsnJson } from "../../lib/dsn-pcb/circuit-json-to-dsn-json/convert-circuit-json-to-dsn-json"
+import { convertDsnSessionToCircuitJson } from "../../lib/dsn-pcb/dsn-json-to-circuit-json/convert-dsn-session-to-circuit-json"
+import type { DsnSession } from "../../lib/dsn-pcb/types"
 
 test("multi-layer support - 2 layers (default)", () => {
   const circuitElements: AnyCircuitElement[] = [
@@ -159,4 +161,82 @@ test("multi-layer support - no num_layers specified (default to 2)", () => {
   expect(dsnJson.structure.layers[0].property.index).toBe(0)
   expect(dsnJson.structure.layers[1].name).toBe("B.Cu")
   expect(dsnJson.structure.layers[1].property.index).toBe(1)
+})
+
+test("multi-layer support - 4 layer session preserves inner layers and Via[0-3] vias", () => {
+  const circuitElements: AnyCircuitElement[] = [
+    {
+      type: "pcb_board",
+      pcb_board_id: "pcb_board_0",
+      center: { x: 0, y: 0 },
+      thickness: 1.4,
+      num_layers: 4,
+      width: 34.48,
+      height: 14.16,
+    } as any,
+  ]
+
+  const dsnPcb = convertCircuitJsonToDsnJson(circuitElements)
+  const dsnSession: DsnSession = {
+    is_dsn_session: true,
+    filename: "session",
+    placement: {
+      resolution: dsnPcb.resolution,
+      components: [],
+    },
+    routes: {
+      resolution: { unit: "um", value: 10 },
+      parser: dsnPcb.parser,
+      library_out: {
+        images: [],
+        padstacks: [
+          {
+            name: "Via[0-3]_600:300_um",
+            attach: "off",
+            shapes: [],
+          },
+        ],
+      },
+      network_out: {
+        nets: [
+          {
+            name: "Net-1",
+            vias: [
+              {
+                x: 10000,
+                y: 20000,
+              },
+            ],
+            wires: [
+              {
+                path: {
+                  layer: "F.Cu",
+                  width: 1500,
+                  coordinates: [0, 0, 10000, 20000],
+                },
+              },
+              {
+                path: {
+                  layer: "In1.Cu",
+                  width: 1500,
+                  coordinates: [10000, 20000, 30000, 20000],
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  }
+
+  const output = convertDsnSessionToCircuitJson(dsnPcb, dsnSession)
+  const traces = output.filter((e): e is PcbTrace => e.type === "pcb_trace")
+  const vias = output.filter((e): e is PcbVia => e.type === "pcb_via")
+
+  expect(traces).toHaveLength(2)
+  expect(
+    traces[1].route.filter((pt) => pt.route_type === "wire")[0]?.layer,
+  ).toBe("inner1")
+  expect(vias).toHaveLength(1)
+  expect(vias[0].layers).toEqual(["top", "inner1"])
 })
