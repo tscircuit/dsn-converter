@@ -1,6 +1,7 @@
 import { su } from "@tscircuit/soup-util"
 import type {
   AnyCircuitElement,
+  PcbPlatedHole,
   SourceComponentBase,
   SourcePort,
 } from "circuit-json"
@@ -114,9 +115,26 @@ export function processPlatedHoles(
     return () => current++
   }
 
-  function findNumericHint(port?: SourcePort): number | undefined {
+  function findNumericHint(
+    port?: SourcePort,
+    hole?: PcbPlatedHole,
+  ): number | undefined {
     const hint = port?.port_hints?.find((h) => !Number.isNaN(Number(h)))
-    return hint !== undefined ? Number(hint) : undefined
+    if (hint !== undefined) return Number(hint)
+
+    if (
+      port &&
+      "pin_number" in port &&
+      port.pin_number !== undefined &&
+      !Number.isNaN(Number(port.pin_number))
+    ) {
+      return Number(port.pin_number)
+    }
+
+    const holeHint = hole?.port_hints?.find((h) => !Number.isNaN(Number(h)))
+    if (holeHint !== undefined) return Number(holeHint)
+
+    return undefined
   }
 
   /**
@@ -126,6 +144,7 @@ export function processPlatedHoles(
   const componentsByFootprint = new Map<
     string,
     Array<{
+      pcbComponentId: string
       componentName: string
       coordinates: { x: number; y: number }
       rotation: number
@@ -147,7 +166,7 @@ export function processPlatedHoles(
       .source_component.list()
       .find((e) => e.source_component_id === pcbComponent.source_component_id)
 
-    const footprintName = getFootprintName(sourceComponent!, pcbComponent!)
+    const footprintName = getFootprintName(sourceComponent, pcbComponent)
     const image = ensureImage(footprintName)
     const nextPinNumber = createNextPinNumberGenerator(image)
 
@@ -167,7 +186,7 @@ export function processPlatedHoles(
             .find((e) => e.source_port_id === pcbPort.source_port_id)
         : undefined
 
-      const pinNumber = findNumericHint(sourcePort) ?? nextPinNumber()
+      const pinNumber = findNumericHint(sourcePort, hole) ?? nextPinNumber()
 
       const pin: Pin = {
         padstack_name: padstackName,
@@ -192,7 +211,9 @@ export function processPlatedHoles(
       if (!componentsByFootprint.has(key)) componentsByFootprint.set(key, [])
 
       componentsByFootprint.get(key)!.push({
-        componentName: sourceComponent?.name || "Unknown",
+        pcbComponentId: pcb_component_id,
+        componentName:
+          sourceComponent?.name || pcbComponent.pcb_component_id || "Unknown",
         coordinates: applyToPoint(transformMmToUm, pcbComponent.center),
         rotation: pcbComponent.rotation || 0,
         value: getComponentValue(sourceComponent),
@@ -203,16 +224,34 @@ export function processPlatedHoles(
 
   // Emit placement data for plated-hole-only footprints
   for (const [footprint, comps] of componentsByFootprint) {
-    pcb.placement.components.push({
-      name: footprint,
-      places: comps.map((c) => ({
-        refdes: `${c.componentName}_${c.sourceComponent?.source_component_id}`,
+    const places = comps.map((c) => {
+      const idSuffix =
+        c.sourceComponent?.source_component_id ?? c.pcbComponentId
+      const refdes =
+        idSuffix &&
+        c.componentName !== idSuffix &&
+        !c.componentName.endsWith(`_${idSuffix}`)
+          ? `${c.componentName}_${idSuffix}`
+          : c.componentName
+      return {
+        refdes,
         x: c.coordinates.x,
         y: c.coordinates.y,
         side: "front" as const,
         rotation: c.rotation % 90,
         PN: c.value,
-      })),
+      }
     })
+    const existingPlacement = pcb.placement.components.find(
+      (comp) => comp.name === footprint,
+    )
+    if (existingPlacement) {
+      existingPlacement.places.push(...places)
+    } else {
+      pcb.placement.components.push({
+        name: footprint,
+        places,
+      })
+    }
   }
 }
