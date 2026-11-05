@@ -7,9 +7,11 @@ import type {
   PcbTraceRoutePointWire,
 } from "circuit-json"
 import Debug from "debug"
+import { getTraceLength } from "lib/utils/get-trace-length"
 import { applyToPoint, scale } from "transformation-matrix"
 import type { DsnPcb, DsnSession } from "../types"
 import { convertDsnPcbToCircuitJson } from "./convert-dsn-pcb-to-circuit-json"
+import { convertPolylinePathToPcbTraces } from "./dsn-component-converters/convert-polyline-path-to-pcb-traces"
 import { convertViaToPcbVia } from "./dsn-component-converters/convert-via-to-pcb-via"
 import { convertWiringPathToPcbTraces } from "./dsn-component-converters/convert-wiring-path-to-pcb-traces"
 
@@ -111,6 +113,20 @@ export function convertDsnSessionToCircuitJson(
         })
 
         sessionElements.push(...traces)
+      } else if ("polyline_path" in wire) {
+        const traces = convertPolylinePathToPcbTraces({
+          wire,
+          transformUmToMm,
+          netName: `${net.name}_${wireIdx}`,
+        })
+
+        traces.forEach((trace) => {
+          trace.source_trace_id = sourceTrace
+            ? sourceTrace.source_trace_id
+            : `source_trace_${net.name}`
+        })
+
+        sessionElements.push(...traces)
       }
     })
 
@@ -192,6 +208,19 @@ export function convertDsnSessionToCircuitJson(
           }),
         })
       })
+    }
+  }
+
+  for (const element of sessionElements) {
+    if (element.type === "pcb_trace") {
+      const trace = element as PcbTrace
+      const wirePoints = trace.route
+        .filter(
+          (point): point is PcbTraceRoutePointWire =>
+            point.route_type === "wire",
+        )
+        .map((point) => ({ x: point.x, y: point.y }))
+      trace.trace_length = getTraceLength(wirePoints)
     }
   }
 
