@@ -19,12 +19,15 @@ export function convertCircuitJsonToDsnJson(
   // Find the PCB board element
   const pcbBoard = circuitElements.find(
     (element) => element.type === "pcb_board",
-  ) as AnyCircuitElement & {
-    width: number
-    height: number
-    center: { x: number; y: number }
-    num_layers?: number
-  }
+  ) as
+    | (AnyCircuitElement & {
+        width?: number
+        height?: number
+        center?: { x: number; y: number }
+        outline?: Array<{ x: number; y: number }>
+        num_layers?: number
+      })
+    | undefined
 
   const numLayers = pcbBoard?.num_layers ?? 2
   const layers = generateLayers(numLayers)
@@ -121,11 +124,25 @@ export function convertCircuitJsonToDsnJson(
   return pcb
 }
 
-function calculateBoardBoundary(pcbBoard: {
-  width: number
-  height: number
-  center: { x: number; y: number }
+function calculateBoardBoundary(pcbBoard?: {
+  width?: number
+  height?: number
+  center?: { x: number; y: number }
+  outline?: Array<{ x: number; y: number }>
 }): number[] {
+  if (pcbBoard?.outline && pcbBoard.outline.length >= 3) {
+    const coordinates: number[] = []
+    for (const point of pcbBoard.outline) {
+      coordinates.push(point.x * 1000, point.y * 1000)
+    }
+    const first = pcbBoard.outline[0]
+    const last = pcbBoard.outline[pcbBoard.outline.length - 1]
+    if (first.x !== last.x || first.y !== last.y) {
+      coordinates.push(first.x * 1000, first.y * 1000)
+    }
+    return coordinates
+  }
+
   // default to 100mm x 100mm if not provided
   const width = pcbBoard?.width ?? 100
   const height = pcbBoard?.height ?? 100
