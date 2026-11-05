@@ -1,6 +1,7 @@
 import type { PcbTrace } from "circuit-json"
 import { chunks } from "lib/utils/chunks"
 import { computeSegIntersection } from "lib/utils/compute-seg-intersection"
+import { dsnLayerToLayerRef } from "lib/utils/generate-layers"
 import { getTraceLength } from "lib/utils/get-trace-length"
 import { type Matrix, applyToPoint } from "transformation-matrix"
 import type { Wiring } from "../../types"
@@ -28,6 +29,12 @@ export const convertPolylinePathToPcbTraces = ({
     if (!intersection) continue
     pointsOnTraceMm.push(applyToPoint(transformUmToMm, intersection))
   }
+  if (pointsOnTraceMm.length === 0 && segsUm.length === 1) {
+    pointsOnTraceMm.push(
+      applyToPoint(transformUmToMm, { x: segsUm[0].x1, y: segsUm[0].y1 }),
+      applyToPoint(transformUmToMm, { x: segsUm[0].x2, y: segsUm[0].y2 }),
+    )
+  }
 
   traces.push({
     type: "pcb_trace",
@@ -40,7 +47,7 @@ export const convertPolylinePathToPcbTraces = ({
       width: fromSessionSpace
         ? wire.polyline_path!.width / 10000 // session space to circuit space
         : wire.polyline_path!.width / 1000, // dsn space to circuit space
-      layer: wire.polyline_path?.layer.includes("B.") ? "bottom" : "top",
+      layer: dsnLayerToLayerRef(wire.polyline_path?.layer ?? "F.Cu"),
     })),
     trace_length: getTraceLength(pointsOnTraceMm),
   })

@@ -35,7 +35,30 @@ export function mergeDsnSessionIntoDsnPcb(
               net: sessionNet.name,
               type: wire.type ?? "route",
             })
+          } else if (wire.polyline_path) {
+            mergedPcb.wiring.wires.push({
+              polyline_path: {
+                ...wire.polyline_path,
+                width: wire.polyline_path.width / 10,
+                coordinates: wire.polyline_path.coordinates.map((c) => c / 10),
+              },
+              net: sessionNet.name,
+              type: wire.type ?? "route",
+            } as any)
           }
+        })
+      }
+      if (sessionNet.vias) {
+        sessionNet.vias.forEach((via) => {
+          mergedPcb.wiring.wires.push({
+            path: {
+              layer: "F.Cu",
+              width: 600,
+              coordinates: [via.x / 10, via.y / 10],
+            },
+            net: sessionNet.name,
+            type: "via",
+          })
         })
       }
     })
