@@ -54,6 +54,12 @@ export const stringifyDsnSession = (session: DsnSession): string => {
   }
 
   // Network_out subsection
+  const defaultViaPadstackName =
+    session.routes.library_out?.padstacks?.find((p) =>
+      p.name.startsWith("Via["),
+    )?.name ??
+    session.routes.library_out?.padstacks?.[0]?.name ??
+    "Via[0-1]_600:300_um"
   result += `${indent}${indent}(network_out \n`
   session.routes.network_out.nets.forEach((net) => {
     result += `${indent}${indent}${indent}(net ${JSON.stringify(net.name)}\n`
@@ -65,6 +71,9 @@ export const stringifyDsnSession = (session: DsnSession): string => {
         result += `${indent}${indent}${indent}${indent}${indent})\n`
         result += `${indent}${indent}${indent}${indent})\n`
       }
+    })
+    net.vias?.forEach((via) => {
+      result += `${indent}${indent}${indent}${indent}(via ${JSON.stringify(defaultViaPadstackName)} ${via.x} ${via.y})\n`
     })
     result += `${indent}${indent}${indent})\n`
   })
