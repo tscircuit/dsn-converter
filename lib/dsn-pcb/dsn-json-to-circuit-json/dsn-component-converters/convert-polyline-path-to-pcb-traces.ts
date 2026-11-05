@@ -23,26 +23,40 @@ export const convertPolylinePathToPcbTraces = ({
   )
 
   const pointsOnTraceMm: Array<{ x: number; y: number }> = []
-  for (let i = 0; i < segsUm.length - 1; i++) {
-    const intersection = computeSegIntersection(segsUm[i], segsUm[i + 1])
-    if (!intersection) continue
-    pointsOnTraceMm.push(applyToPoint(transformUmToMm, intersection))
+  if (segsUm.length === 1) {
+    const seg = segsUm[0]
+    if (seg) {
+      pointsOnTraceMm.push(
+        applyToPoint(transformUmToMm, { x: seg.x1, y: seg.y1 }),
+        applyToPoint(transformUmToMm, { x: seg.x2, y: seg.y2 }),
+      )
+    }
+  } else {
+    for (let i = 0; i < segsUm.length - 1; i++) {
+      const intersection = computeSegIntersection(segsUm[i], segsUm[i + 1])
+      if (!intersection) continue
+      pointsOnTraceMm.push(applyToPoint(transformUmToMm, intersection))
+    }
   }
+
+  const route = pointsOnTraceMm.map((point) => ({
+    route_type: "wire" as const,
+    x: Number(point.x.toFixed(4)),
+    y: Number(point.y.toFixed(4)),
+    width: fromSessionSpace
+      ? wire.polyline_path!.width / 10000 // session space to circuit space
+      : wire.polyline_path!.width / 1000, // dsn space to circuit space
+    layer: wire.polyline_path?.layer.includes("B.")
+      ? ("bottom" as const)
+      : ("top" as const),
+  }))
 
   traces.push({
     type: "pcb_trace",
     pcb_trace_id: `pcb_trace_${netName}`,
     source_trace_id: netName,
-    route: pointsOnTraceMm.map((point) => ({
-      route_type: "wire" as const,
-      x: Number(point.x.toFixed(4)),
-      y: Number(point.y.toFixed(4)),
-      width: fromSessionSpace
-        ? wire.polyline_path!.width / 10000 // session space to circuit space
-        : wire.polyline_path!.width / 1000, // dsn space to circuit space
-      layer: wire.polyline_path?.layer.includes("B.") ? "bottom" : "top",
-    })),
-    trace_length: getTraceLength(pointsOnTraceMm),
+    route,
+    trace_length: getTraceLength(route),
   })
 
   return traces
