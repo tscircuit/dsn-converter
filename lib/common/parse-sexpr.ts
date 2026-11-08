@@ -44,16 +44,33 @@ export function tokenizeDsn(input: string): Token[] {
       }
       i++ // Skip the closing quote
       tokens.push({ type: "String", value })
-    } else if (char === "-" || /\d/.test(char)) {
-      // Parse number (integer or float)
+    } else if (
+      /\d/.test(char) ||
+      ((char === "-" || char === "+") &&
+        i + 1 < length &&
+        /[\d.]/.test(input[i + 1]))
+    ) {
+      // Parse number (integer, float, or scientific notation e.g. 1.505e5, -2.5E-3)
       let numStr = ""
-      if (char === "-") {
-        numStr += "-"
+      if (char === "-" || char === "+") {
+        numStr += char
         i++
       }
       while (i < length && /[\d.]/.test(input[i])) {
         numStr += input[i]
         i++
+      }
+      if (i < length && (input[i] === "e" || input[i] === "E")) {
+        numStr += input[i]
+        i++
+        if (i < length && (input[i] === "+" || input[i] === "-")) {
+          numStr += input[i]
+          i++
+        }
+        while (i < length && /\d/.test(input[i])) {
+          numStr += input[i]
+          i++
+        }
       }
       tokens.push({ type: "Number", value: parseFloat(numStr) })
     } else {
