@@ -259,9 +259,7 @@ function processLayer(nodes: ASTNode[]): Layer {
           case "type":
             if (rest[0].type === "Atom" && typeof rest[0].value === "string") {
               layer.type =
-                rest[0].value === "java_error_token"
-                  ? "signal"
-                  : rest[0].value
+                rest[0].value === "java_error_token" ? "signal" : rest[0].value
             }
             break
           case "property":
@@ -1027,9 +1025,7 @@ function processWire(nodes: ASTNode[]): Wire {
           case "type":
             if (rest[0].type === "Atom" && typeof rest[0].value === "string") {
               wire.type =
-                rest[0].value === "java_error_token"
-                  ? "route"
-                  : rest[0].value
+                rest[0].value === "java_error_token" ? "route" : rest[0].value
             }
             break
         }
