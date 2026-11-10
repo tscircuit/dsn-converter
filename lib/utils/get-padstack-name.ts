@@ -4,11 +4,12 @@ type PadstackLayer = "top" | "bottom" | "all"
 type PadstackLayerCode = "T" | "B" | "A"
 
 export interface PadstackNameArgs {
-  shape: "circle" | "oval" | "pill" | "rect" | "polygon"
+  shape: "circle" | "oval" | "pill" | "rect" | "rotated_rect" | "polygon"
   width?: number
   height?: number
   holeDiameter?: number
   outerDiameter?: number
+  ccwRotation?: number
   layer?: PcbSmtPad["layer"] | "all"
   customDescriptor?: string
 }
@@ -33,6 +34,13 @@ export type ParsedPadstackName =
       height: number
     }
   | {
+      shape: "rotated_rect"
+      layer: PadstackLayer
+      width: number
+      height: number
+      ccwRotation: number
+    }
+  | {
       shape: "polygon"
       layer: PadstackLayer
       descriptor: string
@@ -43,6 +51,7 @@ const padstackNamePrefixes = {
   oval: "Oval[",
   pill: "Oval[",
   rect: "RoundRect[",
+  rotated_rect: "RoundRect[",
   polygon: "Cust[",
 } as const
 
@@ -89,6 +98,7 @@ export function getPadstackName({
   height,
   holeDiameter,
   outerDiameter,
+  ccwRotation,
   layer = "top",
   customDescriptor,
 }: PadstackNameArgs): string {
@@ -102,6 +112,10 @@ export function getPadstackName({
       return `${padstackNamePrefixes.pill}${layerCode}]Pad_${width}x${height}_um`
     case "rect":
       return `${padstackNamePrefixes.rect}${layerCode}]Pad_${width}x${height}_um`
+    case "rotated_rect":
+      return ccwRotation
+        ? `${padstackNamePrefixes.rotated_rect}${layerCode}]Pad_${width}x${height}_${ccwRotation}deg_um`
+        : `${padstackNamePrefixes.rotated_rect}${layerCode}]Pad_${width}x${height}_um`
     case "polygon":
       return `${padstackNamePrefixes.polygon}${layerCode}]Pad_${customDescriptor ?? `${width}x${height}`}_um`
     default:
@@ -139,6 +153,22 @@ export function parsePadstackName(
       layer,
       width: parseMicrometers(ovalMatch[2]),
       height: parseMicrometers(ovalMatch[3]),
+    }
+  }
+
+  const rotatedRectMatch = padstackName.match(
+    /^RoundRect\[([TBA])\]Pad_([0-9]+(?:\.[0-9]+)?)x([0-9]+(?:\.[0-9]+)?)_(-?[0-9]+(?:\.[0-9]+)?)deg_um$/,
+  )
+  if (rotatedRectMatch) {
+    const layer = parsePadstackLayer(rotatedRectMatch[1])
+    if (!layer) return null
+
+    return {
+      shape: "rotated_rect",
+      layer,
+      width: parseMicrometers(rotatedRectMatch[2]),
+      height: parseMicrometers(rotatedRectMatch[3]),
+      ccwRotation: Number(rotatedRectMatch[4]),
     }
   }
 

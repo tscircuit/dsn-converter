@@ -83,6 +83,52 @@ function getRectangleDimensionsFromPolygon(coordinates: number[]) {
   }
 }
 
+function getRotatedRectangleFromPolygon(coordinates: number[]) {
+  const uniquePoints: Array<{ x: number; y: number }> = []
+  const seen = new Set<string>()
+
+  for (let i = 0; i < coordinates.length; i += 2) {
+    const x = coordinates[i]
+    const y = coordinates[i + 1]
+    const key = `${x},${y}`
+    if (!seen.has(key)) {
+      seen.add(key)
+      uniquePoints.push({ x, y })
+    }
+  }
+
+  if (uniquePoints.length !== 4) return null
+
+  const [p0, p1, p2, p3] = uniquePoints
+  const e0 = { x: p1.x - p0.x, y: p1.y - p0.y }
+  const e1 = { x: p2.x - p1.x, y: p2.y - p1.y }
+  const e2 = { x: p3.x - p2.x, y: p3.y - p2.y }
+  const e3 = { x: p0.x - p3.x, y: p0.y - p3.y }
+
+  const widthUm = Math.hypot(e0.x, e0.y)
+  const heightUm = Math.hypot(e1.x, e1.y)
+  if (widthUm === 0 || heightUm === 0) return null
+
+  const oppositeSidesMatch =
+    Math.hypot(e0.x + e2.x, e0.y + e2.y) < 1e-2 &&
+    Math.hypot(e1.x + e3.x, e1.y + e3.y) < 1e-2
+  if (!oppositeSidesMatch) return null
+
+  const dot = e0.x * e1.x + e0.y * e1.y
+  const cosAngle = Math.abs(dot) / (widthUm * heightUm)
+  if (cosAngle > 1e-2) return null
+
+  const rawAngleDeg = (Math.atan2(e0.y, e0.x) * 180) / Math.PI
+  const ccwRotation = Number((((rawAngleDeg % 360) + 360) % 360).toFixed(3))
+  if (ccwRotation === 0 || ccwRotation === 180) return null
+
+  return {
+    width: Number((widthUm / 1000).toFixed(6)),
+    height: Number((heightUm / 1000).toFixed(6)),
+    ccwRotation,
+  }
+}
+
 function isApproximatelyEqual(a: number, b: number) {
   return Math.abs(a - b) < 1e-6
 }
@@ -279,10 +325,43 @@ export function convertPadstacksToSmtPads(
         const rectangleDimensionsFromPolygon = polygonShape
           ? getRectangleDimensionsFromPolygon(polygonShape.coordinates)
           : null
+        const rotatedRectangleFromPolygon =
+          polygonShape && !rectangleDimensionsFromPolygon
+            ? getRotatedRectangleFromPolygon(polygonShape.coordinates)
+            : null
+        const shouldImportAsRotatedRect =
+          parsedPadstackName?.shape === "rotated_rect" ||
+          !!rotatedRectangleFromPolygon
         const shouldImportPolygonAsRect =
           !!polygonShape && !!rectangleDimensionsFromPolygon
 
-        if (polygonShape && !shouldImportPolygonAsRect) {
+        if (shouldImportAsRotatedRect) {
+          const layer = getLayerFromPadstack(padstack)
+          const rotatedRectWidth =
+            parsedPadstackName?.shape === "rotated_rect"
+              ? parsedPadstackName.width
+              : rotatedRectangleFromPolygon!.width
+          const rotatedRectHeight =
+            parsedPadstackName?.shape === "rotated_rect"
+              ? parsedPadstackName.height
+              : rotatedRectangleFromPolygon!.height
+          const ccwRotation =
+            parsedPadstackName?.shape === "rotated_rect"
+              ? parsedPadstackName.ccwRotation
+              : rotatedRectangleFromPolygon!.ccwRotation
+          pcbPad = {
+            type: "pcb_smtpad",
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            ...commonIds,
+            shape: "rotated_rect",
+            x: circuitX,
+            y: circuitY,
+            width: rotatedRectWidth,
+            height: rotatedRectHeight,
+            ccw_rotation: ccwRotation,
+            layer,
+          }
+        } else if (polygonShape && !shouldImportPolygonAsRect) {
           const layer = getLayerFromPadstack(padstack)
           pcbPad = {
             type: "pcb_smtpad",
