@@ -2,6 +2,7 @@ import type { AnyCircuitElement, PcbPlatedHole, PcbSmtPad } from "circuit-json"
 import Debug from "debug"
 import type { DsnPcb, Padstack } from "lib/dsn-pcb/types"
 import { parsePadstackName } from "lib/utils/get-padstack-name"
+import { parseRotatedRectDescriptor } from "lib/utils/get-rotated-rect-smt-pad-geometry"
 import { applyToPoint } from "transformation-matrix"
 
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
@@ -276,13 +277,31 @@ export function convertPadstacksToSmtPads(
         }
 
         let pcbPad: PcbSmtPad
+        const rotatedRectFromDescriptor =
+          parsedPadstackName?.shape === "polygon"
+            ? parseRotatedRectDescriptor(parsedPadstackName.descriptor)
+            : null
         const rectangleDimensionsFromPolygon = polygonShape
           ? getRectangleDimensionsFromPolygon(polygonShape.coordinates)
           : null
         const shouldImportPolygonAsRect =
           !!polygonShape && !!rectangleDimensionsFromPolygon
 
-        if (polygonShape && !shouldImportPolygonAsRect) {
+        if (polygonShape && rotatedRectFromDescriptor) {
+          const layer = getLayerFromPadstack(padstack)
+          pcbPad = {
+            type: "pcb_smtpad",
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            ...commonIds,
+            shape: "rotated_rect",
+            x: circuitX,
+            y: circuitY,
+            width: rotatedRectFromDescriptor.widthMm,
+            height: rotatedRectFromDescriptor.heightMm,
+            ccw_rotation: rotatedRectFromDescriptor.ccwRotation,
+            layer,
+          }
+        } else if (polygonShape && !shouldImportPolygonAsRect) {
           const layer = getLayerFromPadstack(padstack)
           pcbPad = {
             type: "pcb_smtpad",

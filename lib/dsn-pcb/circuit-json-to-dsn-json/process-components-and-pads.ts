@@ -120,7 +120,7 @@ export function processComponentsAndPads(
     }
     pcb.library.images.push(image)
 
-    // Add component entry
+    // Add component entry (pin coordinates and padstacks are already in world orientation)
     const componentEntry = {
       name: footprintName,
       places: components.map((component) => ({
@@ -128,7 +128,7 @@ export function processComponentsAndPads(
         x: component.coordinates.x,
         y: component.coordinates.y,
         side: "front" as const,
-        rotation: component.rotation % 90,
+        rotation: 0,
         PN: component.value,
       })),
     }

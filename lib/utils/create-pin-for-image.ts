@@ -4,6 +4,7 @@ import type { PcbComponent, SourcePort } from "circuit-json"
 import type { Pin } from "lib"
 import { type PadstackNameArgs, getPadstackName } from "./get-padstack-name"
 import { getPolygonSmtPadGeometry } from "./get-polygon-smt-pad-geometry"
+import { getRotatedRectSmtPadGeometry } from "./get-rotated-rect-smt-pad-geometry"
 
 export function createPinForImage({
   pad,
@@ -18,8 +19,12 @@ export function createPinForImage({
 
   const isCircle = pad.shape === "circle"
   const isPolygon = pad.shape === "polygon"
+  const isRotatedRect = pad.shape === "rotated_rect"
   const polygonPadGeometry = isPolygon
     ? getPolygonSmtPadGeometry(pad)
+    : undefined
+  const rotatedRectGeometry = isRotatedRect
+    ? getRotatedRectSmtPadGeometry(pad)
     : undefined
 
   let shape: PadstackNameArgs["shape"] = "rect"
@@ -38,6 +43,16 @@ export function createPinForImage({
     width = polygonPadGeometry?.widthUm
     height = polygonPadGeometry?.heightUm
     customDescriptor = `${polygonPadGeometry?.widthUm}x${polygonPadGeometry?.heightUm}_${polygonPadGeometry?.relativePointsUm.join("_")}`
+  } else if (rotatedRectGeometry) {
+    if (rotatedRectGeometry.kind === "rotated_polygon") {
+      shape = "polygon"
+      width = rotatedRectGeometry.widthUm
+      height = rotatedRectGeometry.heightUm
+      customDescriptor = rotatedRectGeometry.customDescriptor
+    } else {
+      width = rotatedRectGeometry.widthUm
+      height = rotatedRectGeometry.heightUm
+    }
   } else {
     width = pad.width * 1000
     height = pad.height * 1000
