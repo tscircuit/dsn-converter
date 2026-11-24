@@ -23,6 +23,10 @@ export function createCircularPadstack(
   }
 }
 
+function roundMicrons(value: number): number {
+  return Number(value.toFixed(3))
+}
+
 export function createOvalPadstack(
   name: string,
   outerWidth: number,
@@ -30,11 +34,37 @@ export function createOvalPadstack(
   holeWidth: number,
   holeHeight: number,
   numLayers = 2,
+  ccwRotation = 0,
 ): Padstack {
   const pathOffset = Math.abs(outerWidth - outerHeight) / 2
 
   // Determine orientation based on dimensions
-  const isHorizontal = outerWidth > outerHeight
+  const isHorizontal = outerWidth >= outerHeight
+  const baseEndpoints = isHorizontal
+    ? [
+        { x: -pathOffset, y: 0 },
+        { x: pathOffset, y: 0 },
+      ]
+    : [
+        { x: 0, y: -pathOffset },
+        { x: 0, y: pathOffset },
+      ]
+
+  const radians = (ccwRotation * Math.PI) / 180
+  const cos = Math.cos(radians)
+  const sin = Math.sin(radians)
+  const coordinates =
+    Math.abs(ccwRotation % 180) < 1e-6
+      ? [
+          baseEndpoints[0].x,
+          baseEndpoints[0].y,
+          baseEndpoints[1].x,
+          baseEndpoints[1].y,
+        ]
+      : baseEndpoints.flatMap((pt) => [
+          roundMicrons(pt.x * cos - pt.y * sin),
+          roundMicrons(pt.x * sin + pt.y * cos),
+        ])
 
   return {
     name,
@@ -42,9 +72,7 @@ export function createOvalPadstack(
       shapeType: "path" as const,
       layer,
       width: isHorizontal ? outerHeight : outerWidth,
-      coordinates: isHorizontal
-        ? [-pathOffset, 0, pathOffset, 0] // Horizontal oval
-        : [0, -pathOffset, 0, pathOffset], // Vertical oval
+      coordinates,
     })),
     hole: {
       shape: "oval",
@@ -118,22 +146,33 @@ export function createCircularHoleRectangularPadstack(
   outerHeight: number,
   holeDiameter: number,
   numLayers = 2,
+  ccwRotation = 0,
 ): Padstack {
   const halfWidth = outerWidth / 2
   const halfHeight = outerHeight / 2
 
+  const corners = [
+    { x: -halfWidth, y: halfHeight },
+    { x: halfWidth, y: halfHeight },
+    { x: halfWidth, y: -halfHeight },
+    { x: -halfWidth, y: -halfHeight },
+  ]
+  const radians = (ccwRotation * Math.PI) / 180
+  const cos = Math.cos(radians)
+  const sin = Math.sin(radians)
+  const rotatedCorners =
+    Math.abs(ccwRotation % 180) < 1e-6
+      ? corners
+      : corners.map((pt) => ({
+          x: roundMicrons(pt.x * cos - pt.y * sin),
+          y: roundMicrons(pt.x * sin + pt.y * cos),
+        }))
+
   // Define the rectangle polygon once so we can reuse for all layers
   const rectPolygon = [
-    -halfWidth,
-    halfHeight, // Top-left
-    halfWidth,
-    halfHeight, // Top-right
-    halfWidth,
-    -halfHeight, // Bottom-right
-    -halfWidth,
-    -halfHeight, // Bottom-left
-    -halfWidth,
-    halfHeight, // Close the polygon
+    ...rotatedCorners.flatMap((pt) => [pt.x, pt.y]),
+    rotatedCorners[0].x,
+    rotatedCorners[0].y,
   ]
 
   return {
