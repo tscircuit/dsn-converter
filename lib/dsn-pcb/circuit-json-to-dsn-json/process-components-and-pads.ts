@@ -17,11 +17,14 @@ export function processComponentsAndPads(
   componentGroups: ComponentGroup[],
   circuitElements: AnyCircuitElement[],
   pcb: DsnPcb,
+  footprintNameByComponentId?: Map<string, string>,
 ) {
   const processedPadstacks = new Set<string>()
   const componentsByFootprint = new Map<
     string,
     Array<{
+      group: ComponentGroup
+      pcbComponent: PcbComponent
       componentName: string
       coordinates: { x: number; y: number }
       rotation: number
@@ -38,15 +41,18 @@ export function processComponentsAndPads(
     const pcbComponent = su(circuitElements)
       .pcb_component.list()
       .find((e) => e.pcb_component_id === pcb_component_id)
+    if (!pcbComponent) continue
     const sourceComponent = su(circuitElements)
       .source_component.list()
-      .find((e) => e.source_component_id === pcbComponent?.source_component_id)
+      .find((e) => e.source_component_id === pcbComponent.source_component_id)
 
-    const footprintName = getFootprintName(sourceComponent!, pcbComponent!)
+    const footprintName =
+      footprintNameByComponentId?.get(pcb_component_id) ??
+      getFootprintName(sourceComponent!, pcbComponent)
     const componentName = sourceComponent?.name || "Unknown"
     const circuitSpaceCoordinates = applyToPoint(
       transformMmToUm,
-      pcbComponent!.center,
+      pcbComponent.center,
     )
 
     if (!componentsByFootprint.has(footprintName)) {
@@ -54,9 +60,11 @@ export function processComponentsAndPads(
     }
 
     componentsByFootprint.get(footprintName)?.push({
+      group,
+      pcbComponent,
       componentName,
       coordinates: circuitSpaceCoordinates,
-      rotation: pcbComponent?.rotation || 0,
+      rotation: pcbComponent.rotation || 0,
       value: getComponentValue(sourceComponent),
       sourceComponent,
     })
@@ -64,21 +72,9 @@ export function processComponentsAndPads(
 
   // Second pass: Process each footprint group
   for (const [footprintName, components] of componentsByFootprint) {
-    // All are having the same footprint so getting the first one
+    // All components in this group share the same footprint and orientation
     const firstComponent = components[0]
-    const componentGroup = componentGroups.find((group) => {
-      const pcbComponent = circuitElements.find(
-        (e) =>
-          e.type === "pcb_component" &&
-          e.source_component_id ===
-            firstComponent.sourceComponent?.source_component_id,
-      ) as PcbComponent
-      return (
-        pcbComponent && group.pcb_component_id === pcbComponent.pcb_component_id
-      )
-    })
-
-    if (!componentGroup) continue
+    const componentGroup = firstComponent.group
 
     // Add padstacks for SMT pads
     for (const pad of componentGroup.pcb_smtpads) {
@@ -95,12 +91,7 @@ export function processComponentsAndPads(
       outlines: [],
       pins: componentGroup.pcb_smtpads
         .map((pad) => {
-          const pcbComponent = circuitElements.find(
-            (e) =>
-              e.type === "pcb_component" &&
-              e.source_component_id ===
-                firstComponent.sourceComponent?.source_component_id,
-          ) as PcbComponent
+          const pcbComponent = firstComponent.pcbComponent
 
           // Find the corresponding pcb_port and its source_port
           const pcbPort = su(circuitElements)
@@ -120,7 +111,7 @@ export function processComponentsAndPads(
     }
     pcb.library.images.push(image)
 
-    // Add component entry
+    // Add component entry (pin coordinates and padstacks are already in world orientation)
     const componentEntry = {
       name: footprintName,
       places: components.map((component) => ({
@@ -128,7 +119,7 @@ export function processComponentsAndPads(
         x: component.coordinates.x,
         y: component.coordinates.y,
         side: "front" as const,
-        rotation: component.rotation % 90,
+        rotation: 0,
         PN: component.value,
       })),
     }

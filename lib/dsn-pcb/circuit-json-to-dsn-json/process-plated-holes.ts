@@ -22,14 +22,29 @@ export function processPlatedHoles(
   circuitElements: AnyCircuitElement[],
   pcb: DsnPcb,
   numLayers = 2,
+  footprintNameByComponentId?: Map<string, string>,
 ) {
   /**
    * Helpers
    */
   const processedPadstacks = new Set<string>()
 
+  /** Normalize symmetric oval/rect rotation into [0, 180) degrees */
+  function normalizeSymmetricRotation(angleDeg: number): number {
+    const mod = ((angleDeg % 180) + 180) % 180
+    return Math.abs(mod) < 1e-6 || Math.abs(mod - 180) < 1e-6
+      ? 0
+      : Number(mod.toFixed(4))
+  }
+
   /** Guarantee that a padstack for the given plated-hole exists, return its name */
-  function ensurePadstack(hole: any): string {
+  function ensurePadstack(hole: any, componentRotation = 0): string {
+    const effectiveRotation = normalizeSymmetricRotation(
+      hole.ccw_rotation ?? componentRotation,
+    )
+    const isSwapped90 = Math.abs(effectiveRotation - 90) < 1e-6
+    const isNonOrthogonal = effectiveRotation !== 0 && !isSwapped90
+
     switch (hole.shape) {
       case "circle": {
         const name = getPadstackName({
@@ -49,37 +64,70 @@ export function processPlatedHoles(
       }
       case "oval":
       case "pill": {
-        const name = getPadstackName({
+        const holeWidthUm =
+          (isSwapped90 ? hole.hole_height : hole.hole_width) * 1000
+        const holeHeightUm =
+          (isSwapped90 ? hole.hole_width : hole.hole_height) * 1000
+        const baseName = getPadstackName({
           shape: hole.shape,
-          width: hole.hole_width * 1000,
-          height: hole.hole_height * 1000,
+          width: holeWidthUm,
+          height: holeHeightUm,
           layer: "all",
         })
+        const name = isNonOrthogonal
+          ? baseName.replace(/_um$/, `_rot${effectiveRotation}deg_um`)
+          : baseName
         if (!processedPadstacks.has(name)) {
-          const iW = Math.round(hole.hole_width * 1000)
-          const iH = Math.round(hole.hole_height * 1000)
-          const oW = Math.round(hole.outer_width * 1000)
-          const oH = Math.round(hole.outer_height * 1000)
+          const iW = Math.round(holeWidthUm)
+          const iH = Math.round(holeHeightUm)
+          const oW = Math.round(
+            (isSwapped90 ? hole.outer_height : hole.outer_width) * 1000,
+          )
+          const oH = Math.round(
+            (isSwapped90 ? hole.outer_width : hole.outer_height) * 1000,
+          )
           pcb.library.padstacks.push(
-            createOvalPadstack(name, oW, oH, iW, iH, numLayers),
+            createOvalPadstack(
+              name,
+              oW,
+              oH,
+              iW,
+              iH,
+              numLayers,
+              isNonOrthogonal ? effectiveRotation : 0,
+            ),
           )
           processedPadstacks.add(name)
         }
         return name
       }
       case "circular_hole_with_rect_pad": {
-        const name = getPadstackName({
+        const padWidthUm =
+          (isSwapped90 ? hole.rect_pad_height : hole.rect_pad_width) * 1000
+        const padHeightUm =
+          (isSwapped90 ? hole.rect_pad_width : hole.rect_pad_height) * 1000
+        const baseName = getPadstackName({
           shape: "rect",
-          width: hole.rect_pad_width * 1000,
-          height: hole.rect_pad_height * 1000,
+          width: padWidthUm,
+          height: padHeightUm,
           layer: "all",
         })
+        const name = isNonOrthogonal
+          ? baseName.replace(/_um$/, `_rot${effectiveRotation}deg_um`)
+          : baseName
         if (!processedPadstacks.has(name)) {
-          const oW = Math.round(hole.rect_pad_width * 1000)
-          const oH = Math.round(hole.rect_pad_height * 1000)
+          const oW = Math.round(padWidthUm)
+          const oH = Math.round(padHeightUm)
           const hD = Math.round(hole.hole_diameter * 1000)
           pcb.library.padstacks.push(
-            createCircularHoleRectangularPadstack(name, oW, oH, hD, numLayers),
+            createCircularHoleRectangularPadstack(
+              name,
+              oW,
+              oH,
+              hD,
+              numLayers,
+              isNonOrthogonal ? effectiveRotation : 0,
+            ),
           )
           processedPadstacks.add(name)
         }
@@ -147,13 +195,15 @@ export function processPlatedHoles(
       .source_component.list()
       .find((e) => e.source_component_id === pcbComponent.source_component_id)
 
-    const footprintName = getFootprintName(sourceComponent!, pcbComponent!)
+    const footprintName =
+      footprintNameByComponentId?.get(pcb_component_id) ??
+      getFootprintName(sourceComponent!, pcbComponent!)
     const image = ensureImage(footprintName)
     const nextPinNumber = createNextPinNumberGenerator(image)
 
     // Create/update pins for every plated hole
     for (const hole of pcb_plated_holes) {
-      const padstackName = ensurePadstack(hole)
+      const padstackName = ensurePadstack(hole, pcbComponent.rotation || 0)
 
       // Resolve sourcePort (if any)
       const pcbPort = hole.pcb_port_id
@@ -210,7 +260,7 @@ export function processPlatedHoles(
         x: c.coordinates.x,
         y: c.coordinates.y,
         side: "front" as const,
-        rotation: c.rotation % 90,
+        rotation: 0,
         PN: c.value,
       })),
     })

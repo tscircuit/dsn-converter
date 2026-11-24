@@ -128,7 +128,7 @@ export function parsePadstackName(
   }
 
   const ovalMatch = padstackName.match(
-    /^Oval\[([TBA])\]Pad_([0-9]+(?:\.[0-9]+)?)x([0-9]+(?:\.[0-9]+)?)_um$/,
+    /^Oval\[([TBA])\]Pad_([0-9]+(?:\.[0-9]+)?)x([0-9]+(?:\.[0-9]+)?)(?:_rot[0-9]+(?:\.[0-9]+)?deg)?_um$/,
   )
   if (ovalMatch) {
     const layer = parsePadstackLayer(ovalMatch[1])

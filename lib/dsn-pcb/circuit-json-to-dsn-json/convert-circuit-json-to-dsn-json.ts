@@ -4,6 +4,7 @@ import {
   generateLayers,
   getViaPadstackName,
 } from "lib/utils/generate-layers"
+import { buildComponentFootprintNameMap } from "lib/utils/get-footprint-name"
 import type { ComponentGroup, DsnPcb, Padstack } from "../types"
 import { processComponentsAndPads } from "./process-components-and-pads"
 import { processNets } from "./process-nets"
@@ -114,8 +115,23 @@ export function convertCircuitJsonToDsnJson(
   }
 
   const componentGroups = groupComponents(circuitElements)
-  processComponentsAndPads(componentGroups, circuitElements, pcb)
-  processPlatedHoles(componentGroups, circuitElements, pcb, numLayers)
+  const footprintNameByComponentId = buildComponentFootprintNameMap(
+    componentGroups,
+    circuitElements,
+  )
+  processComponentsAndPads(
+    componentGroups,
+    circuitElements,
+    pcb,
+    footprintNameByComponentId,
+  )
+  processPlatedHoles(
+    componentGroups,
+    circuitElements,
+    pcb,
+    numLayers,
+    footprintNameByComponentId,
+  )
   processNets(circuitElements, pcb)
   processPcbTraces(circuitElements, pcb, numLayers)
   return pcb

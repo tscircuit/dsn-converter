@@ -2,6 +2,7 @@ import type { AnyCircuitElement, PcbPlatedHole, PcbSmtPad } from "circuit-json"
 import Debug from "debug"
 import type { DsnPcb, Padstack } from "lib/dsn-pcb/types"
 import { parsePadstackName } from "lib/utils/get-padstack-name"
+import { parseRotatedRectDescriptor } from "lib/utils/get-rotated-rect-smt-pad-geometry"
 import { applyToPoint } from "transformation-matrix"
 
 const debug = Debug("dsn-converter:convertPadstacksToSmtpads")
@@ -171,14 +172,39 @@ export function convertPadstacksToSmtPads(
           if (pathShape && pathShape.shapeType === "path") {
             const [x1, y1, x2, y2] = pathShape.coordinates
             const strokeWidth = pathShape.width / 1000
-            const endpointDist =
-              Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) / 1000
-            const isHorizontal = Math.abs(x2 - x1) >= Math.abs(y2 - y1)
+            const dx = x2 - x1
+            const dy = y2 - y1
+            const endpointDist = Math.sqrt(dx ** 2 + dy ** 2) / 1000
+            const isAxisAligned = Math.abs(dx) < 1e-6 || Math.abs(dy) < 1e-6
+            const isHorizontal = Math.abs(dx) >= Math.abs(dy)
 
             const major = endpointDist + strokeWidth
             const minor = strokeWidth
-            const outerWidth = isHorizontal ? major : minor
-            const outerHeight = isHorizontal ? minor : major
+            const isOriginallyVertical =
+              !isAxisAligned &&
+              parsedPadstackName?.shape === "oval" &&
+              parsedPadstackName.width < parsedPadstackName.height
+            const outerWidth = isAxisAligned
+              ? isHorizontal
+                ? major
+                : minor
+              : isOriginallyVertical
+                ? minor
+                : major
+            const outerHeight = isAxisAligned
+              ? isHorizontal
+                ? minor
+                : major
+              : isOriginallyVertical
+                ? major
+                : minor
+            const rawAngleDeg = isAxisAligned
+              ? 0
+              : ((((Math.atan2(dy, dx) * 180) / Math.PI) % 180) + 180) % 180
+            const adjustedAngleDeg = isOriginallyVertical
+              ? (((rawAngleDeg - 90) % 180) + 180) % 180
+              : rawAngleDeg
+            const ccwRotation = Number(adjustedAngleDeg.toFixed(4))
 
             let holeWidth: number
             let holeHeight: number
@@ -214,7 +240,7 @@ export function convertPadstacksToSmtPads(
               outer_height: outerHeight,
               hole_width: holeWidth,
               hole_height: holeHeight,
-              ccw_rotation: 0,
+              ccw_rotation: ccwRotation,
               layers: ["top", "bottom"],
             }
             elements.push(platedHole)
@@ -276,13 +302,31 @@ export function convertPadstacksToSmtPads(
         }
 
         let pcbPad: PcbSmtPad
+        const rotatedRectFromDescriptor =
+          parsedPadstackName?.shape === "polygon"
+            ? parseRotatedRectDescriptor(parsedPadstackName.descriptor)
+            : null
         const rectangleDimensionsFromPolygon = polygonShape
           ? getRectangleDimensionsFromPolygon(polygonShape.coordinates)
           : null
         const shouldImportPolygonAsRect =
           !!polygonShape && !!rectangleDimensionsFromPolygon
 
-        if (polygonShape && !shouldImportPolygonAsRect) {
+        if (polygonShape && rotatedRectFromDescriptor) {
+          const layer = getLayerFromPadstack(padstack)
+          pcbPad = {
+            type: "pcb_smtpad",
+            pcb_smtpad_id: `pcb_smtpad_${componentId}_${place.refdes}_${Number(pin.pin_number) - 1}`,
+            ...commonIds,
+            shape: "rotated_rect",
+            x: circuitX,
+            y: circuitY,
+            width: rotatedRectFromDescriptor.widthMm,
+            height: rotatedRectFromDescriptor.heightMm,
+            ccw_rotation: rotatedRectFromDescriptor.ccwRotation,
+            layer,
+          }
+        } else if (polygonShape && !shouldImportPolygonAsRect) {
           const layer = getLayerFromPadstack(padstack)
           pcbPad = {
             type: "pcb_smtpad",

@@ -8,6 +8,7 @@ import {
 } from "./create-padstack"
 import { type PadstackNameArgs, getPadstackName } from "./get-padstack-name"
 import { getPolygonSmtPadGeometry } from "./get-polygon-smt-pad-geometry"
+import { getRotatedRectSmtPadGeometry } from "./get-rotated-rect-smt-pad-geometry"
 
 export function createAndAddPadstackFromPcbSmtPad({
   pcb,
@@ -20,8 +21,12 @@ export function createAndAddPadstackFromPcbSmtPad({
 }): string {
   const isCircle = pad.shape === "circle"
   const isPolygon = pad.shape === "polygon"
+  const isRotatedRect = pad.shape === "rotated_rect"
   const polygonPadGeometry = isPolygon
     ? getPolygonSmtPadGeometry(pad)
+    : undefined
+  const rotatedRectGeometry = isRotatedRect
+    ? getRotatedRectSmtPadGeometry(pad)
     : undefined
 
   let shape: PadstackNameArgs["shape"] = "rect"
@@ -30,6 +35,7 @@ export function createAndAddPadstackFromPcbSmtPad({
   let width: number | undefined
   let height: number | undefined
   let customDescriptor: string | undefined
+  let polygonCoordinates: number[] | undefined
 
   if (isCircle) {
     shape = "circle"
@@ -39,7 +45,19 @@ export function createAndAddPadstackFromPcbSmtPad({
     shape = "polygon"
     width = polygonPadGeometry?.widthUm
     height = polygonPadGeometry?.heightUm
+    polygonCoordinates = polygonPadGeometry?.relativePointsUm
     customDescriptor = `${polygonPadGeometry?.widthUm}x${polygonPadGeometry?.heightUm}_${polygonPadGeometry?.relativePointsUm.join("_")}`
+  } else if (rotatedRectGeometry) {
+    if (rotatedRectGeometry.kind === "rotated_polygon") {
+      shape = "polygon"
+      width = rotatedRectGeometry.widthUm
+      height = rotatedRectGeometry.heightUm
+      polygonCoordinates = rotatedRectGeometry.relativePointsUm
+      customDescriptor = rotatedRectGeometry.customDescriptor
+    } else {
+      width = rotatedRectGeometry.widthUm
+      height = rotatedRectGeometry.heightUm
+    }
   } else {
     width = (pad as { width: number }).width * 1000
     height = (pad as { height: number }).height * 1000
@@ -66,10 +84,10 @@ export function createAndAddPadstackFromPcbSmtPad({
         padstackParams.outerDiameter!,
         padstackParams.holeDiameter!,
       )
-    } else if (isPolygon) {
+    } else if (polygonCoordinates) {
       padstack = createPolygonPadstack({
         name: padstackName,
-        coordinates: polygonPadGeometry!.relativePointsUm,
+        coordinates: polygonCoordinates,
         layer: pad.layer,
       })
     } else {
