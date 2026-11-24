@@ -45,17 +45,18 @@ export function tokenizeDsn(input: string): Token[] {
       i++ // Skip the closing quote
       tokens.push({ type: "String", value })
     } else if (char === "-" || /\d/.test(char)) {
-      // Parse number (integer or float)
-      let numStr = ""
-      if (char === "-") {
-        numStr += "-"
+      // Parse number (integer or float) or a symbol like "-5V"/"5A"
+      // that starts with "-" or a digit but is not fully numeric.
+      const start = i
+      while (i < length && !/\s|\(|\)/.test(input[i])) {
         i++
       }
-      while (i < length && /[\d.]/.test(input[i])) {
-        numStr += input[i]
-        i++
+      const word = input.slice(start, i)
+      if (/^-?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/.test(word)) {
+        tokens.push({ type: "Number", value: parseFloat(word) })
+      } else {
+        tokens.push({ type: "Symbol", value: word })
       }
-      tokens.push({ type: "Number", value: parseFloat(numStr) })
     } else {
       // Parse symbol
       let sym = ""
